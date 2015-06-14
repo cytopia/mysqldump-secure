@@ -270,7 +270,7 @@ for db in ${DATABASES}; do
 			fi
 		else
 			if [ ${ENCRYPT} -eq 1 ]; then
-				outputi "Dumping:  ${db} (encryped) " $LOG "${LOGFILE}"
+				outputi "Dumping:  ${db} (encrypted) " $LOG "${LOGFILE}"
 				${MYSQLDUMP} ${MYSQL_OPTS} --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} "${db}" | ${OPENSSL} smime -encrypt -binary -text ${OPENSSL_ALGO_ARG} -out "${TARGET}/${DATE}_${TIME}__${db}.sql.enc" -outform DER ${OPENSSL_PUBKEY_PEM}
 			else
 				outputi "Dumping:  ${db} " $LOG "${LOGFILE}"
