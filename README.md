@@ -1,27 +1,38 @@
 # dump-database
 [![Build Status](https://travis-ci.org/cytopia/dump-database.svg?branch=master)](https://travis-ci.org/cytopia/dump-database)
 
-Backup script to dump MySQL databases via cron or command line with additional options for logging, compression, blacklisting and custom mysqldump parameters.
+Backup script to dump MySQL databases via cron or command line with additional options for encryption, compression, blacklisting, logging and custom mysqldump parameters.
 
 ## Features
 
+**Encryption**
+
+On-the-fly public/private key encryption of database dumps. The advantage of public/private key encryption is
+that even if your server is compromised the database dumps cannot be decrypted as it needs the private key which
+should be far away in a secure location
+
 **Opt-out / blacklinsting**
+
 By default all databases are dumped one by one that you do not accidentally forget to add new databases.
 If however you want to exclude certain databases such as for example 'information_schema' you can add them to the IGNORE list
 
 **Dump Options**
+
 You can specify custom mysqldump parameters in the configuration file. The default configuration dumps databases including events, triggers and routines.
 The dump is done via 'single-transaction' to also take transactional tables into account and via --quick in case of very large tables.
 All those parameters are customizable so alter them as desired.
 
 **Compression**
+
 Databases can be writting to disk via gzip compression in order to save storage
 
 **Logging**
+
 You can turn on logging to file.
 
 
 **Verbosity**
+
 The verbosity is currently fixed and is quite talkative. Informing you about missing directories, wrong permissions, dumping time, etc. Just have a look at the code.
 
 
