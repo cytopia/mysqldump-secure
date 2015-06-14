@@ -1,4 +1,58 @@
 # dump-database
 [![Build Status](https://travis-ci.org/cytopia/dump-database.svg?branch=master)](https://travis-ci.org/cytopia/dump-database)
 
-Dump all databases one by one with additional options for compression and encryption
+Backup script to dump MySQL databases via cron or command line with additional options for logging, compression, blacklisting and custom mysqldump parameters.
+
+## Quick Start
+
+Copy the config file to /etc and the script itself to any sbin directory.
+Make sure that the configuration file can not be read by others as you will need to store the MySQL credentials inside.
+```shell
+cp dump-database.conf /etc/dump-database.conf
+chmod 400 /etc/dump-database.conf
+
+cp dump-database.sh /usr/local/sbin/dump-database.sh
+chmod +x /usr/local/sbin/dump-database.sh
+```
+
+Make sure to adjust the configuration and create the backup directory and the logfile (optionally).
+```
+mkdir /shared/backup/databases
+touch /var/log/dump-database.log
+```
+
+Once you have tested the script you can setup the cronjob like so:
+```
+# Dump MySQL Databases at 03:15 every day
+  15 3  *  *  * /bin/sh /usr/local/sbin/dump-database.sh
+```
+
+
+## Configuration
+See [dump-database.conf](database.conf) for all options.
+
+
+
+
+## Licence
+The MIT License (MIT)
+
+Copyright (c) 2015 Pantu
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
