@@ -8,8 +8,8 @@
 #
 # Script to dump databases one by one
 # Features:
-# * Encryped output (optional)
-# * Compressed output (optional)
+# * Encryped output via public/private key (optional)
+# * Compressed output via gzip (optional)
 # * Database black list (optional)
 # * Logfile (optional)
 # * Custom mysqldump parameters
@@ -31,6 +31,7 @@ output() {
 
 	printf "%s\n" "${MSG}"
 	[ ${LOG} -eq 1 ] && printf "%s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${MSG}" >> "${FILE}"
+	return 0
 }
 # Inline Output to stdout and to file (no newline)
 outputi() {
@@ -40,6 +41,7 @@ outputi() {
 
 	printf "%s" "${MSG}"
 	[ ${LOG} -eq 1 ] && printf "%s %s %s" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${MSG}" >> "${FILE}"
+	return 0
 }
 # Output to stdout and to file (no time)
 outputn() {
@@ -49,6 +51,24 @@ outputn() {
 
 	printf "%s\n" "${MSG}"
 	[ ${LOG} -eq 1 ] && printf "%s\n" "${MSG}" >> "${FILE}"
+	return 0
+}
+
+permission() {
+	local file
+	local perm
+
+	file="${1}"
+
+	# e.g. 640
+	if [ "$(uname)" = "Linux" ]; then
+		perm="$(stat --format '%a' ${file})"
+	else # Darwin or FreeBSD
+		perm="$(stat -f "%OLp" ${file})"
+	fi
+
+	echo $perm
+	return 0
 }
 
 
@@ -56,6 +76,12 @@ outputn() {
 # 1.) ---- Read configuration file
 if [ ! -f "${CONFIG_FILE}" ]; then
 	output "[ERR]  Configuration file not found in ${CONFIG_FILE}"
+	output "Aborting"
+	exit 1
+fi
+if [ $(permission "${CONFIG_FILE}") != "400" ]; then
+	output "[ERR]  Configuration file ${CONFIG_FILE} has dangerous permissions: $(permission "${CONFIG_FILE}")."
+	output "[INFO] Fix it to 400"
 	output "Aborting"
 	exit 1
 fi
@@ -99,7 +125,8 @@ if [ ${LOG} -eq 1 ]; then
 	fi
 fi
 if [ ${LOG} -eq 1 ]; then
-	echo "\n---------------------------------------" >> "${LOGFILE}"
+	echo "" >> "${LOGFILE}"
+	echo "---------------------------------------" >> "${LOGFILE}"
 	echo "$(date '+%Y-%m-%d') $(date '+%H:%M:%S') Starting" >> "${LOGFILE}"
 fi
 
@@ -196,6 +223,7 @@ TIME="$(date '+%H-%M')"
 outputi "Retrieving list of databases... " $LOG "${LOGFILE}"
 DATABASES="$( ${MYSQL} --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} --batch -e 'show databases;')"
 if [ $? -ne 0 ]; then
+	outputn "ERROR"
 	exit 3
 fi
 DATABASES="$( echo "${DATABASES}" | sed 1d )"
