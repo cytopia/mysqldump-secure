@@ -11,7 +11,7 @@ On-the-fly public/private key encryption of database dumps. The advantage of pub
 that even if your server is compromised the database dumps cannot be decrypted as it needs the private key which
 should be far away in a secure location
 
-**Opt-out / blacklinsting**
+**Opt-out / blacklisting**
 
 By default all databases are dumped one by one that you do not accidentally forget to add new databases.
 If however you want to exclude certain databases such as for example 'information_schema' you can add them to the IGNORE list
