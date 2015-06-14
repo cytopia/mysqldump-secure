@@ -79,6 +79,11 @@ if [ ! -f "${CONFIG_FILE}" ]; then
 	output "Aborting"
 	exit 1
 fi
+if [ ! -r "${CONFIG_FILE}" ]; then
+	output "[ERR]  Configuration file is not readable in ${CONFIG_FILE}"
+	output "Aborting"
+	exit 1
+fi
 if [ $(permission "${CONFIG_FILE}") != "400" ]; then
 	output "[ERR]  Configuration file ${CONFIG_FILE} has dangerous permissions: $(permission "${CONFIG_FILE}")."
 	output "[INFO] Fix it to 400"
