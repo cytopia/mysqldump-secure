@@ -8,8 +8,9 @@
 #
 # Script to dump databases one by one
 # Features:
-# * Database black list
+# * Encryped output (optional)
 # * Compressed output (optional)
+# * Database black list (optional)
 # * Logfile (optional)
 # * Custom mysqldump parameters
 # * Dumping time, total time
