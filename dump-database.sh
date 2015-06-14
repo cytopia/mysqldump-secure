@@ -7,7 +7,9 @@
 # @version   v0.1
 #
 # Script to dump databases one by one
+#
 # Features:
+# ---------------------
 # * Encryped output via public/private key (optional)
 # * Compressed output via gzip (optional)
 # * Database black list (optional)
@@ -15,6 +17,14 @@
 # * Custom mysqldump parameters
 # * Dumping time, total time
 # * Error handling
+#
+# Return values:
+# ---------------------
+# * 0: Success
+# * 1: Script specific: (writeable directory, config file not found, wrong permissions)
+# * 2: Required binary not found
+# * 3: MySQL connection error
+# * 4: MySQL Database dump error
 
 
 # Adjust this variable if your config file
@@ -26,7 +36,7 @@ CONFIG_FILE="/etc/dump-database.conf"
 # Output to stdout and to file
 output() {
 	local MSG="${1}"		# Message to output
-	local LOG="${2:-0}"	# Log? 1: yes 0: No (defaults to 0)
+	local LOG="${2:-0}"		# Log? 1: yes 0: No (defaults to 0)
 	local FILE="${3}"		# Logfile path
 
 	printf "%s\n" "${MSG}"
@@ -36,7 +46,7 @@ output() {
 # Inline Output to stdout and to file (no newline)
 outputi() {
 	local MSG="${1}"		# Message to output
-	local LOG="${2:-0}"	# Log? 1: yes 0: No (defaults to 0)
+	local LOG="${2:-0}"		# Log? 1: yes 0: No (defaults to 0)
 	local FILE="${3}"		# Logfile path
 
 	printf "%s" "${MSG}"
@@ -46,7 +56,7 @@ outputi() {
 # Output to stdout and to file (no time)
 outputn() {
 	local MSG="${1}"		# Message to output
-	local LOG="${2:-0}"	# Log? 1: yes 0: No (defaults to 0)
+	local LOG="${2:-0}"		# Log? 1: yes 0: No (defaults to 0)
 	local FILE="${3}"		# Logfile path
 
 	printf "%s\n" "${MSG}"
@@ -267,8 +277,13 @@ for db in ${DATABASES}; do
 				${MYSQLDUMP} ${MYSQL_OPTS} --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} "${db}" > "${TARGET}/${DATE}_${TIME}__${db}.sql"
 			fi
 		fi
+
 		# We cannot check against $? as the first if uses a pipe | gzip and so we
 		# need to check against the exit code of the first pipe status
+		#
+		# TODO: $PIPESTATUS is not POSIX conform
+		# http://cfaj.ca/shell/cus-faq-2.html
+		# check run()
 		if [ ${PIPESTATUS[0]} -ne 0 ]; then
 			outputn "ERROR" $LOG "${LOGFILE}"
 			ERROR=1
