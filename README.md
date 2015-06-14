@@ -67,11 +67,6 @@ See [dump-database.conf](dump-database.conf) for all options.
 
 
 
-
-## Todo
-It is planned to add optional encryption support via private/public key
-
-
 ## Contribution
 Contributers, issues and merge-requests are highly welcome.
 
