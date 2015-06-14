@@ -3,6 +3,30 @@
 
 Backup script to dump MySQL databases via cron or command line with additional options for logging, compression, blacklisting and custom mysqldump parameters.
 
+## Features
+
+### Opt-out / blacklinsting
+By default all databases are dumped one by one that you do not accidentally forget to add new databases.
+If however you want to exclude certain databases such as for example 'information_schema' you can add them to the IGNORE list
+
+### Dump Options
+You can specify custom mysqldump parameters in the configuration file. The default configuration dumps databases including events, triggers and routines.
+The dump is done via 'single-transaction' to also take transactional tables into account and via --quick in case of very large tables.
+All those parameters are customizable so alter them as desired.
+
+### Compression
+Databases can be writting to disk via gzip compression in order to save storage
+
+
+### Logging
+You can turn on logging to file.
+
+
+### Verbosity
+The verbosity is currently fixed and is quite talkative. Informing you about missing directories, wrong permissions, dumping time, etc. Just have a look at the code.
+
+
+
 ## Quick Start
 
 Copy the config file to /etc and the script itself to any sbin directory.
@@ -29,8 +53,17 @@ Once you have tested the script you can setup the cronjob like so:
 
 
 ## Configuration
-See [dump-database.conf](database.conf) for all options.
+See [dump-database.conf](dump-database.conf) for all options.
 
+
+
+
+## Todo
+It is planned to add optional encryption support via private/public key
+
+
+## Contribution
+Contributers, issues and merge-requests are highly welcome.
 
 
 
