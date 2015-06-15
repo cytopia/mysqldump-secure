@@ -35,6 +35,19 @@ You can turn on logging to file.
 
 The verbosity is currently fixed and is quite talkative. Informing you about missing directories, wrong permissions, dumping time, etc. Just have a look at the code.
 
+**Error Checking**
+
+The script performs heavy error checking and is able to fall back to default options. Checking includes:
+* Logfile exists
+* Logfile is writeable
+* Auto creation of logfile
+* Logging turned off automatically
+* Destination dir exists
+* Destination dir is writeable
+* Auto creation of destination dir
+* Required system binaries exist
+* MySQL credentials are valid
+
 
 
 ## Quick Start
@@ -69,6 +82,30 @@ See [dump-database.conf](dump-database.conf) for all options.
 
 ## Contribution
 Contributers, issues and merge-requests are highly welcome.
+As well as feature requests.
+
+
+## Todo
+The script is currently not POSIX conform as it needs to check the exit codes of piped commands via
+```shell
+if [ ${PIPESTATUS[0]} -ne 0  ]; then
+```
+Another approach had been to check:
+```shell
+pipefail
+```
+which is unfortunately also not POSIX conform.
+
+There is a solution that currently exists for pure POSIX conform exit code checking on piped commands.
+http://cfaj.ca/shell/cus-faq-2.html
+```shell
+# ...
+run() {
+	#
+}
+# ...
+```
+This however did not work and needs further investigation.
 
 
 

@@ -104,12 +104,15 @@ fi
 
 
 
-# 2.) ---- Read Logging options
+# 2.) ---- Read Features
+
+# Logging set?
 if [ -z ${LOG+x} ]; then
-	output '[WARN] Missing $LOG variable in ${CONFIG_FILE}'
-	output "[WARN] Logging disabled"
+	output '[INFO] $LOG variable not set in ${CONFIG_FILE}'
+	output "[INFO] Logging disabled"
 	LOG=0
 fi
+# Logging requirements fullfilled?
 if [ ${LOG} -eq 1 ]; then
 	if [ -z ${LOGFILE+x} ]; then
 		output '[WARN] Missing $LOGFILE variable in ${CONFIG_FILE}'
@@ -145,15 +148,31 @@ if [ ${LOG} -eq 1 ]; then
 	echo "$(date '+%Y-%m-%d') $(date '+%H:%M:%S') Starting" >> "${LOGFILE}"
 fi
 
+# Compression
+if [ -z ${COMPRESS+x} ]; then
+	output '[INFO] $COMPRESS variable not set in ${CONFIG_FILE}'
+	output "[INFO] Compression disabled"
+	COMPRESS=0
+fi
+
+# Encryption
+if [ -z ${ENCRYPT+x} ]; then
+	output '[INFO] $ENCRYPT variable not set in ${CONFIG_FILE}'
+	output "[INFO] Encryption disabled"
+	ENCRYPT=0
+fi
+
 
 
 # 3.) ---- Destination dir
+
 # Check if destination dir exists
 if [ ! -d "${TARGET}" ]; then
 	output "[WARN] Destination dir ${TARGET} does not exist" $LOG "${LOGFILE}"
 	outputi "[INFO] Trying to create... " $LOG "${LOGFILE}"
-	mkdir -p "${TARGET}" > /dev/null 2>&1
-	if [ $? -ne 0 ]; then
+#	mkdir -p "${TARGET}" > /dev/null 2>&1
+#	if [ $? -ne 0 ]; then
+	if ! mkdir -p "${TARGET}" > /dev/null 2>&1 ; then
 		outputn "Failed" $LOG "${LOGFILE}"
 		output "Aborting" $LOG "${LOGFILE}"
 		exit 1
@@ -163,12 +182,14 @@ if [ ! -d "${TARGET}" ]; then
 		chmod 0700 "${TARGET}"
 	fi
 fi
+
 # Check if destination dir is writeable
 if [ ! -w "${TARGET}" ]; then
 	output "[WARN] Destination dir ${TARGET} is not writeable" $LOG "${LOGFILE}"
 	outputi "[INFO] Trying to chmod... " $LOG "${LOGFILE}"
-	chmod 0700 "${TARGET}" > /dev/null 2>&1
-	if [ $? -ne 0 ]; then
+#	chmod 0700 "${TARGET}" > /dev/null 2>&1
+#	if [ $? -ne 0 ]; then
+	if ! chmod 0700 "${TARGET}" > /dev/null 2>&1 ; then
 		outputn "Failed" $LOG "${LOGFILE}"
 		output "Aborting" $LOG "${LOGFILE}"
 		exit 1
@@ -176,8 +197,9 @@ if [ ! -w "${TARGET}" ]; then
 		output "Done" $LOG "${LOGFILE}"
 	fi
 	outputi "[INFO] Trying to chown... " $LOG "${LOGFILE}"
-	chown "$(whoami)" "${TARGET}" > /dev/null 2>&1
-	if [ $? -ne 0 ]; then
+#	chown "$(whoami)" "${TARGET}" > /dev/null 2>&1
+#	if [ $? -ne 0 ]; then
+	if ! 	chown "$(whoami)" "${TARGET}" > /dev/null 2>&1 ; then
 		outputn "Failed" $LOG "${LOGFILE}"
 		output "Aborting" $LOG "${LOGFILE}"
 		exit 1
@@ -185,6 +207,7 @@ if [ ! -w "${TARGET}" ]; then
 		output "Done" $LOG "${LOGFILE}"
 	fi
 fi
+
 
 
 # 4.) ---- Check binaries
