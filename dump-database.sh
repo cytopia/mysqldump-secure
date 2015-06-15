@@ -265,7 +265,11 @@ if [ $? -ne 0 ]; then
 	exit 3
 fi
 DATABASES="$( echo "${DATABASES}" | sed 1d )"
-outputn "$( echo "${DATABASES}" | wc -l)" $LOG "${LOGFILE}"
+NUM_DB="$(echo "${DATABASES}" | wc -l)"
+NUM_DB="$(echo ${NUM_DB//[[:blank:]]/})" # remove whitespaces
+outputn "${NUM_DB}" $LOG "${LOGFILE}"
+
+output "Backup directory: ${TARGET}" $LOG "${LOGFILE}"
 
 
 TOTAL_STARTTIME=$(date +%s)
@@ -315,7 +319,7 @@ for db in ${DATABASES}; do
 			outputn "$(($endtime - $starttime)) sec" $LOG "${LOGFILE}"
 		fi
 	else
-		output "Ignoring: ${db}" $LOG "${LOGFILE}"
+		output "Skipping: ${db}" $LOG "${LOGFILE}"
 	fi
 done
 TOTAL_ENDTIME=$(date +%s)
