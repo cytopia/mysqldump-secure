@@ -18,7 +18,7 @@
 # * Dumping time, total time
 # * Error handling
 #
-# Return values:
+# Exit Codes
 # ---------------------
 # * 0: Success
 # * 1: Script specific: (writeable directory, config file not found, wrong permissions)
@@ -94,7 +94,7 @@ if [ ! -r "${CONFIG_FILE}" ]; then
 	output "Aborting"
 	exit 1
 fi
-if [ $(permission "${CONFIG_FILE}") != "400" ]; then
+if [ "$(permission "${CONFIG_FILE}")" != "400" ]; then
 	output "[ERR]  Configuration file ${CONFIG_FILE} has dangerous permissions: $(permission "${CONFIG_FILE}")."
 	output "[INFO] Fix it to 400"
 	output "Aborting"
@@ -122,9 +122,8 @@ if [ ${LOG} -eq 1 ]; then
 		if [ ! -f "${LOGFILE}" ]; then
 			output "[WARN] Logfile does not exist in ${LOGFILE}"
 			output "[INFO] Trying to create..."
-			touch "${LOGFILE}" > /dev/null 2>&1
 
-			if [ $? -ne 0 ]; then
+			if ! touch "${LOGFILE}" > /dev/null 2>&1 ; then
 				output "[ERR]  Failed to create file ${LOGFILE}"
 				output "[WARN] Logging disabled"
 				LOG=0
@@ -170,8 +169,6 @@ fi
 if [ ! -d "${TARGET}" ]; then
 	output "[WARN] Destination dir ${TARGET} does not exist" $LOG "${LOGFILE}"
 	outputi "[INFO] Trying to create... " $LOG "${LOGFILE}"
-#	mkdir -p "${TARGET}" > /dev/null 2>&1
-#	if [ $? -ne 0 ]; then
 	if ! mkdir -p "${TARGET}" > /dev/null 2>&1 ; then
 		outputn "Failed" $LOG "${LOGFILE}"
 		output "Aborting" $LOG "${LOGFILE}"
@@ -187,8 +184,6 @@ fi
 if [ ! -w "${TARGET}" ]; then
 	output "[WARN] Destination dir ${TARGET} is not writeable" $LOG "${LOGFILE}"
 	outputi "[INFO] Trying to chmod... " $LOG "${LOGFILE}"
-#	chmod 0700 "${TARGET}" > /dev/null 2>&1
-#	if [ $? -ne 0 ]; then
 	if ! chmod 0700 "${TARGET}" > /dev/null 2>&1 ; then
 		outputn "Failed" $LOG "${LOGFILE}"
 		output "Aborting" $LOG "${LOGFILE}"
@@ -197,8 +192,6 @@ if [ ! -w "${TARGET}" ]; then
 		output "Done" $LOG "${LOGFILE}"
 	fi
 	outputi "[INFO] Trying to chown... " $LOG "${LOGFILE}"
-#	chown "$(whoami)" "${TARGET}" > /dev/null 2>&1
-#	if [ $? -ne 0 ]; then
 	if ! 	chown "$(whoami)" "${TARGET}" > /dev/null 2>&1 ; then
 		outputn "Failed" $LOG "${LOGFILE}"
 		output "Aborting" $LOG "${LOGFILE}"
@@ -265,8 +258,7 @@ if [ $? -ne 0 ]; then
 	exit 3
 fi
 DATABASES="$( echo "${DATABASES}" | sed 1d )"
-NUM_DB="$(echo "${DATABASES}" | wc -l)"
-NUM_DB="$(echo ${NUM_DB//[[:blank:]]/})" # remove whitespaces
+NUM_DB="$(echo "${DATABASES}" | wc -l | tr -d ' ')"
 outputn "${NUM_DB}" $LOG "${LOGFILE}"
 
 output "Backup directory: ${TARGET}" $LOG "${LOGFILE}"
