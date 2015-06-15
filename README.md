@@ -68,6 +68,9 @@ Make sure that the configuration file can not be read by others as you will need
 cp dump-database.conf /etc/dump-database.conf
 chmod 400 /etc/dump-database.conf
 
+cp dump-database.cnf /etc/dump-database.cnf
+chmod 400 /etc/dump-database.cnf
+
 cp dump-database.sh /usr/local/sbin/dump-database.sh
 chmod +x /usr/local/sbin/dump-database.sh
 ```
