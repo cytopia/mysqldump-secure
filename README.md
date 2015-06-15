@@ -8,7 +8,8 @@ Most mysqldump scripts I have seen out there use something like this:
 ```shell
 mysqldump --user=root --password=foo --host localhost database > database.sql
 ```
-**THIS IS DANGEROUS**
+**THIS IS REALLY DANGEROUS**
+
 Even if run inside a script, you can see the mysql password in cleartext in ps aux.
 You should always define your credentials in a my.cnf file with chmod 400 or you can loose all your databases to everybody with access to that machine.
 
@@ -40,6 +41,9 @@ Databases can be writting to disk via gzip compression in order to save storage
 
 You can turn on logging to file.
 
+**tmpwatch integration**
+
+You can enable deletion of backup files older than X hours (requires tmpwatch to be installed)
 
 **Verbosity**
 
