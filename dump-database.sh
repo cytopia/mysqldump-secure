@@ -27,11 +27,24 @@
 # * 4: MySQL Database dump error
 
 
+################################################################################
+#
+# ADJUSTABLE VARIABLES
+#
+################################################################################
+
 # Adjust this variable if your config file
 # is placed somewhere else
 CONFIG_FILE="/etc/dump-database.conf"
 
 
+
+
+################################################################################
+#
+# HELPER FUNCTIONS
+#
+################################################################################
 
 # Output to stdout and to file
 output() {
@@ -64,6 +77,12 @@ outputn() {
 	return 0
 }
 
+# Test if argument is an integer
+# @return integer	0: is numer | 1 not a number
+isint(){
+	printf '%d' "$1" >/dev/null 2>&1 && return 0 || return 1;
+}
+
 permission() {
 	local file
 	local perm
@@ -83,7 +102,18 @@ permission() {
 
 
 
-# 1.) ---- Read configuration file
+
+################################################################################
+#
+# ENTRY POINT: ERROR CHECKING
+#
+################################################################################
+
+
+############################################################
+# Config FIle
+############################################################
+
 if [ ! -f "${CONFIG_FILE}" ]; then
 	output "[ERR]  Configuration file not found in ${CONFIG_FILE}"
 	output "Aborting"
@@ -100,11 +130,16 @@ if [ "$(permission "${CONFIG_FILE}")" != "400" ]; then
 	output "Aborting"
 	exit 1
 fi
+
+# Read config file
 . "${CONFIG_FILE}"
 
 
 
-# 2.) ---- Read Features
+
+############################################################
+# Logging Options
+############################################################
 
 # Logging set?
 if [ -z ${LOG+x} ]; then
@@ -147,23 +182,11 @@ if [ ${LOG} -eq 1 ]; then
 	echo "$(date '+%Y-%m-%d') $(date '+%H:%M:%S') Starting" >> "${LOGFILE}"
 fi
 
-# Compression
-if [ -z ${COMPRESS+x} ]; then
-	output '[INFO] $COMPRESS variable not set in ${CONFIG_FILE}'
-	output "[INFO] Compression disabled"
-	COMPRESS=0
-fi
-
-# Encryption
-if [ -z ${ENCRYPT+x} ]; then
-	output '[INFO] $ENCRYPT variable not set in ${CONFIG_FILE}'
-	output "[INFO] Encryption disabled"
-	ENCRYPT=0
-fi
 
 
-
-# 3.) ---- Destination dir
+############################################################
+# Destination Directory and Prefix
+############################################################
 
 # Check if destination dir exists
 if [ ! -d "${TARGET}" ]; then
@@ -179,7 +202,6 @@ if [ ! -d "${TARGET}" ]; then
 		chmod 0700 "${TARGET}"
 	fi
 fi
-
 # Check if destination dir is writeable
 if [ ! -w "${TARGET}" ]; then
 	output "[WARN] Destination dir ${TARGET} is not writeable" $LOG "${LOGFILE}"
@@ -189,21 +211,36 @@ if [ ! -w "${TARGET}" ]; then
 		output "Aborting" $LOG "${LOGFILE}"
 		exit 1
 	else
-		output "Done" $LOG "${LOGFILE}"
+		outputn "Done" $LOG "${LOGFILE}"
 	fi
 	outputi "[INFO] Trying to chown... " $LOG "${LOGFILE}"
-	if ! 	chown "$(whoami)" "${TARGET}" > /dev/null 2>&1 ; then
+	if ! chown "$(whoami)" "${TARGET}" > /dev/null 2>&1 ; then
 		outputn "Failed" $LOG "${LOGFILE}"
 		output "Aborting" $LOG "${LOGFILE}"
 		exit 1
 	else
-		output "Done" $LOG "${LOGFILE}"
+		outputn "Done" $LOG "${LOGFILE}"
 	fi
+fi
+# Check correct permissions of destination dir
+if [ "$(permission "${TARGET}")" != "700" ]; then
+	output "[ERR]  Target directory has dangerous permissions: $(permission "${TARGET}")."
+	output "[INFO] Fix it to 700"
+	output "Aborting"
+	exit 1
+fi
+# Check output Prefix
+if [ -z ${PREFIX+x} ]; then
+	output '[INFO] $PREFIX variable not set in ${CONFIG_FILE}'
+	output "[INFO] Using default 'date-time' prefix"
+	PREFIX="$(date '+%Y-%m-%d')_$(date '+%H-%M')__"
 fi
 
 
 
-# 4.) ---- Check binaries
+############################################################
+# MySQL
+############################################################
 if ! command -v mysql > /dev/null 2>&1 ; then
 	output "[ERR]  'mysql' not found" $LOG "${LOGFILE}"
 	output "Aborting" $LOG "${LOGFILE}"
@@ -214,6 +251,23 @@ if ! command -v mysqldump > /dev/null 2>&1 ; then
 	output "Aborting" $LOG "${LOGFILE}"
 	exit 2
 fi
+# Testing MySQL connection
+if ! $(which mysql) --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} -e exit > /dev/null 2>&1 ; then
+	output "[ERR]  Cannot connect to mysql database"
+	output "Aborting" $LOG "${LOGFILE}"
+	exit 3
+fi
+
+
+
+############################################################
+# Compression
+############################################################
+if [ -z ${COMPRESS+x} ]; then
+	output '[INFO] $COMPRESS variable not set in ${CONFIG_FILE}'
+	output "[INFO] Compression disabled"
+	COMPRESS=0
+fi
 if [ ${COMPRESS} -eq 1 ]; then
 	if ! command -v gzip > /dev/null 2>&1 ; then
 		output "[WARN] 'gzip' not found" $LOG "${LOGFILE}"
@@ -221,52 +275,115 @@ if [ ${COMPRESS} -eq 1 ]; then
 		COMPRESS=0
 	fi
 fi
+
+
+
+############################################################
+# Encryption
+############################################################
+if [ -z ${ENCRYPT+x} ]; then
+	output '[INFO] $ENCRYPT variable not set in ${CONFIG_FILE}'
+	output "[INFO] Encryption disabled"
+	ENCRYPT=0
+fi
 if [ ${ENCRYPT} -eq 1 ]; then
 	if ! command -v openssl > /dev/null 2>&1 ; then
-		output "[WARN] 'openssl' not found" $LOG "${LOGFILE}"
-		output "[WARN] Disabling encryption" $LOG "${LOGFILE}"
-		ENCRYPT=0
+		output "[ERR]  'openssl' not found" $LOG "${LOGFILE}"
+		output "Aborting" $LOG "${LOGFILE}"
+		exit 2
 	fi
 	if [ ! -f "${OPENSSL_PUBKEY_PEM}" ]; then
-		output "[WARN] OpenSSL pubkey not found in ${OPENSSL_PUBKEY_PEM}"
-		output "[WARN] Disabling encryption" $LOG "${LOGFILE}"
-		ENCRYPT=0
+		output "[ERR]  OpenSSL pubkey not found in ${OPENSSL_PUBKEY_PEM}" $LOG "${LOGFILE}"
+		output "Aborting" $LOG "${LOGFILE}"
+		exit 2
+	fi
+	if [ -z ${OPENSSL_ALGO_ARG+x} ]; then
+		output '[WARN] $OPENSSL_ALGO_ARG variable not set in ${CONFIG_FILE}'
+		output "[INFO] Encryption defaults to -aes256"
+		OPENSSL_ALGO_ARG="-aes256"
+	fi
+	# Test openssl Algo
+	if ! echo "test" | $(which openssl) smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} "${OPENSSL_PUBKEY_PEM}" > /dev/null 2>&1 ; then
+		output '[ERR]  openssl encryption test failed. Validate $OPENSSL_ALGO_ARG' $LOG "${LOGFILE}"
+		output "Aborting" $LOG "${LOGFILE}"
+		exit 2
 	fi
 fi
 
 
+
+############################################################
+# Deletion
+############################################################
+
+if [ -z ${DELETE+x} ]; then
+	output '[INFO] $DELETE variable not set in ${CONFIG_FILE}'
+	output "[INFO] Deletion of old files disabled"
+	DELETE=0
+fi
+if [ ${DELETE} -eq 1  ]; then
+	if [ -z ${DELETE_IF_OLDER+x} ]; then
+		output '[WARN] $DELETE_IF_OLDER variable not set in ${CONFIG_FILE}'
+		output "[WARN] Deletion of old files disabled"
+		DELETE=0
+	elif ! isint ${DELETE_IF_OLDER} > /dev/null 2>&1 ; then
+		output '[WARN] $DELETE_IF_OLDER variable is not a valid integer'
+		output "[WARN] Deletion of old files disabled"
+		DELETE=0
+	elif [ ${DELETE_IF_OLDER} -lt 1 ]; then
+		output '[WARN] $DELETE_IF_OLDER is smaller than 1 hour'
+		output "[WARN] Deletion of old files disabled"
+		DELETE=0
+	elif ! command -v tmpwatch > /dev/null 2>&1 ; then
+		output "[WARN] 'tmpwatch' not found" $LOG "${LOGFILE}"
+		output "[WARN] Deletion of old files disabled"
+		DELETE=0
+	fi
+fi
+
+
+
+
+
+
+
+
+################################################################################
+#
+# ENTRY POINT: MAIN
+#
+################################################################################
 
 # Binaries
 MYSQL="$(which mysql)"
 MYSQLDUMP="$(which mysqldump)"
 GZIP="$(which gzip)"
 OPENSSL="$(which openssl)"
+TMPWATCH="$(which tmpwatch)"
 
-# Date/Time Prefix
-DATE="$(date '+%Y-%m-%d')"
-TIME="$(date '+%H-%M')"
-
+ERROR=0
 
 
-
+############################################################
+# Get all databases
+############################################################
 
 # Get a list of all databases
-outputi "Retrieving list of databases... " $LOG "${LOGFILE}"
+outputi "[INFO] Retrieving list of databases... " $LOG "${LOGFILE}"
 DATABASES="$( ${MYSQL} --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} --batch -e 'show databases;')"
-if [ $? -ne 0 ]; then
-	outputn "ERROR"
-	exit 3
-fi
 DATABASES="$( echo "${DATABASES}" | sed 1d )"
 NUM_DB="$(echo "${DATABASES}" | wc -l | tr -d ' ')"
 outputn "${NUM_DB}" $LOG "${LOGFILE}"
 
-output "Backup directory: ${TARGET}" $LOG "${LOGFILE}"
 
+
+############################################################
+# Dump databases
+############################################################
 
 TOTAL_STARTTIME=$(date +%s)
-ERROR=0
-# Dump database one by one
+output "[INFO] Backup directory: ${TARGET}" $LOG "${LOGFILE}"
+
 for db in ${DATABASES}; do
 
 	# Skip specified databases
@@ -279,21 +396,26 @@ for db in ${DATABASES}; do
 
 	if [ ${skip} -eq 0 ]; then
 		starttime=$(date +%s)
+		ext=""	# file extension
 		if [ ${COMPRESS} -eq 1 ]; then
 			if [ ${ENCRYPT} -eq 1 ]; then
+				ext=".sql.gz.pem"
 				outputi "Dumping:  ${db} (compressed) (encrypted) " $LOG "${LOGFILE}"
-				${MYSQLDUMP} ${MYSQL_OPTS} --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} "${db}" | ${GZIP} -9 | ${OPENSSL} smime -encrypt -binary -text ${OPENSSL_ALGO_ARG} -out "${TARGET}/${DATE}_${TIME}__${db}.sql.gz.enc" -outform DER ${OPENSSL_PUBKEY_PEM}
+				${MYSQLDUMP} ${MYSQL_OPTS} --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} "${db}" | ${GZIP} -9 | ${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}"
 			else
+				ext=".sql.gz"
 				outputi "Dumping:  ${db} (compressed) " $LOG "${LOGFILE}"
-				${MYSQLDUMP} ${MYSQL_OPTS} --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} "${db}" | ${GZIP} -9 > "${TARGET}/${DATE}_${TIME}__${db}.sql.gz"
+				${MYSQLDUMP} ${MYSQL_OPTS} --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} "${db}" | ${GZIP} -9 > "${TARGET}/${PREFIX}${db}${ext}"
 			fi
 		else
 			if [ ${ENCRYPT} -eq 1 ]; then
+				ext=".sql.pem"
 				outputi "Dumping:  ${db} (encrypted) " $LOG "${LOGFILE}"
-				${MYSQLDUMP} ${MYSQL_OPTS} --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} "${db}" | ${OPENSSL} smime -encrypt -binary -text ${OPENSSL_ALGO_ARG} -out "${TARGET}/${DATE}_${TIME}__${db}.sql.enc" -outform DER ${OPENSSL_PUBKEY_PEM}
+				${MYSQLDUMP} ${MYSQL_OPTS} --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} "${db}" | ${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}"
 			else
+				ext=".sql"
 				outputi "Dumping:  ${db} " $LOG "${LOGFILE}"
-				${MYSQLDUMP} ${MYSQL_OPTS} --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} "${db}" > "${TARGET}/${DATE}_${TIME}__${db}.sql"
+				${MYSQLDUMP} ${MYSQL_OPTS} --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} "${db}" > "${TARGET}/${PREFIX}${db}${ext}"
 			fi
 		fi
 
@@ -309,6 +431,8 @@ for db in ${DATABASES}; do
 		else
 			endtime=$(date +%s)
 			outputn "$(($endtime - $starttime)) sec" $LOG "${LOGFILE}"
+
+			chmod 600 "${TARGET}/${PREFIX}${db}${ext}"
 		fi
 	else
 		output "Skipping: ${db}" $LOG "${LOGFILE}"
@@ -317,11 +441,38 @@ done
 TOTAL_ENDTIME=$(date +%s)
 
 if [ $ERROR -ne 0 ]; then
-	output "Some errors occured while dumping" $LOG "${LOGFILE}"
+	output "[ERR]  Some errors occured while dumping" $LOG "${LOGFILE}"
+else
+	output "[INFO] Dumping finished" $LOG "${LOGFILE}"
+	output "[INFO] Took $(($TOTAL_ENDTIME - $TOTAL_STARTTIME)) seconds" $LOG "${LOGFILE}"
+fi
+
+
+
+############################################################
+# Delete old Files
+############################################################
+if [ ${DELETE} -eq 1 ]; then
+	output "[INFO] Deleting files older than ${DELETE_IF_OLDER} hours" $LOG "${LOGFILE}"
+	DELETED="$(${TMPWATCH} -m ${DELETE_IF_OLDER} -v "${TARGET}/")"
+	if [ $? -ne 0 ]; then
+		ERROR=1
+	fi
+	output "${DELETED}" $LOG "${LOGFILE}"
+fi
+
+
+
+############################################################
+# Exit
+############################################################
+
+if [ $ERROR -ne 0 ]; then
+	# Send bad exit code
+	output "[FAIL] Finished with errors" $LOG "${LOGFILE}"
 	exit 4
 else
-	output "Dumping finished" $LOG "${LOGFILE}"
-	output "Took $(($TOTAL_ENDTIME - $TOTAL_STARTTIME)) seconds" $LOG "${LOGFILE}"
 	# Send good exit code
+	output "[OK]   Finished successfully" $LOG "${LOGFILE}"
 	exit 0
 fi

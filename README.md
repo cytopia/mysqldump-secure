@@ -33,7 +33,7 @@ You can turn on logging to file.
 
 **Verbosity**
 
-The verbosity is currently fixed and is quite talkative. Informing you about missing directories, wrong permissions, dumping time, etc. Just have a look at the code.
+The verbosity is currently static and is quite talkative. Informing you about missing directories, wrong permissions, dumping time, etc. Just have a look at the code.
 
 **Error Checking**
 
