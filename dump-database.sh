@@ -197,7 +197,7 @@ if [ ! -d "${TARGET}" ]; then
 		output "Aborting" $LOG "${LOGFILE}"
 		exit 1
 	else
-		output "Done"
+		outputn "Done" $LOG "${LOGFILE}"
 		output "[INFO] Adjusting file permissions on ${TARGET}" $LOG "${LOGFILE}"
 		chmod 0700 "${TARGET}"
 	fi
@@ -224,15 +224,15 @@ if [ ! -w "${TARGET}" ]; then
 fi
 # Check correct permissions of destination dir
 if [ "$(permission "${TARGET}")" != "700" ]; then
-	output "[ERR]  Target directory has dangerous permissions: $(permission "${TARGET}")."
-	output "[INFO] Fix it to 700"
-	output "Aborting"
+	output "[ERR]  Target directory has dangerous permissions: $(permission "${TARGET}")." $LOG "${LOGFILE}"
+	output "[INFO] Fix it to 700" $LOG "${LOGFILE}"
+	output "Aborting" $LOG "${LOGFILE}"
 	exit 1
 fi
 # Check output Prefix
 if [ -z ${PREFIX+x} ]; then
-	output '[INFO] $PREFIX variable not set in ${CONFIG_FILE}'
-	output "[INFO] Using default 'date-time' prefix"
+	output '[INFO] $PREFIX variable not set in ${CONFIG_FILE}'$LOG "${LOGFILE}"
+	output "[INFO] Using default 'date-time' prefix" $LOG "${LOGFILE}"
 	PREFIX="$(date '+%Y-%m-%d')_$(date '+%H-%M')__"
 fi
 
@@ -241,6 +241,28 @@ fi
 ############################################################
 # MySQL
 ############################################################
+if [ -z ${MYSQL_CNF_FILE+x} ]; then
+	output '[ERR]  $MYSQL_CNF_FILE variable not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
+	output "Aborting" $LOG "${LOGFILE}"
+	exit 1
+fi
+
+if [ ! -f "${MYSQL_CNF_FILE}" ]; then
+	output "[ERR]  MySQL Configuration file not found in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}"
+	output "Aborting" $LOG "${LOGFILE}"
+	exit 1
+fi
+if [ ! -r "${MYSQL_CNF_FILE}" ]; then
+	output "[ERR]  MySQL Configuration file is not readable in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}"
+	output "Aborting" $LOG "${LOGFILE}"
+	exit 1
+fi
+if [ "$(permission "${MYSQL_CNF_FILE}")" != "400" ]; then
+	output "[ERR]  MySQL Configuration file ${MYSQL_CNF_FILE} has dangerous permissions: $(permission "${MYSQL_CNF_FILE}")." $LOG "${LOGFILE}"
+	output "[INFO] Fix it to 400" $LOG "${LOGFILE}"
+	output "Aborting" $LOG "${LOGFILE}"
+	exit 1
+fi
 if ! command -v mysql > /dev/null 2>&1 ; then
 	output "[ERR]  'mysql' not found" $LOG "${LOGFILE}"
 	output "Aborting" $LOG "${LOGFILE}"
@@ -252,8 +274,8 @@ if ! command -v mysqldump > /dev/null 2>&1 ; then
 	exit 2
 fi
 # Testing MySQL connection
-if ! $(which mysql) --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} -e exit > /dev/null 2>&1 ; then
-	output "[ERR]  Cannot connect to mysql database"
+if ! $(which mysql) --defaults-extra-file=${MYSQL_CNF_FILE} -e exit > /dev/null 2>&1 ; then
+	output "[ERR]  Cannot connect to mysql database. Check credentials in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}"
 	output "Aborting" $LOG "${LOGFILE}"
 	exit 3
 fi
@@ -264,8 +286,8 @@ fi
 # Compression
 ############################################################
 if [ -z ${COMPRESS+x} ]; then
-	output '[INFO] $COMPRESS variable not set in ${CONFIG_FILE}'
-	output "[INFO] Compression disabled"
+	output '[INFO] $COMPRESS variable not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
+	output "[INFO] Compression disabled" $LOG "${LOGFILE}"
 	COMPRESS=0
 fi
 if [ ${COMPRESS} -eq 1 ]; then
@@ -282,8 +304,8 @@ fi
 # Encryption
 ############################################################
 if [ -z ${ENCRYPT+x} ]; then
-	output '[INFO] $ENCRYPT variable not set in ${CONFIG_FILE}'
-	output "[INFO] Encryption disabled"
+	output '[INFO] $ENCRYPT variable not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
+	output "[INFO] Encryption disabled" $LOG "${LOGFILE}"
 	ENCRYPT=0
 fi
 if [ ${ENCRYPT} -eq 1 ]; then
@@ -298,8 +320,8 @@ if [ ${ENCRYPT} -eq 1 ]; then
 		exit 2
 	fi
 	if [ -z ${OPENSSL_ALGO_ARG+x} ]; then
-		output '[WARN] $OPENSSL_ALGO_ARG variable not set in ${CONFIG_FILE}'
-		output "[INFO] Encryption defaults to -aes256"
+		output '[WARN] $OPENSSL_ALGO_ARG variable not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
+		output "[INFO] Encryption defaults to -aes256" $LOG "${LOGFILE}"
 		OPENSSL_ALGO_ARG="-aes256"
 	fi
 	# Test openssl Algo
@@ -317,26 +339,26 @@ fi
 ############################################################
 
 if [ -z ${DELETE+x} ]; then
-	output '[INFO] $DELETE variable not set in ${CONFIG_FILE}'
-	output "[INFO] Deletion of old files disabled"
+	output '[INFO] $DELETE variable not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
+	output "[INFO] Deletion of old files disabled" $LOG "${LOGFILE}"
 	DELETE=0
 fi
 if [ ${DELETE} -eq 1  ]; then
 	if [ -z ${DELETE_IF_OLDER+x} ]; then
-		output '[WARN] $DELETE_IF_OLDER variable not set in ${CONFIG_FILE}'
-		output "[WARN] Deletion of old files disabled"
+		output '[WARN] $DELETE_IF_OLDER variable not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
+		output "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
 		DELETE=0
 	elif ! isint ${DELETE_IF_OLDER} > /dev/null 2>&1 ; then
-		output '[WARN] $DELETE_IF_OLDER variable is not a valid integer'
-		output "[WARN] Deletion of old files disabled"
+		output '[WARN] $DELETE_IF_OLDER variable is not a valid integer' $LOG "${LOGFILE}"
+		output "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
 		DELETE=0
 	elif [ ${DELETE_IF_OLDER} -lt 1 ]; then
-		output '[WARN] $DELETE_IF_OLDER is smaller than 1 hour'
-		output "[WARN] Deletion of old files disabled"
+		output '[WARN] $DELETE_IF_OLDER is smaller than 1 hour' $LOG "${LOGFILE}"
+		output "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
 		DELETE=0
 	elif ! command -v tmpwatch > /dev/null 2>&1 ; then
 		output "[WARN] 'tmpwatch' not found" $LOG "${LOGFILE}"
-		output "[WARN] Deletion of old files disabled"
+		output "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
 		DELETE=0
 	fi
 fi
@@ -370,7 +392,7 @@ ERROR=0
 
 # Get a list of all databases
 outputi "[INFO] Retrieving list of databases... " $LOG "${LOGFILE}"
-DATABASES="$( ${MYSQL} --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} --batch -e 'show databases;')"
+DATABASES="$( ${MYSQL} --defaults-extra-file=${MYSQL_CNF_FILE} --batch -e 'show databases;')"
 DATABASES="$( echo "${DATABASES}" | sed 1d )"
 NUM_DB="$(echo "${DATABASES}" | wc -l | tr -d ' ')"
 outputn "${NUM_DB}" $LOG "${LOGFILE}"
@@ -401,21 +423,21 @@ for db in ${DATABASES}; do
 			if [ ${ENCRYPT} -eq 1 ]; then
 				ext=".sql.gz.pem"
 				outputi "Dumping:  ${db} (compressed) (encrypted) " $LOG "${LOGFILE}"
-				${MYSQLDUMP} ${MYSQL_OPTS} --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} "${db}" | ${GZIP} -9 | ${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}"
+				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" | ${GZIP} -9 | ${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}"
 			else
 				ext=".sql.gz"
 				outputi "Dumping:  ${db} (compressed) " $LOG "${LOGFILE}"
-				${MYSQLDUMP} ${MYSQL_OPTS} --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} "${db}" | ${GZIP} -9 > "${TARGET}/${PREFIX}${db}${ext}"
+				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" | ${GZIP} -9 > "${TARGET}/${PREFIX}${db}${ext}"
 			fi
 		else
 			if [ ${ENCRYPT} -eq 1 ]; then
 				ext=".sql.pem"
 				outputi "Dumping:  ${db} (encrypted) " $LOG "${LOGFILE}"
-				${MYSQLDUMP} ${MYSQL_OPTS} --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} "${db}" | ${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}"
+				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" | ${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}"
 			else
 				ext=".sql"
 				outputi "Dumping:  ${db} " $LOG "${LOGFILE}"
-				${MYSQLDUMP} ${MYSQL_OPTS} --user=${MYSQL_USER} --password=${MYSQL_PASS} --host=${MYSQL_HOST} "${db}" > "${TARGET}/${PREFIX}${db}${ext}"
+				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" > "${TARGET}/${PREFIX}${db}${ext}"
 			fi
 		fi
 

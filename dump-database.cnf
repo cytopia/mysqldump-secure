@@ -1,0 +1,4 @@
+[client]
+host = localhost
+user = readonlyuser
+password = "verySecurePasswordWith$%&"

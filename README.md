@@ -1,7 +1,17 @@
 # dump-database
 [![Build Status](https://travis-ci.org/cytopia/dump-database.svg?branch=master)](https://travis-ci.org/cytopia/dump-database)
 
-Backup script to dump MySQL databases via cron or command line with additional options for encryption, compression, blacklisting, logging and custom mysqldump parameters.
+Security-first backup script to dump MySQL databases via cron or command line with additional options for encryption, compression, blacklisting, logging and custom mysqldump parameters.
+
+## Caution
+Most mysqldump scripts I have seen out there use something like this:
+```shell
+mysqldump --user=root --password=foo --host localhost database > database.sql
+```
+**THIS IS DANGEROUS**
+Even if run inside a script, you can see the mysql password in cleartext in ps aux.
+You should always define your credentials in a my.cnf file with chmod 400 or you can loose all your databases to everybody with access to that machine.
+
 
 ## Features
 
