@@ -13,6 +13,10 @@ mysqldump --user=root --password=foo --host localhost database > database.sql
 Even if run inside a script, you can see the mysql password in cleartext in ps aux.
 You should always define your credentials in a my.cnf file with chmod 400 or you can loose all your databases to everybody with access to that machine.
 
+**man mysql / man mysqldump**
+
+Specifying a password on the command line should be considered insecure. See Section 5.3.2.2, “End-User Guidelines for Password Security”. You can use an option file to avoid giving the password on the command line.
+
 
 ## Features
 
