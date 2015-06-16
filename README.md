@@ -10,12 +10,12 @@ mysqldump --user=root --password=foo --host localhost database > database.sql
 ```
 **THIS IS REALLY DANGEROUS**
 
-Even if run inside a script, you can see the mysql password in cleartext in ps aux.
-You should always define your credentials in a my.cnf file with chmod 400 or you can loose all your databases to everybody with access to that machine.
+Even if run inside a script, you can see the mysql password in cleartext in `ps aux`.
+You should always define your credentials in a my.cnf file with `chmod 400` or you can loose all your databases to everybody with access to that machine.
 
 **man mysql / man mysqldump**
 
-Specifying a password on the command line should be considered insecure. See Section 5.3.2.2, “End-User Guidelines for Password Security”. You can use an option file to avoid giving the password on the command line.
+Specifying a password on the command line should be considered insecure. See [End-User Guidelines for Password Security](https://dev.mysql.com/doc/refman/5.7/en/password-security-user.html). You can use an option file to avoid giving the password on the command line.
 
 
 ## Features
@@ -23,8 +23,7 @@ Specifying a password on the command line should be considered insecure. See Sec
 **Encryption**
 
 On-the-fly public/private key encryption of database dumps. The advantage of public/private key encryption is
-that even if your server is compromised the database dumps cannot be decrypted as it needs the private key which
-should be far away in a secure location
+that even if your server is compromised the database dumps cannot be decrypted as it needs the private key which should be far away in a secure location. Encryption is done via [OpenSSL SMIME](https://www.openssl.org/docs/apps/smime.html)
 
 **Opt-out / blacklisting**
 
@@ -33,21 +32,19 @@ If however you want to exclude certain databases such as for example 'informatio
 
 **Dump Options**
 
-You can specify custom mysqldump parameters in the configuration file. The default configuration dumps databases including events, triggers and routines.
-The dump is done via 'single-transaction' to also take transactional tables into account and via --quick in case of very large tables.
-All those parameters are customizable so alter them as desired.
+You can specify custom mysqldump parameters in the configuration file. The default configuration dumps databases including events, triggers and routines. The dump is done via `--single-transaction` to also take transactional tables into account. All those parameters are customizable so alter them as desired.
 
 **Compression**
 
-Databases can be writting to disk via gzip compression in order to save storage
+Databases can be writting to disk via `gzip` compression in order to save storage.
 
 **Logging**
 
 You can turn on logging to file.
 
-**tmpwatch integration**
+**Tmpwatch Integration**
 
-You can enable deletion of backup files older than X hours (requires tmpwatch to be installed)
+You can enable deletion of backup files older than X hours (requires [tmpwatch](http://linux.die.net/man/8/tmpwatch) to be installed)
 
 **Verbosity**
 
@@ -68,7 +65,15 @@ The script performs heavy error checking and is able to fall back to default opt
 
 
 
-## Quick Start
+## Quick Start (Automatic)
+Install everything including proper access right via make.
+```shell
+sudo make install
+```
+Adjust [mysqldump-secure.conf](mysqldump-secure.conf) and [mysqldump-secure.cnf](mysqldump-secure.cnf) and make sure that all required directories exist. If both configuration files are setup correctly, simply execute the script to autogenerate directories, files and permissions.
+
+
+## Quick Start (Manual)
 
 Copy the config file to /etc and the script itself to any sbin directory.
 Make sure that the configuration file can not be read by others as you will need to store the MySQL credentials inside.
