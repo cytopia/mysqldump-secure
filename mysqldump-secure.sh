@@ -33,10 +33,7 @@
 #
 ################################################################################
 
-# Adjust this variable if your config file
-# is placed somewhere else
-CONFIG_FILE="/etc/dump-database.conf"
-
+CONFIG_NAME="mysqldump-secure.conf"
 
 
 
@@ -113,6 +110,18 @@ permission() {
 ############################################################
 # Config FIle
 ############################################################
+
+# Try /usr/local/etc first
+# Fallback to /etc
+if [ -f "/usr/local/etc/${CONFIG_NAME}" ]; then
+	output "[INFO] Configuration file found in /usr/local/etc/${CONFIG_NAME}"
+	CONFIG_FILE="/usr/local/etc/${CONFIG_NAME}"
+else
+	output "[INFO] Configuration file not found in /usr/local/etc/${CONFIG_NAME}"
+	output "[INFO] Assuming Configuration file in /etc/${CONFIG_NAME}"
+	CONFIG_FILE="/etc/${CONFIG_NAME}"
+fi
+
 
 if [ ! -f "${CONFIG_FILE}" ]; then
 	output "[ERR]  Configuration file not found in ${CONFIG_FILE}"
