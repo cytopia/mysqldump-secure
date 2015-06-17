@@ -45,7 +45,7 @@ install:
 	@echo ""
 
 	@# Install config file with backup file
-	install -b $(DUMP_CONF) $(ETCDIR)/$(DUMP_CNF)
+	install -b $(DUMP_CNF) $(ETCDIR)/$(DUMP_CNF)
 	chmod 400 $(ETCDIR)/$(DUMP_CNF)
 	@echo ""
 
