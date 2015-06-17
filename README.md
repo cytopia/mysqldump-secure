@@ -1,10 +1,12 @@
 # mysqldump-secure
 [![Build Status](https://travis-ci.org/cytopia/mysqldump-secure.svg?branch=master)](https://travis-ci.org/cytopia/mysqldump-secure)
 
-Security-first backup script to dump MySQL databases via cron or command line with additional options for encryption, compression, blacklisting, logging and custom mysqldump parameters.
+Mysqldump-secure is a POSIX conform automated backup solution for MySQL databases with strong security in mind.
+It will backup every available database (which is readable by the specified user) as a separate file with the possibility to opt out via blacklisting. Dumped databases can optionally be piped directly to gzip or openssl in order to compress and/or encrypt the backup. Encryption is done before the file is written to disk in order to avoid possible race conditions.
 
-## Caution
-Most mysqldump scripts I have seen out there use something like this:
+
+## General Warning
+Most mysqldump scripts I have seen out there do something like this:
 ```shell
 mysqldump --user=root --password=foo --host localhost database > database.sql
 ```
@@ -13,9 +15,9 @@ mysqldump --user=root --password=foo --host localhost database > database.sql
 Even if run inside a script, you can see the mysql password in cleartext in `ps aux`.
 You should always define your credentials in a my.cnf file with `chmod 400` or you can loose all your databases to everybody with access to that machine.
 
-**man mysql / man mysqldump**
+> [MySQL End-User Guidelines for Password Security](https://dev.mysql.com/doc/refman/5.7/en/password-security-user.html)
 
-Specifying a password on the command line should be considered insecure. See [End-User Guidelines for Password Security](https://dev.mysql.com/doc/refman/5.7/en/password-security-user.html). You can use an option file to avoid giving the password on the command line.
+> Specifying a password on the command line should be considered insecure. You can use an option file to avoid giving the password on the command line.
 
 
 ## Features
