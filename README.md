@@ -44,9 +44,6 @@ vim /etc/mysqldump-secure.conf
 vim /etc/mysqldump-secure.cnf
 ```
 
-```shell
-Adjust [mysqldump-secure.conf](mysqldump-secure.conf) and [mysqldump-secure.cnf](mysqldump-secure.cnf) and make sure that all required directories exist. If both configuration files are setup correctly, simply execute the script to autogenerate directories, files and permissions.
-```
 
 ### Manual installation
 If you do not trust the `Makefile` you can also manually copy the files and adjust file permissions by hand.
