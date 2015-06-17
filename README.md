@@ -1,10 +1,12 @@
 # mysqldump-secure
 [![Build Status](https://travis-ci.org/cytopia/mysqldump-secure.svg?branch=master)](https://travis-ci.org/cytopia/mysqldump-secure)
 
-Security-first backup script to dump MySQL databases via cron or command line with additional options for encryption, compression, blacklisting, logging and custom mysqldump parameters.
+Mysqldump-secure is a POSIX conform automated backup solution for MySQL databases with strong security in mind.
+It will backup every available database (which is readable by the specified user) as a separate file with the possibility to opt out via blacklisting. Dumped databases can optionally be piped directly to gzip or openssl in order to compress and/or encrypt the backup. Encryption is done before the file is written to disk in order to avoid possible race conditions.
 
-## Caution
-Most mysqldump scripts I have seen out there use something like this:
+
+## General Warning
+Most mysqldump scripts I have seen out there do something like this:
 ```shell
 mysqldump --user=root --password=foo --host localhost database > database.sql
 ```
@@ -13,45 +15,148 @@ mysqldump --user=root --password=foo --host localhost database > database.sql
 Even if run inside a script, you can see the mysql password in cleartext in `ps aux`.
 You should always define your credentials in a my.cnf file with `chmod 400` or you can loose all your databases to everybody with access to that machine.
 
-**man mysql / man mysqldump**
+> [MySQL End-User Guidelines for Password Security](https://dev.mysql.com/doc/refman/5.7/en/password-security-user.html)
 
-Specifying a password on the command line should be considered insecure. See [End-User Guidelines for Password Security](https://dev.mysql.com/doc/refman/5.7/en/password-security-user.html). You can use an option file to avoid giving the password on the command line.
+> Specifying a password on the command line should be considered insecure. You can use an option file to avoid giving the password on the command line.
 
 
-## Features
+## Feature Overview
 
-**Encryption**
+* Encryption
+* Compression
+* Blacklisting
+* Tmpwatch integration
+* File logging
+* Error checking / security validation
+* Custom mysqldump options
 
-On-the-fly public/private key encryption of database dumps. The advantage of public/private key encryption is
-that even if your server is compromised the database dumps cannot be decrypted as it needs the private key which should be far away in a secure location. Encryption is done via [OpenSSL SMIME](https://www.openssl.org/docs/apps/smime.html)
 
-**Opt-out / blacklisting**
+## Installation
 
-By default all databases are dumped one by one that you do not accidentally forget to add new databases.
-If however you want to exclude certain databases such as for example 'information_schema' you can add them to the IGNORE list
+### Automated installation
+Automated installation and setting of access rights via `unix Makefile`.
+```shell
+sudo make install
+```
+Adjust the configuration and you are good to go.
+```shell
+vim /etc/mysqldump-secure.conf
+vim /etc/mysqldump-secure.cnf
+```
 
-**Dump Options**
 
-You can specify custom mysqldump parameters in the configuration file. The default configuration dumps databases including events, triggers and routines. The dump is done via `--single-transaction` to also take transactional tables into account. All those parameters are customizable so alter them as desired.
+### Manual installation
+If you do not trust the `Makefile` you can also manually copy the files and adjust file permissions by hand.
+```shell
+# Copy the script
+cp mysqldump-secure.sh /usr/local/sbin/mysqldump-secure.sh
+chmod +x /usr/local/sbin/mysqldump-secure.sh
 
-**Compression**
+# Copy the config files
+cp mysqldump-secure.conf /etc/mysqldump-secure.conf
+chmod 400 /etc/mysqldump-secure.conf
 
-Databases can be writting to disk via `gzip` compression in order to save storage.
+cp mysqldump-secure.cnf /etc/mysqldump-secure.cnf
+chmod 400 /etc/mysqldump-secure.cnf
 
-**Logging**
+# Create the backup dir
+mkdir -p /shared/backup/databases
+chmod 700 /shared/backup/databases
 
-You can turn on logging to file.
+# Create the logfile (optionally)
+touch /var/log/mysqldump-secure.log
+chmod 600 /var/log/mysqldump-secure.log
 
-**Tmpwatch Integration**
+```
+Adjust the configuration and you are good to go.
+```shell
+vim /etc/mysqldump-secure.conf
+vim /etc/mysqldump-secure.cnf
+```
 
-You can enable deletion of backup files older than X hours (requires [tmpwatch](http://linux.die.net/man/8/tmpwatch) to be installed)
+### Cronjob
+Once you have tested the script you can setup the cronjob:
+```
+# Dump MySQL Databases at 03:15 every day
+  15 3  *  *  * /bin/sh /usr/local/sbin/mysqldump-secure.sh
+```
 
-**Verbosity**
 
-The verbosity is currently static and is quite talkative. Informing you about missing directories, wrong permissions, dumping time, etc. Just have a look at the code.
+## Configuration
+Before you start make sure to have the credentials setup correctly.
 
-**Error Checking**
+1. Copy [mysqldump-secure.cnf](mysqldump-secure.cnf) to `/etc/mysqldump-secure.cnf`
+2. Adjust credentials: `vi /etc/mysqldump-secure.cnf`
+3. Set permissions: `chmod 400 /etc/mysqldump-secure.cnf`
+4. Test connection: `mysql`
 
+If you see the mysql prompt then everything went fine and you can continue configuring the program.
+
+
+### Encryption
+Encryption is done by public/private key via [OpenSSL SMIME](https://www.openssl.org/docs/apps/smime.html) which also supports encrypting large files.
+
+> The primary advantage of public-key cryptography is increased security and convenience: private keys never need to be transmitted or revealed to anyone. In a secret-key system, by contrast, the secret keys must be transmitted (either manually or through a communication channel) since the same key is used for encryption and decryption. A serious concern is that there may be a chance that an enemy can discover the secret key during transmission.
+> [[1]](http://www.emc.com/emc-plus/rsa-labs/standards-initiatives/advantages-and-disadvantages.htm)
+
+See [examples](examples) for scripts to generate public/private keys, encrypt and decrypt.
+
+#### Create the keypair
+In order to enable encryption you need a public/private keypair. If you don't know how to generate them you can use provided script: [create-keypair.sh](examples/create-keypair.sh).
+
+Once you have the keys
+
+1. Move the private key away from the server to a very secure location.
+2. Copy the public key to `/etc/mysqldump-secure.pub.pem`
+3. `chmod 400 /etc/mysqldump-secure.pub.pem`
+
+Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following variables
+```shell
+ENCRYPT=1
+OPENSSL_PUBKEY_PEM="/etc/mysqldump-secure.pub.pem"
+OPENSSL_ALGO_ARG="-aes256"
+```
+
+
+### Compression
+MySQL dumps can be piped directly to `gzip` before writing to disk.
+
+Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following variables
+```shell
+COMPRESS=1
+```
+
+### Blacklisting
+Mysqldump-secure uses opt-out instead of opt-in and will by default dump every readable database to disk. If you however want to manually ignore certain databases, such as `information_schema` or `performance_schema` you can specify them in a ignore list.
+
+**Opt-out vs Opt-in**
+The disadvantage of opt-out is that you might backup a database that is not needed. On the other hand if you use opt-in you could forget a database that was actually needed to be backed up.
+
+Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following variables
+```shell
+IGNORE="information_schema performance_schema"
+```
+
+### Tmpwatch integration
+If you have [tmpwatch](http://linux.die.net/man/8/tmpwatch) installed you can specify to automatically delete backups older than X hours.
+
+Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following variables
+```shell
+DELETE=720 # 720 hours
+```
+
+
+### File logging
+Mysqldump-secure includes a mechanism to log every action (debug, info, warn and error) to file. The script also follows the practise of sending proper exit codes (0 for everything went fine and >0 for I had some errors).
+
+Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following variables
+```shell
+LOG=1
+LOGFILE="/var/log/mysqldump-secure.log"
+```
+
+
+### Error checking / security validation
 The script performs heavy error checking and is able to fall back to default options. Checking includes:
 * Logfile exists
 * Logfile is writeable
@@ -63,60 +168,18 @@ The script performs heavy error checking and is able to fall back to default opt
 * Required system binaries exist
 * MySQL credentials are valid
 
+### Custom mysqldump options
+You can specify custom mysqldump parameters in the configuration file. The default configuration dumps databases including events, triggers and routines. The dump is done via `--single-transaction` to also take transactional tables into account. All those parameters are customizable so alter them as desired.
 
-
-## Quick Start (Automatic)
-Install everything including proper access right via make.
+Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following variables
 ```shell
-sudo make install
+MYSQL_OPTS='--events --triggers --routines --single-transaction --opt'
 ```
-Adjust [mysqldump-secure.conf](mysqldump-secure.conf) and [mysqldump-secure.cnf](mysqldump-secure.cnf) and make sure that all required directories exist. If both configuration files are setup correctly, simply execute the script to autogenerate directories, files and permissions.
-
-
-## Quick Start (Manual)
-
-Copy the config file to /etc and the script itself to any sbin directory.
-Make sure that the configuration file can not be read by others as you will need to store the MySQL credentials inside.
-```shell
-cp mysqldump-secure.conf /etc/mysqldump-secure.conf
-chmod 400 /etc/mysqldump-secure.conf
-
-cp mysqldump-secure.cnf /etc/mysqldump-secure.cnf
-chmod 400 /etc/mysqldump-secure.cnf
-
-cp mysqldump-secure.sh /usr/local/sbin/mysqldump-secure.sh
-chmod +x /usr/local/sbin/mysqldump-secure.sh
-```
-
-Make sure to adjust the configuration and create the backup directory and the logfile (optionally).
-```
-mkdir -p /shared/backup/databases
-chmod 700 /shared/backup/databases
-
-touch /var/log/mysqldump-secure.log
-chmod 600 /var/log/mysqldump-secure.log
-```
-
-Once you have tested the script you can setup the cronjob like so:
-```
-# Dump MySQL Databases at 03:15 every day
-  15 3  *  *  * /bin/sh /usr/local/sbin/mysqldump-secure.sh
-```
-
-
-## Encryption / Decryption
-See [examples](examples) for scripts to generate public/private keys, encrypt and decrypt.
-
-
-
-## Configuration
-See [mysqldump-secure.conf](mysqldump-secure.conf) for all options.
-
+See [mysqldump](https://dev.mysql.com/doc/refman/5.0/en/mysqldump.html) for all possible parameters.
 
 
 ## Contribution
-See [contribution guidelines](doc/CONTRIBUTING.md).
-
+Contributors are welcome. See [contribution guidelines](doc/CONTRIBUTING.md).
 
 
 ## Todo
