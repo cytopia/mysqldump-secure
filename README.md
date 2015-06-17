@@ -89,6 +89,7 @@ Before you start make sure to have the credentials setup correctly.
 2. `chmod 400 /etc/mysqldump-secure.cnf`
 3. Adjust credentials: `vi /etc/mysqldump-secure.cnf`
 4. Test connection: `mysql`
+
 If you see the mysql prompt then everything went fine and you can continue configuring the program.
 
 
