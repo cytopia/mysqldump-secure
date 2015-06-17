@@ -82,7 +82,8 @@ Once you have tested the script you can setup the cronjob:
 ```
 
 
-## Feature Description
+## Configuration
+See [mysqldump-secure.conf](mysqldump-secure.conf) for all options.
 
 ### Encryption
 Encryption is done by public/private key via [OpenSSL SMIME](https://www.openssl.org/docs/apps/smime.html) which also supports encrypting large files.
@@ -92,9 +93,30 @@ Encryption is done by public/private key via [OpenSSL SMIME](https://www.openssl
 
 See [examples](examples) for scripts to generate public/private keys, encrypt and decrypt.
 
+#### Create the keypair
+In order to enable encryption you need a public/private keypair. If you don't know how to generate them you can use provided script: [create-keypair.sh](examples/create-keypair.sh).
+
+Once you have the keys
+
+1. Move the private key away from the server to a very secure location.
+2. Copy the public key to `/etc/mysqldump-secure.pub.pem`
+3. `chmod 400 /etc/mysqldump-secure.pub.pem`
+
+Open `/etc/mysqldump-secure.conf` and set the following variables
+```shell
+ENCRYPT=1
+OPENSSL_PUBKEY_PEM="/etc/mysqldump-secure.pub.pem"
+OPENSSL_ALGO_ARG="-aes256"
+```
+
 
 ### Compression
 MySQL dumps can be piped directly to `gzip` before writing to disk.
+
+Open `/etc/mysqldump-secure.conf` and set the following variables
+```shell
+COMPRESS=1
+```
 
 ### Blacklisting
 Mysqldump-secure uses opt-out instead of opt-in and will by default dump every readable database to disk. If you however want to manually ignore certain databases, such as `information_schema` or `performance_schema` you can specify them in a ignore list.
@@ -102,11 +124,29 @@ Mysqldump-secure uses opt-out instead of opt-in and will by default dump every r
 **Opt-out vs Opt-in**
 The disadvantage of opt-out is that you might backup a database that is not needed. On the other hand if you use opt-in you could forget a database that was actually needed to be backed up.
 
+Open `/etc/mysqldump-secure.conf` and set the following variables
+```shell
+IGNORE="information_schema performance_schema"
+```
+
 ### Tmpwatch integration
 If you have [tmpwatch](http://linux.die.net/man/8/tmpwatch) installed you can specify to automatically delete backups older than X hours.
 
+Open `/etc/mysqldump-secure.conf` and set the following variables
+```shell
+DELETE=720 # 720 hours
+```
+
+
 ### File logging
 Mysqldump-secure includes a mechanism to log every action (debug, info, warn and error) to file. The script also follows the practise of sending proper exit codes (0 for everything went fine and >0 for I had some errors).
+
+Open `/etc/mysqldump-secure.conf` and set the following variables
+```shell
+LOG=1
+LOGFILE="/var/log/mysqldump-secure.log"
+```
+
 
 ### Error checking / security validation
 The script performs heavy error checking and is able to fall back to default options. Checking includes:
@@ -123,15 +163,14 @@ The script performs heavy error checking and is able to fall back to default opt
 ### Custom mysqldump options
 You can specify custom mysqldump parameters in the configuration file. The default configuration dumps databases including events, triggers and routines. The dump is done via `--single-transaction` to also take transactional tables into account. All those parameters are customizable so alter them as desired.
 
-
-## Configuration
-See [mysqldump-secure.conf](mysqldump-secure.conf) for all options.
-
+Open `/etc/mysqldump-secure.conf` and set the following variables
+```shell
+MYSQL_OPTS='--events --triggers --routines --single-transaction --opt'
+```
 
 
 ## Contribution
-See [contribution guidelines](doc/CONTRIBUTING.md).
-
+Contributors are welcome. See [contribution guidelines](doc/CONTRIBUTING.md).
 
 
 ## Todo
