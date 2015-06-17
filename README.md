@@ -86,8 +86,8 @@ Once you have tested the script you can setup the cronjob:
 Before you start make sure to have the credentials setup correctly.
 
 1. Copy [mysqldump-secure.cnf](mysqldump-secure.cnf) to `/etc/mysqldump-secure.cnf`
-2. `chmod 400 /etc/mysqldump-secure.cnf`
-3. Adjust credentials: `vi /etc/mysqldump-secure.cnf`
+2. Adjust credentials: `vi /etc/mysqldump-secure.cnf`
+3. Set permissions: `chmod 400 /etc/mysqldump-secure.cnf`
 4. Test connection: `mysql`
 
 If you see the mysql prompt then everything went fine and you can continue configuring the program.
