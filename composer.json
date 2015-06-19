@@ -5,7 +5,6 @@
 	"keywords": ["backup", "mysqldump", "export", "dump", "mysql", "database", "encryption"],
 	"homepage": "https://github.com/cytopia/mysqldump-secure",
 	"license": "MIT",
-	"minimum-stability": "stable",
 	"authors": [
 		{
 			"name" : "Patrick Plocke",
