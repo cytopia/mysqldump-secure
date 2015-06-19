@@ -1,0 +1,4 @@
+{
+	"name": "cytopia/mysqldump-secure",
+	"description": "Secure mysqldump script with encryption, compression, logging and blacklisting"
+}
