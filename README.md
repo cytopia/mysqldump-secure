@@ -23,6 +23,7 @@ You should always define your credentials in a my.cnf file with `chmod 400` or y
 > Specifying a password on the command line should be considered insecure. You can use an option file to avoid giving the password on the command line.
 
 
+
 ## Feature Overview
 
 * Encryption
