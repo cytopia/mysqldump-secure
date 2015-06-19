@@ -1,4 +1,16 @@
 {
 	"name": "cytopia/mysqldump-secure",
-	"description": "Secure mysqldump script with encryption, compression, logging and blacklisting"
+	"description": "Secure mysqldump script with encryption, compression, logging and blacklisting",
+	"type": "library",
+	"keywords": ["backup", "mysqldump", "export", "dump", "mysql", "database", "encryption"],
+	"homepage": "https://github.com/cytopia/mysqldump-secure",
+	"license": "MIT",
+	"minimum-stability": "stable",
+	"authors": [
+		{
+			"name" : "Patrick Plocke",
+			"homepage": "https://github.com/cytopia",
+			"role": "Developer"
+		}
+	]
 }
