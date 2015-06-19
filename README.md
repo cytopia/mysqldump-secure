@@ -1,5 +1,6 @@
 # mysqldump-secure
 [![Build Status](https://travis-ci.org/cytopia/mysqldump-secure.svg?branch=master)](https://travis-ci.org/cytopia/mysqldump-secure)
+[![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](doc/LICENSE)
 
 Mysqldump-secure is a POSIX conform automated backup solution for MySQL databases with strong security in mind.
 It will backup every available database (which is readable by the specified user) as a separate file with the possibility to opt out via blacklisting. Dumped databases can optionally be piped directly to gzip or openssl in order to compress and/or encrypt the backup. Encryption is done before the file is written to disk in order to avoid possible race conditions.
