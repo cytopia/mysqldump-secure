@@ -35,6 +35,14 @@
 
 CONFIG_NAME="mysqldump-secure.conf"
 
+# These command line arguments are considered insecure and can lead
+# to compromising your data
+MYSQL_EVIL_OPTS="--password -p"
+
+# Do not allow to read any other file than the one specified in
+# the configuration.
+MYSQL_BAD_OPTS="--defaults-extra-file --defaults-file"
+
 
 
 ################################################################################
@@ -288,6 +296,28 @@ if ! $(which mysql) --defaults-extra-file=${MYSQL_CNF_FILE} -e exit > /dev/null 
 	output "Aborting" $LOG "${LOGFILE}"
 	exit 3
 fi
+
+
+
+############################################################
+# Bad MySQL Opts
+############################################################
+for opt in ${MYSQL_OPTS}; do
+	for evil in ${MYSQL_EVIL_OPTS}; do
+		if [ "${opt}" = "${evil}" ]; then
+			output "[ERR]  Insecure mysqldump option found in MYSQL_OPTS: '${evil}'" $LOG "${LOGFILE}"
+			output "Aborting" $LOG "${LOGFILE}"
+			exit 3
+		fi
+	done
+	for bad in ${MYSQL_BAD_OPTS}; do
+		if [ "${opt}" = "${evil}" ]; then
+			output "[ERR]  Disallowed mysqldump option found in MYSQL_OPTS: '${bad}'" $LOG "${LOGFILE}"
+			output "Aborting" $LOG "${LOGFILE}"
+			exit 3
+		fi
+	done
+done
 
 
 
