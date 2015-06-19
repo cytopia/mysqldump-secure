@@ -164,6 +164,11 @@ if [ -z ${LOG+x} ]; then
 	output "[INFO] Logging disabled"
 	LOG=0
 fi
+if [ -z ${LOG} ]; then
+	output '[INFO] $LOG variable is empty in ${CONFIG_FILE}'
+	output "[INFO] Logging disabled"
+	LOG=0
+fi
 # Logging requirements fullfilled?
 if [ ${LOG} -eq 1 ]; then
 	if [ -z ${LOGFILE+x} ]; then
@@ -263,7 +268,11 @@ if [ -z ${MYSQL_CNF_FILE+x} ]; then
 	output "Aborting" $LOG "${LOGFILE}"
 	exit 1
 fi
-
+if [ -z ${MYSQL_CNF_FILE} ]; then
+	output '[ERR]  $MYSQL_CNF_FILE variable is empty in ${CONFIG_FILE}' $LOG "${LOGFILE}"
+	output "Aborting" $LOG "${LOGFILE}"
+	exit 1
+fi
 if [ ! -f "${MYSQL_CNF_FILE}" ]; then
 	output "[ERR]  MySQL Configuration file not found in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}"
 	output "Aborting" $LOG "${LOGFILE}"
@@ -329,6 +338,11 @@ if [ -z ${COMPRESS+x} ]; then
 	output "[INFO] Compression disabled" $LOG "${LOGFILE}"
 	COMPRESS=0
 fi
+if [ -z ${COMPRESS} ]; then
+	output '[INFO] $COMPRESS variable is empty in ${CONFIG_FILE}' $LOG "${LOGFILE}"
+	output "[INFO] Compression disabled" $LOG "${LOGFILE}"
+	COMPRESS=0
+fi
 if [ ${COMPRESS} -eq 1 ]; then
 	if ! command -v gzip > /dev/null 2>&1 ; then
 		output "[WARN] 'gzip' not found" $LOG "${LOGFILE}"
@@ -344,6 +358,11 @@ fi
 ############################################################
 if [ -z ${ENCRYPT+x} ]; then
 	output '[INFO] $ENCRYPT variable not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
+	output "[INFO] Encryption disabled" $LOG "${LOGFILE}"
+	ENCRYPT=0
+fi
+if [ -z ${ENCRYPT} ]; then
+	output '[INFO] $ENCRYPT variable is empty in ${CONFIG_FILE}' $LOG "${LOGFILE}"
 	output "[INFO] Encryption disabled" $LOG "${LOGFILE}"
 	ENCRYPT=0
 fi
@@ -379,6 +398,11 @@ fi
 
 if [ -z ${DELETE+x} ]; then
 	output '[INFO] $DELETE variable not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
+	output "[INFO] Deletion of old files disabled" $LOG "${LOGFILE}"
+	DELETE=0
+fi
+if [ -z ${DELETE} ]; then
+	output '[INFO] $DELETE variable is empty in ${CONFIG_FILE}' $LOG "${LOGFILE}"
 	output "[INFO] Deletion of old files disabled" $LOG "${LOGFILE}"
 	DELETE=0
 fi
