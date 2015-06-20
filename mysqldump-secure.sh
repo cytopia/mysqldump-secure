@@ -29,11 +29,14 @@
 
 ################################################################################
 #
-# ADJUSTABLE VARIABLES
+# VARIABLES
 #
 ################################################################################
 
+# Configuration
 CONFIG_NAME="mysqldump-secure.conf"
+CONFIG_FILE="/etc/${CONFIG_NAME}"
+
 
 # These command line arguments are considered insecure and can lead
 # to compromising your data
@@ -58,7 +61,7 @@ output() {
 	local FILE="${3}"		# Logfile path
 
 	printf "%s\n" "${MSG}"
-	[ ${LOG} -eq 1 ] && printf "%s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${MSG}" >> "${FILE}"
+	[ "${LOG}" = "1" ] && printf "%s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${MSG}" >> "${FILE}"
 	return 0
 }
 # Inline Output to stdout and to file (no newline)
@@ -68,7 +71,7 @@ outputi() {
 	local FILE="${3}"		# Logfile path
 
 	printf "%s" "${MSG}"
-	[ ${LOG} -eq 1 ] && printf "%s %s %s" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${MSG}" >> "${FILE}"
+	[ "${LOG}" = "1" ] && printf "%s %s %s" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${MSG}" >> "${FILE}"
 	return 0
 }
 # Output to stdout and to file (no time)
@@ -78,7 +81,7 @@ outputn() {
 	local FILE="${3}"		# Logfile path
 
 	printf "%s\n" "${MSG}"
-	[ ${LOG} -eq 1 ] && printf "%s\n" "${MSG}" >> "${FILE}"
+	[ "${LOG}" = "1" ] && printf "%s\n" "${MSG}" >> "${FILE}"
 	return 0
 }
 
@@ -119,18 +122,6 @@ permission() {
 # Config FIle
 ############################################################
 
-# Try /usr/local/etc first
-# Fallback to /etc
-if [ -f "/usr/local/etc/${CONFIG_NAME}" ]; then
-	output "[INFO] Configuration file found in /usr/local/etc/${CONFIG_NAME}"
-	CONFIG_FILE="/usr/local/etc/${CONFIG_NAME}"
-else
-	output "[INFO] Configuration file not found in /usr/local/etc/${CONFIG_NAME}"
-	output "[INFO] Assuming Configuration file in /etc/${CONFIG_NAME}"
-	CONFIG_FILE="/etc/${CONFIG_NAME}"
-fi
-
-
 if [ ! -f "${CONFIG_FILE}" ]; then
 	output "[ERR]  Configuration file not found in ${CONFIG_FILE}"
 	output "Aborting"
@@ -158,51 +149,61 @@ fi
 # Logging Options
 ############################################################
 
-# Logging set?
-if [ -z ${LOG+x} ]; then
-	output '[INFO] $LOG variable not set in ${CONFIG_FILE}'
-	output "[INFO] Logging disabled"
-	LOG=0
-fi
+# Be really strict on checking if we are going to log to file
+# or not. Also make sure that the logfile is writeable and
+# that no other has read permissions to the file.
 if [ -z ${LOG} ]; then
-	output '[INFO] $LOG variable is empty in ${CONFIG_FILE}'
+	output '[INFO] $LOG variable is empty or not set in ${CONFIG_FILE}'
 	output "[INFO] Logging disabled"
 	LOG=0
-fi
-# Logging requirements fullfilled?
-if [ ${LOG} -eq 1 ]; then
-	if [ -z ${LOGFILE+x} ]; then
-		output '[WARN] Missing $LOGFILE variable in ${CONFIG_FILE}'
+elif [ "${LOG}" = "1" ]; then
+	if [ -z ${LOGFILE} ]; then
+		output '[WARN] $LOGFILE variable is empty or not set in ${CONFIG_FILE}'
+		output "[WARN] Logging disabled"
+		LOG=0
+	elif [ ! -f "${LOGFILE}" ]; then
+		output "[WARN] Logfile does not exist in ${LOGFILE}"
+		outputi "[INFO] Trying to create..."
+
+		if ! touch "${LOGFILE}" > /dev/null 2>&1 ; then
+			outputn "Failed"
+			output  "[ERR]  Failed to create file ${LOGFILE}"
+			output  "[WARN] Logging disabled"
+			LOG=0
+		else
+			outputn "OK"
+			output  "[INFO] Created file ${LOGFILE}"
+			outputi "[INFO] Trying to chmod..."
+
+			if ! chmod 600 "${LOGFILE}" > /dev/null 2>&1 ; then
+				outputn "Failed"
+				output  "[ERR]  Failed to chmod 600 ${LOGFILE}"
+				output  "[WARN] Logging disabled"
+				LOG=0
+			else
+				outputn "OK"
+			fi
+		fi
+	elif [ ! -w "${LOGFILE}" ]; then
+		output "[WARN] Logfile ${LOGFILE} not writeable"
+		output "[WARN] Logging disabled"
+		LOG=0
+	elif [ "$(permission "${LOGFILE}")" != "600" ]; then
+		output "[ERR]  Logfile has dangerous permissions: $(permission "${LOGFILE}")"
+		output "[INFO] Fix it to 600"
 		output "[WARN] Logging disabled"
 		LOG=0
 	else
-		if [ ! -f "${LOGFILE}" ]; then
-			output "[WARN] Logfile does not exist in ${LOGFILE}"
-			output "[INFO] Trying to create..."
-
-			if ! touch "${LOGFILE}" > /dev/null 2>&1 ; then
-				output "[ERR]  Failed to create file ${LOGFILE}"
-				output "[WARN] Logging disabled"
-				LOG=0
-			else
-				output "[INFO] Created file ${LOGFILE}"
-				output "[INFO] Logging enabled"
-				LOG=1
-			fi
-		else
-			if [ ! -w "${LOGFILE}" ]; then
-				output "[WARN] Logfile ${LOGFILE} not writeable"
-				output "[WARN] Logging disabled"
-				LOG=0
-			fi
-		fi
+		echo "" >> "${LOGFILE}"
+		echo "---------------------------------------" >> "${LOGFILE}"
+		echo "$(date '+%Y-%m-%d') $(date '+%H:%M:%S') Starting" >> "${LOGFILE}"
+		output "[INFO] Logging enabled"
 	fi
+else
+	output "[INFO] Logging not enabled in ${CONFIG_FILE}"
+	LOG=0
 fi
-if [ ${LOG} -eq 1 ]; then
-	echo "" >> "${LOGFILE}"
-	echo "---------------------------------------" >> "${LOGFILE}"
-	echo "$(date '+%Y-%m-%d') $(date '+%H:%M:%S') Starting" >> "${LOGFILE}"
-fi
+
 
 
 
@@ -211,12 +212,16 @@ fi
 ############################################################
 
 # Check if destination dir exists
-if [ ! -d "${TARGET}" ]; then
-	output "[WARN] Destination dir ${TARGET} does not exist" $LOG "${LOGFILE}"
+if [ -z ${TARGET} ]; then
+	output '[ERR]  TARGET variable is empty or not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
+	output "Aborting" $LOG "${LOGFILE}"
+	exit 1
+elif [ ! -d "${TARGET}" ]; then
+	output  "[WARN] Destination dir ${TARGET} does not exist" $LOG "${LOGFILE}"
 	outputi "[INFO] Trying to create... " $LOG "${LOGFILE}"
 	if ! mkdir -p "${TARGET}" > /dev/null 2>&1 ; then
 		outputn "Failed" $LOG "${LOGFILE}"
-		output "Aborting" $LOG "${LOGFILE}"
+		output  "Aborting" $LOG "${LOGFILE}"
 		exit 1
 	else
 		outputn "Done" $LOG "${LOGFILE}"
@@ -252,8 +257,8 @@ if [ "$(permission "${TARGET}")" != "700" ]; then
 	exit 1
 fi
 # Check output Prefix
-if [ -z ${PREFIX+x} ]; then
-	output '[INFO] $PREFIX variable not set in ${CONFIG_FILE}'$LOG "${LOGFILE}"
+if [ -z ${PREFIX} ]; then
+	output '[INFO] $PREFIX variable is empty not set in ${CONFIG_FILE}'$LOG "${LOGFILE}"
 	output "[INFO] Using default 'date-time' prefix" $LOG "${LOGFILE}"
 	PREFIX="$(date '+%Y-%m-%d')_$(date '+%H-%M')__"
 fi
@@ -263,13 +268,8 @@ fi
 ############################################################
 # MySQL
 ############################################################
-if [ -z ${MYSQL_CNF_FILE+x} ]; then
-	output '[ERR]  $MYSQL_CNF_FILE variable not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
-	output "Aborting" $LOG "${LOGFILE}"
-	exit 1
-fi
 if [ -z ${MYSQL_CNF_FILE} ]; then
-	output '[ERR]  $MYSQL_CNF_FILE variable is empty in ${CONFIG_FILE}' $LOG "${LOGFILE}"
+	output '[ERR]  $MYSQL_CNF_FILE variable is empty or not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
 	output "Aborting" $LOG "${LOGFILE}"
 	exit 1
 fi
@@ -285,7 +285,8 @@ if [ ! -r "${MYSQL_CNF_FILE}" ]; then
 fi
 if [ "$(permission "${MYSQL_CNF_FILE}")" != "400" ]; then
 	output "[ERR]  MySQL Configuration file ${MYSQL_CNF_FILE} has dangerous permissions: $(permission "${MYSQL_CNF_FILE}")." $LOG "${LOGFILE}"
-	output "[INFO] Fix it to 400" $LOG "${LOGFILE}"
+	output "[ERR]  Fix it to 400" $LOG "${LOGFILE}"
+	output "[ERR]  Change your database password!" $LOG "${LOGFILE}"
 	output "Aborting" $LOG "${LOGFILE}"
 	exit 1
 fi
@@ -333,22 +334,19 @@ done
 ############################################################
 # Compression
 ############################################################
-if [ -z ${COMPRESS+x} ]; then
-	output '[INFO] $COMPRESS variable not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
-	output "[INFO] Compression disabled" $LOG "${LOGFILE}"
-	COMPRESS=0
-fi
 if [ -z ${COMPRESS} ]; then
-	output '[INFO] $COMPRESS variable is empty in ${CONFIG_FILE}' $LOG "${LOGFILE}"
+	output '[INFO] $COMPRESS variable is empty or not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
 	output "[INFO] Compression disabled" $LOG "${LOGFILE}"
 	COMPRESS=0
 fi
-if [ ${COMPRESS} -eq 1 ]; then
+if [ "${COMPRESS}" = "1" ]; then
 	if ! command -v gzip > /dev/null 2>&1 ; then
 		output "[WARN] 'gzip' not found" $LOG "${LOGFILE}"
 		output "[WARN] Disabling compression" $LOG "${LOGFILE}"
 		COMPRESS=0
 	fi
+else
+	output "[INFO] Compression not enabled in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 fi
 
 
@@ -356,17 +354,12 @@ fi
 ############################################################
 # Encryption
 ############################################################
-if [ -z ${ENCRYPT+x} ]; then
-	output '[INFO] $ENCRYPT variable not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
-	output "[INFO] Encryption disabled" $LOG "${LOGFILE}"
-	ENCRYPT=0
-fi
 if [ -z ${ENCRYPT} ]; then
-	output '[INFO] $ENCRYPT variable is empty in ${CONFIG_FILE}' $LOG "${LOGFILE}"
+	output "[INFO] \$ENCRYPT variable is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 	output "[INFO] Encryption disabled" $LOG "${LOGFILE}"
 	ENCRYPT=0
 fi
-if [ ${ENCRYPT} -eq 1 ]; then
+if [ "${ENCRYPT}" = "1" ]; then
 	if ! command -v openssl > /dev/null 2>&1 ; then
 		output "[ERR]  'openssl' not found" $LOG "${LOGFILE}"
 		output "Aborting" $LOG "${LOGFILE}"
@@ -377,8 +370,8 @@ if [ ${ENCRYPT} -eq 1 ]; then
 		output "Aborting" $LOG "${LOGFILE}"
 		exit 2
 	fi
-	if [ -z ${OPENSSL_ALGO_ARG+x} ]; then
-		output '[WARN] $OPENSSL_ALGO_ARG variable not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
+	if [ -z ${OPENSSL_ALGO_ARG} ]; then
+		output '[WARN] $OPENSSL_ALGO_ARG variable is empty not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
 		output "[INFO] Encryption defaults to -aes256" $LOG "${LOGFILE}"
 		OPENSSL_ALGO_ARG="-aes256"
 	fi
@@ -388,6 +381,8 @@ if [ ${ENCRYPT} -eq 1 ]; then
 		output "Aborting" $LOG "${LOGFILE}"
 		exit 2
 	fi
+else
+	output "[INFO] Encryption not enabled in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 fi
 
 
@@ -395,20 +390,14 @@ fi
 ############################################################
 # Deletion
 ############################################################
-
-if [ -z ${DELETE+x} ]; then
-	output '[INFO] $DELETE variable not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
-	output "[INFO] Deletion of old files disabled" $LOG "${LOGFILE}"
-	DELETE=0
-fi
 if [ -z ${DELETE} ]; then
-	output '[INFO] $DELETE variable is empty in ${CONFIG_FILE}' $LOG "${LOGFILE}"
+	output '[INFO] $DELETE variable is empty or not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
 	output "[INFO] Deletion of old files disabled" $LOG "${LOGFILE}"
 	DELETE=0
 fi
-if [ ${DELETE} -eq 1  ]; then
-	if [ -z ${DELETE_IF_OLDER+x} ]; then
-		output '[WARN] $DELETE_IF_OLDER variable not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
+if [ "${DELETE}" = "1"  ]; then
+	if [ -z ${DELETE_IF_OLDER} ]; then
+		output '[WARN] $DELETE_IF_OLDER variable is empty or not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
 		output "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
 		DELETE=0
 	elif ! isint ${DELETE_IF_OLDER} > /dev/null 2>&1 ; then
@@ -424,6 +413,8 @@ if [ ${DELETE} -eq 1  ]; then
 		output "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
 		DELETE=0
 	fi
+else
+	output "[INFO] TMPWATCH deletion not enabled in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 fi
 
 
