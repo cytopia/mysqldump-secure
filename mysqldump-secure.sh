@@ -4,7 +4,7 @@
 # @gpg key   0x28BF179F
 # @date      2015-06-13
 # @licencse  MIT http://opensource.org/licenses/MIT
-# @version   v0.1
+# @version   v0.2
 #
 # Script to dump databases one by one
 #
