@@ -1,3 +1,11 @@
+[General Warning](https://github.com/cytopia/mysqldump-secure#general-warning) |
+[Feature Overview](https://github.com/cytopia/mysqldump-secure#feature-overview) |
+[Installation](https://github.com/cytopia/mysqldump-secure#installation) |
+[Configuration](https://github.com/cytopia/mysqldump-secure#configuration) |
+[Contribution](https://github.com/cytopia/mysqldump-secure#contribution) |
+[Todo](https://github.com/cytopia/mysqldump-secure#todo) |
+[License](https://github.com/cytopia/mysqldump-secure#license)
+
 # mysqldump-secure
 [![Build Status](https://travis-ci.org/cytopia/mysqldump-secure.svg?branch=master)](https://travis-ci.org/cytopia/mysqldump-secure)
 [![Latest Stable Version](https://poser.pugx.org/cytopia/mysqldump-secure/v/stable)](https://packagist.org/packages/cytopia/mysqldump-secure) [![Total Downloads](https://poser.pugx.org/cytopia/mysqldump-secure/downloads)](https://packagist.org/packages/cytopia/mysqldump-secure) [![Latest Unstable Version](https://poser.pugx.org/cytopia/mysqldump-secure/v/unstable)](https://packagist.org/packages/cytopia/mysqldump-secure) [![License](https://poser.pugx.org/cytopia/mysqldump-secure/license)](doc/LICENSE)
@@ -193,5 +201,5 @@ See [Todo list](doc/TODO.md)
 
 
 
-## Licence
+## License
 [![License](https://poser.pugx.org/cytopia/mysqldump-secure/license)](doc/LICENSE)
