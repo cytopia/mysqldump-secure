@@ -484,21 +484,49 @@ for db in ${DATABASES}; do
 			if [ ${ENCRYPT} -eq 1 ]; then
 				ext=".sql.gz.pem"
 				outputi "Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) " $LOG "${LOGFILE}"
-				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" | ${GZIP} -9 | ${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}"
+#				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" | ${GZIP} -9 | ${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}"
+				# execute with POSIX pipestatus emulation
+				exec 4>&1
+				error_statuses="`(
+					(${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
+					(${GZIP} -9 || echo "1:$?" >&3)
+					(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" || echo "2:$?" >&3)
+				) 3>&1 >&4`"
+				exec 4>&-
 			else
 				ext=".sql.gz"
 				outputi "Dumping:  ${db} (${DB_SIZE} MB) (compressed) " $LOG "${LOGFILE}"
-				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" | ${GZIP} -9 > "${TARGET}/${PREFIX}${db}${ext}"
+#				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" | ${GZIP} -9 > "${TARGET}/${PREFIX}${db}${ext}"
+				# execute with POSIX pipestatus emulation
+				exec 4>&1
+				error_statuses="`(
+					(${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
+					(${GZIP} -9 > "${TARGET}/${PREFIX}${db}${ext}" || echo "1:$?" >&3)
+				) 3>&1 >&4`"
+				exec 4>&-
+
+
 			fi
 		else
 			if [ ${ENCRYPT} -eq 1 ]; then
 				ext=".sql.pem"
 				outputi "Dumping:  ${db} (${DB_SIZE} MB) (encrypted) " $LOG "${LOGFILE}"
-				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" | ${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}"
+#				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" | ${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}"
+				exec 4>&1
+				error_statuses="`(
+					(${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
+					(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" || echo "1:$?" >&3)
+				) 3>&1 >&4`"
+				exec 4>&-
 			else
 				ext=".sql"
 				outputi "Dumping:  ${db} (${DB_SIZE} MB) " $LOG "${LOGFILE}"
-				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" > "${TARGET}/${PREFIX}${db}${ext}"
+#				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" > "${TARGET}/${PREFIX}${db}${ext}"
+				exec 4>&1
+				error_statuses="`(
+					(${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" > "${TARGET}/${PREFIX}${db}${ext}" || echo "0:$?" >&3)
+				) 3>&1 >&4`"
+				exec 4>&-
 			fi
 		fi
 
@@ -508,15 +536,27 @@ for db in ${DATABASES}; do
 		# TODO: $PIPESTATUS is not POSIX conform
 		# http://cfaj.ca/shell/cus-faq-2.html
 		# check run()
-		if [ ${PIPESTATUS[0]} -ne 0 ]; then
-			outputn "ERROR" $LOG "${LOGFILE}"
-			ERROR=1
-		else
+#		if [ ${PIPESTATUS[0]} -ne 0 ]; then
+#			outputn "ERROR" $LOG "${LOGFILE}"
+#			ERROR=1
+#		else
+#			endtime=$(date +%s)
+#			outputn "$(($endtime - $starttime)) sec" $LOG "${LOGFILE}"
+#
+#			chmod 600 "${TARGET}/${PREFIX}${db}${ext}"
+#		fi
+
+		# No errors in POSIX pipestatus emulation
+		if [ -z "$error_statuses" ]; then
 			endtime=$(date +%s)
 			outputn "$(($endtime - $starttime)) sec" $LOG "${LOGFILE}"
-
 			chmod 600 "${TARGET}/${PREFIX}${db}${ext}"
+		else
+			outputn "ERROR" $LOG "${LOGFILE}"
+			ERROR=1
 		fi
+
+
 	else
 		output "Skipping: ${db}" $LOG "${LOGFILE}"
 	fi
