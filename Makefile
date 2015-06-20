@@ -19,7 +19,6 @@ all:
 	@echo "   make install"
 	@echo "   make uninstall"
 	@echo "   make help"
-	@exit 0
 
 
 help:
@@ -27,7 +26,6 @@ help:
 	@echo "   make install"
 	@echo "   make uninstall"
 	@echo "   make help"
-	@exit 0
 
 
 install:
@@ -53,7 +51,6 @@ install:
 	@echo ""
 	@echo "Adjust values in $(ETCDIR)/$(DUMP_CONF)"
 	@echo "Adjust values in $(ETCDIR)/$(DUMP_CNF)"
-	@exit 0
 
 
 uninstall:
@@ -63,4 +60,4 @@ uninstall:
 	rm -f $(SBINDIR)/$(DUMP_SH)
 	rm -f $(ETCDIR)/$(DUMP_CONF)
 	rm -f $(ETCDIR)/$(DUMP_CNF)
-	@exit 0
+
