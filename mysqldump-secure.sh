@@ -471,26 +471,33 @@ for db in ${DATABASES}; do
 	done
 
 	if [ ${skip} -eq 0 ]; then
+
+		DB_SIZE="$( ${MYSQL} --defaults-extra-file=${MYSQL_CNF_FILE} --batch \
+			-e "SELECT SUM(ROUND(((DATA_LENGTH + INDEX_LENGTH ) / 1024 / 1024),2)) AS Size
+				FROM INFORMATION_SCHEMA.TABLES
+				WHERE TABLE_SCHEMA = '${db}';")"
+		DB_SIZE="$(echo "${DB_SIZE}" | tail -n1)"
+
 		starttime=$(date +%s)
 		ext=""	# file extension
 		if [ ${COMPRESS} -eq 1 ]; then
 			if [ ${ENCRYPT} -eq 1 ]; then
 				ext=".sql.gz.pem"
-				outputi "Dumping:  ${db} (compressed) (encrypted) " $LOG "${LOGFILE}"
+				outputi "Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) " $LOG "${LOGFILE}"
 				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" | ${GZIP} -9 | ${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}"
 			else
 				ext=".sql.gz"
-				outputi "Dumping:  ${db} (compressed) " $LOG "${LOGFILE}"
+				outputi "Dumping:  ${db} (${DB_SIZE} MB) (compressed) " $LOG "${LOGFILE}"
 				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" | ${GZIP} -9 > "${TARGET}/${PREFIX}${db}${ext}"
 			fi
 		else
 			if [ ${ENCRYPT} -eq 1 ]; then
 				ext=".sql.pem"
-				outputi "Dumping:  ${db} (encrypted) " $LOG "${LOGFILE}"
+				outputi "Dumping:  ${db} (${DB_SIZE} MB) (encrypted) " $LOG "${LOGFILE}"
 				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" | ${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}"
 			else
 				ext=".sql"
-				outputi "Dumping:  ${db} " $LOG "${LOGFILE}"
+				outputi "Dumping:  ${db} (${DB_SIZE} MB) " $LOG "${LOGFILE}"
 				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" > "${TARGET}/${PREFIX}${db}${ext}"
 			fi
 		fi
