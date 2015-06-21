@@ -57,6 +57,17 @@ You should always define your credentials in a my.cnf file with `chmod 400` or y
 
 ## Installation
 
+### Download
+
+Download via git or composer
+```shell
+git clone git@github.com:cytopia/mysqldump-secure.git
+```
+
+```shell
+composer create-project cytopia/mysqldump-secure
+```
+
 ### Automated installation
 Automated installation and setting of access rights via `unix Makefile`.
 ```shell
