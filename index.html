@@ -1,37 +1,44 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
-    <meta charset='utf-8'>
+    <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <link href='https://fonts.googleapis.com/css?family=Chivo:900' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/github-dark.css" media="screen">
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
     <title>Mysqldump-secure by cytopia</title>
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-dark.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="javascripts/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
   </head>
-
   <body>
-    <div id="container">
-      <div class="inner">
+      <div id="header">
+        <nav>
+          <li class="fork"><a href="https://github.com/cytopia/mysqldump-secure">View On GitHub</a></li>
+          <li class="downloads"><a href="https://github.com/cytopia/mysqldump-secure/zipball/master">ZIP</a></li>
+          <li class="downloads"><a href="https://github.com/cytopia/mysqldump-secure/tarball/master">TAR</a></li>
+          <li class="title">DOWNLOADS</li>
+        </nav>
+      </div><!-- end header -->
 
-        <header>
+    <div class="wrapper">
+
+      <section>
+        <div id="title">
           <h1>Mysqldump-secure</h1>
-          <h2>Secure mysqldump script with encryption, compression, logging and blacklisting</h2>
-        </header>
+          <p>(Encrypted) Secure mysqldump script with compression, logging and blacklisting</p>
+          <hr>
+          <span class="credits left">Project maintained by <a href="https://github.com/cytopia">cytopia</a></span>
+          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
+        </div>
 
-        <section id="downloads" class="clearfix">
-          <a href="https://github.com/cytopia/mysqldump-secure/zipball/master" id="download-zip" class="button"><span>Download .zip</span></a>
-          <a href="https://github.com/cytopia/mysqldump-secure/tarball/master" id="download-tar-gz" class="button"><span>Download .tar.gz</span></a>
-          <a href="https://github.com/cytopia/mysqldump-secure" id="view-on-github" class="button"><span>View on GitHub</span></a>
-        </section>
-
-        <hr>
-
-        <section id="main_content">
-          <h1>
+        <h1>
 <a id="mysqldump-secure" class="anchor" href="#mysqldump-secure" aria-hidden="true"><span class="octicon octicon-link"></span></a>mysqldump-secure</h1>
 
 <p><a href="https://github.com/cytopia/mysqldump-secure#general-warning">General Warning</a> |
@@ -44,12 +51,24 @@
 
 <p><a href="https://travis-ci.org/cytopia/mysqldump-secure"><img src="https://travis-ci.org/cytopia/mysqldump-secure.svg?branch=master" alt="Build Status"></a>
 <a href="https://packagist.org/packages/cytopia/mysqldump-secure"><img src="https://poser.pugx.org/cytopia/mysqldump-secure/v/stable" alt="Latest Stable Version"></a> <a href="https://packagist.org/packages/cytopia/mysqldump-secure"><img src="https://poser.pugx.org/cytopia/mysqldump-secure/downloads" alt="Total Downloads"></a> <a href="https://packagist.org/packages/cytopia/mysqldump-secure"><img src="https://poser.pugx.org/cytopia/mysqldump-secure/v/unstable" alt="Latest Unstable Version"></a> <a href="doc/LICENSE"><img src="https://poser.pugx.org/cytopia/mysqldump-secure/license" alt="License"></a>
-<a href="https://en.wikipedia.org/?title=POSIX"><img src="https://img.shields.io/badge/posix_compliant-100%25-brightgreen.svg" alt="POSIX"></a></p>
+<a href="https://en.wikipedia.org/?title=POSIX"><img src="https://img.shields.io/badge/posix-100%25-brightgreen.svg" alt="POSIX"></a>
+<a href="https://en.wikipedia.org/?title=Bourne_shell"><img src="https://img.shields.io/badge/type-%2Fbin%2Fsh-red.svg" alt="Type"></a></p>
 
 <p>Mysqldump-secure is a POSIX compliant shell backup script for MySQL databases with strong security in mind.
 It will backup every available database (which is readable by the specified user) as a separate file with the possibility to opt out via blacklisting. Dumped databases can optionally be piped directly to gzip or openssl in order to compress and/or encrypt the backup. Encryption is done before the file is written to disk to avoid possible race conditions.</p>
 
 <p>Find the whole post at <a href="http://www.everythingcli.org/index.php/2015/06/13/secure-mysqldump-script-with-encryption-and-compression/">www.everythingcli.org</a></p>
+
+<h5>
+<a id="tested-on" class="anchor" href="#tested-on" aria-hidden="true"><span class="octicon octicon-link"></span></a>Tested on</h5>
+
+<p><a href="https://www.freebsd.org"><img src="https://raw.githubusercontent.com/cytopia/icons/master/64x64/freebsd.png" alt="FreeBSD"></a>
+<a href="https://www.redhat.com"><img src="https://raw.githubusercontent.com/cytopia/icons/master/64x64/redhat.png" alt="RedHat"></a>
+<a href="https://www.centos.org"><img src="https://raw.githubusercontent.com/cytopia/icons/master/64x64/centos.png" alt="CentOS"></a>
+<a href="https://www.debian.org"><img src="https://raw.githubusercontent.com/cytopia/icons/master/64x64/debian.png" alt="Debian"></a>
+<a href="https://www.archlinux.org"><img src="https://raw.githubusercontent.com/cytopia/icons/master/64x64/archlinux.png" alt="ArchLinux"></a>
+<a href="https://www.ubuntu.com"><img src="https://raw.githubusercontent.com/cytopia/icons/master/64x64/ubuntu.png" alt="Ubuntu"></a>
+<a href="https://www.apple.com/osx"><img src="https://raw.githubusercontent.com/cytopia/icons/master/64x64/osx.png" alt="OSX"></a></p>
 
 <h2>
 <a id="general-warning" class="anchor" href="#general-warning" aria-hidden="true"><span class="octicon octicon-link"></span></a>General Warning</h2>
@@ -259,6 +278,8 @@ LOGFILE=<span class="pl-s"><span class="pl-pds">"</span>/var/log/mysqldump-secur
 
 <p>Contributors are welcome. See <a href="doc/CONTRIBUTING.md">contribution guidelines</a>.</p>
 
+<p>If the script runs on an operating system productively, which is currently not yet included at the top of this document, please let me know, so I can add it for reference.</p>
+
 <h2>
 <a id="todo" class="anchor" href="#todo" aria-hidden="true"><span class="octicon octicon-link"></span></a>Todo</h2>
 
@@ -268,14 +289,11 @@ LOGFILE=<span class="pl-s"><span class="pl-pds">"</span>/var/log/mysqldump-secur
 <a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>License</h2>
 
 <p><a href="doc/LICENSE"><img src="https://poser.pugx.org/cytopia/mysqldump-secure/license" alt="License"></a></p>
-        </section>
+      </section>
 
-        <footer>
-          Mysqldump-secure is maintained by <a href="https://github.com/cytopia">cytopia</a><br>
-          This page was generated by <a href="https://pages.github.com">GitHub Pages</a>. Tactile theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.
-        </footer>
-
-                  <script type="text/javascript">
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+              <script type="text/javascript">
             var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
             document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
           </script>
@@ -286,7 +304,5 @@ LOGFILE=<span class="pl-s"><span class="pl-pds">"</span>/var/log/mysqldump-secur
             } catch(err) {}
           </script>
 
-      </div>
-    </div>
   </body>
 </html>
