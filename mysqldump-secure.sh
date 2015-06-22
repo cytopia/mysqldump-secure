@@ -2,9 +2,9 @@
 #
 # @author    Patrick Plocke <patrick@plocke.de>
 # @gpg key   0x28BF179F
-# @date      2015-06-13
+# @date      2015-07-13
 # @licencse  MIT http://opensource.org/licenses/MIT
-# @version   v0.2
+# @version   v0.3
 #
 # Script to dump databases one by one
 #
