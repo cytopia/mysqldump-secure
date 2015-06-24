@@ -76,7 +76,8 @@ You should always define your credentials in a my.cnf file with `chmod 400` or y
 
 Download via git or composer
 ```shell
-git clone git@github.com:cytopia/mysqldump-secure.git
+# Make sure to clone recursively to also get the submodules
+git clone --recursive https://github.com/cytopia/mysqldump-secure.git
 ```
 
 ```shell
@@ -93,7 +94,6 @@ sudo make install
 If you do not trust the `Makefile` you can also manually copy the files and adjust the file permissions by hand.
 ```shell
 # Update git submodules
-git submodule update --init --recursive
 
 # Copy the script
 cp mysqldump-secure /usr/local/sbin/mysqldump-secure
