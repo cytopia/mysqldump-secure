@@ -238,6 +238,7 @@ Contributors are welcome. See [contribution guidelines](doc/CONTRIBUTING.md).
 
 If the script runs on an operating system productively, which is currently not yet included at the top of this document, please let me know, so I can add it for reference.
 
+If you use the script, star it or let me know somehow.
 
 
 ## 6. Todo
