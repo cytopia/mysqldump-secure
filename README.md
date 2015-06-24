@@ -29,6 +29,18 @@ Find the whole post at [www.everythingcli.org](http://www.everythingcli.org/inde
 
 <sub>(If the script runs on any other system not mentioned here, please drop me a note.)</sub>
 
+##### Requirements
+| Program  | Required | Description |
+| ------------- | ------------- | -------- |
+| bourne shell (sh)  | yes  | The whole script is written in pure bourne shell (sh) and is 100% Posix compliant |
+| [mysql](https://dev.mysql.com/downloads/mysql/)  | yes  | The mysql binary is used to find all available databases and their corresponding size |
+| [mysqldump](https://dev.mysql.com/downloads/mysql/)  | yes  | This is used for the actual dump procedure |
+| [openssl](https://www.openssl.org)  | optional  | Optionally used for private/public key encrypting the database dump |
+| [gzip](http://www.gzip.org)  | optional  | Optionally used for compressing the database dump |
+| [tmpwatch](http://linux.die.net/man/8/tmpwatch)  | optional  | Optionally used to delete old database dumps |
+| [check_mysqldump-secure](nagios/check_mysqldump-secure)  | optional  | Optionally used to monitor the dump via nagios (already bundled as a submodule inside this repository) |
+
+
 ## 1. General Warning
 Most mysqldump scripts I have seen out there do something like this:
 ```shell
