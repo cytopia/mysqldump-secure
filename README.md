@@ -46,7 +46,6 @@ You should always define your credentials in a my.cnf file with `chmod 400` or y
 
 
 ## 2. Feature Overview
-
 * Encryption
 * Compression
 * Blacklisting
@@ -110,6 +109,19 @@ There are two separate configuration files:
 * [/etc/mysqldump-secure.conf](mysqldump-secure.conf)
 
 The first one is to setup the MySQL credentials and the second one configures the behavior of how to backup the databases.
+
+You do not need to worry about file permissions or directories. The script will auto-check the following options and adjust them as required:
+* Logfile exists
+* Logfile is writeable
+* Auto creation of logfile
+* Logging turned off automatically
+* Destination dir exists
+* Destination dir is writeable
+* Auto creation of destination dir
+* Required system binaries exist
+* MySQL credentials are valid
+
+
 
 ### 4.1 MySQL Credentials
 Setup MySQL username, password and host in [/etc/mysqldump-secure.cnf](mysqldump-secure.cnf) and simply test if the connection works via `mysql`.
@@ -181,20 +193,7 @@ LOG=1
 LOGFILE="/var/log/mysqldump-secure.log"
 ```
 
-
-### Error checking / security validation
-The script performs heavy error checking and is able to fall back to default options. Checking includes:
-* Logfile exists
-* Logfile is writeable
-* Auto creation of logfile
-* Logging turned off automatically
-* Destination dir exists
-* Destination dir is writeable
-* Auto creation of destination dir
-* Required system binaries exist
-* MySQL credentials are valid
-
-### Custom mysqldump options
+#### 4.2.6 Mysqldump options
 You can specify custom mysqldump parameters in the configuration file. The default configuration dumps databases including events, triggers and routines. The dump is done via `--single-transaction` to also take transactional tables into account. All those parameters are customizable so alter them as desired.
 
 Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following variables
@@ -202,6 +201,7 @@ Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following v
 MYSQL_OPTS='--events --triggers --routines --single-transaction --opt'
 ```
 See [mysqldump](https://dev.mysql.com/doc/refman/5.0/en/mysqldump.html) for all possible parameters.
+
 
 
 ### 4.3 Cronjob 
@@ -216,6 +216,7 @@ The script is intended to be run automatically via cron. If you set it up this w
 Contributors are welcome. See [contribution guidelines](doc/CONTRIBUTING.md).
 
 If the script runs on an operating system productively, which is currently not yet included at the top of this document, please let me know, so I can add it for reference.
+
 
 
 ## 6. Todo
