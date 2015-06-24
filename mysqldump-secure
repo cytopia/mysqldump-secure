@@ -4,7 +4,7 @@
 # @gpg key   0x28BF179F
 # @date      2015-07-13
 # @licencse  MIT http://opensource.org/licenses/MIT
-# @version   v0.3
+# @version   0.3
 #
 # Script to dump databases one by one
 #
@@ -189,21 +189,31 @@ elif [ "${LOG}" = "1" ]; then
 		output "[WARN] Logging disabled"
 		LOG=0
 	elif [ "$(permission "${LOGFILE}")" != "600" ]; then
-		output "[ERR]  Logfile has dangerous permissions: $(permission "${LOGFILE}")"
-		output "[INFO] Fix it to 600"
-		output "[WARN] Logging disabled"
-		LOG=0
-	else
-		echo "" >> "${LOGFILE}"
-		echo "---------------------------------------" >> "${LOGFILE}"
-		echo "$(date '+%Y-%m-%d') $(date '+%H:%M:%S') Starting" >> "${LOGFILE}"
-		output "[INFO] Logging enabled"
+		output "[WARN] Logfile has dangerous permissions: $(permission "${LOGFILE}")"
+		outputi "[INFO] Trying to chmod..."
+
+		if ! chmod 600 "${LOGFILE}" > /dev/null 2>&1 ; then
+			outputn "Failed"
+			output  "[ERR]  Failed to chmod 600 ${LOGFILE}"
+			output  "[WARN] Logging disabled"
+			LOG=0
+		else
+			outputn "OK"
+		fi
 	fi
 else
 	output "[INFO] Logging not enabled in ${CONFIG_FILE}"
 	LOG=0
 fi
 
+# Is logging still enabled after all checks?
+# Write to the file
+if [ "${OG}" = "1" ]; then
+	echo "" >> "${LOGFILE}"
+	echo "---------------------------------------" >> "${LOGFILE}"
+	echo "$(date '+%Y-%m-%d') $(date '+%H:%M:%S') Starting" >> "${LOGFILE}"
+	output "[INFO] Logging enabled" ${LOG} "${LOGFILE}"
+fi
 
 
 
@@ -258,7 +268,7 @@ if [ "$(permission "${TARGET}")" != "700" ]; then
 fi
 # Check output Prefix
 if [ -z ${PREFIX} ]; then
-	output '[INFO] $PREFIX variable is empty not set in ${CONFIG_FILE}'$LOG "${LOGFILE}"
+	output "[INFO] $PREFIX variable is empty not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 	output "[INFO] Using default 'date-time' prefix" $LOG "${LOGFILE}"
 	PREFIX="$(date '+%Y-%m-%d')_$(date '+%H-%M')__"
 fi
@@ -335,7 +345,7 @@ done
 # Compression
 ############################################################
 if [ -z ${COMPRESS} ]; then
-	output '[INFO] $COMPRESS variable is empty or not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
+	output "[INFO] \$COMPRESS variable is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 	output "[INFO] Compression disabled" $LOG "${LOGFILE}"
 	COMPRESS=0
 fi
@@ -421,8 +431,64 @@ fi
 
 
 
+############################################################
+# Nagios
+############################################################
+if [ -z ${NAGIOS_LOG} ]; then
+	output "[INFO] \$NAGIOS_LOG variable is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	output "[INFO] Nagios plugin log disabled" $LOG "${LOGFILE}"
+	NAGIOS_LOG=0
+elif [ "${NAGIOS_LOG}" = "1"  ]; then
+	if [ -z ${NAGIOS_LOGFILE} ]; then
+		output "[WARN] \$NAGIOS_LOG variable is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+		output "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}"
+		NAGIOS_LOG=0
+	elif [ ! -f ${NAGIOS_LOGFILE} ]; then
+		output  "[WARN] ${NAGIOS_LOGFILE} not found" $LOG "${LOGFILE}"
+		outputi "[INFO] Trying to create..." $LOG "${LOGFILE}"
 
+		if ! touch "${NAGIOS_LOGFILE}" > /dev/null 2>&1 ; then
+			outputn "Failed" $LOG "${LOGFILE}"
+			output  "[ERR]  Failed to create file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}"
+			output  "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}"
+			NAGIOS_LOG=0
+		else
+			outputn "OK" $LOG "${LOGFILE}"
+			output  "[INFO] Created file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}"
+			outputi "[INFO] Trying to chmod..." $LOG "${LOGFILE}"
 
+			if ! chmod 644 "${NAGIOS_LOGFILE}" > /dev/null 2>&1 ; then
+				outputn "Failed" $LOG "${LOGFILE}"
+				output  "[ERR]  Failed to chmod 644 ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}"
+				output  "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}"
+				NAGIOS_LOG=0
+			else
+				outputn "OK" $LOG "${LOGFILE}"
+				output  "[INFO] Nagios plugin log enabled" $LOG "${LOGFILE}"
+			fi
+		fi
+	elif [ ! -r "${NAGIOS_LOGFILE}" ]; then
+		output "[WARN] ${NAGIOS_LOGFILE} not readable" $LOG "${LOGFILE}"
+		output "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}"
+		NAGIOS_LOG=0
+		# TODO: auto chmod
+	elif [ ! -w "${NAGIOS_LOGFILE}" ]; then
+		output "[WARN] ${NAGIOS_LOGFILE} not writeable" $LOG "${LOGFILE}"
+		output "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}"
+		NAGIOS_LOG=0
+		# TODO: auto chmod
+	elif [ "$(permission "${NAGIOS_LOGFILE}")" != "644" ]; then
+		output "[WARN] Nagios logfile ${NAGIOS_LOGFILE} has wrong permissions: $(permission "${NAGIOS_LOGFILE}")." $LOG "${LOGFILE}"
+		output "[WARN] Fix it to 644" $LOG "${LOGFILE}"
+		output "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}"
+		# TODO: auto chmod
+		NAGIOS_LOG=0
+	else
+		output "[INFO] Nagios plugin log enabled" $LOG "${LOGFILE}"
+	fi
+else
+	output "[INFO] Nagios plugin log enabled" $LOG "${LOGFILE}"
+fi
 
 
 
@@ -442,14 +508,14 @@ TMPWATCH="$(which tmpwatch)"
 ERROR=0
 
 
+
 ############################################################
 # Get all databases
 ############################################################
 
 # Get a list of all databases
 outputi "[INFO] Retrieving list of databases... " $LOG "${LOGFILE}"
-DATABASES="$( ${MYSQL} --defaults-extra-file=${MYSQL_CNF_FILE} --batch -e 'show databases;')"
-DATABASES="$( echo "${DATABASES}" | sed 1d )"
+DATABASES="$( ${MYSQL} --defaults-extra-file=${MYSQL_CNF_FILE} --batch -e 'show databases;' | sed 1d )"
 NUM_DB="$(echo "${DATABASES}" | wc -l | tr -d ' ')"
 outputn "${NUM_DB}" $LOG "${LOGFILE}"
 
@@ -461,6 +527,9 @@ outputn "${NUM_DB}" $LOG "${LOGFILE}"
 
 TOTAL_STARTTIME=$(date +%s)
 TOTAL_SIZE=0
+TOTAL_DBS=0
+TOTAL_IGN=0
+
 output "[INFO] Backup directory: ${TARGET}" $LOG "${LOGFILE}"
 
 for db in ${DATABASES}; do
@@ -478,8 +547,7 @@ for db in ${DATABASES}; do
 		DB_SIZE="$( ${MYSQL} --defaults-extra-file=${MYSQL_CNF_FILE} --batch \
 			-e "SELECT SUM(ROUND(((DATA_LENGTH + INDEX_LENGTH ) / 1024 / 1024),2)) AS Size
 				FROM INFORMATION_SCHEMA.TABLES
-				WHERE TABLE_SCHEMA = '${db}';")"
-		DB_SIZE="$(echo "${DB_SIZE}" | tail -n1)"
+				WHERE TABLE_SCHEMA = '${db}';" | tail -n1 )"
 		TOTAL_SIZE=$( expr $TOTAL_SIZE + "$(printf "%.0f\n" $DB_SIZE)" )
 		starttime=$(date +%s)
 		ext=""	# file extension
@@ -538,6 +606,8 @@ for db in ${DATABASES}; do
 			fi
 		fi
 
+		TOTAL_DBS=$(expr ${TOTAL_DBS} + 1)
+
 
 		# No errors in POSIX pipestatus emulation
 		if [ -z "$error_statuses" ]; then
@@ -552,6 +622,7 @@ for db in ${DATABASES}; do
 
 	else
 		output "Skipping: ${db}" $LOG "${LOGFILE}"
+		TOTAL_IGN=$(expr ${TOTAL_IGN} + 1)
 	fi
 done
 TOTAL_ENDTIME=$(date +%s)
@@ -577,6 +648,37 @@ if [ ${DELETE} -eq 1 ]; then
 	fi
 	output "${DELETED}" $LOG "${LOGFILE}"
 fi
+
+
+
+############################################################
+# Nagios Plugin Log
+############################################################
+if [ "${NAGIOS_LOG}" = "1" ]; then
+	output "[INFO] Writing nagios logfile" $LOG "${LOGFILE}"
+
+	echo "[state]"						 > "${NAGIOS_LOGFILE}"
+	echo "success = ${ERROR}"			>> "${NAGIOS_LOGFILE}"
+	echo "lastbak = ${TOTAL_STARTTIME}"	>> "${NAGIOS_LOGFILE}"
+	echo "message = "					>> "${NAGIOS_LOGFILE}"
+
+	echo "[options]"					>> "${NAGIOS_LOGFILE}"
+	echo "opt_log = ${LOG}"				>> "${NAGIOS_LOGFILE}"
+	echo "opt_com = ${COMPRESS}"		>> "${NAGIOS_LOGFILE}"
+	echo "opt_enc = ${ENCRYPT}"			>> "${NAGIOS_LOGFILE}"
+	echo "opt_del = ${DELETE}"			>> "${NAGIOS_LOGFILE}"
+
+	echo "[messages]"					>> "${NAGIOS_LOGFILE}"
+	echo "msg_dbs = ${TOTAL_DBS}"		>> "${NAGIOS_LOGFILE}"
+	echo "msg_ign = ${TOTAL_IGN}"		>> "${NAGIOS_LOGFILE}"
+	echo "msg_meg = ${TOTAL_SIZE}"		>> "${NAGIOS_LOGFILE}"
+	echo "msg_sec = $(($TOTAL_ENDTIME - $TOTAL_STARTTIME))"			>> "${NAGIOS_LOGFILE}"
+
+	echo "[tmpwatch]"					>> "${NAGIOS_LOGFILE}"
+	echo "del_time = 0"					>> "${NAGIOS_LOGFILE}"
+fi
+
+
 
 
 

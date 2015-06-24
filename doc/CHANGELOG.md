@@ -1,3 +1,10 @@
+Version 0.3
+-----------
+
+- [Enh]		Added Nagios Plugin submodule
+- [Enh]		Added Nagios Configuration Options
+
+
 Version 0.2
 -----------
 
