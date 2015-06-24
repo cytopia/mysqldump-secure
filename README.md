@@ -27,7 +27,7 @@ Find the whole post at [www.everythingcli.org](http://www.everythingcli.org/inde
 [![Ubuntu](https://raw.githubusercontent.com/cytopia/icons/master/64x64/ubuntu.png)](https://www.ubuntu.com)
 [![OSX](https://raw.githubusercontent.com/cytopia/icons/master/64x64/osx.png)](https://www.apple.com/osx)
 
-
+<sub>(If the script runs on any other system not mentioned here, please drop me a note.)</sub>
 
 ## 1. General Warning
 Most mysqldump scripts I have seen out there do something like this:
