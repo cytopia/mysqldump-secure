@@ -38,7 +38,7 @@ Find the whole post at [www.everythingcli.org](http://www.everythingcli.org/inde
 | [openssl](https://www.openssl.org)  | optional  | Optionally used for private/public key encrypting the database dump |
 | [gzip](http://www.gzip.org)  | optional  | Optionally used for compressing the database dump |
 | [tmpwatch](https://fedorahosted.org/tmpwatch/)  | optional  | Optionally used to delete old database dumps |
-| [check_mysqldump-secure](nagios/check_mysqldump-secure)  | optional  | Optionally used to monitor the dump via nagios (already bundled as a submodule inside this repository) |
+| [check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure)  | optional  | Optionally used to monitor the dump via nagios (already bundled as a submodule inside this repository) |
 
 
 ## 1. General Warning
@@ -214,6 +214,17 @@ Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following v
 MYSQL_OPTS='--events --triggers --routines --single-transaction --opt'
 ```
 See [mysqldump](https://dev.mysql.com/doc/refman/5.0/en/mysqldump.html) for all possible parameters.
+
+#### 4.2.7 Nagios output log
+You can enable Nagios Logging. A special logfile that is overwritten every time the dump is triggered.
+The Nagios Log file can be used by [check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure) to integrate the current state into nagios.
+
+Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following variables
+```shell
+NAGIOS_LOG=1
+NAGIOS_LOGFILE="/var/log/mysqldump-secure.nagios.log"
+```
+See [Plugin Readme](https://github.com/cytopia/check_mysqldump-secure) for further instructions about how to use the nagios plugin itself.
 
 
 
