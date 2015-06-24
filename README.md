@@ -204,7 +204,7 @@ See [mysqldump](https://dev.mysql.com/doc/refman/5.0/en/mysqldump.html) for all 
 
 
 
-### 4.3 Cronjob 
+### 4.3 Setup Cronjob 
 The script is intended to be run automatically via cron. If you set it up this way, I highly recommend to turn on logging in order to see any warnings or errors that might have occured. Once logging is enabled, the logfile is always protected by file permissions so no other user can see what you are back upping.
 ```
 # Dump MySQL Databases at 03:15 every day
