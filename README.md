@@ -123,12 +123,12 @@ You do not need to worry about file permissions or directories. The script will 
 
 
 
-### 4.1 MySQL Credentials
+### 4.1 Configure MySQL Credentials
 Setup MySQL username, password and host in [/etc/mysqldump-secure.cnf](mysqldump-secure.cnf) and simply test if the connection works via `mysql`.
 
 If you see the mysql prompt then everything went fine and you can continue configuring the program.
 
-### 4.2 MySQLDump Configuration
+### 4.2 Configure MySQLDump Options
 Configure the backup behavior in [/etc/mysqldump-secure.conf](mysqldump-secure.conf).
 
 #### 4.2.1 Encryption
