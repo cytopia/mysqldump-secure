@@ -39,9 +39,9 @@ mysqldump --user=root --password=foo --host=localhost database > database.sql
 Even if run inside a script, you can see the mysql password in cleartext in `ps aux`.
 You should always define your credentials in a my.cnf file with `chmod 400` or you can loose all your databases to everybody with access to that machine.
 
-> [MySQL End-User Guidelines for Password Security](https://dev.mysql.com/doc/refman/5.7/en/password-security-user.html)
+> <sub>[MySQL End-User Guidelines for Password Security](https://dev.mysql.com/doc/refman/5.7/en/password-security-user.html)</sub>
 
-> Specifying a password on the command line should be considered insecure. You can use an option file to avoid giving the password on the command line.
+> <sub>Specifying a password on the command line should be considered insecure. You can use an option file to avoid giving the password on the command line.</sub>
 
 
 
@@ -108,6 +108,7 @@ chmod 600 /var/log/mysqldump-secure.log
 There are two separate configuration files:
 * [/etc/mysqldump-secure.cnf](mysqldump-secure.cnf)
 * [/etc/mysqldump-secure.conf](mysqldump-secure.conf)
+* 
 The first one is to setup the MySQL credentials and the second one configures the behavior of how to backup the databases.
 
 ### 4.1 MySQL Credentials
@@ -115,14 +116,14 @@ Setup MySQL username, password and host in [/etc/mysqldump-secure.cnf](mysqldump
 
 If you see the mysql prompt then everything went fine and you can continue configuring the program.
 
-### 4.2 Backup configuration
+### 4.2 MySQLDump Configuration
 Configure the backup behavior in [/etc/mysqldump-secure.conf](mysqldump-secure.conf).
 
 #### 4.2.1 Encryption
 Encryption is done by public/private key via [OpenSSL SMIME](https://www.openssl.org/docs/apps/smime.html) which also supports encrypting large files.
 
-> The primary advantage of public-key cryptography is increased security and convenience: private keys never need to be transmitted or revealed to anyone. In a secret-key system, by contrast, the secret keys must be transmitted (either manually or through a communication channel) since the same key is used for encryption and decryption. A serious concern is that there may be a chance that an enemy can discover the secret key during transmission.
-> [[1]](http://www.emc.com/emc-plus/rsa-labs/standards-initiatives/advantages-and-disadvantages.htm)
+> <sub>The primary advantage of public-key cryptography is increased security and convenience: private keys never need to be transmitted or revealed to anyone. In a secret-key system, by contrast, the secret keys must be transmitted (either manually or through a communication channel) since the same key is used for encryption and decryption. A serious concern is that there may be a chance that an enemy can discover the secret key during transmission.</sub>
+> <sub>[[1]](http://www.emc.com/emc-plus/rsa-labs/standards-initiatives/advantages-and-disadvantages.htm)</sub>
 
 See [examples](examples) for scripts to generate public/private keys, encrypt and decrypt.
 
