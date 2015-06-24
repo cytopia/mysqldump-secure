@@ -344,6 +344,8 @@ if [ "${COMPRESS}" = "1" ]; then
 		output "[WARN] 'gzip' not found" $LOG "${LOGFILE}"
 		output "[WARN] Disabling compression" $LOG "${LOGFILE}"
 		COMPRESS=0
+	else
+		output "[INFO] Compression enabled" $LOG "${LOGFILE}"
 	fi
 else
 	output "[INFO] Compression not enabled in ${CONFIG_FILE}" $LOG "${LOGFILE}"
@@ -458,6 +460,7 @@ outputn "${NUM_DB}" $LOG "${LOGFILE}"
 ############################################################
 
 TOTAL_STARTTIME=$(date +%s)
+TOTAL_SIZE=0
 output "[INFO] Backup directory: ${TARGET}" $LOG "${LOGFILE}"
 
 for db in ${DATABASES}; do
@@ -477,14 +480,15 @@ for db in ${DATABASES}; do
 				FROM INFORMATION_SCHEMA.TABLES
 				WHERE TABLE_SCHEMA = '${db}';")"
 		DB_SIZE="$(echo "${DB_SIZE}" | tail -n1)"
-
+		TOTAL_SIZE=$( expr $TOTAL_SIZE + "$(printf "%.0f\n" $DB_SIZE)" )
 		starttime=$(date +%s)
 		ext=""	# file extension
+
 		if [ ${COMPRESS} -eq 1 ]; then
 			if [ ${ENCRYPT} -eq 1 ]; then
 				ext=".sql.gz.pem"
 				outputi "Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) " $LOG "${LOGFILE}"
-#				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" | ${GZIP} -9 | ${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}"
+
 				# execute with POSIX pipestatus emulation
 				exec 4>&1
 				error_statuses="`(
@@ -493,10 +497,11 @@ for db in ${DATABASES}; do
 					(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" || echo "2:$?" >&3)
 				) 3>&1 >&4`"
 				exec 4>&-
+
 			else
 				ext=".sql.gz"
 				outputi "Dumping:  ${db} (${DB_SIZE} MB) (compressed) " $LOG "${LOGFILE}"
-#				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" | ${GZIP} -9 > "${TARGET}/${PREFIX}${db}${ext}"
+
 				# execute with POSIX pipestatus emulation
 				exec 4>&1
 				error_statuses="`(
@@ -505,46 +510,34 @@ for db in ${DATABASES}; do
 				) 3>&1 >&4`"
 				exec 4>&-
 
-
 			fi
 		else
 			if [ ${ENCRYPT} -eq 1 ]; then
 				ext=".sql.pem"
 				outputi "Dumping:  ${db} (${DB_SIZE} MB) (encrypted) " $LOG "${LOGFILE}"
-#				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" | ${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}"
+
+				# execute with POSIX pipestatus emulation
 				exec 4>&1
 				error_statuses="`(
 					(${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
 					(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" || echo "1:$?" >&3)
 				) 3>&1 >&4`"
 				exec 4>&-
+
 			else
 				ext=".sql"
 				outputi "Dumping:  ${db} (${DB_SIZE} MB) " $LOG "${LOGFILE}"
-#				${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" > "${TARGET}/${PREFIX}${db}${ext}"
+
+				# execute with POSIX pipestatus emulation
 				exec 4>&1
 				error_statuses="`(
 					(${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" > "${TARGET}/${PREFIX}${db}${ext}" || echo "0:$?" >&3)
 				) 3>&1 >&4`"
 				exec 4>&-
+
 			fi
 		fi
 
-		# We cannot check against $? as the first if uses a pipe | gzip and so we
-		# need to check against the exit code of the first pipe status
-		#
-		# TODO: $PIPESTATUS is not POSIX conform
-		# http://cfaj.ca/shell/cus-faq-2.html
-		# check run()
-#		if [ ${PIPESTATUS[0]} -ne 0 ]; then
-#			outputn "ERROR" $LOG "${LOGFILE}"
-#			ERROR=1
-#		else
-#			endtime=$(date +%s)
-#			outputn "$(($endtime - $starttime)) sec" $LOG "${LOGFILE}"
-#
-#			chmod 600 "${TARGET}/${PREFIX}${db}${ext}"
-#		fi
 
 		# No errors in POSIX pipestatus emulation
 		if [ -z "$error_statuses" ]; then
@@ -568,6 +561,7 @@ if [ $ERROR -ne 0 ]; then
 else
 	output "[INFO] Dumping finished" $LOG "${LOGFILE}"
 	output "[INFO] Took $(($TOTAL_ENDTIME - $TOTAL_STARTTIME)) seconds" $LOG "${LOGFILE}"
+	output "[INFO] Total size dumped: ${TOTAL_SIZE} MB" $LOG "${LOGFILE}"
 fi
 
 
@@ -599,3 +593,4 @@ else
 	output "[OK]   Finished successfully" $LOG "${LOGFILE}"
 	exit 0
 fi
+

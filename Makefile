@@ -1,7 +1,7 @@
 # Unix Makefile
 
 # Local files
-DUMP_SH   = mysqldump-secure.sh
+DUMP_SH   = mysqldump-secure
 DUMP_CONF = mysqldump-secure.conf
 DUMP_CNF  = mysqldump-secure.cnf
 
