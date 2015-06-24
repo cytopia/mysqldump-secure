@@ -215,6 +215,17 @@ MYSQL_OPTS='--events --triggers --routines --single-transaction --opt'
 ```
 See [mysqldump](https://dev.mysql.com/doc/refman/5.0/en/mysqldump.html) for all possible parameters.
 
+#### 4.2.7 Nagios output log
+You can enable Nagios Logging. A special logfile that is overwritten every time the dump is triggered.
+The Nagios Log file can be used by [check_mysqldump-secure](nagios) to integrate the current state into nagios.
+
+Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following variables
+```shell
+NAGIOS_LOG=1
+NAGIOS_LOGFILE="/var/log/mysqldump-secure.nagios.log"
+```
+See [Plugin Readme](nagios) for further instructions about how to use the nagios plugin itself.
+
 
 
 ### 4.3 Setup Cronjob 
