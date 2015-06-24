@@ -1,0 +1,3 @@
+[submodule "nagios"]
+	path = nagios
+	url = git@github.com:cytopia/check_mysqldump-secure

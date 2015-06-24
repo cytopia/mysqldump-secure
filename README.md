@@ -73,8 +73,8 @@ vim /etc/mysqldump-secure.cnf
 If you do not trust the `Makefile` you can also manually copy the files and adjust file permissions by hand.
 ```shell
 # Copy the script
-cp mysqldump-secure.sh /usr/local/sbin/mysqldump-secure.sh
-chmod +x /usr/local/sbin/mysqldump-secure.sh
+cp mysqldump-secure /usr/local/sbin/mysqldump-secure
+chmod +x /usr/local/sbin/mysqldump-secure
 
 # Copy the config files
 cp mysqldump-secure.conf /etc/mysqldump-secure.conf
@@ -102,7 +102,7 @@ vim /etc/mysqldump-secure.cnf
 Once you have tested the script you can setup the cronjob:
 ```
 # Dump MySQL Databases at 03:15 every day
-  15 3  *  *  * /bin/sh /usr/local/sbin/mysqldump-secure.sh
+  15 3  *  *  * /bin/sh /usr/local/sbin/mysqldump-secure
 ```
 
 
