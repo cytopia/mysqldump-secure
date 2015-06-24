@@ -93,8 +93,6 @@ sudo make install
 ### 3.3 Manual installation
 If you do not trust the `Makefile` you can also manually copy the files and adjust the file permissions by hand.
 ```shell
-# Update git submodules
-
 # Copy the script
 cp mysqldump-secure /usr/local/sbin/mysqldump-secure
 chmod +x /usr/local/sbin/mysqldump-secure
