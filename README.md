@@ -55,6 +55,7 @@ You should always define your credentials in a my.cnf file with `chmod 400` or y
 * Custom mysqldump options
 * Security validation
 * Nagios integration
+* 100% POSIX compliant
 
 
 
