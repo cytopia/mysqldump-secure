@@ -108,7 +108,7 @@ chmod 600 /var/log/mysqldump-secure.log
 There are two separate configuration files:
 * [/etc/mysqldump-secure.cnf](mysqldump-secure.cnf)
 * [/etc/mysqldump-secure.conf](mysqldump-secure.conf)
-* 
+
 The first one is to setup the MySQL credentials and the second one configures the behavior of how to backup the databases.
 
 ### 4.1 MySQL Credentials
