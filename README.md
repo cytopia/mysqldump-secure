@@ -32,7 +32,7 @@ Find the whole post at [www.everythingcli.org](http://www.everythingcli.org/inde
 ## 1. General Warning
 Most mysqldump scripts I have seen out there do something like this:
 ```shell
-mysqldump --user=root --password=foo --host localhost database > database.sql
+mysqldump --user=root --password=foo --host=localhost database > database.sql
 ```
 **THIS IS REALLY DANGEROUS**
 
