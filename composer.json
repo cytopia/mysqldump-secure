@@ -11,5 +11,8 @@
 			"homepage": "https://github.com/cytopia",
 			"role": "Developer"
 		}
-	]
+	],
+	"suggest": {
+		"cytopia/check_mysqldump-secure": "Nagios Plugin to monitor mysqldump database backups."
+	}
 }
