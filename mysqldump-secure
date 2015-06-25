@@ -91,6 +91,16 @@ isint(){
 	printf '%d' "$1" >/dev/null 2>&1 && return 0 || return 1;
 }
 
+
+# Sum up two numbers
+sum() {
+#	if command -v bc 2> /dev/null 2>&1; then
+#		echo "${1}+${2} | $(which bc)"
+#	else
+		echo  | awk -v "a=${1}" -v "b=${2}" '{print a + b}'
+#	fi
+}
+
 permission() {
 	local file
 	local perm
@@ -208,7 +218,7 @@ fi
 
 # Is logging still enabled after all checks?
 # Write to the file
-if [ "${OG}" = "1" ]; then
+if [ "${LOG}" = "1" ]; then
 	echo "" >> "${LOGFILE}"
 	echo "---------------------------------------" >> "${LOGFILE}"
 	echo "$(date '+%Y-%m-%d') $(date '+%H:%M:%S') Starting" >> "${LOGFILE}"
@@ -553,7 +563,8 @@ for db in ${DATABASES}; do
 			-e "SELECT SUM(ROUND(((DATA_LENGTH + INDEX_LENGTH ) / 1024 / 1024),2)) AS Size
 				FROM INFORMATION_SCHEMA.TABLES
 				WHERE TABLE_SCHEMA = '${db}';" | tail -n1 )"
-		TOTAL_SIZE=$( expr $TOTAL_SIZE + "$(printf "%.0f\n" $DB_SIZE)" )
+
+		TOTAL_SIZE=$( sum "${TOTAL_SIZE}" "${DB_SIZE}" )
 		starttime=$(date +%s)
 		ext=""	# file extension
 
@@ -566,7 +577,7 @@ for db in ${DATABASES}; do
 				exec 4>&1
 				error_statuses="`(
 					(${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
-					(${GZIP} -9 || echo "1:$?" >&3)
+					(${GZIP} --stdout -9 || echo "1:$?" >&3) |
 					(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" || echo "2:$?" >&3)
 				) 3>&1 >&4`"
 				exec 4>&-
