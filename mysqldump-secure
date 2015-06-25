@@ -393,6 +393,9 @@ if [ "${ENCRYPT}" = "1" ]; then
 		output "Aborting" $LOG "${LOGFILE}"
 		exit 2
 	fi
+
+	output "[INFO] Encryption enabled" $LOG "${LOGFILE}"
+
 else
 	output "[INFO] Encryption not enabled in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 fi
@@ -424,9 +427,11 @@ if [ "${DELETE}" = "1"  ]; then
 		output "[WARN] 'tmpwatch' not found" $LOG "${LOGFILE}"
 		output "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
 		DELETE=0
+	else
+		output "[INFO] Tmpwatch deletion enabled" $LOG "${LOGFILE}"
 	fi
 else
-	output "[INFO] TMPWATCH deletion not enabled in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	output "[INFO] Tmpwatch deletion not enabled in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 fi
 
 
@@ -554,7 +559,7 @@ for db in ${DATABASES}; do
 
 		if [ ${COMPRESS} -eq 1 ]; then
 			if [ ${ENCRYPT} -eq 1 ]; then
-				ext=".sql.gz.pem"
+				ext=".sql.gz.enc"
 				outputi "Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) " $LOG "${LOGFILE}"
 
 				# execute with POSIX pipestatus emulation
@@ -581,7 +586,7 @@ for db in ${DATABASES}; do
 			fi
 		else
 			if [ ${ENCRYPT} -eq 1 ]; then
-				ext=".sql.pem"
+				ext=".sql.enc"
 				outputi "Dumping:  ${db} (${DB_SIZE} MB) (encrypted) " $LOG "${LOGFILE}"
 
 				# execute with POSIX pipestatus emulation
