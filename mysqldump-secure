@@ -118,7 +118,32 @@ permission() {
 	return 0
 }
 
+# Validate chmod permissions
+valid_chmod() {
+	CHMOD=${1}
 
+	len=$(echo "${1}" | awk '{ print length()   }')
+	if [ "${len}" != "3" ]; then
+		return 1
+	fi
+
+	r=$(echo "${CHMOD}" | awk '{print substr($0,1,1)}')
+	w=$(echo "${CHMOD}" | awk '{print substr($0,2,1)}')
+	x=$(echo "${CHMOD}" | awk '{print substr($0,3,1)}')
+
+	if [ $r -lt 0 ] || [ $r -gt 7 ]; then
+		return 1
+	fi
+	if [ $w -lt 0 ] || [ $w -gt 7 ]; then
+		return 1
+	fi
+	if [ $x -lt 0 ] || [ $x -gt 7 ]; then
+		return 1
+	fi
+
+	# All good
+	return 0
+}
 
 
 ################################################################################
@@ -231,6 +256,30 @@ fi
 # Destination Directory and Prefix
 ############################################################
 
+# Check if CHMOD exists, otherwise use default values
+if [ -z ${TARGET_DIR_CHMOD} ]; then
+	output "[WARN] \$TARGET_DIR_CHMOD is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	output "[INFO] Setting \$TARGET_DIR_CHMOD to 700" $LOG "${LOGFILE}"
+	TARGET_DIR_CHMOD=700
+fi
+if [ -z ${TARGET_FILE_CHMOD} ]; then
+	output "[WARN] \$TARGET_FILE_CHMOD is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	output "[INFO] Setting \$TARGET_FILE_CHMOD to 600" $LOG "${LOGFILE}"
+	TARGET_FILE_CHMOD=600
+fi
+if ! valid_chmod "${TARGET_DIR_CHMOD}" > /dev/null 2>&1; then
+	output "[ERR]  Invalid chmod value for \$TARGET_DIR_CHMOD: ${TARGET_DIR_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	output "[INFO] Setting \$TARGET_DIR_CHMOD to 700" $LOG "${LOGFILE}"
+	TARGET_DIR_CHMOD=700
+fi
+if ! valid_chmod "${TARGET_FILE_CHMOD}" > /dev/null 2>&1; then
+	output "[ERR]  Invalid chmod value for \$TARGET_FILE_CHMOD: ${TARGET_FILE_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	output "[INFO] Setting \$TARGET_FILE_CHMOD to 600" $LOG "${LOGFILE}"
+	TARGET_FILE_CHMOD=600
+fi
+
+
+
 # Check if destination dir exists
 if [ -z ${TARGET} ]; then
 	output '[ERR]  TARGET variable is empty or not set in ${CONFIG_FILE}' $LOG "${LOGFILE}"
@@ -245,15 +294,16 @@ elif [ ! -d "${TARGET}" ]; then
 		exit 1
 	else
 		outputn "Done" $LOG "${LOGFILE}"
-		output "[INFO] Adjusting file permissions on ${TARGET}" $LOG "${LOGFILE}"
-		chmod 0700 "${TARGET}"
+		output "[INFO] Adjusting file permissions to ${TARGET_DIR_CHMOD} on ${TARGET}" $LOG "${LOGFILE}"
+		chmod ${TARGET_DIR_CHMOD} "${TARGET}"
 	fi
 fi
+
 # Check if destination dir is writeable
 if [ ! -w "${TARGET}" ]; then
 	output "[WARN] Destination dir ${TARGET} is not writeable" $LOG "${LOGFILE}"
-	outputi "[INFO] Trying to chmod... " $LOG "${LOGFILE}"
-	if ! chmod 0700 "${TARGET}" > /dev/null 2>&1 ; then
+	outputi "[INFO] Trying to chmod to ${TARGET_DIR_CHMOD}... " $LOG "${LOGFILE}"
+	if ! chmod ${TARGET_DIR_CHMOD} "${TARGET}" > /dev/null 2>&1 ; then
 		outputn "Failed" $LOG "${LOGFILE}"
 		output "Aborting" $LOG "${LOGFILE}"
 		exit 1
@@ -270,12 +320,20 @@ if [ ! -w "${TARGET}" ]; then
 	fi
 fi
 # Check correct permissions of destination dir
-if [ "$(permission "${TARGET}")" != "700" ]; then
-	output "[ERR]  Target directory has dangerous permissions: $(permission "${TARGET}")." $LOG "${LOGFILE}"
-	output "[INFO] Fix it to 700" $LOG "${LOGFILE}"
-	output "Aborting" $LOG "${LOGFILE}"
-	exit 1
+if [ "$(permission "${TARGET}")" != "${TARGET_DIR_CHMOD}" ]; then
+	output "[ERR]  Target directory has wrong permissions: $(permission "${TARGET}"), but should ${TARGET_DIR_CHMOD}." $LOG "${LOGFILE}"
+	outputi "[INFO] Trying to chmod to ${TARGET_DIR_CHMOD}... " $LOG "${LOGFILE}"
+
+	if ! chmod "${TARGET_DIR_CHMOD}" "${TARGET}" > /dev/null 2>&1 ; then
+		outputn "Failed" $LOG "${LOGFILE}"
+		output "Aborting" $LOG "${LOGFILE}"
+		exit 1
+	else
+		outputn "Done" $LOG "${LOGFILE}"
+	fi
 fi
+
+
 # Check output Prefix
 if [ -z ${PREFIX} ]; then
 	output "[INFO] $PREFIX variable is empty not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
@@ -629,7 +687,7 @@ for db in ${DATABASES}; do
 		if [ -z "$error_statuses" ]; then
 			endtime=$(date +%s)
 			outputn "$(($endtime - $starttime)) sec" $LOG "${LOGFILE}"
-			chmod 600 "${TARGET}/${PREFIX}${db}${ext}"
+			chmod ${TARGET_FILE_CHMOD} "${TARGET}/${PREFIX}${db}${ext}"
 		else
 			outputn "ERROR" $LOG "${LOGFILE}"
 			ERROR=1
