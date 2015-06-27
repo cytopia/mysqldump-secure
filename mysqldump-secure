@@ -717,6 +717,7 @@ fi
 if [ ${DELETE} -eq 1 ]; then
 	output "[INFO] Deleting files older than ${DELETE_IF_OLDER} hours" $LOG "${LOGFILE}"
 	DELETED="$(${TMPWATCH} -m ${DELETE_IF_OLDER} -v "${TARGET}/")"
+	NUM_DEL="$( echo "${DELETED}" | grep 'removing' | wc -l )"
 	if [ $? -ne 0 ]; then
 		ERROR=1
 	fi
@@ -747,6 +748,7 @@ if [ "${NAGIOS_LOG}" = "1" ]; then
 	echo "msg_ign = ${TOTAL_IGN}"		>> "${NAGIOS_LOGFILE}"
 	echo "msg_meg = ${TOTAL_SIZE}"		>> "${NAGIOS_LOGFILE}"
 	echo "msg_sec = $(($TOTAL_ENDTIME - $TOTAL_STARTTIME))"			>> "${NAGIOS_LOGFILE}"
+	echo "msg_del = ${NUM_DEL}"			>> "${NAGIOS_LOGFILE}"
 
 	echo "[tmpwatch]"					>> "${NAGIOS_LOGFILE}"
 	echo "del_time = 0"					>> "${NAGIOS_LOGFILE}"
