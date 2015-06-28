@@ -274,8 +274,8 @@ if ! valid_chmod "${TARGET_DIR_CHMOD}" > /dev/null 2>&1; then
 fi
 if ! valid_chmod "${TARGET_FILE_CHMOD}" > /dev/null 2>&1; then
 	output "[ERR]  Invalid chmod value for \$TARGET_FILE_CHMOD: ${TARGET_FILE_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	output "[INFO] Setting \$TARGET_FILE_CHMOD to 600" $LOG "${LOGFILE}"
-	TARGET_FILE_CHMOD=600
+	output "[INFO] Setting \$TARGET_FILE_CHMOD to 400" $LOG "${LOGFILE}"
+	TARGET_FILE_CHMOD=400
 fi
 
 
