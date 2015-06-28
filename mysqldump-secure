@@ -410,6 +410,22 @@ done
 
 
 ############################################################
+# IGNORE/REQUIRE
+############################################################
+if [ -z ${IGNORE+xxx} ]; then
+	output "[INFO] \$IGNORE variable is not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	output "[INFO] No database will be ignored" $LOG "${LOGFILE}"
+	IGNORE=""
+fi
+if [ -z ${REQUIRE+xxx} ]; then
+	output "[INFO] \$REQUIRE variable is not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	output "[INFO] No database will explicitly be required" $LOG "${LOGFILE}"
+	REQUIRE=""
+fi
+
+
+
+############################################################
 # Compression
 ############################################################
 if [ -z ${COMPRESS} ]; then
@@ -617,6 +633,15 @@ for db in ${DATABASES}; do
 
 	if [ ${skip} -eq 0 ]; then
 
+		# Check required databases
+		for req in ${REQUIRE}; do
+			# Required database found?
+			# Remove from variable
+			if [ "${db}" = "${req}" ]; then
+				REQUIRE="$( echo "${REQUIRE}" | sed "s/${db}//" )"
+			fi
+		done
+
 		DB_SIZE="$( ${MYSQL} --defaults-extra-file=${MYSQL_CNF_FILE} --batch \
 			-e "SELECT SUM(ROUND(((DATA_LENGTH + INDEX_LENGTH ) / 1024 / 1024),2)) AS Size
 				FROM INFORMATION_SCHEMA.TABLES
@@ -701,13 +726,16 @@ for db in ${DATABASES}; do
 done
 TOTAL_ENDTIME=$(date +%s)
 
-if [ $ERROR -ne 0 ]; then
-	output "[ERR]  Some errors occured while dumping" $LOG "${LOGFILE}"
-else
-	output "[INFO] Dumping finished" $LOG "${LOGFILE}"
-	output "[INFO] Took $(($TOTAL_ENDTIME - $TOTAL_STARTTIME)) seconds" $LOG "${LOGFILE}"
-	output "[INFO] Total size dumped: ${TOTAL_SIZE} MB" $LOG "${LOGFILE}"
-fi
+
+for req in ${REQUIRE}; do
+	output "[ERR]  Required database: \"${req}\" has not been dumped." $LOG "${LOGFILE}"
+	ERROR=1
+done
+
+
+output "[INFO] Dumping finished" $LOG "${LOGFILE}"
+output "[INFO] Took $(($TOTAL_ENDTIME - $TOTAL_STARTTIME)) seconds" $LOG "${LOGFILE}"
+output "[INFO] Total size dumped: ${TOTAL_SIZE} MB" $LOG "${LOGFILE}"
 
 
 
@@ -736,6 +764,7 @@ if [ "${NAGIOS_LOG}" = "1" ]; then
 	echo "success = ${ERROR}"			>> "${NAGIOS_LOGFILE}"
 	echo "lastbak = ${TOTAL_STARTTIME}"	>> "${NAGIOS_LOGFILE}"
 	echo "message = "					>> "${NAGIOS_LOGFILE}"
+	echo "missing = ${REQUIRE}"			>> "${NAGIOS_LOGFILE}"
 
 	echo "[options]"					>> "${NAGIOS_LOGFILE}"
 	echo "opt_log = ${LOG}"				>> "${NAGIOS_LOGFILE}"
@@ -751,7 +780,12 @@ if [ "${NAGIOS_LOG}" = "1" ]; then
 	echo "msg_del = ${NUM_DEL}"			>> "${NAGIOS_LOGFILE}"
 
 	echo "[tmpwatch]"					>> "${NAGIOS_LOGFILE}"
-	echo "del_time = 0"					>> "${NAGIOS_LOGFILE}"
+
+	if [ "${DELETE}" = "1" ]; then
+		echo "del_time = ${DELETE_IF_OLDER}"	>> "${NAGIOS_LOGFILE}"
+	else
+		echo "del_time = 0"						>> "${NAGIOS_LOGFILE}"
+	fi
 fi
 
 
