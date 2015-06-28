@@ -13,7 +13,8 @@ ETCDIR  = /etc
 
 all:
 
-	@echo "Nothing to make"
+	@echo "Nothing to make."
+	@echo "Type 'Make help' or one of the below options."
 	@echo ""
 	@echo Options
 	@echo "   make install"
@@ -24,8 +25,14 @@ all:
 help:
 	@echo Options
 	@echo "   make install"
+	@echo "      Install everthing (requires root)"
+	@echo ""
 	@echo "   make uninstall"
+	@echo "      Remove everything except the logfiles"
+	@echo "      (requires root)"
+	@echo ""
 	@echo "   make help"
+	@echo "      Show this help screen"
 
 
 install:
