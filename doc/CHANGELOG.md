@@ -5,6 +5,7 @@ Version 0.4
 - [Bug]		Fixed bug when using compression AND encryption together
 - [Enh]		Display total Size and total Megabytes at the end
 - [Enh]		Adjustable file/folder permission for target dir and db dumps
+- [Enh]		List of required databases
 
 
 Version 0.3
