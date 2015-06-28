@@ -2,9 +2,9 @@
 #
 # @author    Patrick Plocke <patrick@plocke.de>
 # @gpg key   0x28BF179F
-# @date      2015-07-13
+# @date      2015-06-28
 # @licencse  MIT http://opensource.org/licenses/MIT
-# @version   0.3
+# @version   0.4
 #
 # Script to dump databases one by one
 #
@@ -745,7 +745,7 @@ output "[INFO] Total size dumped: ${TOTAL_SIZE} MB" $LOG "${LOGFILE}"
 if [ ${DELETE} -eq 1 ]; then
 	output "[INFO] Deleting files older than ${DELETE_IF_OLDER} hours" $LOG "${LOGFILE}"
 	DELETED="$(${TMPWATCH} -m ${DELETE_IF_OLDER} -v "${TARGET}/")"
-	NUM_DEL="$( echo "${DELETED}" | grep 'removing' | wc -l )"
+	NUM_DEL="$( echo "${DELETED}" | grep 'removing' | wc -l | awk '{print $1}' )"
 	if [ $? -ne 0 ]; then
 		ERROR=1
 	fi
