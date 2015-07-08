@@ -240,7 +240,7 @@ The script is intended to be run automatically via cron. If you set it up this w
 # *  *  *  *  * user-name  command to be executed
 
 # Dump MySQL Databases at 03:15 every day
-  15 3  *  *  * /bin/sh /usr/local/sbin/mysqldump-secure.sh
+  15 3  *  *  * /bin/sh /usr/local/sbin/mysqldump-secure
 ```
 
 
