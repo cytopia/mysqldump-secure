@@ -1,6 +1,7 @@
 Version 0.5
 -----------
 
+- [Bug]		Do not overwrite configuration files during re-/install
 - [Enh]		Tied submodule check_mysqldump-secure to 0.5
 
 
@@ -12,6 +13,7 @@ Version 0.4
 - [Enh]		Display total Size and total Megabytes at the end
 - [Enh]		Adjustable file/folder permission for target dir and db dumps
 - [Enh]		List of required databases
+- [Enh]		Added evil/bad mysqldump option blacklist
 
 
 Version 0.3
