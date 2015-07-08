@@ -5,7 +5,6 @@
 [Installation](https://github.com/cytopia/mysqldump-secure#3-installation) |
 [Configuration](https://github.com/cytopia/mysqldump-secure#4-configuration) |
 [Contribution](https://github.com/cytopia/mysqldump-secure#5-contribution) |
-[Todo](https://github.com/cytopia/mysqldump-secure#6-todo) |
 [License](https://github.com/cytopia/mysqldump-secure#7-license)
 
 [![Build Status](https://travis-ci.org/cytopia/mysqldump-secure.svg?branch=master)](https://travis-ci.org/cytopia/mysqldump-secure)
@@ -216,7 +215,7 @@ MYSQL_OPTS='--events --triggers --routines --single-transaction --opt'
 See [mysqldump](https://dev.mysql.com/doc/refman/5.0/en/mysqldump.html) for all possible parameters.
 
 #### 4.2.7 Nagios output log
-You can enable Nagios Logging. A special logfile that is overwritten every time the dump is triggered.
+It is possible to fully integrate the backup procedure into a nagios/icinga environment. For that to use you will need to enable Nagios Logging, which will then create a special logfile that is overwritten every time the dump is triggered.
 The Nagios Log file can be used by [check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure) to integrate the current state into nagios.
 
 Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following variables
@@ -224,7 +223,7 @@ Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following v
 NAGIOS_LOG=1
 NAGIOS_LOGFILE="/var/log/mysqldump-secure.nagios.log"
 ```
-See [Plugin Readme](https://github.com/cytopia/check_mysqldump-secure) for further instructions about how to use the nagios plugin itself.
+See [Plugin Readme](https://github.com/cytopia/check_mysqldump-secure) for further instructions and a variety of screenshots.
 
 
 
@@ -240,7 +239,7 @@ The script is intended to be run automatically via cron. If you set it up this w
 # *  *  *  *  * user-name  command to be executed
 
 # Dump MySQL Databases at 03:15 every day
-  15 3  *  *  * /bin/sh /usr/local/sbin/mysqldump-secure.sh
+  15 3  *  *  * /bin/sh /usr/local/sbin/mysqldump-secure
 ```
 
 
@@ -252,10 +251,5 @@ If the script runs on an operating system productively, which is currently not y
 If you use the script, star it or let me know somehow.
 
 
-## 6. Todo
-See [Todo list](doc/TODO.md)
-
-
-
-## 7. License
+## 6. License
 [![License](https://poser.pugx.org/cytopia/mysqldump-secure/license)](doc/LICENSE)
