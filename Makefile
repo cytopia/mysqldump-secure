@@ -10,14 +10,29 @@ PREFIX  = $(DESTDIR)/usr/local
 SBINDIR = $(PREFIX)/sbin
 ETCDIR  = /etc
 
+# Configuration
+SHELL = /bin/sh
+
+
+# Check if any file is already installed
+ifneq ("$(wildcard $(ETCDIR)/$(DUMP_CONF))","")
+	INSTALLED = 1
+endif
+ifneq ("$(wildcard $(ETCDIR)/$(DUMP_CNF))","")
+	INSTALLED = 1
+endif
+ifneq ("$(wildcard $(SBINDIR)/$(DUMP_SH))","")
+	INSTALLED = 1
+endif
+
 
 all:
-
 	@echo "Nothing to make."
 	@echo "Type 'Make help' or one of the below options."
 	@echo ""
 	@echo Options
 	@echo "   make install"
+	@echo "   make reinstall"
 	@echo "   make uninstall"
 	@echo "   make help"
 
@@ -26,6 +41,10 @@ help:
 	@echo Options
 	@echo "   make install"
 	@echo "      Install everthing (requires root)"
+	@echo ""
+	@echo "   make reinstall"
+	@echo "      Install everthing even if it is already"
+	@echo "      installed (requires root)"
 	@echo ""
 	@echo "   make uninstall"
 	@echo "      Remove everything except the logfiles"
@@ -37,27 +56,59 @@ help:
 
 install:
 
+ifeq ($(INSTALLED),1)
+	$(error Already installed, use make reinstall)
+endif
+
 	@echo "Installing files"
 	@echo ""
 
 	@# Install binary
-	install  $(DUMP_SH) $(SBINDIR)/$(DUMP_SH)
+	install -m 0755 $(DUMP_SH) $(SBINDIR)/$(DUMP_SH)
 	@echo ""
 
-	@# Install config file with backup file
-	install -b $(DUMP_CONF) $(ETCDIR)/$(DUMP_CONF)
-	chmod 400 $(ETCDIR)/$(DUMP_CONF)
+	@# Install config file and create backup if there is one already
+	install -b -m 0400 $(DUMP_CONF) $(ETCDIR)/$(DUMP_CONF)
 	@echo ""
 
-	@# Install config file with backup file
-	install -b $(DUMP_CNF) $(ETCDIR)/$(DUMP_CNF)
-	chmod 400 $(ETCDIR)/$(DUMP_CNF)
+	@# Install config file and create backup if there is one already
+	install -b -m 0400 $(DUMP_CNF) $(ETCDIR)/$(DUMP_CNF)
 	@echo ""
 
 	@echo "Installation complete"
 	@echo ""
 	@echo "Adjust values in $(ETCDIR)/$(DUMP_CONF)"
 	@echo "Adjust values in $(ETCDIR)/$(DUMP_CNF)"
+
+
+reinstall:
+
+	@echo "Installing files"
+	@echo ""
+
+	@# Install binary
+	install -m 0755 $(DUMP_SH) $(SBINDIR)/$(DUMP_SH)
+	@echo ""
+
+	@# Install config file without overwriting
+	test -f $(ETCDIR)/$(DUMP_CONF) \
+		&& install -m 0400 $(DUMP_CONF) $(ETCDIR)/$(DUMP_CONF).new \
+		|| install -m 0400 $(DUMP_CONF) $(ETCDIR)/$(DUMP_CONF)
+
+	@echo ""
+
+	@# Install config file without overwriting
+	test -f $(ETCDIR)/$(DUMP_CNF) \
+		&& install -m 0400 $(DUMP_CNF) $(ETCDIR)/$(DUMP_CNF).new \
+		|| install -m 0400 $(DUMP_CNF) $(ETCDIR)/$(DUMP_CNF)
+	@echo ""
+
+	@echo "Installation complete"
+	@echo ""
+	@echo "Compare new config: $(ETCDIR)/$(DUMP_CONF).new"
+	@echo "Compare new config: $(ETCDIR)/$(DUMP_CNF).new"
+	@echo "New configuration options might be available"
+
 
 
 uninstall:
