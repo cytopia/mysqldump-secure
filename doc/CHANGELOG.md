@@ -1,3 +1,9 @@
+Version 0.5
+-----------
+
+- [Enh]		Tied submodule check_mysqldump-secure to 0.5
+
+
 Version 0.4
 -----------
 
