@@ -5,7 +5,6 @@
 [Installation](https://github.com/cytopia/mysqldump-secure#3-installation) |
 [Configuration](https://github.com/cytopia/mysqldump-secure#4-configuration) |
 [Contribution](https://github.com/cytopia/mysqldump-secure#5-contribution) |
-[Todo](https://github.com/cytopia/mysqldump-secure#6-todo) |
 [License](https://github.com/cytopia/mysqldump-secure#7-license)
 
 [![Build Status](https://travis-ci.org/cytopia/mysqldump-secure.svg?branch=master)](https://travis-ci.org/cytopia/mysqldump-secure)
@@ -252,10 +251,5 @@ If the script runs on an operating system productively, which is currently not y
 If you use the script, star it or let me know somehow.
 
 
-## 6. Todo
-See [Todo list](doc/TODO.md)
-
-
-
-## 7. License
+## 6. License
 [![License](https://poser.pugx.org/cytopia/mysqldump-secure/license)](doc/LICENSE)
