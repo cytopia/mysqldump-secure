@@ -96,17 +96,25 @@ debugn() {
 
 
 # Test if argument is an integer
-# @return integer	0: is numer | 1 not a number
+# @param  mixed
+# @return integer	0: is number | 1: not a number
 isint(){
 	printf '%d' "$1" >/dev/null 2>&1 && return 0 || return 1;
 }
 
 
 # Sum up two numbers
+# @param  integer
+# @param  integer
+# @return integer
 sum() {
 	echo  | awk -v "a=${1}" -v "b=${2}" '{print a + b}'
 }
 
+
+# Get Operating system independent numerical chmod value
+# @param  string	path to file/folder
+# @return string	numerical chmod
 permission() {
 	local file
 	local perm
@@ -124,11 +132,13 @@ permission() {
 	return 0
 }
 
-# Validate chmod permissions
+# Validate chmod value
+# @param  string	numerical chmod
+# @return boolean	0: valid, 1: invalid
 valid_chmod() {
 	CHMOD=${1}
 
-	len=$(echo "${1}" | awk '{ print length()   }')
+	len=$(echo "${CHMOD}" | awk '{ print length()   }')
 	if [ "${len}" != "3" ]; then
 		return 1
 	fi
