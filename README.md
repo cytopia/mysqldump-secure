@@ -5,7 +5,7 @@
 [Installation](https://github.com/cytopia/mysqldump-secure#3-installation) |
 [Configuration](https://github.com/cytopia/mysqldump-secure#4-configuration) |
 [Contribution](https://github.com/cytopia/mysqldump-secure#5-contribution) |
-[License](https://github.com/cytopia/mysqldump-secure#6-license)
+[License](https://github.com/cytopia/mysqldump-secure#6-license) |
 [Version](https://github.com/cytopia/mysqldump-secure#7-version)
 
 [![Build Status](https://travis-ci.org/cytopia/mysqldump-secure.svg?branch=master)](https://travis-ci.org/cytopia/mysqldump-secure)
@@ -260,5 +260,5 @@ If you use the script, star it or let me know somehow.
 ## 6. License
 [![license](https://poser.pugx.org/cytopia/mysqldump-secure/license)](http://opensource.org/licenses/mit)
 
-## 6. Version
+## 7. Version
 For a complete list of verion see [CHANGELOG](CHANGELOG.md)
