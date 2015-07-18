@@ -260,5 +260,5 @@ If you use the script, star it or let me know somehow.
 ## 6. License
 [![license](https://poser.pugx.org/cytopia/mysqldump-secure/license)](http://opensource.org/licenses/mit)
 
-## 6. Version
+## 7. Version
 For a complete list of verion see [CHANGELOG](CHANGELOG.md)
