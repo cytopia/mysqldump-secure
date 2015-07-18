@@ -5,10 +5,11 @@
 [Installation](https://github.com/cytopia/mysqldump-secure#3-installation) |
 [Configuration](https://github.com/cytopia/mysqldump-secure#4-configuration) |
 [Contribution](https://github.com/cytopia/mysqldump-secure#5-contribution) |
-[License](https://github.com/cytopia/mysqldump-secure#7-license)
+[License](https://github.com/cytopia/mysqldump-secure#6-license)
+[Version](https://github.com/cytopia/mysqldump-secure#7-version)
 
 [![Build Status](https://travis-ci.org/cytopia/mysqldump-secure.svg?branch=master)](https://travis-ci.org/cytopia/mysqldump-secure)
-[![Latest Stable Version](https://poser.pugx.org/cytopia/mysqldump-secure/v/stable)](https://packagist.org/packages/cytopia/mysqldump-secure) [![Total Downloads](https://poser.pugx.org/cytopia/mysqldump-secure/downloads)](https://packagist.org/packages/cytopia/mysqldump-secure) [![Latest Unstable Version](https://poser.pugx.org/cytopia/mysqldump-secure/v/unstable)](https://packagist.org/packages/cytopia/mysqldump-secure) [![License](https://poser.pugx.org/cytopia/mysqldump-secure/license)](doc/LICENSE)
+[![Latest Stable Version](https://poser.pugx.org/cytopia/mysqldump-secure/v/stable)](https://packagist.org/packages/cytopia/mysqldump-secure) [![Total Downloads](https://poser.pugx.org/cytopia/mysqldump-secure/downloads)](https://packagist.org/packages/cytopia/mysqldump-secure) [![Latest Unstable Version](https://poser.pugx.org/cytopia/mysqldump-secure/v/unstable)](https://packagist.org/packages/cytopia/mysqldump-secure) [![License](https://poser.pugx.org/cytopia/mysqldump-secure/license)](http://opensource.org/licenses/MIT)
 [![POSIX](https://img.shields.io/badge/posix-100%25-brightgreen.svg)](https://en.wikipedia.org/?title=POSIX)
 [![Type](https://img.shields.io/badge/type-%2Fbin%2Fsh-red.svg)](https://en.wikipedia.org/?title=Bourne_shell)
 
@@ -249,7 +250,7 @@ All errors and warnings will be redirected to `stderr` automatically by the scri
 
 
 ## 5. Contribution
-Contributors are welcome. See [contribution guidelines](doc/CONTRIBUTING.md).
+Contributors are welcome.
 
 If the script runs on an operating system productively, which is currently not yet included at the top of this document, please let me know, so I can add it for reference.
 
@@ -257,4 +258,7 @@ If you use the script, star it or let me know somehow.
 
 
 ## 6. License
-[![License](https://poser.pugx.org/cytopia/mysqldump-secure/license)](doc/LICENSE)
+[![license](https://poser.pugx.org/cytopia/mysqldump-secure/license)](http://opensource.org/licenses/mit)
+
+## 6. Version
+For a complete list of verion see [CHANGELOG](CHANGELOG.md)
