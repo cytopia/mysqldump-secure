@@ -1,6 +1,6 @@
 {
 	"name": "cytopia/mysqldump-secure",
-	"description": "Secure mysqldump script with encryption, compression, logging and blacklisting",
+	"description": "Secure mysqldump script with encryption, compression, logging, blacklisting and Nagios monitoring integration",
 	"type": "library",
 	"keywords": ["backup", "mysqldump", "export", "dump", "mysql", "database", "encryption"],
 	"homepage": "https://github.com/cytopia/mysqldump-secure",

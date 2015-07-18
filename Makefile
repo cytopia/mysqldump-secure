@@ -114,6 +114,7 @@ reinstall:
 uninstall:
 
 	@# Never ever delete the public private keys!!
+	@# Also keep the logfile, as we do not know its location (it is set in config)
 	@# Just remove the binary and config files
 	rm -f $(SBINDIR)/$(DUMP_SH)
 	rm -f $(ETCDIR)/$(DUMP_CONF)
