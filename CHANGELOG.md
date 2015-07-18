@@ -1,3 +1,9 @@
+Version 0.5.1
+-----------
+
+- [Enh]		Improved Nagios Long output
+
+
 Version 0.5
 -----------
 
