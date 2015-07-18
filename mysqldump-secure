@@ -8,16 +8,6 @@
 #
 # Script to dump databases one by one
 #
-# Features:
-# ---------------------
-# * Encryped output via public/private key (optional)
-# * Compressed output via gzip (optional)
-# * Database black list (optional)
-# * Logfile (optional)
-# * Custom mysqldump parameters
-# * Dumping time, total time
-# * Error handling
-#
 # Exit Codes
 # ---------------------
 # * 0: Success
@@ -32,6 +22,11 @@
 # VARIABLES
 #
 ################################################################################
+
+#
+# Adjust the following values with caution!
+#
+
 
 # Configuration
 CONFIG_NAME="mysqldump-secure.conf"
@@ -62,8 +57,8 @@ debug() {
 	local file="${4}"	# full path to logfile
 
 	[ "${lvl}" = "info" ] && printf "%s\n" "${msg}"
-	[ "${lvl}" = "warn" ] && printf "%s\n" "${msg}" 1>&2
-	[ "${lvl}" = "err"  ] && printf "%s\n" "${msg}" 1>&2
+	[ "${lvl}" = "warn" ] && printf "%s\n" "${msg}" 1>&2	# stdout -> stderr
+	[ "${lvl}" = "err"  ] && printf "%s\n" "${msg}" 1>&2	# stdout -> stderr
 	[ "${log}" = "1"    ] && printf "%s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${msg}" >> "${file}"
 	return 0
 }
@@ -75,8 +70,8 @@ debugi() {
 	local file="${4}"	# full path to logfile
 
 	[ "${lvl}" = "info" ] && printf "%s" "${msg}"
-	[ "${lvl}" = "warn" ] && printf "%s" "${msg}" 1>&2
-	[ "${lvl}" = "err"  ] && printf "%s" "${msg}" 1>&2
+	[ "${lvl}" = "warn" ] && printf "%s" "${msg}" 1>&2	# stdout -> stderr
+	[ "${lvl}" = "err"  ] && printf "%s" "${msg}" 1>&2	# stdout -> stderr
 	[ "${log}" = "1"    ] && printf "%s %s %s" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${msg}" >> "${file}"
 	return 0
 }
@@ -88,8 +83,8 @@ debugn() {
 	local file="${4}"	# full path to logfile
 
 	[ "${lvl}" = "info" ] && printf "%s\n" "${msg}"
-	[ "${lvl}" = "warn" ] && printf "%s\n" "${msg}" 1>&2
-	[ "${lvl}" = "err"  ] && printf "%s\n" "${msg}" 1>&2
+	[ "${lvl}" = "warn" ] && printf "%s\n" "${msg}" 1>&2	# stdout -> stderr
+	[ "${lvl}" = "err"  ] && printf "%s\n" "${msg}" 1>&2	# stdout -> stderr
 	[ "${log}" = "1"    ] && printf "%s\n" "${msg}" >> "${file}"
 	return 0
 }
