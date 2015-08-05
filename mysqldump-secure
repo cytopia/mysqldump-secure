@@ -511,18 +511,14 @@ if [ "${DELETE}" = "1"  ]; then
 		debug "warn" "[WARN] \$DELETE_METHOD variable is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
 		DELETE=0
-	elif [ "${DELETE_METHOD}" = "tmpwatch" ]; then
-		if ! command -v tmpwatch > /dev/null 2>&1 ; then
-			debug "warn" "[WARN] 'tmpwatch' not found" $LOG "${LOGFILE}"
-			debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
-			DELETE=0
-		fi
-	elif [ "${DELETE_METHOD}" = "tmpreaper" ]; then
-		if ! command -v tmpreaper > /dev/null 2>&1 ; then
-			debug "warn" "[WARN] 'tmpreaper' not found" $LOG "${LOGFILE}"
-			debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
-			DELETE=0
-		fi
+	elif [ "${DELETE_METHOD}" = "tmpwatch" ] &&  ! command -v tmpwatch > /dev/null 2>&1 ; then
+		debug "warn" "[WARN] 'tmpwatch' not found" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
+		DELETE=0
+	elif [ "${DELETE_METHOD}" = "tmpreaper" ] && ! command -v tmpreaper > /dev/null 2>&1 ; then
+		debug "warn" "[WARN] 'tmpreaper' not found" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
+		DELETE=0
 	elif [ "${DELETE_METHOD}" != "tmpwatch" ] && [ "${DELETE_METHOD}" != 'tmpreaper' ]; then
 		debug "warn" "[WARN] \$DELETE_METHOD must be either 'tmpwatch' or 'tmpreaper' in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
@@ -540,10 +536,35 @@ if [ "${DELETE}" = "1"  ]; then
 		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
 		DELETE=0
 	else
-		debug "info" "[INFO] Tmpwatch deletion enabled" $LOG "${LOGFILE}"
+		debug "info" "[INFO] Deletion enabled. Using: ${DELETE_METHOD}" $LOG "${LOGFILE}"
 	fi
 else
-	debug "info" "[INFO] Tmpwatch deletion not enabled in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	debug "info" "[INFO] Deletion not enabled in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+fi
+
+# Check for forced deletion
+if [ "${DELETE}" = "1" ]; then
+	if [ -z ${DELETE_FORCE} ]; then
+		debug "warn" "[WARN] \$DELETE_FORCE variable is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}"
+		DELETE_FORCE=0
+	elif ! isint ${DELETE_FORCE} > /dev/null 2>&1 ; then
+		debug "warn" "[WARN] \$DELETE_FORCE variable is not a valid integer" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}"
+		DELETE_FORCE=0
+	elif [ "${DELETE_FORCE}" != "0" ] && [ "${DELETE_FORCE}" != "1" ]; then
+		debug "warn" "[WARN] \$DELETE_FORCE variable invalid. Must be either 0 or 1." $LOG "${LOGFILE}"
+		debug "warn" "[WARN] Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}"
+		DELETE_FORCE=0
+	fi
+
+
+	if [ "${DELETE_FORCE}" = 1 ]; then
+		debug "info" "[INFO] Using '--force' option for ${DELETE_METHOD}" $LOG "${LOGFILE}"
+	else
+		debug "info" "[INFO] Not forcing (--force) deletion on read-only files for ${DELETE_METHOD}" $LOG "${LOGFILE}"
+	fi
+
 fi
 
 
@@ -784,8 +805,12 @@ debug "info" "[INFO] Total size dumped: ${TOTAL_SIZE} MB" $LOG "${LOGFILE}"
 # Delete old Files
 ############################################################
 if [ ${DELETE} -eq 1 ]; then
+
+	# Force deletion?
+	[ "${DELETE_FORCE}" = "1" ] && FORCE_ARG="--force" || FORCE_ARG=""
+
 	debug "info" "[INFO] Deleting files older than ${DELETE_IF_OLDER} hours" $LOG "${LOGFILE}"
-	DELETED="$(${TMPWATCH} -m ${DELETE_IF_OLDER} -v "${TARGET}/")"
+	DELETED="$(${TMPWATCH} ${FORCE_ARG} -m ${DELETE_IF_OLDER} -v "${TARGET}/")"
 	NUM_DEL="$( echo "${DELETED}" | grep 'removing' | wc -l | awk '{print $1}' )"
 	if [ $? -ne 0 ]; then
 		ERROR=1

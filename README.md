@@ -197,6 +197,8 @@ Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following v
 DELETE=1
 DELETE_METHOD="tmpwatch"	# Use this for redhat/centos/fedora
 #DELETE_METHOD="tmpreaper"	# Use this for debian/ubuntu
+
+DELETE_FORCE=1				# Remove files even if EUID doesn’t have write access
 DELETE=720 # 720 hours
 ```
 
