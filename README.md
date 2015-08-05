@@ -38,6 +38,7 @@ Find the whole post at [www.everythingcli.org](http://www.everythingcli.org/inde
 | [openssl](https://www.openssl.org)  | optional  | Optionally used for private/public key encrypting the database dump |
 | [gzip](http://www.gzip.org)  | optional  | Optionally used for compressing the database dump |
 | [tmpwatch](https://fedorahosted.org/tmpwatch/)  | optional  | Optionally used to delete old database dumps |
+| [tmpreaper](https://packages.debian.org/sid/tmpreaper)  | optional  | Optionally used to delete old database dumps |
 | [check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure)  | optional  | Optionally used to monitor the dump via nagios (already bundled as a submodule inside this repository) |
 
 
@@ -188,11 +189,14 @@ Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following v
 IGNORE="information_schema performance_schema"
 ```
 
-#### 4.2.4 Tmpwatch integration
-If you have [tmpwatch](http://linux.die.net/man/8/tmpwatch) installed you can specify to automatically delete backups older than X hours.
+#### 4.2.4 Tmpwatch/Tmpreaper integration
+If you have [tmpwatch](http://linux.die.net/man/8/tmpwatch) or [tmpreaper](http://manpages.ubuntu.com/manpages/hardy/man8/tmpreaper.8.html) installed you can specify to automatically delete backups older than X hours.
 
-Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following variables
+Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following variables:
 ```shell
+DELETE=1
+DELETE_METHOD="tmpwatch"	# Use this for redhat/centos/fedora
+#DELETE_METHOD="tmpreaper"	# Use this for debian/ubuntu
 DELETE=720 # 720 hours
 ```
 

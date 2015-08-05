@@ -1,3 +1,9 @@
+Version 0.6
+-----------
+
+- [Enh]		Added choice to use either tmpwatch (redhat/centos/fedora) or tmpreaper (ubuntu/debian)
+
+
 Version 0.5.1
 -----------
 

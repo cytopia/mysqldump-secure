@@ -507,7 +507,27 @@ if [ -z ${DELETE} ]; then
 	DELETE=0
 fi
 if [ "${DELETE}" = "1"  ]; then
-	if [ -z ${DELETE_IF_OLDER} ]; then
+	if [ -z ${DELETE_METHOD} ]; then
+		debug "warn" "[WARN] \$DELETE_METHOD variable is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
+		DELETE=0
+	elif [ "${DELETE_METHOD}" = "tmpwatch" ]; then
+		if ! command -v tmpwatch > /dev/null 2>&1 ; then
+			debug "warn" "[WARN] 'tmpwatch' not found" $LOG "${LOGFILE}"
+			debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
+			DELETE=0
+		fi
+	elif [ "${DELETE_METHOD}" = "tmpreaper" ]; then
+		if ! command -v tmpreaper > /dev/null 2>&1 ; then
+			debug "warn" "[WARN] 'tmpreaper' not found" $LOG "${LOGFILE}"
+			debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
+			DELETE=0
+		fi
+	elif [ "${DELETE_METHOD}" != "tmpwatch" ] && [ "${DELETE_METHOD}" != 'tmpreaper' ]; then
+		debug "warn" "[WARN] \$DELETE_METHOD must be either 'tmpwatch' or 'tmpreaper' in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
+		DELETE=0
+	elif [ -z ${DELETE_IF_OLDER} ]; then
 		debug "warn" "[WARN] \$DELETE_IF_OLDER variable is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
 		DELETE=0
@@ -517,10 +537,6 @@ if [ "${DELETE}" = "1"  ]; then
 		DELETE=0
 	elif [ ${DELETE_IF_OLDER} -lt 1 ]; then
 		debug "warn" "[WARN] \$DELETE_IF_OLDER is smaller than 1 hour" $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
-		DELETE=0
-	elif ! command -v tmpwatch > /dev/null 2>&1 ; then
-		debug "warn" "[WARN] 'tmpwatch' not found" $LOG "${LOGFILE}"
 		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
 		DELETE=0
 	else
@@ -604,7 +620,7 @@ MYSQL="$(which mysql)"
 MYSQLDUMP="$(which mysqldump)"
 GZIP="$(which gzip)"
 OPENSSL="$(which openssl)"
-TMPWATCH="$(which tmpwatch)"
+TMPWATCH="$(which ${DELETE_METHOD})"	# This can be tmpwatch or tmpreaper
 
 ERROR=0
 
