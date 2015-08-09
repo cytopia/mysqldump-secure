@@ -1,3 +1,10 @@
+Version 0.6
+-----------
+
+- [Enh]		#11 Added choice to use either tmpwatch (redhat/centos/fedora) or tmpreaper (ubuntu/debian)
+- [Bug]		#12 Remove files even if EUID doesn’t have write access (have config option for that to enable)
+
+
 Version 0.5.1
 -----------
 
