@@ -193,12 +193,30 @@ IGNORE="information_schema performance_schema"
 If you have [tmpwatch](http://linux.die.net/man/8/tmpwatch) or [tmpreaper](http://manpages.ubuntu.com/manpages/hardy/man8/tmpreaper.8.html) installed you can specify to automatically delete backups older than X hours.
 
 Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following variables:
+Enable `1` or disable `1` automatic deletion
 ```shell
 DELETE=1
+#DELETE=0
+```
+
+Choose the binary to use `tmpwatch` or `tmpreaper`
+```shell
 DELETE_METHOD="tmpwatch"	# Use this for redhat/centos/fedora
 #DELETE_METHOD="tmpreaper"	# Use this for debian/ubuntu
+```
 
+If your database backups are stored readonly (e.g. chmod 400), tmpwatch/tmpreaper will fail to delete them. In order to overcome this, the `-f` (`--force`) flag must be parsed along.
+
+> Remove files even if EUID doesn’t have write access (akin to  rm -f). Normally,  files owned by the current EUID, with no write  bit set are not removed.
+
+```shell
 DELETE_FORCE=1				# Remove files even if EUID doesn’t have write access
+#DELETE_FORCE=0				# Do not delete read-only files
+```
+
+Delete files older than X hours
+
+```shell
 DELETE=720 # 720 hours
 ```
 
