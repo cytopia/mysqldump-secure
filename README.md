@@ -189,21 +189,48 @@ Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following v
 IGNORE="information_schema performance_schema"
 ```
 
-#### 4.2.4 Tmpwatch/Tmpreaper integration
+#### 4.2.4 Whitelisting (Requiring)
+If you need to make sure that a specific (or many specific) database(s) must be dumped regardless, add it space-separated to this variable. If the specified databases cannot be dumped (no access rights, missing, whatever reason), the dump script will throw an error which is catchable by cron as well as by the included nagios script.
+
+This option is here to make sure you will be informed, that your desired database was not dumped.
+```shell
+REQUIRED="mysql databaseX databaseY"
+#REQUIRED=""
+```
+
+#### 4.2.5 Tmpwatch/Tmpreaper integration
 If you have [tmpwatch](http://linux.die.net/man/8/tmpwatch) or [tmpreaper](http://manpages.ubuntu.com/manpages/hardy/man8/tmpreaper.8.html) installed you can specify to automatically delete backups older than X hours.
 
 Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following variables:
+Enable `1` or disable `1` automatic deletion
 ```shell
 DELETE=1
+#DELETE=0
+```
+
+Choose the binary to use `tmpwatch` or `tmpreaper`
+```shell
 DELETE_METHOD="tmpwatch"	# Use this for redhat/centos/fedora
 #DELETE_METHOD="tmpreaper"	# Use this for debian/ubuntu
+```
 
+If your database backups are stored readonly (e.g. chmod 400), tmpwatch/tmpreaper will fail to delete them. In order to overcome this, the `-f` (`--force`) flag must be parsed along.
+
+> Remove files even if EUID doesn’t have write access (akin to  rm -f). Normally,  files owned by the current EUID, with no write  bit set are not removed.
+
+```shell
 DELETE_FORCE=1				# Remove files even if EUID doesn’t have write access
+#DELETE_FORCE=0				# Do not delete read-only files
+```
+
+Delete files older than X hours
+
+```shell
 DELETE=720 # 720 hours
 ```
 
 
-#### 4.2.5 File logging
+#### 4.2.6 File logging
 Mysqldump-secure includes a mechanism to log every action (debug, info, warn and error) to file. The script also follows the practise of sending proper exit codes (0 for everything went fine and >0 for I had some errors).
 
 Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following variables
@@ -212,7 +239,7 @@ LOG=1
 LOGFILE="/var/log/mysqldump-secure.log"
 ```
 
-#### 4.2.6 Mysqldump options
+#### 4.2.7 Mysqldump options
 You can specify custom mysqldump parameters in the configuration file. The default configuration dumps databases including events, triggers and routines. The dump is done via `--single-transaction` to also take transactional tables into account. All those parameters are customizable so alter them as desired.
 
 Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following variables
@@ -221,7 +248,7 @@ MYSQL_OPTS='--events --triggers --routines --single-transaction --opt'
 ```
 See [mysqldump](https://dev.mysql.com/doc/refman/5.0/en/mysqldump.html) for all possible parameters.
 
-#### 4.2.7 Nagios output log
+#### 4.2.8 Nagios output log
 It is possible to fully integrate the backup procedure into a nagios/icinga environment. For that to use you will need to enable Nagios Logging, which will then create a special logfile that is overwritten every time the dump is triggered.
 The Nagios Log file can be used by [check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure) to integrate the current state into nagios.
 
