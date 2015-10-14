@@ -191,7 +191,7 @@ fi
 # Read config file
 # Comment required by shellcheck,
 # See problem here: https://github.com/koalaman/shellcheck/wiki/SC1090
-# shellcheck source=/dev/null
+# shellcheck disable=SC1090
 . "${CONFIG_FILE}"
 
 
