@@ -42,6 +42,12 @@ MYSQL_EVIL_OPTS="--password -p"
 MYSQL_BAD_OPTS="--defaults-extra-file --defaults-file"
 
 
+# Deault Variables
+PREFIX_DEFAULT="$(date '+%Y-%m-%d')_$(date '+%H-%M')__"
+TARGET_DIR_CHMOD_DEFAULT="700"
+TARGET_FILE_CHMOD_DEFAULT="400"
+OPENSSL_ALGO_ARG_DEFAULT="-aes256"
+
 
 ################################################################################
 #
@@ -51,41 +57,41 @@ MYSQL_BAD_OPTS="--defaults-extra-file --defaults-file"
 
 # Output to stdout/stderr and to file
 debug() {
-	local lvl="${1}"	# Loglevel: "info", "warn" or "err"
-	local msg="${2}"	# message to output
-	local log="${3}"	# log to file?
-	local file="${4}"	# full path to logfile
+	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
+	_msg="${2}"		# message to output
+	_log="${3}"		# log to file?
+	_file="${4}"	# full path to logfile
 
-	[ "${lvl}" = "info" ] && printf "%s\n" "${msg}"
-	[ "${lvl}" = "warn" ] && printf "%s\n" "${msg}" 1>&2	# stdout -> stderr
-	[ "${lvl}" = "err"  ] && printf "%s\n" "${msg}" 1>&2	# stdout -> stderr
-	[ "${log}" = "1"    ] && printf "%s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${msg}" >> "${file}"
+	[ "${_lvl}" = "info" ] && printf "%s\n" "${_msg}"
+	[ "${_lvl}" = "warn" ] && printf "%s\n" "${_msg}" 1>&2	# stdout -> stderr
+	[ "${_lvl}" = "err"  ] && printf "%s\n" "${_msg}" 1>&2	# stdout -> stderr
+	[ "${_log}" = "1"    ] && printf "%s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_msg}" >> "${_file}"
 	return 0
 }
 # Inline Output to stdout/stderr and to file
 debugi() {
-	local lvl="${1}"	# Loglevel: "info", "warn" or "err"
-	local msg="${2}"	# message to output
-	local log="${3}"	# log to file?
-	local file="${4}"	# full path to logfile
+	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
+	_msg="${2}"		# message to output
+	_log="${3}"		# log to file?
+	_file="${4}"	# full path to logfile
 
-	[ "${lvl}" = "info" ] && printf "%s" "${msg}"
-	[ "${lvl}" = "warn" ] && printf "%s" "${msg}" 1>&2	# stdout -> stderr
-	[ "${lvl}" = "err"  ] && printf "%s" "${msg}" 1>&2	# stdout -> stderr
-	[ "${log}" = "1"    ] && printf "%s %s %s" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${msg}" >> "${file}"
+	[ "${_lvl}" = "info" ] && printf "%s" "${_msg}"
+	[ "${_lvl}" = "warn" ] && printf "%s" "${_msg}" 1>&2	# stdout -> stderr
+	[ "${_lvl}" = "err"  ] && printf "%s" "${_msg}" 1>&2	# stdout -> stderr
+	[ "${_log}" = "1"    ] && printf "%s %s %s" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_msg}" >> "${_file}"
 	return 0
 }
 # Output to stdout/stderr and to file (No date output)
 debugn() {
-	local lvl="${1}"	# Loglevel: "info", "warn" or "err"
-	local msg="${2}"	# message to output
-	local log="${3}"	# log to file?
-	local file="${4}"	# full path to logfile
+	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
+	_msg="${2}"		# message to output
+	_log="${3}"		# log to file?
+	_file="${4}"	# full path to logfile
 
-	[ "${lvl}" = "info" ] && printf "%s\n" "${msg}"
-	[ "${lvl}" = "warn" ] && printf "%s\n" "${msg}" 1>&2	# stdout -> stderr
-	[ "${lvl}" = "err"  ] && printf "%s\n" "${msg}" 1>&2	# stdout -> stderr
-	[ "${log}" = "1"    ] && printf "%s\n" "${msg}" >> "${file}"
+	[ "${_lvl}" = "info" ] && printf "%s\n" "${_msg}"
+	[ "${_lvl}" = "warn" ] && printf "%s\n" "${_msg}" 1>&2	# stdout -> stderr
+	[ "${_lvl}" = "err"  ] && printf "%s\n" "${_msg}" 1>&2	# stdout -> stderr
+	[ "${_log}" = "1"    ] && printf "%s\n" "${_msg}" >> "${_file}"
 	return 0
 }
 
@@ -111,19 +117,16 @@ sum() {
 # @param  string	path to file/folder
 # @return string	numerical chmod
 permission() {
-	local file
-	local perm
-
-	file="${1}"
+	_file="${1}"
 
 	# e.g. 640
 	if [ "$(uname)" = "Linux" ]; then
-		perm="$(stat --format '%a' ${file})"
+		_perm="$(stat --format '%a' "${_file}")"
 	else # Darwin or FreeBSD
-		perm="$(stat -f "%OLp" ${file})"
+		_perm="$(stat -f "%OLp" "${_file}")"
 	fi
 
-	echo $perm
+	echo "${_perm}"
 	return 0
 }
 
@@ -142,13 +145,13 @@ valid_chmod() {
 	w=$(echo "${CHMOD}" | awk '{print substr($0,2,1)}')
 	x=$(echo "${CHMOD}" | awk '{print substr($0,3,1)}')
 
-	if [ $r -lt 0 ] || [ $r -gt 7 ]; then
+	if [ "$r" -lt 0 ] || [ "$r" -gt 7 ]; then
 		return 1
 	fi
-	if [ $w -lt 0 ] || [ $w -gt 7 ]; then
+	if [ "$w" -lt 0 ] || [ "$w" -gt 7 ]; then
 		return 1
 	fi
-	if [ $x -lt 0 ] || [ $x -gt 7 ]; then
+	if [ "$x" -lt 0 ] || [ "$x" -gt 7 ]; then
 		return 1
 	fi
 
@@ -186,6 +189,9 @@ if [ "$(permission "${CONFIG_FILE}")" != "400" ]; then
 fi
 
 # Read config file
+# Comment required by shellcheck,
+# See problem here: https://github.com/koalaman/shellcheck/wiki/SC1090
+# shellcheck disable=SC1090
 . "${CONFIG_FILE}"
 
 
@@ -198,15 +204,17 @@ fi
 # Be really strict on checking if we are going to log to file
 # or not. Also make sure that the logfile is writeable and
 # that no other has read permissions to the file.
-if [ -z ${LOG} ]; then
-	debug "warn" "[WARN] \$LOG variable is empty or not set in ${CONFIG_FILE}"
+if [ -z "${LOG}" ]; then
+	debug "warn" "[WARN] \$LOG variable is not set or empty in ${CONFIG_FILE}"
 	debug "warn" "[WARN] Logging disabled"
 	LOG=0
 elif [ "${LOG}" = "1" ]; then
-	if [ -z ${LOGFILE} ]; then
-		debug "warn" "[WARN] \$LOGFILE variable is empty or not set in ${CONFIG_FILE}"
+	# Logfile not set
+	if [ -z "${LOGFILE}" ]; then
+		debug "warn" "[WARN] \$LOGFILE variable is not set or empty in ${CONFIG_FILE}"
 		debug "warn" "[WARN] Logging disabled"
 		LOG=0
+	# Logfile not found
 	elif [ ! -f "${LOGFILE}" ]; then
 		debug  "warn" "[WARN] Logfile does not exist in ${LOGFILE}"
 		debugi "info" "[INFO] Trying to create..."
@@ -230,10 +238,27 @@ elif [ "${LOG}" = "1" ]; then
 				debugn "info" "OK"
 			fi
 		fi
+	# Logfile not writeable
 	elif [ ! -w "${LOGFILE}" ]; then
-		debug "warn" "[WARN] Logfile ${LOGFILE} not writeable"
-		debug "warn" "[WARN] Logging disabled"
-		LOG=0
+		debug  "warn" "[WARN] Logfile ${LOGFILE} not writeable"
+		debugi "info" "[INFO] Trying to chmod..."
+
+		if ! chmod 600 "${LOGFILE}" > /dev/null 2>&1 ; then
+			debugn "err"  "Failed"
+			debug  "err"  "[ERR]  Failed to chmod 600 ${LOGFILE}"
+			debug  "warn" "[WARN] Logging disabled"
+			LOG=0
+		else
+			# Check again if it is writeable now?
+			if [ ! -w "${LOGFILE}" ]; then
+				debug  "warn" "[WARN] Logfile ${LOGFILE} still not writeable"
+				debug  "warn" "[WARN] Logging disabled"
+				LOG=0
+			else
+				debugn "info" "OK"
+			fi
+		fi
+	# Logfile has wrong permissions
 	elif [ "$(permission "${LOGFILE}")" != "600" ]; then
 		debug  "warn" "[WARN] Logfile has dangerous permissions: $(permission "${LOGFILE}")"
 		debugi "info" "[INFO] Trying to chmod..."
@@ -255,9 +280,11 @@ fi
 # Is logging still enabled after all checks?
 # Write to the file
 if [ "${LOG}" = "1" ]; then
-	echo "" >> "${LOGFILE}"
-	echo "--------------------------------------------------------------------------------" >> "${LOGFILE}"
-	echo "$(date '+%Y-%m-%d') $(date '+%H:%M:%S') Starting" >> "${LOGFILE}"
+	{
+		echo;
+		echo "--------------------------------------------------------------------------------";
+		echo "$(date '+%Y-%m-%d') $(date '+%H:%M:%S') Starting";
+	} >> "${LOGFILE}"
 	debug "info" "[INFO] Logging enabled" ${LOG} "${LOGFILE}"
 fi
 
@@ -268,32 +295,32 @@ fi
 ############################################################
 
 # Check if CHMOD exists, otherwise use default values
-if [ -z ${TARGET_DIR_CHMOD} ]; then
-	debug "warn" "[WARN] \$TARGET_DIR_CHMOD is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "warn" "[WARN] Setting \$TARGET_DIR_CHMOD to 700" $LOG "${LOGFILE}"
-	TARGET_DIR_CHMOD=700
+if [ -z "${TARGET_DIR_CHMOD}" ]; then
+	debug "warn" "[WARN] \$TARGET_DIR_CHMOD is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	debug "warn" "[WARN] Setting \$TARGET_DIR_CHMOD to ${TARGET_DIR_CHMOD_DEFAULT}" $LOG "${LOGFILE}"
+	TARGET_DIR_CHMOD=${TARGET_DIR_CHMOD_DEFAULT}
 fi
-if [ -z ${TARGET_FILE_CHMOD} ]; then
-	debug "warn" "[WARN] \$TARGET_FILE_CHMOD is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "warn" "[WARN] Setting \$TARGET_FILE_CHMOD to 600" $LOG "${LOGFILE}"
-	TARGET_FILE_CHMOD=600
+if [ -z "${TARGET_FILE_CHMOD}" ]; then
+	debug "warn" "[WARN] \$TARGET_FILE_CHMOD is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	debug "warn" "[WARN] Setting \$TARGET_FILE_CHMOD to ${TARGET_FILE_CHMOD_DEFAULT}" $LOG "${LOGFILE}"
+	TARGET_FILE_CHMOD=${TARGET_FILE_CHMOD_DEFAULT}
 fi
 if ! valid_chmod "${TARGET_DIR_CHMOD}" > /dev/null 2>&1; then
 	debug "err"  "[ERR]  Invalid chmod value for \$TARGET_DIR_CHMOD: ${TARGET_DIR_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "info" "[INFO] Setting \$TARGET_DIR_CHMOD to 700" $LOG "${LOGFILE}"
-	TARGET_DIR_CHMOD=700
+	debug "info" "[INFO] Setting \$TARGET_DIR_CHMOD to ${TARGET_DIR_CHMOD_DEFAULT}" $LOG "${LOGFILE}"
+	TARGET_DIR_CHMOD=${TARGET_DIR_CHMOD_DEFAULT}
 fi
 if ! valid_chmod "${TARGET_FILE_CHMOD}" > /dev/null 2>&1; then
 	debug "err"  "[ERR]  Invalid chmod value for \$TARGET_FILE_CHMOD: ${TARGET_FILE_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "info" "[INFO] Setting \$TARGET_FILE_CHMOD to 400" $LOG "${LOGFILE}"
-	TARGET_FILE_CHMOD=400
+	debug "info" "[INFO] Setting \$TARGET_FILE_CHMOD to ${TARGET_FILE_CHMOD_DEFAULT}" $LOG "${LOGFILE}"
+	TARGET_FILE_CHMOD=${TARGET_FILE_CHMOD_DEFAULT}
 fi
 
 
 
 # Check if destination dir exists
-if [ -z ${TARGET} ]; then
-	debug "err" "[ERR]  \$TARGET variable is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+if [ -z "${TARGET}" ]; then
+	debug "err" "[ERR]  \$TARGET variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 	debug "err" "Aborting" $LOG "${LOGFILE}"
 	exit 1
 elif [ ! -d "${TARGET}" ]; then
@@ -346,11 +373,10 @@ fi
 
 
 # Check output Prefix
-if [ -z ${PREFIX} ]; then
-	PREFIX="$(date '+%Y-%m-%d')_$(date '+%H-%M')__"
-	debug "warn" "[WARN] $PREFIX variable is empty not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "warn" "[WARN] Using default 'date-time' prefix: ${PREFIX}" $LOG "${LOGFILE}"
-
+if [ -z "${PREFIX}" ]; then
+	debug "warn" "[WARN] \$PREFIX variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	debug "warn" "[WARN] Using default 'date-time' prefix: ${PREFIX_DEFAULT}" $LOG "${LOGFILE}"
+	PREFIX="${PREFIX_DEFAULT}"
 fi
 
 
@@ -358,8 +384,8 @@ fi
 ############################################################
 # MySQL
 ############################################################
-if [ -z ${MYSQL_CNF_FILE} ]; then
-	debug "err" "[ERR]  \$MYSQL_CNF_FILE variable is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+if [ -z "${MYSQL_CNF_FILE}" ]; then
+	debug "err" "[ERR]  \$MYSQL_CNF_FILE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 	debug "err"  "Aborting" $LOG "${LOGFILE}"
 	exit 1
 fi
@@ -391,7 +417,7 @@ if ! command -v mysqldump > /dev/null 2>&1 ; then
 	exit 2
 fi
 # Testing MySQL connection
-if ! $(which mysql) --defaults-extra-file=${MYSQL_CNF_FILE} -e exit > /dev/null 2>&1 ; then
+if ! $(which mysql) --defaults-extra-file="${MYSQL_CNF_FILE}" -e exit > /dev/null 2>&1 ; then
 	debug "err"  "[ERR]  Cannot connect to mysql database. Check credentials in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}"
 	debug "err"  "Aborting" $LOG "${LOGFILE}"
 	exit 3
@@ -424,14 +450,14 @@ done
 ############################################################
 # IGNORE/REQUIRE
 ############################################################
-if [ -z ${IGNORE+xxx} ]; then
-	debug "warn" "[WARN] \$IGNORE variable is not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "warn" "[WARN] No database will be ignored" $LOG "${LOGFILE}"
+if [ -z "${IGNORE}" ]; then
+	debug "warn" "[INFO] \$IGNORE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	debug "warn" "[INFO] No database will be ignored" $LOG "${LOGFILE}"
 	IGNORE=""
 fi
-if [ -z ${REQUIRE+xxx} ]; then
-	debug "warn" "[WARN] \$REQUIRE variable is not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "warn" "[WARN] No database will explicitly be required" $LOG "${LOGFILE}"
+if [ -z "${REQUIRE}" ]; then
+	debug "warn" "[INFO] \$REQUIRE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	debug "warn" "[INFO] No database will explicitly be required" $LOG "${LOGFILE}"
 	REQUIRE=""
 fi
 
@@ -440,8 +466,8 @@ fi
 ############################################################
 # Compression
 ############################################################
-if [ -z ${COMPRESS} ]; then
-	debug "warn" "[WARN] \$COMPRESS variable is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+if [ -z "${COMPRESS}" ]; then
+	debug "warn" "[WARN] \$COMPRESS variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 	debug "warn" "[WARN] Compression disabled" $LOG "${LOGFILE}"
 	COMPRESS=0
 fi
@@ -462,8 +488,8 @@ fi
 ############################################################
 # Encryption
 ############################################################
-if [ -z ${ENCRYPT} ]; then
-	debug "warn" "[WARN] \$ENCRYPT variable is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+if [ -z "${ENCRYPT}" ]; then
+	debug "warn" "[WARN] \$ENCRYPT variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 	debug "warn" "[WARN] Encryption disabled" $LOG "${LOGFILE}"
 	ENCRYPT=0
 fi
@@ -478,10 +504,10 @@ if [ "${ENCRYPT}" = "1" ]; then
 		debug "err"  "Aborting" $LOG "${LOGFILE}"
 		exit 2
 	fi
-	if [ -z ${OPENSSL_ALGO_ARG} ]; then
-		debug "warn" "[WARN] \$OPENSSL_ALGO_ARG variable is empty not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Encryption defaults to -aes256" $LOG "${LOGFILE}"
-		OPENSSL_ALGO_ARG="-aes256"
+	if [ -z "${OPENSSL_ALGO_ARG}" ]; then
+		debug "warn" "[WARN] \$OPENSSL_ALGO_ARG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] Encryption defaults to: ${OPENSSL_ALGO_ARG}" $LOG "${LOGFILE}"
+		OPENSSL_ALGO_ARG="${OPENSSL_ALGO_ARG_DEFAULT}"
 	fi
 	# Test openssl Algo
 	if ! echo "test" | $(which openssl) smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} "${OPENSSL_PUBKEY_PEM}" > /dev/null 2>&1 ; then
@@ -501,14 +527,14 @@ fi
 ############################################################
 # Deletion
 ############################################################
-if [ -z ${DELETE} ]; then
-	debug "warn" "[WARN] \$DELETE variable is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+if [ -z "${DELETE}" ]; then
+	debug "warn" "[WARN] \$DELETE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 	debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
 	DELETE=0
 fi
 if [ "${DELETE}" = "1"  ]; then
-	if [ -z ${DELETE_METHOD} ]; then
-		debug "warn" "[WARN] \$DELETE_METHOD variable is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	if [ -z "${DELETE_METHOD}" ]; then
+		debug "warn" "[WARN] \$DELETE_METHOD variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
 		DELETE=0
 	elif [ "${DELETE_METHOD}" = "tmpwatch" ] &&  ! command -v tmpwatch > /dev/null 2>&1 ; then
@@ -523,15 +549,15 @@ if [ "${DELETE}" = "1"  ]; then
 		debug "warn" "[WARN] \$DELETE_METHOD must be either 'tmpwatch' or 'tmpreaper' in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
 		DELETE=0
-	elif [ -z ${DELETE_IF_OLDER} ]; then
-		debug "warn" "[WARN] \$DELETE_IF_OLDER variable is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	elif [ -z "${DELETE_IF_OLDER}" ]; then
+		debug "warn" "[WARN] \$DELETE_IF_OLDER variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
 		DELETE=0
-	elif ! isint ${DELETE_IF_OLDER} > /dev/null 2>&1 ; then
+	elif ! isint "${DELETE_IF_OLDER}" > /dev/null 2>&1 ; then
 		debug "warn" "[WARN] \$DELETE_IF_OLDER variable is not a valid integer" $LOG "${LOGFILE}"
 		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
 		DELETE=0
-	elif [ ${DELETE_IF_OLDER} -lt 1 ]; then
+	elif [ "${DELETE_IF_OLDER}" -lt 1 ]; then
 		debug "warn" "[WARN] \$DELETE_IF_OLDER is smaller than 1 hour" $LOG "${LOGFILE}"
 		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
 		DELETE=0
@@ -544,11 +570,11 @@ fi
 
 # Check for forced deletion
 if [ "${DELETE}" = "1" ]; then
-	if [ -z ${DELETE_FORCE} ]; then
-		debug "warn" "[WARN] \$DELETE_FORCE variable is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	if [ -z "${DELETE_FORCE}" ]; then
+		debug "warn" "[WARN] \$DELETE_FORCE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 		debug "warn" "[WARN] Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}"
 		DELETE_FORCE=0
-	elif ! isint ${DELETE_FORCE} > /dev/null 2>&1 ; then
+	elif ! isint "${DELETE_FORCE}" > /dev/null 2>&1 ; then
 		debug "warn" "[WARN] \$DELETE_FORCE variable is not a valid integer" $LOG "${LOGFILE}"
 		debug "warn" "[WARN] Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}"
 		DELETE_FORCE=0
@@ -572,16 +598,16 @@ fi
 ############################################################
 # Nagios
 ############################################################
-if [ -z ${NAGIOS_LOG} ]; then
-	debug "warn" "[WARN] \$NAGIOS_LOG variable is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+if [ -z "${NAGIOS_LOG}" ]; then
+	debug "warn" "[WARN] \$NAGIOS_LOG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 	debug "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}"
 	NAGIOS_LOG=0
 elif [ "${NAGIOS_LOG}" = "1"  ]; then
-	if [ -z ${NAGIOS_LOGFILE} ]; then
-		debug "warn" "[WARN] \$NAGIOS_LOG variable is empty or not set in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	if [ -z "${NAGIOS_LOGFILE}" ]; then
+		debug "warn" "[WARN] \$NAGIOS_LOG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 		debug "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}"
 		NAGIOS_LOG=0
-	elif [ ! -f ${NAGIOS_LOGFILE} ]; then
+	elif [ ! -f "${NAGIOS_LOGFILE}" ]; then
 		debug  "warn" "[WARN] ${NAGIOS_LOGFILE} not found" $LOG "${LOGFILE}"
 		debugi "info" "[INFO] Trying to create..." $LOG "${LOGFILE}"
 
@@ -641,7 +667,7 @@ MYSQL="$(which mysql)"
 MYSQLDUMP="$(which mysqldump)"
 GZIP="$(which gzip)"
 OPENSSL="$(which openssl)"
-TMPWATCH="$(which ${DELETE_METHOD})"	# This can be tmpwatch or tmpreaper
+TMPWATCH="$(which "${DELETE_METHOD}")"	# This can be tmpwatch or tmpreaper
 
 ERROR=0
 
@@ -653,7 +679,7 @@ ERROR=0
 
 # Get a list of all databases
 debugi "info" "[INFO] Retrieving list of databases... " $LOG "${LOGFILE}"
-DATABASES="$( ${MYSQL} --defaults-extra-file=${MYSQL_CNF_FILE} --batch -e 'show databases;' | sed 1d )"
+DATABASES="$( ${MYSQL} --defaults-extra-file="${MYSQL_CNF_FILE}" --batch -e 'show databases;' | sed 1d )"
 NUM_DB="$(echo "${DATABASES}" | wc -l | tr -d ' ')"
 debugn "info" "${NUM_DB}" $LOG "${LOGFILE}"
 
@@ -697,7 +723,7 @@ for db in ${DATABASES}; do
 			fi
 		done
 
-		DB_SIZE="$( ${MYSQL} --defaults-extra-file=${MYSQL_CNF_FILE} --batch \
+		DB_SIZE="$( ${MYSQL} --defaults-extra-file="${MYSQL_CNF_FILE}" --batch \
 			-e "SELECT SUM(ROUND(((DATA_LENGTH + INDEX_LENGTH ) / 1024 / 1024),2)) AS Size
 				FROM INFORMATION_SCHEMA.TABLES
 				WHERE TABLE_SCHEMA = '${db}';" | tail -n1 )"
@@ -711,25 +737,27 @@ for db in ${DATABASES}; do
 				ext=".sql.gz.enc"
 				debugi "info"  "Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) " $LOG "${LOGFILE}"
 
-				# execute with POSIX pipestatus emulation
+				# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
 				exec 4>&1
-				error_statuses="`(
-					(${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
+				# shellcheck disable=SC2086
+				error_statuses="$( (
+					(${MYSQLDUMP} --defaults-extra-file="${MYSQL_CNF_FILE}" ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
 					(${GZIP} --stdout -9 || echo "1:$?" >&3) |
 					(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" || echo "2:$?" >&3)
-				) 3>&1 >&4`"
+				) 3>&1 >&4)"
 				exec 4>&-
 
 			else
 				ext=".sql.gz"
 				debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (compressed) " $LOG "${LOGFILE}"
 
-				# execute with POSIX pipestatus emulation
+				# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
 				exec 4>&1
-				error_statuses="`(
-					(${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
+				# shellcheck disable=SC2086
+				error_statuses="$( (
+					(${MYSQLDUMP} --defaults-extra-file="${MYSQL_CNF_FILE}" ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
 					(${GZIP} -9 > "${TARGET}/${PREFIX}${db}${ext}" || echo "1:$?" >&3)
-				) 3>&1 >&4`"
+				) 3>&1 >&4)"
 				exec 4>&-
 
 			fi
@@ -738,35 +766,37 @@ for db in ${DATABASES}; do
 				ext=".sql.enc"
 				debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (encrypted) " $LOG "${LOGFILE}"
 
-				# execute with POSIX pipestatus emulation
+				# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
 				exec 4>&1
-				error_statuses="`(
-					(${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
+				# shellcheck disable=SC2086
+				error_statuses="$( (
+					(${MYSQLDUMP} --defaults-extra-file="${MYSQL_CNF_FILE}" ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
 					(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" || echo "1:$?" >&3)
-				) 3>&1 >&4`"
+				) 3>&1 >&4)"
 				exec 4>&-
 
 			else
 				ext=".sql"
 				debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) " $LOG "${LOGFILE}"
 
-				# execute with POSIX pipestatus emulation
+				# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
 				exec 4>&1
-				error_statuses="`(
-					(${MYSQLDUMP} --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_OPTS} "${db}" > "${TARGET}/${PREFIX}${db}${ext}" || echo "0:$?" >&3)
-				) 3>&1 >&4`"
+				# shellcheck disable=SC2086
+				error_statuses="$( (
+					(${MYSQLDUMP} --defaults-extra-file="${MYSQL_CNF_FILE}" ${MYSQL_OPTS} "${db}" > "${TARGET}/${PREFIX}${db}${ext}" || echo "0:$?" >&3)
+				) 3>&1 >&4)"
 				exec 4>&-
 
 			fi
 		fi
 
-		TOTAL_DBS=$(expr ${TOTAL_DBS} + 1)
+		TOTAL_DBS=$((TOTAL_DBS + 1))
 
 
 		# No errors in POSIX pipestatus emulation
 		if [ -z "$error_statuses" ]; then
 			endtime=$(date +%s)
-			debugn "info" "$(($endtime - $starttime)) sec" $LOG "${LOGFILE}"
+			debugn "info" "$((endtime - starttime)) sec" $LOG "${LOGFILE}"
 			chmod ${TARGET_FILE_CHMOD} "${TARGET}/${PREFIX}${db}${ext}"
 
 			[ "${NAGIOS_DB_DUMPED}" = "" ] && NAGIOS_DB_DUMPED="${db}" || NAGIOS_DB_DUMPED="${NAGIOS_DB_DUMPED},${db}"
@@ -780,7 +810,7 @@ for db in ${DATABASES}; do
 
 	else
 		debug "info" "Skipping: ${db}" $LOG "${LOGFILE}"
-		TOTAL_IGN=$(expr ${TOTAL_IGN} + 1)
+		TOTAL_IGN=$((TOTAL_IGN + 1))
 
 		[ "${NAGIOS_DB_IGNORED}" = "" ] && NAGIOS_DB_IGNORED="${db}" || NAGIOS_DB_IGNORED="${NAGIOS_DB_IGNORED},${db}"
 
@@ -796,7 +826,7 @@ done
 
 
 debug "info" "[INFO] Dumping finished" $LOG "${LOGFILE}"
-debug "info" "[INFO] Took $(($TOTAL_ENDTIME - $TOTAL_STARTTIME)) seconds" $LOG "${LOGFILE}"
+debug "info" "[INFO] Took $((TOTAL_ENDTIME - TOTAL_STARTTIME)) seconds" $LOG "${LOGFILE}"
 debug "info" "[INFO] Total size dumped: ${TOTAL_SIZE} MB" $LOG "${LOGFILE}"
 
 
@@ -810,8 +840,8 @@ if [ ${DELETE} -eq 1 ]; then
 	[ "${DELETE_FORCE}" = "1" ] && FORCE_ARG="--force" || FORCE_ARG=""
 
 	debug "info" "[INFO] Deleting files older than ${DELETE_IF_OLDER} hours" $LOG "${LOGFILE}"
-	DELETED="$(${TMPWATCH} ${FORCE_ARG} -m ${DELETE_IF_OLDER} -v "${TARGET}/")"
-	NUM_DEL="$( echo "${DELETED}" | grep 'removing' | wc -l | awk '{print $1}' )"
+	DELETED="$(${TMPWATCH} ${FORCE_ARG} -m "$DELETE_IF_OLDER" -v "${TARGET}/")"
+	NUM_DEL="$( echo "${DELETED}" | grep -c 'removing' )"
 	if [ $? -ne 0 ]; then
 		ERROR=1
 	fi
@@ -826,37 +856,41 @@ fi
 if [ "${NAGIOS_LOG}" = "1" ]; then
 	debug "info" "[INFO] Writing nagios logfile" $LOG "${LOGFILE}"
 
-	echo "[state]"						 > "${NAGIOS_LOGFILE}"
-	echo "success = ${ERROR}"			>> "${NAGIOS_LOGFILE}"
-	echo "lastbak = ${TOTAL_STARTTIME}"	>> "${NAGIOS_LOGFILE}"
-	echo "message = "					>> "${NAGIOS_LOGFILE}"
-	echo "missing = ${REQUIRE}"			>> "${NAGIOS_LOGFILE}"
-
-	echo "[options]"					>> "${NAGIOS_LOGFILE}"
-	echo "opt_log = ${LOG}"				>> "${NAGIOS_LOGFILE}"
-	echo "opt_com = ${COMPRESS}"		>> "${NAGIOS_LOGFILE}"
-	echo "opt_enc = ${ENCRYPT}"			>> "${NAGIOS_LOGFILE}"
-	echo "opt_del = ${DELETE}"			>> "${NAGIOS_LOGFILE}"
-
-	echo "[messages]"					>> "${NAGIOS_LOGFILE}"
-	echo "msg_dbs = ${TOTAL_DBS}"		>> "${NAGIOS_LOGFILE}"
-	echo "msg_ign = ${TOTAL_IGN}"		>> "${NAGIOS_LOGFILE}"
-	echo "msg_meg = ${TOTAL_SIZE}"		>> "${NAGIOS_LOGFILE}"
-	echo "msg_sec = $(($TOTAL_ENDTIME - $TOTAL_STARTTIME))"			>> "${NAGIOS_LOGFILE}"
-	echo "msg_del = ${NUM_DEL}"			>> "${NAGIOS_LOGFILE}"
-
-	echo "[tmpwatch]"					>> "${NAGIOS_LOGFILE}"
+	{
+		echo "[state]";
+		echo "success = ${ERROR}";
+		echo "lastbak = ${TOTAL_STARTTIME}";
+		echo "message = ";
+		echo "missing = ${REQUIRE}";
+		echo;
+		echo "[options]";
+		echo "opt_log = ${LOG}";
+		echo "opt_com = ${COMPRESS}";
+		echo "opt_enc = ${ENCRYPT}";
+		echo "opt_del = ${DELETE}";
+		echo;
+		echo "[messages]";
+		echo "msg_dbs = ${TOTAL_DBS}";
+		echo "msg_ign = ${TOTAL_IGN}";
+		echo "msg_meg = ${TOTAL_SIZE}";
+		echo "msg_sec = $((TOTAL_ENDTIME - TOTAL_STARTTIME))";
+		echo "msg_del = ${NUM_DEL}";
+		echo;
+		echo "[tmpwatch]";
+	} > "${NAGIOS_LOGFILE}"
 
 	if [ "${DELETE}" = "1" ]; then
-		echo "del_time = ${DELETE_IF_OLDER}"	>> "${NAGIOS_LOGFILE}"
+		echo "del_time = ${DELETE_IF_OLDER}" >> "${NAGIOS_LOGFILE}"
 	else
-		echo "del_time = 0"						>> "${NAGIOS_LOGFILE}"
+		echo "del_time = 0"	>> "${NAGIOS_LOGFILE}"
 	fi
 
-	echo "[stats]"								>> "${NAGIOS_LOGFILE}"
-	echo "db_dumped = ${NAGIOS_DB_DUMPED}"		>> "${NAGIOS_LOGFILE}"
-	echo "db_error = ${NAGIOS_DB_ERROR}"		>> "${NAGIOS_LOGFILE}"
-	echo "db_ignored = ${NAGIOS_DB_IGNORED}"	>> "${NAGIOS_LOGFILE}"
+	{
+		echo "[stats]";
+		echo "db_dumped = ${NAGIOS_DB_DUMPED}";
+		echo "db_error = ${NAGIOS_DB_ERROR}";
+		echo "db_ignored = ${NAGIOS_DB_IGNORED}"
+	} >> "${NAGIOS_LOGFILE}"
 
 fi
 

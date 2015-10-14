@@ -1,2 +1,24 @@
-language: bash
+language: shell
+
+sudo: false
+
+addons:
+  apt:
+    sources:
+      - debian-sid
+    packages:
+      - shellcheck
+
+#sudo: required
+#install:
+#      - sudo apt-get -qq update
+#      - sudo apt-get -qq install git devscripts shunit2
+
+
+script:
+      - shellcheck --shell=sh mysqldump-secure
+      - shellcheck --shell=sh --exclude=SC2034,SC2148 mysqldump-secure.conf
+      - shellcheck --shell=sh examples/create-keypair.sh
+      - shellcheck --shell=sh examples/decrypt.sh
+      - shellcheck --shell=sh examples/encrypt.sh
 
