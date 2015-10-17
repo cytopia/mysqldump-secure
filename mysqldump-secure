@@ -680,7 +680,7 @@ ERROR=0
 # Get a list of all databases
 debugi "info" "[INFO] Retrieving list of databases... " $LOG "${LOGFILE}"
 #DATABASES="$( ${MYSQL} --defaults-extra-file="${MYSQL_CNF_FILE}" --batch -e 'show databases;' | sed 1d )"
-DATABASES="$( ${MYSQL} --defaults-extra-file="${MYSQL_CNF_FILE}" --no-auto-rehash --skip-column-names -e 'SELECT DISTINCT `table_schema` FROM `information_schema`.`tables`;')"
+DATABASES="$( ${MYSQL} --defaults-extra-file="${MYSQL_CNF_FILE}" --no-auto-rehash --skip-column-names -e 'SELECT DISTINCT table_schema FROM information_schema.tables;')"
 NUM_DB="$(echo "${DATABASES}" | wc -l | tr -d ' ')"
 debugn "info" "${NUM_DB}" $LOG "${LOGFILE}"
 
