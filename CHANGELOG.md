@@ -1,3 +1,9 @@
+Version 0.7 (unreleased)
+-----------
+
+- [Enh]		Better default dump options
+
+
 Version 0.6
 -----------
 
