@@ -1,7 +1,12 @@
-Version 0.7 (unreleased)
+Version 0.8 (unreleased)
+-----------
+
+
+Version 0.7
 -----------
 
 - [Enh]		Better default dump options
+- [Enh]		Pass shellcheck
 
 
 Version 0.6
