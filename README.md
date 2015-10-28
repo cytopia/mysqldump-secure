@@ -295,3 +295,11 @@ If you use the script, star it or let me know somehow.
 
 ## 7. Version
 For a complete list of verion see [CHANGELOG](CHANGELOG.md)
+
+
+## 8. Awesome
+
+Added by the following [![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/sindresorhus/awesome) lists:
+
+* [awesome-mysql](https://shlomi-noach.github.io/awesome-mysql/) ([github](https://github.com/shlomi-noach/awesome-mysql))
+
