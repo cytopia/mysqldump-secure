@@ -73,47 +73,15 @@ You should always define your credentials in a my.cnf file with `chmod 400` or y
 
 ## 3. Installation
 
-### 3.1 Download
+Simply download the source code and use `make install`.
 
-Download via git or composer
 ```shell
-# Make sure to clone recursively to also get the submodules
 git clone --recursive https://github.com/cytopia/mysqldump-secure.git
-```
-
-```shell
-composer create-project cytopia/mysqldump-secure
-```
-
-### 3.2 Automated installation
-Automated installation and setting of access rights via `unix Makefile`.
-```shell
+cd mysqldump-secure
 sudo make install
 ```
 
-### 3.3 Manual installation
-If you do not trust the `Makefile` you can also manually copy the files and adjust the file permissions by hand.
-```shell
-# Copy the script
-cp mysqldump-secure /usr/local/sbin/mysqldump-secure
-chmod +x /usr/local/sbin/mysqldump-secure
-
-# Copy the config files
-cp mysqldump-secure.conf /etc/mysqldump-secure.conf
-chmod 400 /etc/mysqldump-secure.conf
-
-cp mysqldump-secure.cnf /etc/mysqldump-secure.cnf
-chmod 400 /etc/mysqldump-secure.cnf
-
-# Create the backup dir
-mkdir -p /shared/backup/databases
-chmod 700 /shared/backup/databases
-
-# Create the logfile (optionally)
-touch /var/log/mysqldump-secure.log
-chmod 600 /var/log/mysqldump-secure.log
-```
-
+For more detailed instructions go to the [Install guidelines](https://github.com/cytopia/mysqldump-secure/blob/master/doc/INSTALL.md)
 
 
 ## 4. Configuration
