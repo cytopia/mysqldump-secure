@@ -64,15 +64,15 @@ endif
 	@echo ""
 
 	@# Install binary
-	install -m 0755 $(DUMP_SH) $(SBINDIR)/$(DUMP_SH)
+	install -m 0755 bin/$(DUMP_SH) $(SBINDIR)/$(DUMP_SH)
 	@echo ""
 
 	@# Install config file and create backup if there is one already
-	install -b -m 0400 $(DUMP_CONF) $(ETCDIR)/$(DUMP_CONF)
+	install -b -m 0400 config/$(DUMP_CONF) $(ETCDIR)/$(DUMP_CONF)
 	@echo ""
 
 	@# Install config file and create backup if there is one already
-	install -b -m 0400 $(DUMP_CNF) $(ETCDIR)/$(DUMP_CNF)
+	install -b -m 0400 config/$(DUMP_CNF) $(ETCDIR)/$(DUMP_CNF)
 	@echo ""
 
 	@echo "Installation complete"
@@ -87,20 +87,20 @@ reinstall:
 	@echo ""
 
 	@# Install binary
-	install -m 0755 $(DUMP_SH) $(SBINDIR)/$(DUMP_SH)
+	install -m 0755 bin/$(DUMP_SH) $(SBINDIR)/$(DUMP_SH)
 	@echo ""
 
 	@# Install config file without overwriting
 	test -f $(ETCDIR)/$(DUMP_CONF) \
-		&& install -m 0400 $(DUMP_CONF) $(ETCDIR)/$(DUMP_CONF).new \
-		|| install -m 0400 $(DUMP_CONF) $(ETCDIR)/$(DUMP_CONF)
+		&& install -m 0400 config/$(DUMP_CONF) $(ETCDIR)/$(DUMP_CONF).new \
+		|| install -m 0400 config/$(DUMP_CONF) $(ETCDIR)/$(DUMP_CONF)
 
 	@echo ""
 
 	@# Install config file without overwriting
 	test -f $(ETCDIR)/$(DUMP_CNF) \
-		&& install -m 0400 $(DUMP_CNF) $(ETCDIR)/$(DUMP_CNF).new \
-		|| install -m 0400 $(DUMP_CNF) $(ETCDIR)/$(DUMP_CNF)
+		&& install -m 0400 config/$(DUMP_CNF) $(ETCDIR)/$(DUMP_CNF).new \
+		|| install -m 0400 config/$(DUMP_CNF) $(ETCDIR)/$(DUMP_CNF)
 	@echo ""
 
 	@echo "Installation complete"

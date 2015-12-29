@@ -1,6 +1,10 @@
 Version 0.8 (unreleased)
 -----------
 
+- [Enh]		Plugin update
+- [Enh]		Documentation
+- [Enh]		Makefile adjustments
+
 
 Version 0.7
 -----------

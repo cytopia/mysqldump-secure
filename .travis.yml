@@ -1,24 +1,19 @@
-language: shell
+language: bash
 
-sudo: false
-
-addons:
-  apt:
-    sources:
-      - debian-sid
-    packages:
-      - shellcheck
+before_script:
+  - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu/ trusty-backports restricted main universe"
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq shellcheck
 
 #sudo: required
 #install:
 #      - sudo apt-get -qq update
 #      - sudo apt-get -qq install git devscripts shunit2
 
-
 script:
-      - shellcheck --shell=sh mysqldump-secure
-      - shellcheck --shell=sh --exclude=SC2034,SC2148 mysqldump-secure.conf
-      - shellcheck --shell=sh examples/create-keypair.sh
-      - shellcheck --shell=sh examples/decrypt.sh
-      - shellcheck --shell=sh examples/encrypt.sh
+      - shellcheck --shell=sh bin/mysqldump-secure
+      - shellcheck --shell=sh bin/create-keypair.sh
+      - shellcheck --shell=sh bin/decrypt.sh
+      - shellcheck --shell=sh bin/encrypt.sh
+      - shellcheck --shell=sh --exclude=SC2034,SC2148 config/mysqldump-secure.conf
 
