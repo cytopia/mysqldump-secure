@@ -64,7 +64,7 @@ REQUIRED="mysql databaseX databaseY"
 ### 1.2.5 Tmpwatch/Tmpreaper integration
 If you have [tmpwatch](http://linux.die.net/man/8/tmpwatch) or [tmpreaper](http://manpages.ubuntu.com/manpages/hardy/man8/tmpreaper.8.html) installed you can specify to automatically delete backups older than X hours.
 
-Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following variables:
+Open [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/config/mysqldump-secure.conf) and set the following variables:
 Enable `1` or disable `1` automatic deletion
 ```shell
 DELETE=1
