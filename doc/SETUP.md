@@ -14,10 +14,10 @@ Encryption is done by public/private key via [OpenSSL SMIME](https://www.openssl
 > <sub>The primary advantage of public-key cryptography is increased security and convenience: private keys never need to be transmitted or revealed to anyone. In a secret-key system, by contrast, the secret keys must be transmitted (either manually or through a communication channel) since the same key is used for encryption and decryption. A serious concern is that there may be a chance that an enemy can discover the secret key during transmission.</sub>
 > <sub>[[1]](http://www.emc.com/emc-plus/rsa-labs/standards-initiatives/advantages-and-disadvantages.htm)</sub>
 
-See [examples](examples) for scripts to generate public/private keys, encrypt and decrypt.
+See [examples](https://github.com/cytopia/mysqldump-secure/blob/master/bin) for scripts to generate public/private keys, encrypt and decrypt.
 
 #### 1.2.1.1 Create the keypair
-In order to enable encryption you need a public/private keypair. If you don't know how to generate them you can use provided script: [create-keypair.sh](examples/create-keypair.sh).
+In order to enable encryption you need a public/private keypair. If you don't know how to generate them you can use provided script: [create-keypair.sh](https://github.com/cytopia/mysqldump-secure/blob/master/bin/create-keypair.sh).
 
 Once you have the keys
 
