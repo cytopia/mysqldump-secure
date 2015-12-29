@@ -14,7 +14,7 @@ git clone --recursive https://github.com/cytopia/mysqldump-secure.git
 composer create-project cytopia/mysqldump-secure
 ```
 
-### 3.2 Automated installation
+### 1.2 Automated installation
 Automated installation and setting of access rights via `unix Makefile`.
 ```shell
 sudo make install
