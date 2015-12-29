@@ -96,7 +96,7 @@ DELETE=720 # 720 hours
 ### 1.2.6 File logging
 Mysqldump-secure includes a mechanism to log every action (debug, info, warn and error) to file. The script also follows the practise of sending proper exit codes (0 for everything went fine and >0 for I had some errors).
 
-Open [/etc/mysqldump-secure.conf](mysqldump-secure.conf) and set the following variables
+Open [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/config/mysqldump-secure.conf) and set the following variables
 ```shell
 LOG=1
 LOGFILE="/var/log/mysqldump-secure.log"
