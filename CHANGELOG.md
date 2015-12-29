@@ -1,4 +1,8 @@
-Version 0.8 (unreleased)
+Version 0.9 (unreleased)
+-----------
+
+
+Version 0.8
 -----------
 
 - [Enh]		Plugin update
