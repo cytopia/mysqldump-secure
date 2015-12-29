@@ -1,8 +1,6 @@
-# mysqldump-secure
+# mysqldump-secure Installation
 
-## 1. Installation
-
-### 1.1 Download
+## Download
 
 Download via git or composer
 ```shell
@@ -14,13 +12,13 @@ git clone --recursive https://github.com/cytopia/mysqldump-secure.git
 composer create-project cytopia/mysqldump-secure
 ```
 
-### 1.2 Automated installation
+## Automated installation
 Automated installation and setting of access rights via `unix Makefile`.
 ```shell
 sudo make install
 ```
 
-### 1.3 Manual installation
+## Manual installation
 If you do not trust the `Makefile` you can also manually copy the files and adjust the file permissions by hand.
 ```shell
 # Copy the script
