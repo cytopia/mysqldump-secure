@@ -10,6 +10,6 @@ If your desired sql files that you want to import are prefixed with `2015-12-29_
 for i in 2015-12-29_14-24__*.sql ; do \
     db="$(echo "$i" | sed 's/2015-12-29_14-24__//' | sed 's/\.sql//')"; \
     mysql -e "CREATE DATABASE IF NOT EXISTS $db"; \
-    mysql $name < $i;\
+    mysql $db < $i;\
 done
 ```
