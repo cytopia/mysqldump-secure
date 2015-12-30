@@ -1,3 +1,5 @@
+[<- Home](https://github.com/cytopia/mysqldump-secure)
+
 # Examples
 
 ## Importing
