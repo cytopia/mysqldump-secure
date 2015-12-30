@@ -5,7 +5,7 @@
 [Installation](https://github.com/cytopia/mysqldump-secure#3-installation) |
 [Configuration](https://github.com/cytopia/mysqldump-secure#4-configuration) |
 [Contribution](https://github.com/cytopia/mysqldump-secure#5-contribution) |
-[Examples](https://github.com/cytopia/mysqldump-secure#6-exanples) |
+[Examples](https://github.com/cytopia/mysqldump-secure#6-examples) |
 [License](https://github.com/cytopia/mysqldump-secure#7-license) |
 [Version](https://github.com/cytopia/mysqldump-secure#8-version)
 
