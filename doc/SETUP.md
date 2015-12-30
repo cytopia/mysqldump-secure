@@ -1,4 +1,10 @@
-[<- Home](https://github.com/cytopia/mysqldump-secure)
+[Readme](https://github.com/cytopia/mysqldump-secure/blob/master/README.md) |
+[Installation](https://github.com/cytopia/mysqldump-secure/blob/master/doc/INSTALL.md) |
+Configuration |
+[Encryption](https://github.com/cytopia/mysqldump-secure/blob/master/doc/ENCRYPTION.md) |
+[Examples](https://github.com/cytopia/mysqldump-secure/blob/master/doc/EXAMPLES.md)
+
+---
 
 # mysqldump-secure Configuration
 
