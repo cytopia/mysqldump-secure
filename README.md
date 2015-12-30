@@ -4,8 +4,8 @@
 [Feature Overview](https://github.com/cytopia/mysqldump-secure#2-feature-overview) |
 [Installation](https://github.com/cytopia/mysqldump-secure#3-installation) |
 [Configuration](https://github.com/cytopia/mysqldump-secure#4-configuration) |
-[Contribution](https://github.com/cytopia/mysqldump-secure#5-contribution) |
-[Examples](https://github.com/cytopia/mysqldump-secure#6-examples) |
+[Documentation](https://github.com/cytopia/mysqldump-secure#5-documentation) |
+[Contribution](https://github.com/cytopia/mysqldump-secure#6-contribution) |
 [License](https://github.com/cytopia/mysqldump-secure#7-license) |
 [Version](https://github.com/cytopia/mysqldump-secure#8-version)
 
@@ -108,17 +108,17 @@ You do not need to worry about file permissions or directories. The script will 
 For more detailed instructions go to the [Setup guidelines](https://github.com/cytopia/mysqldump-secure/blob/master/doc/SETUP.md)
 
 
+## 5. Documentation
 
-## 5. Contribution
+For examples go to [Examples](https://github.com/cytopia/mysqldump-secure/blob/master/doc/EXAMPLES.md)
+
+
+## 6. Contribution
 Contributors are welcome.
 
 If the script runs on an operating system productively, which is currently not yet included at the top of this document, please let me know, so I can add it for reference.
 
 If you use the script, star it or let me know somehow.
-
-## 6. Examples
-
-For examples go to [Examples](https://github.com/cytopia/mysqldump-secure/blob/master/doc/EXAMPLES.md)
 
 
 ## 7. License
