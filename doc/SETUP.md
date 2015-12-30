@@ -1,3 +1,5 @@
+[<- Home](https://github.com/cytopia/mysqldump-secure)
+
 # mysqldump-secure Configuration
 
 ## 1.1 Configure MySQL Credentials
