@@ -110,7 +110,12 @@ For more detailed instructions go to the [Setup guidelines](https://github.com/c
 
 ## 5. Documentation
 
-For examples go to [Examples](https://github.com/cytopia/mysqldump-secure/blob/master/doc/EXAMPLES.md)
+| File | Description |
+|------|-------------|
+| [Installation](https://github.com/cytopia/mysqldump-secure/blob/master/doc/INSTALL.md) | Different ways to install mysqldump-secure |
+| [Configuration](https://github.com/cytopia/mysqldump-secure/blob/master/doc/SETUP.md) | How to configure mysqldump-secure |
+| [Encryption](https://github.com/cytopia/mysqldump-secure/blob/master/doc/ENCRYPTION.md) | Information and usage about the used encryption |
+| [Examples](https://github.com/cytopia/mysqldump-secure/blob/master/doc/EXAMPLES.md) | Some command line examples such as mass importing databases back into the server |
 
 
 ## 6. Contribution
