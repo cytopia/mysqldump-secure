@@ -1,3 +1,12 @@
+[Readme](https://github.com/cytopia/mysqldump-secure/blob/master/README.md) |
+[Installation](https://github.com/cytopia/mysqldump-secure/blob/master/doc/INSTALL.md) |
+[Configuration](https://github.com/cytopia/mysqldump-secure/blob/master/doc/SETUP.md) |
+Encryption |
+[Examples](https://github.com/cytopia/mysqldump-secure/blob/master/doc/EXAMPLES.md)
+
+---
+
+
 # Encryption/Decrption
 
 ## Create public/private key
