@@ -5,8 +5,9 @@
 [Installation](https://github.com/cytopia/mysqldump-secure#3-installation) |
 [Configuration](https://github.com/cytopia/mysqldump-secure#4-configuration) |
 [Contribution](https://github.com/cytopia/mysqldump-secure#5-contribution) |
-[License](https://github.com/cytopia/mysqldump-secure#6-license) |
-[Version](https://github.com/cytopia/mysqldump-secure#7-version)
+[Examples](https://github.com/cytopia/mysqldump-secure#6-contribution) |
+[License](https://github.com/cytopia/mysqldump-secure#7-license) |
+[Version](https://github.com/cytopia/mysqldump-secure#8-version)
 
 [![Build Status](https://travis-ci.org/cytopia/mysqldump-secure.svg?branch=master)](https://travis-ci.org/cytopia/mysqldump-secure)
 [![Latest Stable Version](https://poser.pugx.org/cytopia/mysqldump-secure/v/stable)](https://packagist.org/packages/cytopia/mysqldump-secure) [![Total Downloads](https://poser.pugx.org/cytopia/mysqldump-secure/downloads)](https://packagist.org/packages/cytopia/mysqldump-secure) [![Latest Unstable Version](https://poser.pugx.org/cytopia/mysqldump-secure/v/unstable)](https://packagist.org/packages/cytopia/mysqldump-secure) [![License](https://poser.pugx.org/cytopia/mysqldump-secure/license)](http://opensource.org/licenses/MIT)
@@ -115,15 +116,19 @@ If the script runs on an operating system productively, which is currently not y
 
 If you use the script, star it or let me know somehow.
 
+## 6. Examples
 
-## 6. License
+For examples go to [Examples](https://github.com/cytopia/mysqldump-secure/blob/master/doc/EXAMPLES.md)
+
+
+## 7. License
 [![license](https://poser.pugx.org/cytopia/mysqldump-secure/license)](http://opensource.org/licenses/mit)
 
-## 7. Version
+## 8. Version
 For a complete list of verion see [CHANGELOG](CHANGELOG.md)
 
 
-## 8. Awesome
+## 9. Awesome
 
 Added by the following [![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/sindresorhus/awesome) lists:
 
