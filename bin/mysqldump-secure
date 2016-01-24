@@ -472,8 +472,8 @@ if [ -z "${COMPRESS}" ]; then
 	COMPRESS=0
 fi
 if [ "${COMPRESS}" = "1" ]; then
-	if ! command -v gzip > /dev/null 2>&1 ; then
-		debug "warn" "[WARN] 'gzip' not found" $LOG "${LOGFILE}"
+	if ! command -v "${COMPRESSOR}" > /dev/null 2>&1 ; then
+		debug "warn" "[WARN] "${COMPRESSOR}" not found" $LOG "${LOGFILE}"
 		debug "warn" "[WARN] Disabling compression" $LOG "${LOGFILE}"
 		COMPRESS=0
 	else
@@ -665,7 +665,7 @@ fi
 # Binaries
 MYSQL="$(which mysql)"
 MYSQLDUMP="$(which mysqldump)"
-GZIP="$(which gzip)"
+GZIP="$(which "${COMPRESSOR}")"
 OPENSSL="$(which openssl)"
 TMPWATCH="$(which "${DELETE_METHOD}")"	# This can be tmpwatch or tmpreaper
 
@@ -735,7 +735,7 @@ for db in ${DATABASES}; do
 
 		if [ ${COMPRESS} -eq 1 ]; then
 			if [ ${ENCRYPT} -eq 1 ]; then
-				ext=".sql.gz.enc"
+				ext=".sql."${COMPRESSOR_EXT}".enc"
 				debugi "info"  "Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) " $LOG "${LOGFILE}"
 
 				# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
@@ -749,7 +749,7 @@ for db in ${DATABASES}; do
 				exec 4>&-
 
 			else
-				ext=".sql.gz"
+				ext=".sql."${COMPRESSOR_EXT}""
 				debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (compressed) " $LOG "${LOGFILE}"
 
 				# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
@@ -896,8 +896,13 @@ if [ "${NAGIOS_LOG}" = "1" ]; then
 fi
 
 
+###########################################################
+# Post processing
+###########################################################
 
-
+if [ ! -z "${POST_SCRIPT}" ]; then
+        eval "${POST_SCRIPT}"
+fi
 
 ############################################################
 # Exit
