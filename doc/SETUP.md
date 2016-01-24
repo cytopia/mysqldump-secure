@@ -1,9 +1,40 @@
+[Readme](https://github.com/cytopia/mysqldump-secure/blob/master/README.md) |
+[Installation](https://github.com/cytopia/mysqldump-secure/blob/master/doc/INSTALL.md) |
+Configuration |
+[Encryption](https://github.com/cytopia/mysqldump-secure/blob/master/doc/ENCRYPTION.md) |
+[Examples](https://github.com/cytopia/mysqldump-secure/blob/master/doc/EXAMPLES.md)
+
+---
+
 # mysqldump-secure Configuration
 
 ## 1.1 Configure MySQL Credentials
-Setup MySQL username, password and host in [/etc/mysqldump-secure.cnf](https://github.com/cytopia/mysqldump-secure/blob/master/config/mysqldump-secure.cnf) and simply test if the connection works via `mysql`.
+Setup MySQL username, password and host in [/etc/mysqldump-secure.cnf](https://github.com/cytopia/mysqldump-secure/blob/master/config/mysqldump-secure.cnf) 
 
-If you see the mysql prompt then everything went fine and you can continue configuring the program.
+```ini
+[client]
+host = localhost
+user = readonlyrootuser
+password = "verySecurePasswordWith$%&SpecialChars"
+```
+
+Test if the connection settings are working
+
+```shell
+$ mysql --defaults-extra-file=/etc/mysqldump-secure.cnf
+
+Welcome to the MariaDB monitor.  Commands end with ; or \g.
+Your MariaDB connection id is 405
+Server version: 10.1.9-MariaDB Homebrew
+
+Copyright (c) 2000, 2015, Oracle, MariaDB Corporation Ab and others.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+MariaDB [(none)]>
+```
+
+If you see the mysql/mariadb prompt then everything went fine and you can continue configuring the program.
 
 ## 1.2 Configure MySQLDump Options
 Configure the backup behavior in [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/config/mysqldump-secure.conf).
@@ -14,7 +45,7 @@ Encryption is done by public/private key via [OpenSSL SMIME](https://www.openssl
 > <sub>The primary advantage of public-key cryptography is increased security and convenience: private keys never need to be transmitted or revealed to anyone. In a secret-key system, by contrast, the secret keys must be transmitted (either manually or through a communication channel) since the same key is used for encryption and decryption. A serious concern is that there may be a chance that an enemy can discover the secret key during transmission.</sub>
 > <sub>[[1]](http://www.emc.com/emc-plus/rsa-labs/standards-initiatives/advantages-and-disadvantages.htm)</sub>
 
-See [examples](https://github.com/cytopia/mysqldump-secure/blob/master/bin) for scripts to generate public/private keys, encrypt and decrypt.
+See [Encryption guidelines](https://github.com/cytopia/mysqldump-secure/blob/master/doc/ENCRYPTION.md) for more info about how to create the keys and manually encrypt/decrypt.
 
 #### 1.2.1.1 Create the keypair
 In order to enable encryption you need a public/private keypair. If you don't know how to generate them you can use provided script: [create-keypair.sh](https://github.com/cytopia/mysqldump-secure/blob/master/bin/create-keypair.sh).

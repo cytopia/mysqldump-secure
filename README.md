@@ -4,9 +4,10 @@
 [Feature Overview](https://github.com/cytopia/mysqldump-secure#2-feature-overview) |
 [Installation](https://github.com/cytopia/mysqldump-secure#3-installation) |
 [Configuration](https://github.com/cytopia/mysqldump-secure#4-configuration) |
-[Contribution](https://github.com/cytopia/mysqldump-secure#5-contribution) |
-[License](https://github.com/cytopia/mysqldump-secure#6-license) |
-[Version](https://github.com/cytopia/mysqldump-secure#7-version)
+[Documentation](https://github.com/cytopia/mysqldump-secure#5-documentation) |
+[Contribution](https://github.com/cytopia/mysqldump-secure#6-contribution) |
+[License](https://github.com/cytopia/mysqldump-secure#7-license) |
+[Version](https://github.com/cytopia/mysqldump-secure#8-version)
 
 [![Build Status](https://travis-ci.org/cytopia/mysqldump-secure.svg?branch=master)](https://travis-ci.org/cytopia/mysqldump-secure)
 [![Latest Stable Version](https://poser.pugx.org/cytopia/mysqldump-secure/v/stable)](https://packagist.org/packages/cytopia/mysqldump-secure) [![Total Downloads](https://poser.pugx.org/cytopia/mysqldump-secure/downloads)](https://packagist.org/packages/cytopia/mysqldump-secure) [![Latest Unstable Version](https://poser.pugx.org/cytopia/mysqldump-secure/v/unstable)](https://packagist.org/packages/cytopia/mysqldump-secure) [![License](https://poser.pugx.org/cytopia/mysqldump-secure/license)](http://opensource.org/licenses/MIT)
@@ -107,8 +108,18 @@ You do not need to worry about file permissions or directories. The script will 
 For more detailed instructions go to the [Setup guidelines](https://github.com/cytopia/mysqldump-secure/blob/master/doc/SETUP.md)
 
 
+## 5. Documentation
 
-## 5. Contribution
+| File | Description |
+|------|-------------|
+| [Installation](https://github.com/cytopia/mysqldump-secure/blob/master/doc/INSTALL.md) | Different ways to install mysqldump-secure |
+| [Configuration](https://github.com/cytopia/mysqldump-secure/blob/master/doc/SETUP.md) | How to configure mysqldump-secure |
+| [Encryption](https://github.com/cytopia/mysqldump-secure/blob/master/doc/ENCRYPTION.md) | Information and usage about the used encryption |
+| [Examples](https://github.com/cytopia/mysqldump-secure/blob/master/doc/EXAMPLES.md) | Some command line examples such as mass importing databases back into the server |
+| [www.everythingcli.org](http://www.everythingcli.org/secure-mysqldump-script-with-encryption-and-compression/) | General thoughts and initial idea for this project. |
+
+
+## 6. Contribution
 Contributors are welcome.
 
 If the script runs on an operating system productively, which is currently not yet included at the top of this document, please let me know, so I can add it for reference.
@@ -116,14 +127,14 @@ If the script runs on an operating system productively, which is currently not y
 If you use the script, star it or let me know somehow.
 
 
-## 6. License
+## 7. License
 [![license](https://poser.pugx.org/cytopia/mysqldump-secure/license)](http://opensource.org/licenses/mit)
 
-## 7. Version
+## 8. Version
 For a complete list of verion see [CHANGELOG](CHANGELOG.md)
 
 
-## 8. Awesome
+## 9. Awesome
 
 Added by the following [![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/sindresorhus/awesome) lists:
 
