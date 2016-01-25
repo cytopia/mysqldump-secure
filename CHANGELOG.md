@@ -1,7 +1,9 @@
 Version 0.9 (unreleased)
 -----------
 
-- [Enh]		Install in /usr/local/bin instead of /usr/local/sbin
+- [Enh]		Added .editorconfig to the project
+- [Fix]		Documentation: dos file types changed to unix
+- [Fix]		Install in /usr/local/bin instead of /usr/local/sbin
 - [Enh]		Keep original filename after decryption (https://github.com/Paike)
 - [Enh]		Make compression algorithm dynamic (thanks to @Paike)
 
