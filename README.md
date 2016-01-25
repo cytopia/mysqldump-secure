@@ -63,8 +63,8 @@ You should always define your credentials in a my.cnf file with `chmod 400` or y
 
 
 ## 2. Feature Overview
-* Encryption
-* Compression
+* Encryption (private/public key)
+* Compression (choose algorithm)
 * Blacklisting
 * Tmpwatch integration
 * File logging
