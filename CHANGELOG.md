@@ -1,4 +1,8 @@
-Version 0.9 (unreleased)
+Version 0.10 (unreleased)
+------------
+
+
+Version 0.9
 -----------
 
 - [Enh]		Added .editorconfig to the project
