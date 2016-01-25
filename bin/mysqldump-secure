@@ -473,17 +473,17 @@ if [ -z "${COMPRESS}" ]; then
 fi
 if [ "${COMPRESS}" = "1" ]; then
 	if [ -z "${COMPRESS_BIN}" ]; then
-		debug "err"  "[ERR]  '\$COMPRESS_BIN variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+		debug "err"  "[ERR]  \$COMPRESS_BIN variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 		debug "err"  "Aborting" $LOG "${LOGFILE}"
 		exit 2
 	fi
 	if [ -z "${COMPRESS_ARG}" ]; then
-		debug "err"  "[ERR]  '\$COMPRESS_ARG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+		debug "err"  "[ERR]  \$COMPRESS_ARG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 		debug "err"  "Aborting" $LOG "${LOGFILE}"
 		exit 2
 	fi
 	if [ -z "${COMPRESS_EXT}" ]; then
-		debug "err"  "[ERR]  '\$COMPRESS_EXT variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+		debug "err"  "[ERR]  \$COMPRESS_EXT variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 		debug "err"  "Aborting" $LOG "${LOGFILE}"
 		exit 2
 	fi
