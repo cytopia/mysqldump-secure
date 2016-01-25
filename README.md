@@ -38,6 +38,9 @@ Find the whole post at [www.everythingcli.org](http://www.everythingcli.org/inde
 | [mysqldump](https://dev.mysql.com/downloads/mysql/)  | yes  | This is used for the actual dump procedure |
 | [openssl](https://www.openssl.org)  | optional  | Optionally used for private/public key encrypting the database dump |
 | [gzip](http://www.gzip.org)  | optional  | Optionally used for compressing the database dump |
+| [bzip2](http://www.bzip.org/)  | optional  | Optionally used for compressing the database dump |
+| [lzma](http://tukaani.org/lzma/)  | optional  | Optionally used for compressing the database dump |
+| [lzop](http://www.lzop.org/)  | optional  | Optionally used for compressing the database dump |
 | [tmpwatch](https://fedorahosted.org/tmpwatch/)  | optional  | Optionally used to delete old database dumps |
 | [tmpreaper](https://packages.debian.org/sid/tmpreaper)  | optional  | Optionally used to delete old database dumps |
 | [check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure)  | optional  | Optionally used to monitor the dump via nagios (already bundled as a submodule inside this repository) |

@@ -1,6 +1,9 @@
 Version 0.9 (unreleased)
 -----------
 
+- [Enh]		Keep original filename after decryption (https://github.com/Paike)
+- [Enh]		Make compression algorithm dynamic (thanks to @Paike)
+
 
 Version 0.8
 -----------

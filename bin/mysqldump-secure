@@ -472,10 +472,26 @@ if [ -z "${COMPRESS}" ]; then
 	COMPRESS=0
 fi
 if [ "${COMPRESS}" = "1" ]; then
-	if ! command -v gzip > /dev/null 2>&1 ; then
-		debug "warn" "[WARN] 'gzip' not found" $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Disabling compression" $LOG "${LOGFILE}"
-		COMPRESS=0
+	if [ -z "${COMPRESS_BIN}" ]; then
+		debug "err"  "[ERR]  '\$COMPRESS_BIN variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+		debug "err"  "Aborting" $LOG "${LOGFILE}"
+		exit 2
+	fi
+	if [ -z "${COMPRESS_ARG}" ]; then
+		debug "err"  "[ERR]  '\$COMPRESS_ARG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+		debug "err"  "Aborting" $LOG "${LOGFILE}"
+		exit 2
+	fi
+	if [ -z "${COMPRESS_EXT}" ]; then
+		debug "err"  "[ERR]  '\$COMPRESS_EXT variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+		debug "err"  "Aborting" $LOG "${LOGFILE}"
+		exit 2
+	fi
+
+	if ! command -v ${COMPRESS_BIN} > /dev/null 2>&1 ; then
+		debug "warn" "[ERR]  ${COMPRESS_BIN}  not found" $LOG "${LOGFILE}"
+		debug "err"  "Aborting" $LOG "${LOGFILE}"
+		exit 2
 	else
 		debug "info" "[INFO] Compression enabled" $LOG "${LOGFILE}"
 	fi
@@ -665,7 +681,6 @@ fi
 # Binaries
 MYSQL="$(which mysql)"
 MYSQLDUMP="$(which mysqldump)"
-GZIP="$(which gzip)"
 OPENSSL="$(which openssl)"
 TMPWATCH="$(which "${DELETE_METHOD}")"	# This can be tmpwatch or tmpreaper
 
@@ -735,7 +750,7 @@ for db in ${DATABASES}; do
 
 		if [ ${COMPRESS} -eq 1 ]; then
 			if [ ${ENCRYPT} -eq 1 ]; then
-				ext=".sql.gz.enc"
+				ext=".sql.${COMPRESS_EXT}.enc"
 				debugi "info"  "Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) " $LOG "${LOGFILE}"
 
 				# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
@@ -743,13 +758,13 @@ for db in ${DATABASES}; do
 				# shellcheck disable=SC2086
 				error_statuses="$( (
 					(${MYSQLDUMP} --defaults-extra-file="${MYSQL_CNF_FILE}" ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
-					(${GZIP} --stdout -9 || echo "1:$?" >&3) |
+					(${COMPRESS_BIN} ${COMPRESS_ARG} || echo "1:$?" >&3) |
 					(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" || echo "2:$?" >&3)
 				) 3>&1 >&4)"
 				exec 4>&-
 
 			else
-				ext=".sql.gz"
+				ext=".sql.${COMPRESS_EXT}"
 				debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (compressed) " $LOG "${LOGFILE}"
 
 				# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
@@ -757,7 +772,7 @@ for db in ${DATABASES}; do
 				# shellcheck disable=SC2086
 				error_statuses="$( (
 					(${MYSQLDUMP} --defaults-extra-file="${MYSQL_CNF_FILE}" ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
-					(${GZIP} -9 > "${TARGET}/${PREFIX}${db}${ext}" || echo "1:$?" >&3)
+					(${COMPRESS_BIN} ${COMPRESS_ARG} > "${TARGET}/${PREFIX}${db}${ext}" || echo "1:$?" >&3)
 				) 3>&1 >&4)"
 				exec 4>&-
 
