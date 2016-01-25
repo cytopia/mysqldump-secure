@@ -488,8 +488,8 @@ if [ "${COMPRESS}" = "1" ]; then
 		exit 2
 	fi
 
-	if ! command -v ${COMPRESS_BIN} > /dev/null 2>&1 ; then
-		debug "warn" "[ERR]  ${COMPRESS_BIN}  not found" $LOG "${LOGFILE}"
+	if ! command -v "${COMPRESS_BIN}" > /dev/null 2>&1 ; then
+		debug "warn" "[ERR]  ${COMPRESS_BIN} not found. Fix \$COMPRESS_BIN" $LOG "${LOGFILE}"
 		debug "err"  "Aborting" $LOG "${LOGFILE}"
 		exit 2
 	else
