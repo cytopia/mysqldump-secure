@@ -34,3 +34,13 @@ for i in ${prefix}*.sql.gz ; do \
 done
 ```
 
+### All bzip2 sql files at once
+
+```shell
+prefix="2015-12-29_14-24__"; \
+for i in ${prefix}*.sql.bz2 ; do \
+    db="$(echo "$i" | sed "s/${prefix}//" | sed 's/\.sql\.bz2//')"; \
+    mysql -u root -e "CREATE DATABASE IF NOT EXISTS \`$db\`;"; \
+    bunzip < "$i" | mysql -u root $db; \
+done
+```
