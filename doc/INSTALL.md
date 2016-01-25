@@ -31,7 +31,7 @@ If you do not trust the `Makefile` you can also manually copy the files and adju
 ```shell
 # Copy the script
 cp bin/mysqldump-secure /usr/local/sbin/mysqldump-secure
-chmod +x /usr/local/sbin/mysqldump-secure
+chmod +x /usr/local/bin/mysqldump-secure
 
 # Copy the config files
 cp config/mysqldump-secure.conf /etc/mysqldump-secure.conf

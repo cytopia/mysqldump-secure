@@ -7,7 +7,7 @@ DUMP_CNF  = mysqldump-secure.cnf
 
 # System directories
 PREFIX  = $(DESTDIR)/usr/local
-SBINDIR = $(PREFIX)/sbin
+BINDIR = $(PREFIX)/bin
 ETCDIR  = /etc
 
 # Configuration
@@ -21,7 +21,7 @@ endif
 ifneq ("$(wildcard $(ETCDIR)/$(DUMP_CNF))","")
 	INSTALLED = 1
 endif
-ifneq ("$(wildcard $(SBINDIR)/$(DUMP_SH))","")
+ifneq ("$(wildcard $(BINDIR)/$(DUMP_SH))","")
 	INSTALLED = 1
 endif
 
@@ -64,7 +64,7 @@ endif
 	@echo ""
 
 	@# Install binary
-	install -m 0755 bin/$(DUMP_SH) $(SBINDIR)/$(DUMP_SH)
+	install -m 0755 bin/$(DUMP_SH) $(BINDIR)/$(DUMP_SH)
 	@echo ""
 
 	@# Install config file and create backup if there is one already
@@ -87,7 +87,7 @@ reinstall:
 	@echo ""
 
 	@# Install binary
-	install -m 0755 bin/$(DUMP_SH) $(SBINDIR)/$(DUMP_SH)
+	install -m 0755 bin/$(DUMP_SH) $(BINDIR)/$(DUMP_SH)
 	@echo ""
 
 	@# Install config file without overwriting
@@ -116,7 +116,7 @@ uninstall:
 	@# Never ever delete the public private keys!!
 	@# Also keep the logfile, as we do not know its location (it is set in config)
 	@# Just remove the binary and config files
-	rm -f $(SBINDIR)/$(DUMP_SH)
+	rm -f $(BINDIR)/$(DUMP_SH)
 	rm -f $(ETCDIR)/$(DUMP_CONF)
 	rm -f $(ETCDIR)/$(DUMP_CNF)
 
