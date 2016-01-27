@@ -70,3 +70,13 @@ This is the resulting file size from `ls -lh`
 | db_17 |   12M   | 8.9M     | 8.9M      |
 | db_18 |  638M   | 464M     | 465M      |
 
+### System Load
+
+#### gzip -9
+![gzip -9](https://raw.githubusercontent.com/cytopia/mysqldump-secure/master/doc/img/gzip-9.png)
+
+#### bzip2 -9
+![bzip2 -9](https://raw.githubusercontent.com/cytopia/mysqldump-secure/master/doc/img/bzip2-9.png)
+
+#### pbzip2 -9
+![pbzip2 -9](https://raw.githubusercontent.com/cytopia/mysqldump-secure/master/doc/img/pbzip2-9.png)
