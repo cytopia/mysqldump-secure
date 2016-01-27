@@ -65,12 +65,36 @@ OPENSSL_ALGO_ARG="-aes256"
 
 
 ### 1.2.2 Compression
-MySQL dumps can be piped directly to `gzip` before writing to disk.
+MySQL database dumps can be piped directly to `gzip`, `bzip2`, `lzma` or `lzop` (depending on your choice) before writing them to disk.
 
 Open [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/config/mysqldump-secure.conf) and set the following variables
 ```shell
 COMPRESS=1
+# Gzip
+COMPRESS_BIN="gzip"
+COMPRESS_ARG="-9 --stdout"
+COMPRESS_EXT="gz"
 ```
+By default, when enabling compression `gzip` is already pre-configured, you can however also change it to one of the above algorithms by uncommenting a different block (and also commenting the gzip block). The other blocks are also pre-configured and look like this:
+```shell
+# Bzip2
+#COMPRESS_BIN="bzip2"
+#COMPRESS_ARG="-9 --stdout"
+#COMPRESS_EXT="bz2"
+
+# LZMA
+#COMPRESS_BIN="lzma"
+#COMPRESS_ARG="-9 --stdout"
+#COMPRESS_EXT="lzma"
+
+# LZOP
+#COMPRESS_BIN="lzop"
+#COMPRESS_ARG="-9 --stdout"
+#COMPRESS_EXT="lzo"
+```
+
+If you use a compression algorithm that differs from the above pre-configured ones, simply add it to the config file and use yours. It would also be nice of you to then drop me a pull request with all other algorithms you add, so we can have it pre-configured in the git repository.
+
 
 ### 1.2.3 Blacklisting
 Mysqldump-secure uses opt-out instead of opt-in and will by default dump every readable database to disk. If you however want to manually ignore certain databases, such as `information_schema` or `performance_schema` you can specify them in a ignore list.
