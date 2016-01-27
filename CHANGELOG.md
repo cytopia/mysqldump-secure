@@ -1,6 +1,7 @@
 Version 0.10 (unreleased)
 ------------
 
+- [Enh]		More documentation about compression
 - [Enh]		Added pbzip2 as a much faster pre-configured compression algorithm
 
 
