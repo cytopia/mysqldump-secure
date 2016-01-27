@@ -1,4 +1,9 @@
-Version 0.10 (unreleased)
+Version 0.11 (unreleased)
+------------
+
+
+
+Version 0.10
 ------------
 
 - [Enh]		More documentation about compression
