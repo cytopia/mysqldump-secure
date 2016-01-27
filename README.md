@@ -129,6 +129,8 @@ If the script runs on an operating system productively, which is currently not y
 
 If you use the script, star it or let me know somehow.
 
+If you like have a look at the [Contributing Guidelines](CONTRIBUTING.md) and see if there is anything you would like to take care of.
+
 
 ## 7. License
 [![license](https://poser.pugx.org/cytopia/mysqldump-secure/license)](http://opensource.org/licenses/mit)
