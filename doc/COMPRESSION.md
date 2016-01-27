@@ -43,6 +43,7 @@ The total time taken to `mysqldump`, compress and write the dump to disk. The si
 | db_17 |  (158.29 MB) 4 sec |  (158.29 MB) 16 sec |  (158.29 MB) 4 sec |
 | db_18 |  (19654.08 MB) 422 sec |  (19654.08 MB) 2464 sec |  (19654.08 MB) 773 sec |
 
+Looks like `pbzip2` is generally faster than `gzip` (and a lot faster than `bzip2`), except for bigger files (see `db_18`).
 
 
 ### Final filesize
@@ -69,6 +70,8 @@ This is the resulting file size from `ls -lh`
 | db_16 |  597K   | 385K     | 386K      |
 | db_17 |   12M   | 8.9M     | 8.9M      |
 | db_18 |  638M   | 464M     | 465M      |
+
+The difference in file size is quiet noticable.
 
 ### System Load
 
