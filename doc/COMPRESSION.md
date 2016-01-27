@@ -33,14 +33,14 @@ The total time taken to `mysqldump`, compress and write the dump to disk. The si
 | db_07 |  (44.48 MB) 2 sec |  (44.48 MB) 3 sec |  (44.48 MB) 2 sec |
 | db_08 |  (44.46 MB) 2 sec |  (44.46 MB) 3 sec |  (44.46 MB) 1 sec |
 | db_09 |  (266.39 MB) 15 sec |  (266.39 MB) 29 sec |  (266.39 MB) 10 sec |
-| db_10 |  (17.24 MB) 0 sec |  (17.24 MB) 2 sec |  (17.24 MB) 1 sec |
+| db_10 |  (17.24 MB) 0 sec |  (17.24 MB) 2 sec |  (17.24 MB) 0 sec |
 | db_11 |  (499.33 MB) 30 sec |  (499.33 MB) 65 sec |  (499.33 MB) 22 sec |
 | db_12 |  (20.18 MB) 1 sec |  (20.18 MB) 2 sec |  (20.18 MB) 1 sec |
 | db_13 |  (6.93 MB) 0 sec |  (6.93 MB) 0 sec |  (6.93 MB) 1 sec |
 | db_14 |  (6.74 MB) 1 sec |  (6.74 MB) 0 sec |  (6.74 MB) 0 sec |
 | db_15 |  (95.97 MB) 4 sec |  (95.97 MB) 6 sec |  (95.97 MB) 3 sec |
-| db_16 |  (12.49 MB) 0 sec |  (12.49 MB) 1 sec |  (12.49 MB) 1 sec |
-| db_17 |  (158.29 MB) 4 sec |  (158.29 MB) 16 sec |  (158.29 MB) 5 sec |
+| db_16 |  (12.49 MB) 0 sec |  (12.49 MB) 1 sec |  (12.49 MB) 0 sec |
+| db_17 |  (158.29 MB) 4 sec |  (158.29 MB) 16 sec |  (158.29 MB) 4 sec |
 | db_18 |  (19654.08 MB) 422 sec |  (19654.08 MB) 2464 sec |  (19654.08 MB) 773 sec |
 
 
