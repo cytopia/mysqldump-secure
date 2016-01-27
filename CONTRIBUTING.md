@@ -5,6 +5,6 @@
 [Examples](https://github.com/cytopia/mysqldump-secure/blob/master/doc/EXAMPLES.md) |
 Contributing
 
---
+---
 
 # Contributing
