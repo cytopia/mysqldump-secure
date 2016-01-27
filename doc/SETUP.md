@@ -102,6 +102,9 @@ By default, when enabling compression `gzip` is already pre-configured, you can 
 
 If you use a compression algorithm that differs from the above pre-configured ones, simply add it to the config file and use yours. It would also be nice of you to then drop me a pull request with all other algorithms you add, so we can have it pre-configured in the git repository.
 
+See [doc/Compression](https://github.com/cytopia/mysqldump-secure/blob/master/doc/COMPRESSION.md) for performance and other info.
+
+
 #### 1.2.2.1 Perfomance
 
 When you choose a compression algorithm also keep in mind they have different performances. The following shows a direct comparison between `bzip2 -9` and the multithreaded version `pbzip2 -9` for smaller and medium sizes databases.
