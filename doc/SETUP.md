@@ -1,6 +1,7 @@
 [Readme](https://github.com/cytopia/mysqldump-secure/blob/master/README.md) |
 [Installation](https://github.com/cytopia/mysqldump-secure/blob/master/doc/INSTALL.md) |
 Configuration |
+[Compression](https://github.com/cytopia/mysqldump-secure/blob/master/doc/COMPRESSION.md) |
 [Encryption](https://github.com/cytopia/mysqldump-secure/blob/master/doc/ENCRYPTION.md) |
 [Examples](https://github.com/cytopia/mysqldump-secure/blob/master/doc/EXAMPLES.md) |
 [Contributing](https://github.com/cytopia/mysqldump-secure/blob/master/CONTRIBUTING.md)
@@ -78,6 +79,11 @@ COMPRESS_EXT="gz"
 ```
 By default, when enabling compression `gzip` is already pre-configured, you can however also change it to one of the above algorithms by uncommenting a different block (and also commenting the gzip block). The other blocks are also pre-configured and look like this:
 ```shell
+# PBzip2 (multithreaded bzip2 version - this will heat all of your cores)
+#COMPRESS_BIN="pbzip2"
+#COMPRESS_ARG="-9 --stdout"
+#COMPRESS_EXT="bz2"
+
 # Bzip2
 #COMPRESS_BIN="bzip2"
 #COMPRESS_ARG="-9 --stdout"
@@ -95,6 +101,26 @@ By default, when enabling compression `gzip` is already pre-configured, you can 
 ```
 
 If you use a compression algorithm that differs from the above pre-configured ones, simply add it to the config file and use yours. It would also be nice of you to then drop me a pull request with all other algorithms you add, so we can have it pre-configured in the git repository.
+
+#### 1.2.2.1 Perfomance
+
+When you choose a compression algorithm also keep in mind they have different performances. The following shows a direct comparison between `bzip2 -9` and the multithreaded version `pbzip2 -9` for smaller and medium sizes databases.
+The following was tested on a MacBookPro (2014), Intel Core i7 2.5Ghz (8 cores).
+
+| bzip2 -9 | pbzip2 -9 |
+|---------|----------|
+| Dumping:  db_01 (433.66 MB) (compressed) 48 sec | Dumping:  db_01 (433.66 MB) (compressed) 14 sec |
+| Dumping:  db_02 (166.68 MB) (compressed) 26 sec | Dumping:  db_02 (166.68 MB) (compressed) 9 sec  |
+| Dumping:  db_03 (14.39 MB) (compressed) 1 sec   | Dumping:  db_03 (14.39 MB) (compressed) 1 sec   |
+| Dumping:  db_04 (39.28 MB) (compressed) 4 sec   | Dumping:  db_04 (39.28 MB) (compressed) 1 sec   |
+| Dumping:  db_05 (14.39 MB) (compressed) 1 sec   | Dumping:  db_05 (14.39 MB) (compressed) 0 sec   |
+| Dumping:  db_06 (10.71 MB) (compressed) 1 sec   | Dumping:  db_06 (10.71 MB) (compressed) 1 sec   |
+| Dumping:  db_07 (44.48 MB) (compressed) 2 sec   | Dumping:  db_07 (44.48 MB) (compressed) 1 sec   |
+| Dumping:  db_08 (44.46 MB) (compressed) 2 sec   | Dumping:  db_08 (44.46 MB) (compressed) 1 sec   |
+| Dumping:  db_09 (266.39 MB) (compressed) 27 sec | Dumping:  db_09 (266.39 MB) (compressed) 9 sec  |
+| Dumping:  db_10 (17.24 MB) (compressed) 2 sec   | Dumping:  db_10 (17.24 MB) (compressed) 1 sec   |
+
+
 
 
 ### 1.2.3 Blacklisting
