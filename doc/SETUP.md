@@ -78,6 +78,11 @@ COMPRESS_EXT="gz"
 ```
 By default, when enabling compression `gzip` is already pre-configured, you can however also change it to one of the above algorithms by uncommenting a different block (and also commenting the gzip block). The other blocks are also pre-configured and look like this:
 ```shell
+# PBzip2 (multithreaded bzip2 version - this will heat all of your cores)
+#COMPRESS_BIN="pbzip2"
+#COMPRESS_ARG="-9 --stdout"
+#COMPRESS_EXT="bz2"
+
 # Bzip2
 #COMPRESS_BIN="bzip2"
 #COMPRESS_ARG="-9 --stdout"
