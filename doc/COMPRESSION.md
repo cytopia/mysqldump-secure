@@ -20,7 +20,7 @@ It was tested on a MacBookPro (2014), Intel Core i7 2.5Ghz (8 cores).
 
 ### Time
 
-The total time taken to `mysqldump`, compress and write the dump to disk. The size in brackets refers to the database size in `MySQL`.
+The total time taken from `mysqldump-secure` to dump,  compress and write the data to disk. The size in brackets refers to the database size in `MySQL`.
 
 |                    | gzip -9 | bzip2 -9 | pbzip2 -9 |
 |--------------------|---------|----------|-----------|
@@ -51,7 +51,7 @@ Looks like `pbzip2` is generally faster than `gzip` (and a lot faster than `bzip
 
 ### Final filesize
 
-This is the resulting file size from `ls -lh`
+This is the resulting file size from `ls -lh`.
 
 |                    | gzip -9 | bzip2 -9 | pbzip2 -9 |
 |--------------------|---------|----------|-----------|
