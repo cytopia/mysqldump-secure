@@ -15,12 +15,12 @@ Compression |
 
 When you choose a compression algorithm also keep in mind they have different performances. The following shows a direct comparison between `gzip -9`, `bzip2 -9` and the multithreaded version `pbzip2 -9` for smaller and medium sized databases.
 
-It was tested on a MacBookPro (2014), Intel Core i7 2.5Ghz (8 cores).
+It was tested on a MacBookPro (2014), Intel Core i7 2.5Ghz (8 cores) with 16GB RAM.
 
 
 ### Time
 
-The total time taken from `mysqldump-secure` to dump,  compress and write the data to disk. The size in brackets refers to the database size in `MySQL`.
+The total time taken from `mysqldump-secure` to dump,  compress and write the data to disk. The size in brackets refers to the database size in `MySQL`. The following represents a mean time calculated from 10 rounds.
 
 |                    | gzip -9 | bzip2 -9 | pbzip2 -9 |
 |--------------------|---------|----------|-----------|
