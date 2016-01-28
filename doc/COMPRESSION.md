@@ -22,7 +22,7 @@ It was tested on a MacBookPro (2014), Intel Core i7 2.5Ghz (8 cores) with 16GB R
 
 The total time taken from `mysqldump-secure` to dump,  compress and write the data to disk. The size in brackets refers to the database size in `MySQL`. The following represents a mean time calculated from 10 rounds.
 
-|                    | direct<sup>[1]</sup>  | gzip -9 | bzip2 -9 | pbzip2 -9 | lzma -9 | xz -9   |
+|                    | direct<sup>[1]</sup>  | gzip -9 | bzip2 -9 | pbzip2 -9 | lzma -9<sup>[2]</sup> | xz -9   |
 |--------------------|--------:|--------:|---------:|----------:|--------:|--------:|
 | db_01 (433.66 MB)  |  15 sec |  19 sec |  45 sec  |  14 sec   | 148 sec | 145 sec |
 | db_02 (166.68 MB)  |   7 sec |  4 sec  |  26 sec  |  10 sec   |  23 sec |  22 sec |
@@ -44,6 +44,7 @@ The total time taken from `mysqldump-secure` to dump,  compress and write the da
 | db_18 (19654.08 MB)| 634 sec | 422 sec |2464 sec  | 773 sec   |2556 sec |2934 sec |
 
 * [1] `Direct` (without compression) is usually much slower than this, because most server HDD's are ofteb the bottleneck (my machine has a very fast PCIe SSD).
+* [2] On modern systems `lzma` is usually an alias to `xz --format=lzma`
 
 
 Looks like `pbzip2` is generally faster than `gzip` (and a lot faster than `bzip2`), except for bigger files (see `db_18`).
