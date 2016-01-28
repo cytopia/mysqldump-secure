@@ -20,3 +20,9 @@ openssl req -x509 -nodes -newkey rsa:2048 \
 	-out mysqldump-secure.pub.pem
 ```
 
+## Key performance
+
+|               | rsa 512  | rsa 1024 | rsa 2048 | rsa 4096 |
+|---------------|---------:|---------:|---------:|---------:|
+| # of sign/s   |  6,878.4 |  2,075.8 |    398.8 |     66.4 |
+| # of verify/s | 99,898.4 | 42,966.3 | 15,396.4 |  4,751.5 |
