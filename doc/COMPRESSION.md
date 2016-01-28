@@ -87,3 +87,6 @@ The difference in file size is quiet noticable.
 
 #### pbzip2 -9
 ![pbzip2 -9](https://raw.githubusercontent.com/cytopia/mysqldump-secure/master/doc/img/pbzip2-9.png)
+
+#### lzma -9
+![pbzip2 -9](https://raw.githubusercontent.com/cytopia/mysqldump-secure/master/doc/img/lzma-9.png)
