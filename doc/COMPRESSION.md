@@ -44,7 +44,7 @@ The total time taken from `mysqldump-secure` to dump,  compress and write the da
 | db_18 (19654.08 MB)| 634 sec | 422 sec |2464 sec  | 773 sec   |2556 sec |2934 sec |
 
 * [1] `Direct` (without compression) is usually much slower than this, because most server HDD's are ofteb the bottleneck (my machine has a very fast PCIe SSD).
-* 
+
 
 Looks like `pbzip2` is generally faster than `gzip` (and a lot faster than `bzip2`), except for bigger files (see `db_18`).
 
