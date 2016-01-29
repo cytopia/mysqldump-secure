@@ -1,6 +1,8 @@
 Version 0.11 (unreleased)
 ------------
 
+- [Enh]		Added compression performance documentation
+- [Enh]		Added xz default preset
 
 
 Version 0.10

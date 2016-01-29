@@ -38,8 +38,9 @@ Find the whole post at [www.everythingcli.org](http://www.everythingcli.org/inde
 | [mysqldump](https://dev.mysql.com/downloads/mysql/)  | yes  | This is used for the actual dump procedure |
 | [openssl](https://www.openssl.org)  | optional  | Optionally used for private/public key encrypting the database dump |
 | [gzip](http://www.gzip.org)  | optional  | Optionally used for compressing the database dump |
-| [pbzip2](http://compression.ca/pbzip2/)  | optional  | Optionally used for compressing the database dump (multithreaded) |
 | [bzip2](http://www.bzip.org/)  | optional  | Optionally used for compressing the database dump |
+| [pbzip2](http://compression.ca/pbzip2/)  | optional  | Optionally used for compressing the database dump (multithreaded) |
+| [xz](http://www.bzip.org/)  | optional  | Optionally used for compressing the database dump |
 | [lzma](http://tukaani.org/lzma/)  | optional  | Optionally used for compressing the database dump |
 | [lzop](http://www.lzop.org/)  | optional  | Optionally used for compressing the database dump |
 | [tmpwatch](https://fedorahosted.org/tmpwatch/)  | optional  | Optionally used to delete old database dumps |
