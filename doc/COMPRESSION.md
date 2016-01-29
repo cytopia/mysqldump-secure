@@ -24,24 +24,25 @@ The total time taken from `mysqldump-secure` to dump,  compress and write the da
 
 |                    | direct<sup>[1]</sup>  | gzip -9 | bzip2 -9 | pbzip2 -9 | lzma -9<sup>[2]</sup> | xz -9   | lzop -9 |
 |--------------------|--------:|--------:|---------:|----------:|--------:|--------:|--------:|
-| db_01 (433.66 MB)  |  15 sec |  19 sec |  45 sec  |  14 sec   | 148 sec | 145 sec |  44 sec |
-| db_02 (166.68 MB)  |   7 sec |  4 sec  |  26 sec  |  10 sec   |  23 sec |  22 sec |  11 sec |
-| db_03 (14.39 MB)   |   0 sec |  1 sec  |   1 sec  |   1 sec   |   2 sec |   2 sec |   1 sec |
-| db_04 (39.28 MB)   |   2 sec |  2 sec  |   4 sec  |   1 sec   |  11 sec |  11 sec |   5 sec |
-| db_05 (14.39 MB)   |   1 sec |  1 sec  |   2 sec  |   1 sec   |   2 sec |   2 sec |   1 sec |
-| db_06 (10.71 MB)   |   0 sec |  1 sec  |   1 sec  |   0 sec   |   2 sec |   2 sec |   1 sec |
-| db_07 (44.48 MB)   |   2 sec |  2 sec  |   3 sec  |   2 sec   |   9 sec |   8 sec |   5 sec |
-| db_08 (44.46 MB)   |   1 sec |  2 sec  |   3 sec  |   1 sec   |   8 sec |   8 sec |   5 sec |
-| db_09 (266.39 MB)  |  11 sec |  15 sec |  29 sec  |  10 sec   |  77 sec |  79 sec |  23 sec |
-| db_10 (17.24 MB)   |   1 sec |  0 sec  |   2 sec  |   0 sec   |   3 sec |   3 sec |   2 sec |
-| db_11 (499.33 MB)  |  26 sec |  30 sec |  65 sec  |  22 sec   | 181 sec | 171 sec |  69 sec |
-| db_12 (20.18 MB)   |   1 sec |  1 sec  |   2 sec  |   1 sec   |   3 sec |   3 sec |   2 sec |
+| db_01 (433.66 MB)  |  15 sec |  19 sec |  45 sec  |  14 sec   | 148 sec |  44 sec | 145 sec |
+| db_02 (166.68 MB)  |   7 sec |  4 sec  |  26 sec  |  10 sec   |  23 sec |  11 sec |  22 sec |
+| db_03 (14.39 MB)   |   0 sec |  1 sec  |   1 sec  |   1 sec   |   2 sec |   1 sec |   2 sec |
+| db_04 (39.28 MB)   |   2 sec |  2 sec  |   4 sec  |   1 sec   |  11 sec |   5 sec |  11 sec |
+| db_05 (14.39 MB)   |   1 sec |  1 sec  |   2 sec  |   1 sec   |   2 sec |   1 sec |   2 sec |
+| db_06 (10.71 MB)   |   0 sec |  1 sec  |   1 sec  |   0 sec   |   2 sec |   1 sec |   2 sec |
+| db_07 (44.48 MB)   |   2 sec |  2 sec  |   3 sec  |   2 sec   |   9 sec |   5 sec |   8 sec |
+| db_08 (44.46 MB)   |   1 sec |  2 sec  |   3 sec  |   1 sec   |   8 sec |   5 sec |   8 sec |
+| db_09 (266.39 MB)  |  11 sec |  15 sec |  29 sec  |  10 sec   |  77 sec |  23 sec |  79 sec |
+| db_10 (17.24 MB)   |   1 sec |  0 sec  |   2 sec  |   0 sec   |   3 sec |   2 sec |   3 sec |
+| db_11 (499.33 MB)  |  26 sec |  30 sec |  65 sec  |  22 sec   | 181 sec |  69 sec | 171 sec |
+| db_12 (20.18 MB)   |   1 sec |  1 sec  |   2 sec  |   1 sec   |   3 sec |   2 sec |   3 sec |
 | db_13 (6.93 MB)    |   0 sec |  0 sec  |   0 sec  |   1 sec   |   1 sec |   1 sec |   1 sec |
 | db_14 (6.74 MB)    |   1 sec |  1 sec  |   0 sec  |   0 sec   |   0 sec |   1 sec |   1 sec |
-| db_15 (95.97 MB)   |   3 sec |  4 sec  |   6 sec  |   3 sec   |  15 sec |  15 sec |   8 sec |
-| db_16 (12.49 MB)   |   1 sec |  0 sec  |   1 sec  |   0 sec   |   2 sec |   2 sec |   1 sec |
-| db_17 (158.29 MB)  |   6 sec | 4 sec   |  16 sec  |   4 sec   |  27 sec |  26 sec |   9 sec |
-| db_18 (19654.08 MB)| 634 sec | 422 sec |2464 sec  | 773 sec   |2556 sec |2934 sec |1078 sec |
+| db_15 (95.97 MB)   |   3 sec |  4 sec  |   6 sec  |   3 sec   |  15 sec |   8 sec |  15 sec |
+| db_16 (12.49 MB)   |   1 sec |  0 sec  |   1 sec  |   0 sec   |   2 sec |   1 sec |   2 sec |
+| db_17 (158.29 MB)  |   6 sec | 4 sec   |  16 sec  |   4 sec   |  27 sec |   9 sec |  26 sec |
+| db_18 (19654.08 MB)| 634 sec | 422 sec |2464 sec  | 773 sec   |2556 sec |1078 sec |2934 sec |
+
 
 * [1] `Direct` (without compression) is usually much slower than this, because most server HDD's are ofteb the bottleneck (my machine has a very fast PCIe SSD).
 * [2] On modern systems `lzma` is usually an alias to `xz --format=lzma`
