@@ -41,7 +41,7 @@ The total time taken from `mysqldump-secure` to dump,  compress and write the da
 | db_09 (266.39 MB)  |  11 sec |  15 sec |  29 sec  |  10 sec   |  79 sec | 77 sec |  23 sec | 427 sec |
 | db_01 (433.66 MB)  |  15 sec |  19 sec |  45 sec  |  14 sec   | 145 sec |148 sec |  44 sec | 753 sec |
 | db_11 (499.33 MB)  |  26 sec |  30 sec |  65 sec  |  22 sec   | 171 sec |181 sec |  69 sec | 930 sec |
-| db_18 (19654.08 MB)| 634 sec | 422 sec |2464 sec  | 773 sec   |2934 sec |556 sec |1078 sec |15242 sec|
+| db_18 (1.919 GB)   | 634 sec | 422 sec |2464 sec  | 773 sec   |2934 sec |556 sec |1078 sec |15242 sec|
 
 
 * [1] `Direct` (without compression) is usually much slower than this, because most server HDD's are ofteb the bottleneck (my machine has a very fast PCIe SSD).
@@ -74,7 +74,7 @@ This is the resulting file size from `ls -lh`.
 | db_09 (266.39 MB)  | 214M   |   19M   |  14M     |  14M      |   25M   |   13M   |  13M  |   10M   |
 | db_01 (433.66 MB)  | 394M   |   35M   |  26M     |  26M      |   46M   |   25M   |  25M  |   20M   |
 | db_11 (499.33 MB)  | 454M   |   49M   |  36M     |  36M      |   66M   |   35M   |  35M  |   29M   |
-| db_18 (19654.08 MB)|  15G   |  638M   | 464M     | 465M      |  810M   |  295M   | 295M  |  266M   |
+| db_18 (1.919 GB)   |  15G   |  638M   | 464M     | 465M      |  810M   |  295M   | 295M  |  266M   |
 
 
 
