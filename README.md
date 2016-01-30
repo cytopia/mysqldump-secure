@@ -73,7 +73,7 @@ You should always define your credentials in a my.cnf file with `chmod 400` or y
 * File logging
 * Custom mysqldump options
 * Security validation
-* Nagios integration ([check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure))
+* Nagios/Icinga integration ([check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure))
 * 100% POSIX compliant
 
 
