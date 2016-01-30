@@ -22,6 +22,13 @@ openssl req -x509 -nodes -newkey rsa:2048 \
 
 ## Key performance
 
+You can test the performance on your target machine yourself with:
+```shell
+openssl speed rsa512
+```
+
+Values on my machine are
+
 |               | rsa 512  | rsa 1024 | rsa 2048 | rsa 4096 |
 |---------------|---------:|---------:|---------:|---------:|
 | # of sign/s   |  6,878.4 |  2,075.8 |    398.8 |     66.4 |
