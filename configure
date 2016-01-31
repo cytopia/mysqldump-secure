@@ -46,24 +46,6 @@ while [ $# -gt 0  ]; do
 done
 
 
-# Check for mysql
-printf "Checking for '%s': " "mysql"
-if command -v mysql > /dev/null 2>&1; then
-	printf "Found\n"
-else
-	printf "Not found\n"
-	exit 1
-fi
-
-# Check for mysqldump
-printf "Checking for '%s': " "mysqldump"
-if command -v mysqldump > /dev/null 2>&1; then
-	printf "Found\n"
-else
-	printf "Not found\n"
-	exit 1
-fi
-
 # Write configure configuration file
 echo "${PREFIX}" > configure.in
 

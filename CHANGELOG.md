@@ -2,6 +2,12 @@ Version 0.12 (unreleased)
 ------------
 
 
+Version 0.11.1
+---------------
+
+- [Fix]		./configure: ignore missing runtime requirements
+
+
 Version 0.11
 ------------
 
