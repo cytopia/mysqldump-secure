@@ -24,9 +24,9 @@
 
 # The following are auto-generated variables by the installer.
 # to determine where the script and its config files are installed.
-_PREFIX_BIN=""
 _PREFIX_ETC=""
-_PREFIX_LOG=""
+#_PREFIX_BIN=""
+#_PREFIX_LOG=""
 
 
 
