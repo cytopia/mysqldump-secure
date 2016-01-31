@@ -4,7 +4,7 @@
 # @gpg key   0x28BF179F
 # @date      2016-01-31
 # @licencse  MIT http://opensource.org/licenses/MIT
-# @version   0.11.2
+# @version   0.11.3
 #
 # Script to dump databases one by one
 #
@@ -232,26 +232,44 @@ elif [ "${LOG}" = "1" ]; then
 		LOG=0
 	# Logfile not found
 	elif [ ! -f "${LOGFILE}" ]; then
-		debug  "warn" "[WARN] Logfile does not exist in ${LOGFILE}"
-		debugi "info" "[INFO] Trying to create..."
 
-		if ! touch "${LOGFILE}" > /dev/null 2>&1 ; then
-			debugn "err"  "Failed"
-			debug  "err"  "[ERR]  Failed to create file ${LOGFILE}"
-			debug  "warn" "[WARN] Logging disabled"
-			LOG=0
-		else
-			debugn "info" "OK"
-			debug  "info" "[INFO] Created file ${LOGFILE}"
-			debugi "info" "[INFO] Trying to chmod..."
-
-			if ! chmod 600 "${LOGFILE}" > /dev/null 2>&1 ; then
+		# Check if logging directory exists
+		if [ ! -d "$(dirname "${LOGFILE}")" ]; then
+			debug  "warn" "[WARN] Logfile directory does not exist in $(dirname "${LOGFILE}")"
+			debugi "info" "[INFO] Trying to create..."
+			if ! mkdir -p "$(dirname "${LOGFILE}")" > /dev/null 2>&1 ; then
 				debugn "err"  "Failed"
-				debug  "err"  "[ERR]  Failed to chmod 600 ${LOGFILE}"
+				debug  "err"  "[ERR]  Failed to create logfile directoy $(dirname "${LOGFILE}")"
 				debug  "warn" "[WARN] Logging disabled"
 				LOG=0
 			else
 				debugn "info" "OK"
+			fi
+		fi
+
+		# If logging is still OK (dir exists), check if the file can be created
+		if [ "${LOG}" = "1" ]; then
+			debug  "warn" "[WARN] Logfile does not exist in ${LOGFILE}"
+			debugi "info" "[INFO] Trying to create..."
+
+			if ! touch "${LOGFILE}" > /dev/null 2>&1 ; then
+				debugn "err"  "Failed"
+				debug  "err"  "[ERR]  Failed to create file ${LOGFILE}"
+				debug  "warn" "[WARN] Logging disabled"
+				LOG=0
+			else
+				debugn "info" "OK"
+				debug  "info" "[INFO] Created file ${LOGFILE}"
+				debugi "info" "[INFO] Trying to chmod..."
+
+				if ! chmod 600 "${LOGFILE}" > /dev/null 2>&1 ; then
+					debugn "err"  "Failed"
+					debug  "err"  "[ERR]  Failed to chmod 600 ${LOGFILE}"
+					debug  "warn" "[WARN] Logging disabled"
+					LOG=0
+				else
+					debugn "info" "OK"
+				fi
 			fi
 		fi
 	# Logfile not writeable
