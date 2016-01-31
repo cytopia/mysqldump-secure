@@ -1,6 +1,10 @@
 Version 0.11 (unreleased)
 ------------
 
+- [Fix]		make uninstall: Also remove *.new files
+- [Enh]		Prefix path for installation
+- [Enh]		./configure && make && make install routine
+- [Enh]		Variable name refactoring
 - [Enh]		Added encryption performance documentation
 - [Enh]		Added compression performance documentation
 - [Enh]		Added xz default preset

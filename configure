@@ -1,0 +1,104 @@
+#!/bin/sh
+
+# This is a leight-weight self-styled configure script
+
+
+PREFIX=""
+
+print_help() {
+
+	echo "Usage: configure [--prefix]"
+	echo ""
+	echo "--prefix     Specify custom install prefix."
+	echo "             e.g. --prefix=/usr/local"
+	echo ""
+}
+
+
+while [ $# -gt 0  ]; do
+
+	case "$1" in
+
+		--help)
+			print_help
+			exit 0
+			;;
+
+		--prefix*)
+			CUSTOM_PREFIX="$(echo "$1" | $(which sed) 's/^--prefix=//g')"
+			# Remove trailing slash
+			CUSTOM_PREFIX="/$(echo "${CUSTOM_PREFIX}" | $(which sed) 's#/*$##;s#^/*##')"
+			if [ ! -d "${CUSTOM_PREFIX}" ]; then
+				echo "Prefix: \"${CUSTOM_PREFIX}\" is not a directory"
+				echo "If you wish to install it into a custom location, make sure to create the directory first."
+				exit 1
+			fi
+			PREFIX="${CUSTOM_PREFIX}"
+			;;
+
+		*)
+			echo "Invalid argument: '${1}'"
+			echo "Type '${0} --help' for available options."
+			exit 1
+			;;
+	esac
+	shift
+done
+
+
+# Check for mysql
+printf "Checking for '%s': " "mysql"
+if command -v mysql > /dev/null 2>&1; then
+	printf "Found\n"
+else
+	printf "Not found\n"
+	exit 1
+fi
+
+# Check for mysqldump
+printf "Checking for '%s': " "mysqldump"
+if command -v mysqldump > /dev/null 2>&1; then
+	printf "Found\n"
+else
+	printf "Not found\n"
+	exit 1
+fi
+
+# Write configure configuration file
+echo "${PREFIX}" > configure.in
+
+
+# Create build directory
+if [ ! -d build ]; then
+	$(which mkdir) build
+fi
+
+# Copy files to dist directory
+$(which cp) -f bin/mysqldump-secure build/
+$(which cp) -f etc/mysqldump-secure.conf build/
+$(which cp) -f etc/mysqldump-secure.cnf build/
+
+# Adjust auto-generated vars
+$(which sed) -i'' -e "s|_PREFIX_BIN=\"\"|_PREFIX_BIN=\"${PREFIX}\"|g" build/mysqldump-secure
+$(which sed) -i'' -e "s|_PREFIX_ETC=\"\"|_PREFIX_ETC=\"${PREFIX}\"|g" build/mysqldump-secure
+$(which sed) -i'' -e "s|_PREFIX_LOG=\"\"|_PREFIX_LOG=\"${PREFIX}\"|g" build/mysqldump-secure
+
+# Adjust auto-generated vars
+$(which sed) -i'' -e "s|_INSTALL_PREFIX=\"\"|_INSTALL_PREFIX=\"${PREFIX}\"|g" build/mysqldump-secure.conf
+
+echo ""
+echo "Configure run successfully"
+echo ""
+if [ -z "${PREFIX}" ]; then
+	echo "     Install prefix: /"
+else
+	echo "     Install prefix: ${PREFIX}"
+fi
+echo ""
+echo "Files will be installed to:"
+echo "     ${PREFIX}/bin/mysqldump-secure"
+echo "     ${PREFIX}/etc/mysqldump-secure.conf"
+echo "     ${PREFIX}/etc/mysqldump-secure.cnf"
+echo ""
+echo "Run 'make' to build or 'make help' for options"
+exit 0

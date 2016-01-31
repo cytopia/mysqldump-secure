@@ -11,7 +11,7 @@ Configuration |
 # mysqldump-secure Configuration
 
 ## 1.1 Configure MySQL Credentials
-Setup MySQL username, password and host in [/etc/mysqldump-secure.cnf](https://github.com/cytopia/mysqldump-secure/blob/master/config/mysqldump-secure.cnf) 
+Setup MySQL username, password and host in [/etc/mysqldump-secure.cnf](https://github.com/cytopia/mysqldump-secure/blob/master/etc/mysqldump-secure.cnf) 
 
 ```ini
 [client]
@@ -39,7 +39,7 @@ MariaDB [(none)]>
 If you see the mysql/mariadb prompt then everything went fine and you can continue configuring the program.
 
 ## 1.2 Configure MySQLDump Options
-Configure the backup behavior in [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/config/mysqldump-secure.conf).
+Configure the backup behavior in [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/etc/mysqldump-secure.conf).
 
 ### 1.2.1 Encryption
 Encryption is done by public/private key via [OpenSSL SMIME](https://www.openssl.org/docs/apps/smime.html) which also supports encrypting large files.
@@ -58,7 +58,7 @@ Once you have the keys
 2. Copy the public key to `/etc/mysqldump-secure.pub.pem`
 3. `chmod 400 /etc/mysqldump-secure.pub.pem`
 
-Open [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/config/mysqldump-secure.conf) and set the following variables
+Open [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/etc/mysqldump-secure.conf) and set the following variables
 ```shell
 ENCRYPT=1
 OPENSSL_PUBKEY_PEM="/etc/mysqldump-secure.pub.pem"
@@ -69,7 +69,7 @@ OPENSSL_ALGO_ARG="-aes256"
 ### 1.2.2 Compression
 MySQL database dumps can be piped directly to `gzip`, `bzip2`, `lzma` or `lzop` (depending on your choice) before writing them to disk.
 
-Open [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/config/mysqldump-secure.conf) and set the following variables
+Open [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/etc/mysqldump-secure.conf) and set the following variables
 ```shell
 COMPRESS=1
 # Gzip
@@ -111,7 +111,7 @@ Mysqldump-secure uses opt-out instead of opt-in and will by default dump every r
 **Opt-out vs Opt-in**
 The disadvantage of opt-out is that you might backup a database that is not needed. On the other hand if you use opt-in you could forget a database that was actually needed to be backed up.
 
-Open [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/config/mysqldump-secure.conf) and set the following variables
+Open [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/etc/mysqldump-secure.conf) and set the following variables
 ```shell
 IGNORE="information_schema performance_schema"
 ```
@@ -128,7 +128,7 @@ REQUIRED="mysql databaseX databaseY"
 ### 1.2.5 Tmpwatch/Tmpreaper integration
 If you have [tmpwatch](http://linux.die.net/man/8/tmpwatch) or [tmpreaper](http://manpages.ubuntu.com/manpages/hardy/man8/tmpreaper.8.html) installed you can specify to automatically delete backups older than X hours.
 
-Open [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/config/mysqldump-secure.conf) and set the following variables:
+Open [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/etc/mysqldump-secure.conf) and set the following variables:
 Enable `1` or disable `1` automatic deletion
 ```shell
 DELETE=1
@@ -160,7 +160,7 @@ DELETE=720 # 720 hours
 ### 1.2.6 File logging
 Mysqldump-secure includes a mechanism to log every action (debug, info, warn and error) to file. The script also follows the practise of sending proper exit codes (0 for everything went fine and >0 for I had some errors).
 
-Open [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/config/mysqldump-secure.conf) and set the following variables
+Open [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/etc/mysqldump-secure.conf) and set the following variables
 ```shell
 LOG=1
 LOGFILE="/var/log/mysqldump-secure.log"
@@ -169,7 +169,7 @@ LOGFILE="/var/log/mysqldump-secure.log"
 ### 1.2.7 Mysqldump options
 You can specify custom mysqldump parameters in the configuration file. The default configuration dumps databases including events, triggers and routines. The dump is done via `--single-transaction` to also take transactional tables into account. All those parameters are customizable so alter them as desired.
 
-Open [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/config/mysqldump-secure.conf) and set the following variables
+Open [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/etc/mysqldump-secure.conf) and set the following variables
 ```shell
 MYSQL_OPTS='--events --triggers --routines --single-transaction --opt'
 ```
@@ -179,7 +179,7 @@ See [mysqldump](https://dev.mysql.com/doc/refman/5.0/en/mysqldump.html) for all 
 It is possible to fully integrate the backup procedure into a nagios/icinga environment. For that to use you will need to enable Nagios Logging, which will then create a special logfile that is overwritten every time the dump is triggered.
 The Nagios Log file can be used by [check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure) to integrate the current state into nagios.
 
-Open [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/config/mysqldump-secure.conf) and set the following variables
+Open [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/etc/mysqldump-secure.conf) and set the following variables
 ```shell
 NAGIOS_LOG=1
 NAGIOS_LOGFILE="/var/log/mysqldump-secure.nagios.log"

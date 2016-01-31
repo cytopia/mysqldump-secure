@@ -2,9 +2,9 @@
 #
 # @author    Patrick Plocke <patrick@plocke.de>
 # @gpg key   0x28BF179F
-# @date      2016-01-25
+# @date      2016-01-31
 # @licencse  MIT http://opensource.org/licenses/MIT
-# @version   0.9
+# @version   0.11
 #
 # Script to dump databases one by one
 #
@@ -16,37 +16,51 @@
 # * 3: MySQL connection error
 # * 4: MySQL Database dump error
 
+################################################################################
+#
+# AUTO-GENERATED
+#
+################################################################################
+
+# The following are auto-generated variables by the installer.
+# to determine where the script and its config files are installed.
+_PREFIX_BIN=""
+_PREFIX_ETC=""
+_PREFIX_LOG=""
+
+
 
 ################################################################################
 #
-# VARIABLES
+# DEFAULT VARIABLES
 #
 ################################################################################
 
 #
-# Adjust the following values with caution!
+# Do not djust the following default variables!
+# They can be overwritten inside mysqldump-secure.conf
+# or via command line arguments
 #
 
+# Default Configuration Path/Name
+_DEFAULT_CONFIG_FILE="${_PREFIX_ETC}/etc/mysqldump-secure.conf"
 
-# Configuration
-CONFIG_NAME="mysqldump-secure.conf"
-CONFIG_FILE="/etc/${CONFIG_NAME}"
+# Default output Variables
+_DEFAULT_DUMP_FILE_PRE="$(date '+%Y-%m-%d')_$(date '+%H-%M')__"
+_DEFAULT_DUMP_FILE_CHMOD="400"
+_DEFAULT_DUMP_DIR_CHMOD="700"
 
+# Default OpenSSL Variables
+_DEFAULT_OPENSSL_ALGO_ARG="-aes256"
 
 # These command line arguments are considered insecure and can lead
 # to compromising your data
 MYSQL_EVIL_OPTS="--password -p"
 
-# Do not allow to read any other file than the one specified in
-# the configuration.
+# Do not allow to read any other MySQL configuration file
+# than the one specified in the configuration.
 MYSQL_BAD_OPTS="--defaults-extra-file --defaults-file"
 
-
-# Deault Variables
-PREFIX_DEFAULT="$(date '+%Y-%m-%d')_$(date '+%H-%M')__"
-TARGET_DIR_CHMOD_DEFAULT="700"
-TARGET_FILE_CHMOD_DEFAULT="400"
-OPENSSL_ALGO_ARG_DEFAULT="-aes256"
 
 
 ################################################################################
@@ -166,6 +180,8 @@ valid_chmod() {
 #
 ################################################################################
 
+# TODO: optionally read in different config file location
+CONFIG_FILE="${_DEFAULT_CONFIG_FILE}"
 
 ############################################################
 # Config FIle
@@ -251,6 +267,7 @@ elif [ "${LOG}" = "1" ]; then
 		else
 			# Check again if it is writeable now?
 			if [ ! -w "${LOGFILE}" ]; then
+				debugn "err"  "Failed"
 				debug  "warn" "[WARN] Logfile ${LOGFILE} still not writeable"
 				debug  "warn" "[WARN] Logging disabled"
 				LOG=0
@@ -295,53 +312,53 @@ fi
 ############################################################
 
 # Check if CHMOD exists, otherwise use default values
-if [ -z "${TARGET_DIR_CHMOD}" ]; then
-	debug "warn" "[WARN] \$TARGET_DIR_CHMOD is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "warn" "[WARN] Setting \$TARGET_DIR_CHMOD to ${TARGET_DIR_CHMOD_DEFAULT}" $LOG "${LOGFILE}"
-	TARGET_DIR_CHMOD=${TARGET_DIR_CHMOD_DEFAULT}
+if [ -z "${DUMP_DIR_CHMOD}" ]; then
+	debug "warn" "[WARN] \$DUMP_DIR_CHMOD is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	debug "warn" "[WARN] Setting \$DUMP_DIR_CHMOD to ${_DEFAULT_DUMP_DIR_CHMOD}" $LOG "${LOGFILE}"
+	DUMP_DIR_CHMOD=${_DEFAULT_DUMP_DIR_CHMOD}
 fi
-if [ -z "${TARGET_FILE_CHMOD}" ]; then
-	debug "warn" "[WARN] \$TARGET_FILE_CHMOD is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "warn" "[WARN] Setting \$TARGET_FILE_CHMOD to ${TARGET_FILE_CHMOD_DEFAULT}" $LOG "${LOGFILE}"
-	TARGET_FILE_CHMOD=${TARGET_FILE_CHMOD_DEFAULT}
+if [ -z "${DUMP_FILE_CHMOD}" ]; then
+	debug "warn" "[WARN] \$DUMP_FILE_CHMOD is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	debug "warn" "[WARN] Setting \$DUMP_FILE_CHMOD to ${_DEFAULT_DUMP_FILE_CHMOD}" $LOG "${LOGFILE}"
+	DUMP_FILE_CHMOD=${_DEFAULT_DUMP_FILE_CHMOD}
 fi
-if ! valid_chmod "${TARGET_DIR_CHMOD}" > /dev/null 2>&1; then
-	debug "err"  "[ERR]  Invalid chmod value for \$TARGET_DIR_CHMOD: ${TARGET_DIR_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "info" "[INFO] Setting \$TARGET_DIR_CHMOD to ${TARGET_DIR_CHMOD_DEFAULT}" $LOG "${LOGFILE}"
-	TARGET_DIR_CHMOD=${TARGET_DIR_CHMOD_DEFAULT}
+if ! valid_chmod "${DUMP_DIR_CHMOD}" > /dev/null 2>&1; then
+	debug "err"  "[ERR]  Invalid chmod value for \$DUMP_DIR_CHMOD: ${DUMP_DIR_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	debug "info" "[INFO] Setting \$DUMP_DIR_CHMOD to ${_DEFAULT_DUMP_DIR_CHMOD}" $LOG "${LOGFILE}"
+	DUMP_DIR_CHMOD=${_DEFAULT_DUMP_DIR_CHMOD}
 fi
-if ! valid_chmod "${TARGET_FILE_CHMOD}" > /dev/null 2>&1; then
-	debug "err"  "[ERR]  Invalid chmod value for \$TARGET_FILE_CHMOD: ${TARGET_FILE_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "info" "[INFO] Setting \$TARGET_FILE_CHMOD to ${TARGET_FILE_CHMOD_DEFAULT}" $LOG "${LOGFILE}"
-	TARGET_FILE_CHMOD=${TARGET_FILE_CHMOD_DEFAULT}
+if ! valid_chmod "${DUMP_FILE_CHMOD}" > /dev/null 2>&1; then
+	debug "err"  "[ERR]  Invalid chmod value for \$DUMP_FILE_CHMOD: ${DUMP_FILE_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	debug "info" "[INFO] Setting \$DUMP_FILE_CHMOD to ${_DEFAULT_DUMP_FILE_CHMOD}" $LOG "${LOGFILE}"
+	DUMP_FILE_CHMOD=${_DEFAULT_DUMP_FILE_CHMOD}
 fi
 
 
 
 # Check if destination dir exists
-if [ -z "${TARGET}" ]; then
-	debug "err" "[ERR]  \$TARGET variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+if [ -z "${DUMP_PATH}" ]; then
+	debug "err" "[ERR]  \$DUMP_PATH variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 	debug "err" "Aborting" $LOG "${LOGFILE}"
 	exit 1
-elif [ ! -d "${TARGET}" ]; then
-	debug  "warn" "[WARN] Destination dir ${TARGET} does not exist" $LOG "${LOGFILE}"
+elif [ ! -d "${DUMP_PATH}" ]; then
+	debug  "warn" "[WARN] Destination dir ${DUMP_PATH} does not exist" $LOG "${LOGFILE}"
 	debugi "info" "[INFO] Trying to create... " $LOG "${LOGFILE}"
-	if ! mkdir -p "${TARGET}" > /dev/null 2>&1 ; then
+	if ! mkdir -p "${DUMP_PATH}" > /dev/null 2>&1 ; then
 		debugn "err"  "Failed" $LOG "${LOGFILE}"
 		debug  "err"  "Aborting" $LOG "${LOGFILE}"
 		exit 1
 	else
 		debugn "info" "Done" $LOG "${LOGFILE}"
-		debug  "info" "[INFO] Adjusting file permissions to ${TARGET_DIR_CHMOD} on ${TARGET}" $LOG "${LOGFILE}"
-		chmod ${TARGET_DIR_CHMOD} "${TARGET}"
+		debug  "info" "[INFO] Adjusting file permissions to ${DUMP_DIR_CHMOD} on ${DUMP_PATH}" $LOG "${LOGFILE}"
+		chmod ${DUMP_DIR_CHMOD} "${DUMP_PATH}"
 	fi
 fi
 
 # Check if destination dir is writeable
-if [ ! -w "${TARGET}" ]; then
-	debug  "warn" "[WARN] Destination dir ${TARGET} is not writeable" $LOG "${LOGFILE}"
-	debugi "info" "[INFO] Trying to chmod to ${TARGET_DIR_CHMOD}... " $LOG "${LOGFILE}"
-	if ! chmod ${TARGET_DIR_CHMOD} "${TARGET}" > /dev/null 2>&1 ; then
+if [ ! -w "${DUMP_PATH}" ]; then
+	debug  "warn" "[WARN] Destination dir ${DUMP_PATH} is not writeable" $LOG "${LOGFILE}"
+	debugi "info" "[INFO] Trying to chmod to ${DUMP_DIR_CHMOD}... " $LOG "${LOGFILE}"
+	if ! chmod ${DUMP_DIR_CHMOD} "${DUMP_PATH}" > /dev/null 2>&1 ; then
 		debugn "err"  "Failed" $LOG "${LOGFILE}"
 		debug  "err"  "Aborting" $LOG "${LOGFILE}"
 		exit 1
@@ -349,7 +366,7 @@ if [ ! -w "${TARGET}" ]; then
 		debugn "info" "Done" $LOG "${LOGFILE}"
 	fi
 	debugi "info" "[INFO] Trying to chown... " $LOG "${LOGFILE}"
-	if ! chown "$(whoami)" "${TARGET}" > /dev/null 2>&1 ; then
+	if ! chown "$(whoami)" "${DUMP_PATH}" > /dev/null 2>&1 ; then
 		debugn "err"  "Failed" $LOG "${LOGFILE}"
 		debug  "err"  "Aborting" $LOG "${LOGFILE}"
 		exit 1
@@ -358,11 +375,11 @@ if [ ! -w "${TARGET}" ]; then
 	fi
 fi
 # Check correct permissions of destination dir
-if [ "$(permission "${TARGET}")" != "${TARGET_DIR_CHMOD}" ]; then
-	debug  "err"  "[ERR]  Target directory has wrong permissions: $(permission "${TARGET}"), but should ${TARGET_DIR_CHMOD}." $LOG "${LOGFILE}"
-	debugi "info" "[INFO] Trying to chmod to ${TARGET_DIR_CHMOD}... " $LOG "${LOGFILE}"
+if [ "$(permission "${DUMP_PATH}")" != "${DUMP_DIR_CHMOD}" ]; then
+	debug  "err"  "[ERR]  Target directory has wrong permissions: $(permission "${DUMP_PATH}"), but should ${DUMP_DIR_CHMOD}." $LOG "${LOGFILE}"
+	debugi "info" "[INFO] Trying to chmod to ${DUMP_DIR_CHMOD}... " $LOG "${LOGFILE}"
 
-	if ! chmod "${TARGET_DIR_CHMOD}" "${TARGET}" > /dev/null 2>&1 ; then
+	if ! chmod "${DUMP_DIR_CHMOD}" "${DUMP_PATH}" > /dev/null 2>&1 ; then
 		debugn "err"  "Failed" $LOG "${LOGFILE}"
 		debug  "err"  "Aborting" $LOG "${LOGFILE}"
 		exit 1
@@ -373,10 +390,10 @@ fi
 
 
 # Check output Prefix
-if [ -z "${PREFIX}" ]; then
-	debug "warn" "[WARN] \$PREFIX variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "warn" "[WARN] Using default 'date-time' prefix: ${PREFIX_DEFAULT}" $LOG "${LOGFILE}"
-	PREFIX="${PREFIX_DEFAULT}"
+if [ -z "${DUMP_FILE_PRE}" ]; then
+	debug "warn" "[WARN] \$DUMP_FILE_PRE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	debug "warn" "[WARN] Using default 'date-time' prefix: ${_DEFAULT_DUMP_FILE_PRE}" $LOG "${LOGFILE}"
+	DUMP_FILE_PRE="${_DEFAULT_DUMP_FILE_PRE}"
 fi
 
 
@@ -523,7 +540,7 @@ if [ "${ENCRYPT}" = "1" ]; then
 	if [ -z "${OPENSSL_ALGO_ARG}" ]; then
 		debug "warn" "[WARN] \$OPENSSL_ALGO_ARG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
 		debug "warn" "[WARN] Encryption defaults to: ${OPENSSL_ALGO_ARG}" $LOG "${LOGFILE}"
-		OPENSSL_ALGO_ARG="${OPENSSL_ALGO_ARG_DEFAULT}"
+		OPENSSL_ALGO_ARG="${_DEFAULT_OPENSSL_ALGO_ARG}"
 	fi
 	# Test openssl Algo
 	if ! echo "test" | $(which openssl) smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} "${OPENSSL_PUBKEY_PEM}" > /dev/null 2>&1 ; then
@@ -716,7 +733,7 @@ NAGIOS_DB_IGNORED=""
 NAGIOS_DB_ERROR=""
 
 
-debug "info" "[INFO] Backup directory: ${TARGET}" $LOG "${LOGFILE}"
+debug "info" "[INFO] Backup directory: ${DUMP_PATH}" $LOG "${LOGFILE}"
 
 for db in ${DATABASES}; do
 
@@ -759,7 +776,7 @@ for db in ${DATABASES}; do
 				error_statuses="$( (
 					(${MYSQLDUMP} --defaults-extra-file="${MYSQL_CNF_FILE}" ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
 					(${COMPRESS_BIN} ${COMPRESS_ARG} || echo "1:$?" >&3) |
-					(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" || echo "2:$?" >&3)
+					(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" || echo "2:$?" >&3)
 				) 3>&1 >&4)"
 				exec 4>&-
 
@@ -772,7 +789,7 @@ for db in ${DATABASES}; do
 				# shellcheck disable=SC2086
 				error_statuses="$( (
 					(${MYSQLDUMP} --defaults-extra-file="${MYSQL_CNF_FILE}" ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
-					(${COMPRESS_BIN} ${COMPRESS_ARG} > "${TARGET}/${PREFIX}${db}${ext}" || echo "1:$?" >&3)
+					(${COMPRESS_BIN} ${COMPRESS_ARG} > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" || echo "1:$?" >&3)
 				) 3>&1 >&4)"
 				exec 4>&-
 
@@ -787,7 +804,7 @@ for db in ${DATABASES}; do
 				# shellcheck disable=SC2086
 				error_statuses="$( (
 					(${MYSQLDUMP} --defaults-extra-file="${MYSQL_CNF_FILE}" ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
-					(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${TARGET}/${PREFIX}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" || echo "1:$?" >&3)
+					(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" || echo "1:$?" >&3)
 				) 3>&1 >&4)"
 				exec 4>&-
 
@@ -799,7 +816,7 @@ for db in ${DATABASES}; do
 				exec 4>&1
 				# shellcheck disable=SC2086
 				error_statuses="$( (
-					(${MYSQLDUMP} --defaults-extra-file="${MYSQL_CNF_FILE}" ${MYSQL_OPTS} "${db}" > "${TARGET}/${PREFIX}${db}${ext}" || echo "0:$?" >&3)
+					(${MYSQLDUMP} --defaults-extra-file="${MYSQL_CNF_FILE}" ${MYSQL_OPTS} "${db}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" || echo "0:$?" >&3)
 				) 3>&1 >&4)"
 				exec 4>&-
 
@@ -813,7 +830,7 @@ for db in ${DATABASES}; do
 		if [ -z "$error_statuses" ]; then
 			endtime=$(date +%s)
 			debugn "info" "$((endtime - starttime)) sec" $LOG "${LOGFILE}"
-			chmod ${TARGET_FILE_CHMOD} "${TARGET}/${PREFIX}${db}${ext}"
+			chmod ${DUMP_FILE_CHMOD} "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}"
 
 			[ "${NAGIOS_DB_DUMPED}" = "" ] && NAGIOS_DB_DUMPED="${db}" || NAGIOS_DB_DUMPED="${NAGIOS_DB_DUMPED},${db}"
 		else
@@ -856,7 +873,7 @@ if [ ${DELETE} -eq 1 ]; then
 	[ "${DELETE_FORCE}" = "1" ] && FORCE_ARG="--force" || FORCE_ARG=""
 
 	debug "info" "[INFO] Deleting files older than ${DELETE_IF_OLDER} hours" $LOG "${LOGFILE}"
-	DELETED="$(${TMPWATCH} ${FORCE_ARG} -m "$DELETE_IF_OLDER" -v "${TARGET}/")"
+	DELETED="$(${TMPWATCH} ${FORCE_ARG} -m "$DELETE_IF_OLDER" -v "${DUMP_PATH}/")"
 	NUM_DEL="$( echo "${DELETED}" | grep -c 'removing' )"
 	if [ $? -ne 0 ]; then
 		ERROR=1

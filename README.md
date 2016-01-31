@@ -93,8 +93,8 @@ For more detailed instructions go to the [Install guidelines](https://github.com
 ## 4. Configuration
 
 There are two separate configuration files:
-* [/etc/mysqldump-secure.cnf](config/mysqldump-secure.cnf)
-* [/etc/mysqldump-secure.conf](config/mysqldump-secure.conf)
+* [/etc/mysqldump-secure.cnf](etc/mysqldump-secure.cnf)
+* [/etc/mysqldump-secure.conf](etc/mysqldump-secure.conf)
 
 The first one is to setup the MySQL credentials and the second one configures the behavior of how to backup the databases.
 

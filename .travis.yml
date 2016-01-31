@@ -15,5 +15,5 @@ script:
       - shellcheck --shell=sh bin/create-keypair.sh
       - shellcheck --shell=sh bin/decrypt.sh
       - shellcheck --shell=sh bin/encrypt.sh
-      - shellcheck --shell=sh --exclude=SC2034,SC2148 config/mysqldump-secure.conf
+      - shellcheck --shell=sh --exclude=SC2034,SC2148 etc/mysqldump-secure.conf
 
