@@ -85,6 +85,8 @@ Simply download the source code and use `make install`.
 ```shell
 git clone --recursive https://github.com/cytopia/mysqldump-secure.git
 cd mysqldump-secure
+./configure
+make
 sudo make install
 ```
 
