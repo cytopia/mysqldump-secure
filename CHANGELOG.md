@@ -1,4 +1,8 @@
-Version 0.11 (unreleased)
+Version 0.12 (unreleased)
+------------
+
+
+Version 0.11
 ------------
 
 - [Fix]		make uninstall: Also remove *.new files
