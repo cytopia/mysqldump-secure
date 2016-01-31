@@ -65,14 +65,15 @@ You should always define your credentials in a my.cnf file with `chmod 400` or y
 
 
 ## 2. Feature Overview
-* Encryption (private/public key)
-* Compression (choose algorithm)
+* Compression (`gzip`, `bzip2`, `pbzip2`, `lzop`, `lzma`, `xz`)
+* Encryption (`openssl` private/public key)
 * Blacklisting
-* Tmpwatch integration
+* Whitelisting
+* Tmpwatch integration (`tmpwatch` or `tmpreaper`)
 * File logging
 * Custom mysqldump options
 * Security validation
-* Nagios integration
+* Nagios/Icinga integration ([check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure))
 * 100% POSIX compliant
 
 
