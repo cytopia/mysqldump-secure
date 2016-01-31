@@ -1,6 +1,11 @@
 Version 0.12 (unreleased)
 ------------
 
+Version 0.11.2
+---------------
+
+- [Fix]		make install: Add directories if they don't exist
+
 
 Version 0.11.1
 ---------------

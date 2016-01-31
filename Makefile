@@ -13,6 +13,8 @@ ETCDIR = $(PREFIX)/etc
 # Configuration
 SHELL = /bin/sh
 
+MKDIR_P = mkdir -p
+
 # Check if './configure' has been run
 ifneq ("$(wildcard configure.in)","")
 CONFIGURED = 1
@@ -84,6 +86,10 @@ endif
 	@echo "Installing files"
 	@echo ""
 
+	@# Create directories
+	${MKDIR_P} $(BINDIR)
+	${MKDIR_P} $(ETCDIR)
+
 	@# Install binary
 	install -m 0755 build/$(DUMP_SH) $(BINDIR)/$(DUMP_SH)
 
@@ -116,6 +122,10 @@ endif
 
 	@echo "Installing files"
 	@echo ""
+
+	@# Create directories
+	${MKDIR_P} $(BINDIR)
+	${MKDIR_P} $(ETCDIR)
 
 	@# Install binary
 	install -m 0755 build/$(DUMP_SH) $(BINDIR)/$(DUMP_SH)
