@@ -203,26 +203,53 @@ valid_chmod() {
 	CHMOD=${1}
 
 	len=$(echo "${CHMOD}" | awk '{ print length()   }')
-	if [ "${len}" != "3" ]; then
+
+
+	if [ "${len}" = "3" ]; then
+
+		r=$(echo "${CHMOD}" | awk '{print substr($0,1,1)}')
+		w=$(echo "${CHMOD}" | awk '{print substr($0,2,1)}')
+		x=$(echo "${CHMOD}" | awk '{print substr($0,3,1)}')
+
+		if [ "$r" -lt 0 ] || [ "$r" -gt 7 ]; then
+			return 1
+		fi
+		if [ "$w" -lt 0 ] || [ "$w" -gt 7 ]; then
+			return 1
+		fi
+		if [ "$x" -lt 0 ] || [ "$x" -gt 7 ]; then
+			return 1
+		fi
+		# All good
+		return 0
+
+	elif  [ "${len}" = "4" ]; then
+
+		s=$(echo "${CHMOD}" | awk '{print substr($0,1,1)}')
+		r=$(echo "${CHMOD}" | awk '{print substr($0,2,1)}')
+		w=$(echo "${CHMOD}" | awk '{print substr($0,3,1)}')
+		x=$(echo "${CHMOD}" | awk '{print substr($0,4,1)}')
+
+		if [ "$s" -lt 0 ] || [ "$s" -gt 7 ]; then
+			return 1
+		fi
+		if [ "$r" -lt 0 ] || [ "$r" -gt 7 ]; then
+			return 1
+		fi
+		if [ "$w" -lt 0 ] || [ "$w" -gt 7 ]; then
+			return 1
+		fi
+		if [ "$x" -lt 0 ] || [ "$x" -gt 7 ]; then
+			return 1
+		fi
+		# All good
+		return 0
+
+	else
+		# Nope!
 		return 1
 	fi
 
-	r=$(echo "${CHMOD}" | awk '{print substr($0,1,1)}')
-	w=$(echo "${CHMOD}" | awk '{print substr($0,2,1)}')
-	x=$(echo "${CHMOD}" | awk '{print substr($0,3,1)}')
-
-	if [ "$r" -lt 0 ] || [ "$r" -gt 7 ]; then
-		return 1
-	fi
-	if [ "$w" -lt 0 ] || [ "$w" -gt 7 ]; then
-		return 1
-	fi
-	if [ "$x" -lt 0 ] || [ "$x" -gt 7 ]; then
-		return 1
-	fi
-
-	# All good
-	return 0
 }
 
 
