@@ -39,6 +39,7 @@ Find the whole post at [www.everythingcli.org](http://www.everythingcli.org/inde
 | [mysqldump](https://dev.mysql.com/downloads/mysql/)  | yes  | This is used for the actual dump procedure |
 | [openssl](https://www.openssl.org)  | optional  | Optionally used for private/public key encrypting the database dump |
 | [gzip](http://www.gzip.org)  | optional  | Optionally used for compressing the database dump |
+| [pigz](http://zlib.net/pigz/)  | optional  | Optionally used for compressing the database dump (multithreaded) |
 | [bzip2](http://www.bzip.org/)  | optional  | Optionally used for compressing the database dump |
 | [pbzip2](http://compression.ca/pbzip2/)  | optional  | Optionally used for compressing the database dump (multithreaded) |
 | [xz](http://www.bzip.org/)  | optional  | Optionally used for compressing the database dump |
@@ -67,7 +68,7 @@ You should always define your credentials in a my.cnf file with `chmod 400` or y
 
 ## 2. Features
 
-* Compression (`gzip`, `bzip2`, `pbzip2`, `lzop`, `lzma`, `xz`)
+* Compression (`gzip`, `pigz`, `bzip2`, `pbzip2`, `lzop`, `lzma`, `xz`)
 * Encryption (`openssl` private/public key)
 * Blacklisting
 * Whitelisting
