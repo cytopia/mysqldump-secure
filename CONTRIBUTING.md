@@ -23,8 +23,10 @@ Contributing
 ## Repos
 Anybody willing to help me get this into
 
-1. brew (OSX homebrew)
-2. yum (CentOS)
-3. apt (Debian)
+1. [X] ~~brew (OSX homebrew)~~
+2. [ ] yum (CentOS)
+3. [ ] apt (Debian)
+4. [ ] apt (Ubuntu)
+5. [ ] pkg (FreeBSD)
 
 

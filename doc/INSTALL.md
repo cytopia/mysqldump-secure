@@ -10,7 +10,16 @@ Installation |
 
 # mysqldump-secure Installation
 
-## Download
+## OSX
+
+```shell
+brew tap cytopia/tap
+brew install mysqldump-secure
+```
+
+## Linux / BSD
+
+### Download
 
 Download via git, archive or composer
 ```shell
@@ -26,7 +35,7 @@ wget https://github.com/cytopia/mysqldump-secure/archive/master.tar.gz -O - | ta
 composer create-project cytopia/mysqldump-secure
 ```
 
-## Installation
+### Installation
 
 ```shell
 ./configure
