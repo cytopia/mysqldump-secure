@@ -869,7 +869,7 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 		debug "info" "[INFO] Nagios plugin log enabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	fi
 else
-	debug "info" "[INFO] Nagios plugin log enabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "[INFO] Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 

@@ -5,6 +5,7 @@ Version 0.13 (unreleased)
 Version 0.12
 ------------
 
+- [Fix]     Now properly reports whether nagios plugin log is enabled/disabled
 - [Enh]     Code cleaning: created solid base for more cli arguments
 - [Enh]     Cron mode (--cron) (Silenced cron mode: no debug, only warnings and errors)
 - [Enh]     Test mode (--test)
