@@ -1,5 +1,16 @@
-Version 0.12 (unreleased)
+Version 0.13 (unreleased)
 ------------
+
+
+Version 0.12
+------------
+
+- [Enh]     Code cleaning: created solid base for more cli arguments
+- [Enh]     Cron mode (--cron) (Silenced cron mode: no debug, only warnings and errors)
+- [Enh]     Test mode (--test)
+- [Enh]     Help screen (--help)
+- [Enh]     Version screen (--version)
+- [Enh]     Adjusted documentation
 
 
 Version 0.11.3

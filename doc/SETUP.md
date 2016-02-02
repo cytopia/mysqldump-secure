@@ -199,10 +199,10 @@ See [Plugin Readme](https://github.com/cytopia/check_mysqldump-secure) for furth
 ## 1.3 Setup Cronjob
 The script is intended to be run automatically via cron. If you set it up this way, I highly recommend to turn on logging in order to see any warnings or errors that might have occured. Once logging is enabled, the logfile is always protected by file permissions so no other user can see what you are backing up.
 
-*Note*:
+*Note for cronjobs*:
 
-Redirect `stdout` to `/dev/null`, otherwise cron will generate an email even if the script run successfully.
-All errors and warnings will be redirected to `stderr` automatically by the script, so you will receive an email only in case something goes wrong.
+Redirect `stdout` to `/dev/null`, otherwise cron will generate an email if a program produces output stdout or stderr.
+All errors and warnings will be redirected to `stderr` automatically by the script, when running in cron mode (`--cron`) so you will receive an email only in case something goes wrong.
 ```script
 # .---------------- minute (0 - 59)
 # |  .------------- hour (0 - 23)
@@ -213,5 +213,5 @@ All errors and warnings will be redirected to `stderr` automatically by the scri
 # *  *  *  *  * user-name  command to be executed
 
 # Dump MySQL Databases at 03:15 every day
-  15 3  *  *  * /bin/sh /usr/local/sbin/mysqldump-secure 1> /dev/null
+  15 3  *  *  * /bin/sh /usr/local/sbin/mysqldump-secure --cron
 ```

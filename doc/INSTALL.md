@@ -12,10 +12,14 @@ Installation |
 
 ## Download
 
-Download via git or composer
+Download via git, archive or composer
 ```shell
 # Make sure to clone recursively to also get the submodules
 git clone --recursive https://github.com/cytopia/mysqldump-secure.git
+```
+
+```shell
+wget https://github.com/cytopia/mysqldump-secure/archive/master.tar.gz -O - | tar -xz
 ```
 
 ```shell
@@ -23,6 +27,7 @@ composer create-project cytopia/mysqldump-secure
 ```
 
 ## Installation
+
 ```shell
 ./configure
 make

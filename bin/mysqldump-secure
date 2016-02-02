@@ -1,11 +1,5 @@
 #!/bin/sh
 #
-# @author    Patrick Plocke <patrick@plocke.de>
-# @gpg key   0x28BF179F
-# @date      2016-01-31
-# @licencse  MIT http://opensource.org/licenses/MIT
-# @version   0.11.3
-#
 # Script to dump databases one by one
 #
 # Exit Codes
@@ -15,6 +9,15 @@
 # * 2: Required binary not found
 # * 3: MySQL connection error
 # * 4: MySQL Database dump error
+
+INFO_NAME="mysqldump-secure"
+INFO_AUTHOR="Patrick Plocke <patrick@plocke.de>"
+INFO_GPGKEY="0x28BF179F"
+INFO_LICENSE="MIT"
+INFO_URL="https://github.com/cytopia/mysqldump-secure"
+INFO_DATE="2016-02-02"
+INFO_VERSION="0.12"
+
 
 ################################################################################
 #
@@ -65,44 +68,80 @@ MYSQL_BAD_OPTS="--defaults-extra-file --defaults-file"
 
 ################################################################################
 #
-# HELPER FUNCTIONS
+# F U N C T I O N S
 #
 ################################################################################
 
-# Output to stdout/stderr and to file
+############################################################
+# Output wrapper
+############################################################
+
+# Output to stdout/stderr and to file.
+#
+# @param  string  _lvl	Debug Level
+# @param  string  _msg	Output message
+# @param  string  _log	'1': log to file | else: do not log to file
+# @param  string  _file	Full path to logfile
+# @param  string  _cron '1': Cron usage - do not print 'info' | else: print all
+# @return integer 0
 debug() {
 	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
 	_msg="${2}"		# message to output
 	_log="${3}"		# log to file?
 	_file="${4}"	# full path to logfile
+	_cron="${5}"	# run for cron?
 
-	[ "${_lvl}" = "info" ] && printf "%s\n" "${_msg}"
+	if [ "${_cron}" != "1" ]; then
+		[ "${_lvl}" = "info" ] && printf "%s\n" "${_msg}"	# only show error if not in cron
+	fi
 	[ "${_lvl}" = "warn" ] && printf "%s\n" "${_msg}" 1>&2	# stdout -> stderr
 	[ "${_lvl}" = "err"  ] && printf "%s\n" "${_msg}" 1>&2	# stdout -> stderr
 	[ "${_log}" = "1"    ] && printf "%s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_msg}" >> "${_file}"
 	return 0
 }
-# Inline Output to stdout/stderr and to file
+
+# Inline Output to stdout/stderr and to file.
+#
+# @param  string  _lvl	Debug Level
+# @param  string  _msg	Output message
+# @param  string  _log	'1': log to file | else: do not log to file
+# @param  string  _file	Full path to logfile
+# @param  string  _cron '1': Cron usage - do not print 'info' | else: print all
+# @return integer 0
 debugi() {
 	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
 	_msg="${2}"		# message to output
 	_log="${3}"		# log to file?
 	_file="${4}"	# full path to logfile
+	_cron="${5}"	# run for cron?
 
-	[ "${_lvl}" = "info" ] && printf "%s" "${_msg}"
+	if [ "${_cron}" != "1" ]; then
+		[ "${_lvl}" = "info" ] && printf "%s" "${_msg}"		# only show error if not in cron
+	fi
 	[ "${_lvl}" = "warn" ] && printf "%s" "${_msg}" 1>&2	# stdout -> stderr
 	[ "${_lvl}" = "err"  ] && printf "%s" "${_msg}" 1>&2	# stdout -> stderr
 	[ "${_log}" = "1"    ] && printf "%s %s %s" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_msg}" >> "${_file}"
 	return 0
 }
-# Output to stdout/stderr and to file (No date output)
+
+# Output to stdout/stderr and to file (No date output).
+#
+# @param  string  _lvl	Debug Level
+# @param  string  _msg	Output message
+# @param  string  _log	'1': log to file | else: do not log to file
+# @param  string  _file	Full path to logfile
+# @param  string  _cron '1': Cron usage - do not print 'info' | else: print all
+# @return integer 0
 debugn() {
 	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
 	_msg="${2}"		# message to output
 	_log="${3}"		# log to file?
 	_file="${4}"	# full path to logfile
+	_cron="${5}"	# run for cron?
 
-	[ "${_lvl}" = "info" ] && printf "%s\n" "${_msg}"
+	if [ "${_cron}" != "1" ]; then
+		[ "${_lvl}" = "info" ] && printf "%s\n" "${_msg}"	# only show error if not in cron
+	fi
 	[ "${_lvl}" = "warn" ] && printf "%s\n" "${_msg}" 1>&2	# stdout -> stderr
 	[ "${_lvl}" = "err"  ] && printf "%s\n" "${_msg}" 1>&2	# stdout -> stderr
 	[ "${_log}" = "1"    ] && printf "%s\n" "${_msg}" >> "${_file}"
@@ -110,7 +149,13 @@ debugn() {
 }
 
 
-# Test if argument is an integer
+
+############################################################
+# Math helper
+############################################################
+
+# Test if argument is an integer.
+#
 # @param  mixed
 # @return integer	0: is number | 1: not a number
 isint(){
@@ -118,7 +163,8 @@ isint(){
 }
 
 
-# Sum up two numbers
+# Sum up two numbers.
+#
 # @param  integer
 # @param  integer
 # @return integer
@@ -127,7 +173,12 @@ sum() {
 }
 
 
-# Get Operating system independent numerical chmod value
+############################################################
+# Security checker
+############################################################
+
+# Get Operating system independent numerical chmod value.
+#
 # @param  string	path to file/folder
 # @return string	numerical chmod
 permission() {
@@ -144,7 +195,8 @@ permission() {
 	return 0
 }
 
-# Validate chmod value
+# Validate chmod value.
+#
 # @param  string	numerical chmod
 # @return boolean	0: valid, 1: invalid
 valid_chmod() {
@@ -174,33 +226,135 @@ valid_chmod() {
 }
 
 
+############################################################
+# Usage/Help/Version
+############################################################
+
+#
+# Usage
+#
+print_usage() {
+#	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--cron] [--test] [--info] [--help] [--version]"
+	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--cron] [--test] [--help] [--version]"
+	printf "%s %s %s\n" "      " "${INFO_NAME}" "--cron"
+	printf "%s %s %s\n" "      " "${INFO_NAME}" "--test"
+#	printf "%s %s %s\n" "      " "${INFO_NAME}" "--info"
+	printf "%s %s %s\n" "      " "${INFO_NAME}" "--help"
+	printf "%s %s %s\n" "      " "${INFO_NAME}" "--version"
+}
+
+#
+# Display program usage
+#
+print_help() {
+
+	print_usage
+	echo
+	echo "When invoked without any arguments, it will dumping databases as"
+	echo "defined in mysqldump-secure.conf."
+	echo
+	echo "--cron            Use for cron run. It will only output errors and warnings"
+	echo "                  and will silence all debug output."
+	echo
+	echo "--test            Test requirements and exit."
+	echo
+#	echo "--info            Show settings and exit."
+#	echo
+	echo "--help            Show this help screen."
+	echo
+	echo "--version         Show version information."
+}
+# TODO:
+# --------
+# --info			Shows current configuration and paths
+# --config=<foo>	Use alternative configuration file
+# --cli				Start interactive cli (mysqldump-secure-cli) to show dumps, import dumps, set configs, etc
+
+
+
+#
+# Display program version and credits
+#
+print_version() {
+	printf "Name:    %s\n" "${INFO_NAME}"
+	printf "Version: %s (%s)\n" "${INFO_VERSION}" "${INFO_DATE}"
+	printf "Author:  %s (%s)\n" "${INFO_AUTHOR}" "${INFO_GPGKEY}"
+	printf "URL:     %s\n" "${INFO_URL}"
+	printf "License: %s\n" "${INFO_LICENSE}"
+}
+
+
 ################################################################################
 #
 # ENTRY POINT: ERROR CHECKING
 #
 ################################################################################
 
+############################################################
+# 1.) Evaluate cmd arguments
+############################################################
+
+
+_ARG_CRON="0"
+_ARG_TEST="0"
+#_ARG_INFO="0"
+
+if [ $# -gt 1 ]; then
+	echo "Too many arguments."
+	echo "Type '${INFO_NAME} --help' for available options."
+	exit 1
+fi
+
+while [ $# -gt 0  ]; do
+	case "$1" in
+		--cron)
+			_ARG_CRON="1"
+			;;
+		--test)
+			_ARG_TEST="1"
+			;;
+#		--info)
+#			_ARG_INFO="1"
+#			;;
+		--help)
+			print_help
+			exit 0
+			;;
+		--version)
+			print_version
+			exit 0
+			;;
+		*)
+			echo "Invalid argument: '${1}'."
+			echo "Type '${INFO_NAME} --help' for available options."
+			exit 1
+			;;
+	esac
+	shift
+done
+
+
 # TODO: optionally read in different config file location
 CONFIG_FILE="${_DEFAULT_CONFIG_FILE}"
 
 ############################################################
-# Config FIle
+# Config File
 ############################################################
 
 if [ ! -f "${CONFIG_FILE}" ]; then
-	debug "err" "[ERR]  Configuration file not found in ${CONFIG_FILE}"
-	debug "err" "Aborting"
+	debug "err" "[ERR]  Configuration file not found in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
+	debug "err" "Aborting" "" "" "${_ARG_CRON}"
 	exit 1
 fi
 if [ ! -r "${CONFIG_FILE}" ]; then
-	debug "err" "[ERR]  Configuration file is not readable in ${CONFIG_FILE}"
-	debug "err" "Aborting"
+	debug "err" "[ERR]  Configuration file is not readable in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
+	debug "err" "Aborting" "" "" "${_ARG_CRON}"
 	exit 1
 fi
 if [ "$(permission "${CONFIG_FILE}")" != "400" ]; then
-	debug "err" "[ERR]  Configuration file ${CONFIG_FILE} has dangerous permissions: $(permission "${CONFIG_FILE}")."
-	debug "err" "[ERR]  Fix it to 400"
-	debug "err" "Aborting"
+	debug "err" "[ERR]  Configuration file ${CONFIG_FILE} has dangerous permissions: $(permission "${CONFIG_FILE}")." "" "" "${_ARG_CRON}"
+	debug "err" "[ERR]  Fix it to 400" "" "" "${_ARG_CRON}"
+	debug "err" "Aborting" "" "" "${_ARG_CRON}"
 	exit 1
 fi
 
@@ -221,94 +375,94 @@ fi
 # or not. Also make sure that the logfile is writeable and
 # that no other has read permissions to the file.
 if [ -z "${LOG}" ]; then
-	debug "warn" "[WARN] \$LOG variable is not set or empty in ${CONFIG_FILE}"
-	debug "warn" "[WARN] Logging disabled"
+	debug "warn" "[WARN] \$LOG variable is not set or empty in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
+	debug "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
 	LOG=0
 elif [ "${LOG}" = "1" ]; then
 	# Logfile not set
 	if [ -z "${LOGFILE}" ]; then
-		debug "warn" "[WARN] \$LOGFILE variable is not set or empty in ${CONFIG_FILE}"
-		debug "warn" "[WARN] Logging disabled"
+		debug "warn" "[WARN] \$LOGFILE variable is not set or empty in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
+		debug "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
 		LOG=0
 	# Logfile not found
 	elif [ ! -f "${LOGFILE}" ]; then
 
 		# Check if logging directory exists
 		if [ ! -d "$(dirname "${LOGFILE}")" ]; then
-			debug  "warn" "[WARN] Logfile directory does not exist in $(dirname "${LOGFILE}")"
-			debugi "info" "[INFO] Trying to create..."
+			debug  "warn" "[WARN] Logfile directory does not exist in $(dirname "${LOGFILE}")" "" "" "${_ARG_CRON}"
+			debugi "info" "[INFO] Trying to create..." "" "" "${_ARG_CRON}"
 			if ! mkdir -p "$(dirname "${LOGFILE}")" > /dev/null 2>&1 ; then
-				debugn "err"  "Failed"
-				debug  "err"  "[ERR]  Failed to create logfile directoy $(dirname "${LOGFILE}")"
-				debug  "warn" "[WARN] Logging disabled"
+				debugn "err"  "Failed" "" "" "${_ARG_CRON}"
+				debug  "err"  "[ERR]  Failed to create logfile directoy $(dirname "${LOGFILE}")" "" "" "${_ARG_CRON}"
+				debug  "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
 				LOG=0
 			else
-				debugn "info" "OK"
+				debugn "info" "OK" "" "" "${_ARG_CRON}"
 			fi
 		fi
 
 		# If logging is still OK (dir exists), check if the file can be created
 		if [ "${LOG}" = "1" ]; then
-			debug  "warn" "[WARN] Logfile does not exist in ${LOGFILE}"
-			debugi "info" "[INFO] Trying to create..."
+			debug  "warn" "[WARN] Logfile does not exist in ${LOGFILE}" "" "" "${_ARG_CRON}"
+			debugi "info" "[INFO] Trying to create..." "" "" "${_ARG_CRON}"
 
 			if ! touch "${LOGFILE}" > /dev/null 2>&1 ; then
-				debugn "err"  "Failed"
-				debug  "err"  "[ERR]  Failed to create file ${LOGFILE}"
-				debug  "warn" "[WARN] Logging disabled"
+				debugn "err"  "Failed" "" "" "${_ARG_CRON}"
+				debug  "err"  "[ERR]  Failed to create file ${LOGFILE}" "" "" "${_ARG_CRON}"
+				debug  "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
 				LOG=0
 			else
-				debugn "info" "OK"
-				debug  "info" "[INFO] Created file ${LOGFILE}"
-				debugi "info" "[INFO] Trying to chmod..."
+				debugn "info" "OK" "" "" "${_ARG_CRON}"
+				debug  "info" "[INFO] Created file ${LOGFILE}" "" "" "${_ARG_CRON}"
+				debugi "info" "[INFO] Trying to chmod..." "" "" "${_ARG_CRON}"
 
 				if ! chmod 600 "${LOGFILE}" > /dev/null 2>&1 ; then
-					debugn "err"  "Failed"
-					debug  "err"  "[ERR]  Failed to chmod 600 ${LOGFILE}"
-					debug  "warn" "[WARN] Logging disabled"
+					debugn "err"  "Failed" "" "" "${_ARG_CRON}"
+					debug  "err"  "[ERR]  Failed to chmod 600 ${LOGFILE}" "" "" "${_ARG_CRON}"
+					debug  "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
 					LOG=0
 				else
-					debugn "info" "OK"
+					debugn "info" "OK" "" "" "${_ARG_CRON}"
 				fi
 			fi
 		fi
 	# Logfile not writeable
 	elif [ ! -w "${LOGFILE}" ]; then
-		debug  "warn" "[WARN] Logfile ${LOGFILE} not writeable"
-		debugi "info" "[INFO] Trying to chmod..."
+		debug  "warn" "[WARN] Logfile ${LOGFILE} not writeable" "" "" "${_ARG_CRON}"
+		debugi "info" "[INFO] Trying to chmod..." "" "" "${_ARG_CRON}"
 
 		if ! chmod 600 "${LOGFILE}" > /dev/null 2>&1 ; then
-			debugn "err"  "Failed"
-			debug  "err"  "[ERR]  Failed to chmod 600 ${LOGFILE}"
-			debug  "warn" "[WARN] Logging disabled"
+			debugn "err"  "Failed" "" "" "${_ARG_CRON}"
+			debug  "err"  "[ERR]  Failed to chmod 600 ${LOGFILE}" "" "" "${_ARG_CRON}"
+			debug  "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
 			LOG=0
 		else
 			# Check again if it is writeable now?
 			if [ ! -w "${LOGFILE}" ]; then
-				debugn "err"  "Failed"
-				debug  "warn" "[WARN] Logfile ${LOGFILE} still not writeable"
-				debug  "warn" "[WARN] Logging disabled"
+				debugn "err"  "Failed" "" "" "${_ARG_CRON}"
+				debug  "warn" "[WARN] Logfile ${LOGFILE} still not writeable" "" "" "${_ARG_CRON}"
+				debug  "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
 				LOG=0
 			else
-				debugn "info" "OK"
+				debugn "info" "OK" "" "" "${_ARG_CRON}"
 			fi
 		fi
 	# Logfile has wrong permissions
 	elif [ "$(permission "${LOGFILE}")" != "600" ]; then
-		debug  "warn" "[WARN] Logfile has dangerous permissions: $(permission "${LOGFILE}")"
-		debugi "info" "[INFO] Trying to chmod..."
+		debug  "warn" "[WARN] Logfile has dangerous permissions: $(permission "${LOGFILE}")" "" "" "${_ARG_CRON}"
+		debugi "info" "[INFO] Trying to chmod..." "" "" "${_ARG_CRON}"
 
 		if ! chmod 600 "${LOGFILE}" > /dev/null 2>&1 ; then
-			debugn "err"  "Failed"
-			debug  "err"  "[ERR]  Failed to chmod 600 ${LOGFILE}"
-			debug  "warn" "[WARN] Logging disabled"
+			debugn "err"  "Failed" "" "" "${_ARG_CRON}"
+			debug  "err"  "[ERR]  Failed to chmod 600 ${LOGFILE}" "" "" "${_ARG_CRON}"
+			debug  "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
 			LOG=0
 		else
-			debugn "info" "OK"
+			debugn "info" "OK" "" "" "${_ARG_CRON}"
 		fi
 	fi
 else
-	debug "info" "[INFO] Logging not enabled in ${CONFIG_FILE}"
+	debug "info" "[INFO] Logging not enabled in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
 	LOG=0
 fi
 
@@ -320,9 +474,22 @@ if [ "${LOG}" = "1" ]; then
 		echo "--------------------------------------------------------------------------------";
 		echo "$(date '+%Y-%m-%d') $(date '+%H:%M:%S') Starting";
 	} >> "${LOGFILE}"
-	debug "info" "[INFO] Logging enabled" ${LOG} "${LOGFILE}"
+	debug "info" "[INFO] Logging enabled" ${LOG} "${LOGFILE}" "${_ARG_CRON}"
 fi
 
+
+############################################################
+# Command line arguments
+############################################################
+if [ "${_ARG_CRON}" = "1" ]; then
+	debug "info" "[INFO] Running in cron mode (--cron)."  ${LOG} "${LOGFILE}" "${_ARG_CRON}"
+fi
+if [ "${_ARG_TEST}" = "1" ]; then
+	debug "info" "[INFO] Running tests only (--test)."  ${LOG} "${LOGFILE}" "${_ARG_CRON}"
+fi
+#if [ "${_ARG_INFO}" = "1" ]; then
+#	debug "info" "[INFO] Showing information only (--info)."  ${LOG} "${LOGFILE}" "${_ARG_CRON}"
+#fi
 
 
 ############################################################
@@ -331,23 +498,23 @@ fi
 
 # Check if CHMOD exists, otherwise use default values
 if [ -z "${DUMP_DIR_CHMOD}" ]; then
-	debug "warn" "[WARN] \$DUMP_DIR_CHMOD is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "warn" "[WARN] Setting \$DUMP_DIR_CHMOD to ${_DEFAULT_DUMP_DIR_CHMOD}" $LOG "${LOGFILE}"
+	debug "warn" "[WARN] \$DUMP_DIR_CHMOD is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "[WARN] Setting \$DUMP_DIR_CHMOD to ${_DEFAULT_DUMP_DIR_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	DUMP_DIR_CHMOD=${_DEFAULT_DUMP_DIR_CHMOD}
 fi
 if [ -z "${DUMP_FILE_CHMOD}" ]; then
-	debug "warn" "[WARN] \$DUMP_FILE_CHMOD is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "warn" "[WARN] Setting \$DUMP_FILE_CHMOD to ${_DEFAULT_DUMP_FILE_CHMOD}" $LOG "${LOGFILE}"
+	debug "warn" "[WARN] \$DUMP_FILE_CHMOD is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "[WARN] Setting \$DUMP_FILE_CHMOD to ${_DEFAULT_DUMP_FILE_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	DUMP_FILE_CHMOD=${_DEFAULT_DUMP_FILE_CHMOD}
 fi
 if ! valid_chmod "${DUMP_DIR_CHMOD}" > /dev/null 2>&1; then
-	debug "err"  "[ERR]  Invalid chmod value for \$DUMP_DIR_CHMOD: ${DUMP_DIR_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "info" "[INFO] Setting \$DUMP_DIR_CHMOD to ${_DEFAULT_DUMP_DIR_CHMOD}" $LOG "${LOGFILE}"
+	debug "err"  "[ERR]  Invalid chmod value for \$DUMP_DIR_CHMOD: ${DUMP_DIR_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "[INFO] Setting \$DUMP_DIR_CHMOD to ${_DEFAULT_DUMP_DIR_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	DUMP_DIR_CHMOD=${_DEFAULT_DUMP_DIR_CHMOD}
 fi
 if ! valid_chmod "${DUMP_FILE_CHMOD}" > /dev/null 2>&1; then
-	debug "err"  "[ERR]  Invalid chmod value for \$DUMP_FILE_CHMOD: ${DUMP_FILE_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "info" "[INFO] Setting \$DUMP_FILE_CHMOD to ${_DEFAULT_DUMP_FILE_CHMOD}" $LOG "${LOGFILE}"
+	debug "err"  "[ERR]  Invalid chmod value for \$DUMP_FILE_CHMOD: ${DUMP_FILE_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "[INFO] Setting \$DUMP_FILE_CHMOD to ${_DEFAULT_DUMP_FILE_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	DUMP_FILE_CHMOD=${_DEFAULT_DUMP_FILE_CHMOD}
 fi
 
@@ -355,62 +522,62 @@ fi
 
 # Check if destination dir exists
 if [ -z "${DUMP_PATH}" ]; then
-	debug "err" "[ERR]  \$DUMP_PATH variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "err" "Aborting" $LOG "${LOGFILE}"
+	debug "err" "[ERR]  \$DUMP_PATH variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err" "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
 elif [ ! -d "${DUMP_PATH}" ]; then
-	debug  "warn" "[WARN] Destination dir ${DUMP_PATH} does not exist" $LOG "${LOGFILE}"
-	debugi "info" "[INFO] Trying to create... " $LOG "${LOGFILE}"
+	debug  "warn" "[WARN] Destination dir ${DUMP_PATH} does not exist" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debugi "info" "[INFO] Trying to create... " $LOG "${LOGFILE}" "${_ARG_CRON}"
 	if ! mkdir -p "${DUMP_PATH}" > /dev/null 2>&1 ; then
-		debugn "err"  "Failed" $LOG "${LOGFILE}"
-		debug  "err"  "Aborting" $LOG "${LOGFILE}"
+		debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 1
 	else
-		debugn "info" "Done" $LOG "${LOGFILE}"
-		debug  "info" "[INFO] Adjusting file permissions to ${DUMP_DIR_CHMOD} on ${DUMP_PATH}" $LOG "${LOGFILE}"
+		debugn "info" "Done" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug  "info" "[INFO] Adjusting file permissions to ${DUMP_DIR_CHMOD} on ${DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		chmod ${DUMP_DIR_CHMOD} "${DUMP_PATH}"
 	fi
 fi
 
 # Check if destination dir is writeable
 if [ ! -w "${DUMP_PATH}" ]; then
-	debug  "warn" "[WARN] Destination dir ${DUMP_PATH} is not writeable" $LOG "${LOGFILE}"
-	debugi "info" "[INFO] Trying to chmod to ${DUMP_DIR_CHMOD}... " $LOG "${LOGFILE}"
+	debug  "warn" "[WARN] Destination dir ${DUMP_PATH} is not writeable" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debugi "info" "[INFO] Trying to chmod to ${DUMP_DIR_CHMOD}... " $LOG "${LOGFILE}" "${_ARG_CRON}"
 	if ! chmod ${DUMP_DIR_CHMOD} "${DUMP_PATH}" > /dev/null 2>&1 ; then
-		debugn "err"  "Failed" $LOG "${LOGFILE}"
-		debug  "err"  "Aborting" $LOG "${LOGFILE}"
+		debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 1
 	else
-		debugn "info" "Done" $LOG "${LOGFILE}"
+		debugn "info" "Done" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	fi
-	debugi "info" "[INFO] Trying to chown... " $LOG "${LOGFILE}"
+	debugi "info" "[INFO] Trying to chown... " $LOG "${LOGFILE}" "${_ARG_CRON}"
 	if ! chown "$(whoami)" "${DUMP_PATH}" > /dev/null 2>&1 ; then
-		debugn "err"  "Failed" $LOG "${LOGFILE}"
-		debug  "err"  "Aborting" $LOG "${LOGFILE}"
+		debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 1
 	else
-		debugn "info" "Done" $LOG "${LOGFILE}"
+		debugn "info" "Done" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	fi
 fi
 # Check correct permissions of destination dir
 if [ "$(permission "${DUMP_PATH}")" != "${DUMP_DIR_CHMOD}" ]; then
-	debug  "err"  "[ERR]  Target directory has wrong permissions: $(permission "${DUMP_PATH}"), but should ${DUMP_DIR_CHMOD}." $LOG "${LOGFILE}"
-	debugi "info" "[INFO] Trying to chmod to ${DUMP_DIR_CHMOD}... " $LOG "${LOGFILE}"
+	debug  "err"  "[ERR]  Target directory has wrong permissions: $(permission "${DUMP_PATH}"), but should ${DUMP_DIR_CHMOD}." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debugi "info" "[INFO] Trying to chmod to ${DUMP_DIR_CHMOD}... " $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 	if ! chmod "${DUMP_DIR_CHMOD}" "${DUMP_PATH}" > /dev/null 2>&1 ; then
-		debugn "err"  "Failed" $LOG "${LOGFILE}"
-		debug  "err"  "Aborting" $LOG "${LOGFILE}"
+		debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 1
 	else
-		debugn "info" "Done" $LOG "${LOGFILE}"
+		debugn "info" "Done" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	fi
 fi
 
 
 # Check output Prefix
 if [ -z "${DUMP_FILE_PRE}" ]; then
-	debug "warn" "[WARN] \$DUMP_FILE_PRE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "warn" "[WARN] Using default 'date-time' prefix: ${_DEFAULT_DUMP_FILE_PRE}" $LOG "${LOGFILE}"
+	debug "warn" "[WARN] \$DUMP_FILE_PRE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "[WARN] Using default 'date-time' prefix: ${_DEFAULT_DUMP_FILE_PRE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	DUMP_FILE_PRE="${_DEFAULT_DUMP_FILE_PRE}"
 fi
 
@@ -420,41 +587,41 @@ fi
 # MySQL
 ############################################################
 if [ -z "${MYSQL_CNF_FILE}" ]; then
-	debug "err" "[ERR]  \$MYSQL_CNF_FILE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "err"  "Aborting" $LOG "${LOGFILE}"
+	debug "err" "[ERR]  \$MYSQL_CNF_FILE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
 fi
 if [ ! -f "${MYSQL_CNF_FILE}" ]; then
-	debug "err"  "[ERR]  MySQL Configuration file not found in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}"
-	debug "err"  "Aborting" $LOG "${LOGFILE}"
+	debug "err"  "[ERR]  MySQL Configuration file not found in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
 fi
 if [ ! -r "${MYSQL_CNF_FILE}" ]; then
-	debug "err"  "[ERR]  MySQL Configuration file is not readable in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}"
-	debug "err"  "Aborting" $LOG "${LOGFILE}"
+	debug "err"  "[ERR]  MySQL Configuration file is not readable in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
 fi
 if [ "$(permission "${MYSQL_CNF_FILE}")" != "400" ]; then
-	debug "err"  "[ERR]  MySQL Configuration file ${MYSQL_CNF_FILE} has dangerous permissions: $(permission "${MYSQL_CNF_FILE}")." $LOG "${LOGFILE}"
-	debug "err"  "[ERR]  Fix it to 400" $LOG "${LOGFILE}"
-	debug "err"  "[ERR]  Change your database password!" $LOG "${LOGFILE}"
-	debug "err"  "Aborting" $LOG "${LOGFILE}"
+	debug "err"  "[ERR]  MySQL Configuration file ${MYSQL_CNF_FILE} has dangerous permissions: $(permission "${MYSQL_CNF_FILE}")." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "[ERR]  Fix it to 400" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "[ERR]  Change your database password!" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
 fi
 if ! command -v mysql > /dev/null 2>&1 ; then
-	debug "err"  "[ERR]  'mysql' not found" $LOG "${LOGFILE}"
-	debug "err"  "Aborting" $LOG "${LOGFILE}"
+	debug "err"  "[ERR]  'mysql' not found" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 2
 fi
 if ! command -v mysqldump > /dev/null 2>&1 ; then
-	debug "err"  "[ERR]  'mysqldump' not found" $LOG "${LOGFILE}"
-	debug "err"  "Aborting" $LOG "${LOGFILE}"
+	debug "err"  "[ERR]  'mysqldump' not found" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 2
 fi
 # Testing MySQL connection
 if ! $(which mysql) --defaults-extra-file="${MYSQL_CNF_FILE}" -e exit > /dev/null 2>&1 ; then
-	debug "err"  "[ERR]  Cannot connect to mysql database. Check credentials in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}"
-	debug "err"  "Aborting" $LOG "${LOGFILE}"
+	debug "err"  "[ERR]  Cannot connect to mysql database. Check credentials in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 3
 fi
 
@@ -466,15 +633,15 @@ fi
 for opt in ${MYSQL_OPTS}; do
 	for evil in ${MYSQL_EVIL_OPTS}; do
 		if [ "${opt}" = "${evil}" ]; then
-			debug "err"  "[ERR]  Insecure mysqldump option found in MYSQL_OPTS: '${evil}'" $LOG "${LOGFILE}"
-			debug "err"  "Aborting" $LOG "${LOGFILE}"
+			debug "err"  "[ERR]  Insecure mysqldump option found in MYSQL_OPTS: '${evil}'" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			exit 3
 		fi
 	done
 	for bad in ${MYSQL_BAD_OPTS}; do
 		if [ "${opt}" = "${evil}" ]; then
-			debug "err"  "[ERR]  Disallowed mysqldump option found in MYSQL_OPTS: '${bad}'" $LOG "${LOGFILE}"
-			debug "err"  "Aborting" $LOG "${LOGFILE}"
+			debug "err"  "[ERR]  Disallowed mysqldump option found in MYSQL_OPTS: '${bad}'" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			exit 3
 		fi
 	done
@@ -486,13 +653,13 @@ done
 # IGNORE/REQUIRE
 ############################################################
 if [ -z "${IGNORE}" ]; then
-	debug "warn" "[INFO] \$IGNORE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "warn" "[INFO] No database will be ignored" $LOG "${LOGFILE}"
+	debug "warn" "[INFO] \$IGNORE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "[INFO] No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	IGNORE=""
 fi
 if [ -z "${REQUIRE}" ]; then
-	debug "warn" "[INFO] \$REQUIRE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "warn" "[INFO] No database will explicitly be required" $LOG "${LOGFILE}"
+	debug "warn" "[INFO] \$REQUIRE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "[INFO] No database will explicitly be required" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	REQUIRE=""
 fi
 
@@ -502,36 +669,36 @@ fi
 # Compression
 ############################################################
 if [ -z "${COMPRESS}" ]; then
-	debug "warn" "[WARN] \$COMPRESS variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "warn" "[WARN] Compression disabled" $LOG "${LOGFILE}"
+	debug "warn" "[WARN] \$COMPRESS variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "[WARN] Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	COMPRESS=0
 fi
 if [ "${COMPRESS}" = "1" ]; then
 	if [ -z "${COMPRESS_BIN}" ]; then
-		debug "err"  "[ERR]  \$COMPRESS_BIN variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-		debug "err"  "Aborting" $LOG "${LOGFILE}"
+		debug "err"  "[ERR]  \$COMPRESS_BIN variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 2
 	fi
 	if [ -z "${COMPRESS_ARG}" ]; then
-		debug "err"  "[ERR]  \$COMPRESS_ARG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-		debug "err"  "Aborting" $LOG "${LOGFILE}"
+		debug "err"  "[ERR]  \$COMPRESS_ARG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 2
 	fi
 	if [ -z "${COMPRESS_EXT}" ]; then
-		debug "err"  "[ERR]  \$COMPRESS_EXT variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-		debug "err"  "Aborting" $LOG "${LOGFILE}"
+		debug "err"  "[ERR]  \$COMPRESS_EXT variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 2
 	fi
 
 	if ! command -v "${COMPRESS_BIN}" > /dev/null 2>&1 ; then
-		debug "warn" "[ERR]  ${COMPRESS_BIN} not found. Fix \$COMPRESS_BIN" $LOG "${LOGFILE}"
-		debug "err"  "Aborting" $LOG "${LOGFILE}"
+		debug "warn" "[ERR]  ${COMPRESS_BIN} not found. Fix \$COMPRESS_BIN" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 2
 	else
-		debug "info" "[INFO] Compression enabled" $LOG "${LOGFILE}"
+		debug "info" "[INFO] Compression enabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	fi
 else
-	debug "info" "[INFO] Compression not enabled in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	debug "info" "[INFO] Compression not enabled in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 
@@ -540,37 +707,37 @@ fi
 # Encryption
 ############################################################
 if [ -z "${ENCRYPT}" ]; then
-	debug "warn" "[WARN] \$ENCRYPT variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "warn" "[WARN] Encryption disabled" $LOG "${LOGFILE}"
+	debug "warn" "[WARN] \$ENCRYPT variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "[WARN] Encryption disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	ENCRYPT=0
 fi
 if [ "${ENCRYPT}" = "1" ]; then
 	if ! command -v openssl > /dev/null 2>&1 ; then
-		debug "err"  "[ERR]  'openssl' not found" $LOG "${LOGFILE}"
-		debug "err"  "Aborting" $LOG "${LOGFILE}"
+		debug "err"  "[ERR]  'openssl' not found" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 2
 	fi
 	if [ ! -f "${OPENSSL_PUBKEY_PEM}" ]; then
-		debug "err"  "[ERR]  OpenSSL pubkey not found in ${OPENSSL_PUBKEY_PEM}" $LOG "${LOGFILE}"
-		debug "err"  "Aborting" $LOG "${LOGFILE}"
+		debug "err"  "[ERR]  OpenSSL pubkey not found in ${OPENSSL_PUBKEY_PEM}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 2
 	fi
 	if [ -z "${OPENSSL_ALGO_ARG}" ]; then
-		debug "warn" "[WARN] \$OPENSSL_ALGO_ARG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Encryption defaults to: ${OPENSSL_ALGO_ARG}" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] \$OPENSSL_ALGO_ARG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] Encryption defaults to: ${OPENSSL_ALGO_ARG}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		OPENSSL_ALGO_ARG="${_DEFAULT_OPENSSL_ALGO_ARG}"
 	fi
 	# Test openssl Algo
 	if ! echo "test" | $(which openssl) smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} "${OPENSSL_PUBKEY_PEM}" > /dev/null 2>&1 ; then
-		debug "err"  "[ERR]  openssl encryption test failed. Validate \$OPENSSL_ALGO_ARG" $LOG "${LOGFILE}"
-		debug "err"  "Aborting" $LOG "${LOGFILE}"
+		debug "err"  "[ERR]  openssl encryption test failed. Validate \$OPENSSL_ALGO_ARG" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 2
 	fi
 
-	debug "info" "[INFO] Encryption enabled" $LOG "${LOGFILE}"
+	debug "info" "[INFO] Encryption enabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 else
-	debug "info" "[INFO] Encryption not enabled in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	debug "info" "[INFO] Encryption not enabled in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 
@@ -579,67 +746,67 @@ fi
 # Deletion
 ############################################################
 if [ -z "${DELETE}" ]; then
-	debug "warn" "[WARN] \$DELETE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
+	debug "warn" "[WARN] \$DELETE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	DELETE=0
 fi
 if [ "${DELETE}" = "1"  ]; then
 	if [ -z "${DELETE_METHOD}" ]; then
-		debug "warn" "[WARN] \$DELETE_METHOD variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] \$DELETE_METHOD variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
 	elif [ "${DELETE_METHOD}" = "tmpwatch" ] &&  ! command -v tmpwatch > /dev/null 2>&1 ; then
-		debug "warn" "[WARN] 'tmpwatch' not found" $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] 'tmpwatch' not found" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
 	elif [ "${DELETE_METHOD}" = "tmpreaper" ] && ! command -v tmpreaper > /dev/null 2>&1 ; then
-		debug "warn" "[WARN] 'tmpreaper' not found" $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] 'tmpreaper' not found" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
 	elif [ "${DELETE_METHOD}" != "tmpwatch" ] && [ "${DELETE_METHOD}" != 'tmpreaper' ]; then
-		debug "warn" "[WARN] \$DELETE_METHOD must be either 'tmpwatch' or 'tmpreaper' in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] \$DELETE_METHOD must be either 'tmpwatch' or 'tmpreaper' in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
 	elif [ -z "${DELETE_IF_OLDER}" ]; then
-		debug "warn" "[WARN] \$DELETE_IF_OLDER variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] \$DELETE_IF_OLDER variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
 	elif ! isint "${DELETE_IF_OLDER}" > /dev/null 2>&1 ; then
-		debug "warn" "[WARN] \$DELETE_IF_OLDER variable is not a valid integer" $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] \$DELETE_IF_OLDER variable is not a valid integer" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
 	elif [ "${DELETE_IF_OLDER}" -lt 1 ]; then
-		debug "warn" "[WARN] \$DELETE_IF_OLDER is smaller than 1 hour" $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] \$DELETE_IF_OLDER is smaller than 1 hour" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
 	else
-		debug "info" "[INFO] Deletion enabled. Using: ${DELETE_METHOD}" $LOG "${LOGFILE}"
+		debug "info" "[INFO] Deletion enabled. Using: ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	fi
 else
-	debug "info" "[INFO] Deletion not enabled in ${CONFIG_FILE}" $LOG "${LOGFILE}"
+	debug "info" "[INFO] Deletion not enabled in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 # Check for forced deletion
 if [ "${DELETE}" = "1" ]; then
 	if [ -z "${DELETE_FORCE}" ]; then
-		debug "warn" "[WARN] \$DELETE_FORCE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] \$DELETE_FORCE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE_FORCE=0
 	elif ! isint "${DELETE_FORCE}" > /dev/null 2>&1 ; then
-		debug "warn" "[WARN] \$DELETE_FORCE variable is not a valid integer" $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] \$DELETE_FORCE variable is not a valid integer" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE_FORCE=0
 	elif [ "${DELETE_FORCE}" != "0" ] && [ "${DELETE_FORCE}" != "1" ]; then
-		debug "warn" "[WARN] \$DELETE_FORCE variable invalid. Must be either 0 or 1." $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] \$DELETE_FORCE variable invalid. Must be either 0 or 1." $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE_FORCE=0
 	fi
 
 
 	if [ "${DELETE_FORCE}" = 1 ]; then
-		debug "info" "[INFO] Using '--force' option for ${DELETE_METHOD}" $LOG "${LOGFILE}"
+		debug "info" "[INFO] Using '--force' option for ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	else
-		debug "info" "[INFO] Not forcing (--force) deletion on read-only files for ${DELETE_METHOD}" $LOG "${LOGFILE}"
+		debug "info" "[INFO] Not forcing (--force) deletion on read-only files for ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	fi
 
 fi
@@ -650,61 +817,70 @@ fi
 # Nagios
 ############################################################
 if [ -z "${NAGIOS_LOG}" ]; then
-	debug "warn" "[WARN] \$NAGIOS_LOG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-	debug "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}"
+	debug "warn" "[WARN] \$NAGIOS_LOG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	NAGIOS_LOG=0
 elif [ "${NAGIOS_LOG}" = "1"  ]; then
 	if [ -z "${NAGIOS_LOGFILE}" ]; then
-		debug "warn" "[WARN] \$NAGIOS_LOG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] \$NAGIOS_LOG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		NAGIOS_LOG=0
 	elif [ ! -f "${NAGIOS_LOGFILE}" ]; then
-		debug  "warn" "[WARN] ${NAGIOS_LOGFILE} not found" $LOG "${LOGFILE}"
-		debugi "info" "[INFO] Trying to create..." $LOG "${LOGFILE}"
+		debug  "warn" "[WARN] ${NAGIOS_LOGFILE} not found" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debugi "info" "[INFO] Trying to create..." $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 		if ! touch "${NAGIOS_LOGFILE}" > /dev/null 2>&1 ; then
-			debugn "err"  "Failed" $LOG "${LOGFILE}"
-			debug  "err"  "[ERR]  Failed to create file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}"
-			debug  "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}"
+			debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug  "err"  "[ERR]  Failed to create file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug  "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			NAGIOS_LOG=0
 		else
-			debugn "info" "OK" $LOG "${LOGFILE}"
-			debug  "info" "[INFO] Created file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}"
-			debugi "info" "[INFO] Trying to chmod..." $LOG "${LOGFILE}"
+			debugn "info" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug  "info" "[INFO] Created file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debugi "info" "[INFO] Trying to chmod..." $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 			if ! chmod 644 "${NAGIOS_LOGFILE}" > /dev/null 2>&1 ; then
-				debugn "err"  "Failed" $LOG "${LOGFILE}"
-				debug  "err"  "[ERR]  Failed to chmod 644 ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}"
-				debug  "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}"
+				debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}"
+				debug  "err"  "[ERR]  Failed to chmod 644 ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+				debug  "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 				NAGIOS_LOG=0
 			else
-				debugn "info" "OK" $LOG "${LOGFILE}"
-				debug  "info" "[INFO] Nagios plugin log enabled" $LOG "${LOGFILE}"
+				debugn "info" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}"
+				debug  "info" "[INFO] Nagios plugin log enabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			fi
 		fi
 	elif [ ! -r "${NAGIOS_LOGFILE}" ]; then
-		debug "warn" "[WARN] ${NAGIOS_LOGFILE} not readable" $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] ${NAGIOS_LOGFILE} not readable" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		NAGIOS_LOG=0
 		# TODO: auto chmod
 	elif [ ! -w "${NAGIOS_LOGFILE}" ]; then
-		debug "warn" "[WARN] ${NAGIOS_LOGFILE} not writeable" $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] ${NAGIOS_LOGFILE} not writeable" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		NAGIOS_LOG=0
 		# TODO: auto chmod
 	elif [ "$(permission "${NAGIOS_LOGFILE}")" != "644" ]; then
-		debug "warn" "[WARN] Nagios logfile ${NAGIOS_LOGFILE} has wrong permissions: $(permission "${NAGIOS_LOGFILE}")." $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Fix it to 644" $LOG "${LOGFILE}"
-		debug "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}"
+		debug "warn" "[WARN] Nagios logfile ${NAGIOS_LOGFILE} has wrong permissions: $(permission "${NAGIOS_LOGFILE}")." $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] Fix it to 644" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		# TODO: auto chmod
 		NAGIOS_LOG=0
 	else
-		debug "info" "[INFO] Nagios plugin log enabled" $LOG "${LOGFILE}"
+		debug "info" "[INFO] Nagios plugin log enabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	fi
 else
-	debug "info" "[INFO] Nagios plugin log enabled" $LOG "${LOGFILE}"
+	debug "info" "[INFO] Nagios plugin log enabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
+
+
+############################################################
+# Test mode
+############################################################
+if [ "${_ARG_TEST}" = "1" ]; then
+	debug "info" "[INFO] Exiting program from test mode (--test)."  ${LOG} "${LOGFILE}" "${_ARG_CRON}"
+	exit 0
+fi
 
 
 ################################################################################
@@ -728,11 +904,11 @@ ERROR=0
 ############################################################
 
 # Get a list of all databases
-debugi "info" "[INFO] Retrieving list of databases... " $LOG "${LOGFILE}"
+debugi "info" "[INFO] Retrieving list of databases... " $LOG "${LOGFILE}" "${_ARG_CRON}"
 #DATABASES="$( ${MYSQL} --defaults-extra-file="${MYSQL_CNF_FILE}" --batch -e 'show databases;' | sed 1d )"
 DATABASES="$( ${MYSQL} --defaults-extra-file="${MYSQL_CNF_FILE}" --no-auto-rehash --skip-column-names -e 'SELECT DISTINCT table_schema FROM information_schema.tables;')"
 NUM_DB="$(echo "${DATABASES}" | wc -l | tr -d ' ')"
-debugn "info" "${NUM_DB}" $LOG "${LOGFILE}"
+debugn "info" "${NUM_DB}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 
 
@@ -751,7 +927,7 @@ NAGIOS_DB_IGNORED=""
 NAGIOS_DB_ERROR=""
 
 
-debug "info" "[INFO] Backup directory: ${DUMP_PATH}" $LOG "${LOGFILE}"
+debug "info" "[INFO] Backup directory: ${DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 for db in ${DATABASES}; do
 
@@ -786,7 +962,7 @@ for db in ${DATABASES}; do
 		if [ ${COMPRESS} -eq 1 ]; then
 			if [ ${ENCRYPT} -eq 1 ]; then
 				ext=".sql.${COMPRESS_EXT}.enc"
-				debugi "info"  "Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) " $LOG "${LOGFILE}"
+				debugi "info"  "Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) " $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 				# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
 				exec 4>&1
@@ -800,7 +976,7 @@ for db in ${DATABASES}; do
 
 			else
 				ext=".sql.${COMPRESS_EXT}"
-				debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (compressed) " $LOG "${LOGFILE}"
+				debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (compressed) " $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 				# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
 				exec 4>&1
@@ -815,7 +991,7 @@ for db in ${DATABASES}; do
 		else
 			if [ ${ENCRYPT} -eq 1 ]; then
 				ext=".sql.enc"
-				debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (encrypted) " $LOG "${LOGFILE}"
+				debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (encrypted) " $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 				# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
 				exec 4>&1
@@ -828,7 +1004,7 @@ for db in ${DATABASES}; do
 
 			else
 				ext=".sql"
-				debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) " $LOG "${LOGFILE}"
+				debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) " $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 				# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
 				exec 4>&1
@@ -847,12 +1023,12 @@ for db in ${DATABASES}; do
 		# No errors in POSIX pipestatus emulation
 		if [ -z "$error_statuses" ]; then
 			endtime=$(date +%s)
-			debugn "info" "$((endtime - starttime)) sec" $LOG "${LOGFILE}"
+			debugn "info" "$((endtime - starttime)) sec" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			chmod ${DUMP_FILE_CHMOD} "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}"
 
 			[ "${NAGIOS_DB_DUMPED}" = "" ] && NAGIOS_DB_DUMPED="${db}" || NAGIOS_DB_DUMPED="${NAGIOS_DB_DUMPED},${db}"
 		else
-			debugn "err"  "ERROR" $LOG "${LOGFILE}"
+			debugn "err"  "ERROR" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			ERROR=1
 
 			[ "${NAGIOS_DB_ERROR}" = "" ] && NAGIOS_DB_ERROR="${db}" || NAGIOS_DB_ERROR="${NAGIOS_DB_ERROR},${db}"
@@ -860,7 +1036,7 @@ for db in ${DATABASES}; do
 
 
 	else
-		debug "info" "Skipping: ${db}" $LOG "${LOGFILE}"
+		debug "info" "Skipping: ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		TOTAL_IGN=$((TOTAL_IGN + 1))
 
 		[ "${NAGIOS_DB_IGNORED}" = "" ] && NAGIOS_DB_IGNORED="${db}" || NAGIOS_DB_IGNORED="${NAGIOS_DB_IGNORED},${db}"
@@ -871,14 +1047,14 @@ TOTAL_ENDTIME=$(date +%s)
 
 
 for req in ${REQUIRE}; do
-	debug "err"  "[ERR]  Required database: \"${req}\" has not been dumped." $LOG "${LOGFILE}"
+	debug "err"  "[ERR]  Required database: \"${req}\" has not been dumped." $LOG "${LOGFILE}" "${_ARG_CRON}"
 	ERROR=1
 done
 
 
-debug "info" "[INFO] Dumping finished" $LOG "${LOGFILE}"
-debug "info" "[INFO] Took $((TOTAL_ENDTIME - TOTAL_STARTTIME)) seconds" $LOG "${LOGFILE}"
-debug "info" "[INFO] Total size dumped: ${TOTAL_SIZE} MB" $LOG "${LOGFILE}"
+debug "info" "[INFO] Dumping finished" $LOG "${LOGFILE}" "${_ARG_CRON}"
+debug "info" "[INFO] Took $((TOTAL_ENDTIME - TOTAL_STARTTIME)) seconds" $LOG "${LOGFILE}" "${_ARG_CRON}"
+debug "info" "[INFO] Total size dumped: ${TOTAL_SIZE} MB" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 
 
@@ -890,13 +1066,13 @@ if [ ${DELETE} -eq 1 ]; then
 	# Force deletion?
 	[ "${DELETE_FORCE}" = "1" ] && FORCE_ARG="--force" || FORCE_ARG=""
 
-	debug "info" "[INFO] Deleting files older than ${DELETE_IF_OLDER} hours" $LOG "${LOGFILE}"
+	debug "info" "[INFO] Deleting files older than ${DELETE_IF_OLDER} hours" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	DELETED="$(${TMPWATCH} ${FORCE_ARG} -m "$DELETE_IF_OLDER" -v "${DUMP_PATH}/")"
 	NUM_DEL="$( echo "${DELETED}" | grep -c 'removing' )"
 	if [ $? -ne 0 ]; then
 		ERROR=1
 	fi
-	debug "info" "${DELETED}" $LOG "${LOGFILE}"
+	debug "info" "${DELETED}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 
@@ -905,7 +1081,7 @@ fi
 # Nagios Plugin Log
 ############################################################
 if [ "${NAGIOS_LOG}" = "1" ]; then
-	debug "info" "[INFO] Writing nagios logfile" $LOG "${LOGFILE}"
+	debug "info" "[INFO] Writing nagios logfile" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 	{
 		echo "[state]";
@@ -955,10 +1131,10 @@ fi
 
 if [ $ERROR -ne 0 ]; then
 	# Send bad exit code
-	debug "err"  "[FAIL] Finished with errors" $LOG "${LOGFILE}"
+	debug "err"  "[FAIL] Finished with errors" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 4
 else
 	# Send good exit code
-	debug "info" "[OK]   Finished successfully" $LOG "${LOGFILE}"
+	debug "info" "[OK]   Finished successfully" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 0
 fi

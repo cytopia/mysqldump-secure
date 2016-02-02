@@ -1,13 +1,14 @@
 # mysqldump-secure
 
 [General Warning](https://github.com/cytopia/mysqldump-secure#1-general-warning) |
-[Feature Overview](https://github.com/cytopia/mysqldump-secure#2-feature-overview) |
+[Features](https://github.com/cytopia/mysqldump-secure#2-features) |
 [Installation](https://github.com/cytopia/mysqldump-secure#3-installation) |
 [Configuration](https://github.com/cytopia/mysqldump-secure#4-configuration) |
-[Documentation](https://github.com/cytopia/mysqldump-secure#5-documentation) |
-[Contribution](https://github.com/cytopia/mysqldump-secure#6-contribution) |
-[License](https://github.com/cytopia/mysqldump-secure#7-license) |
-[Version](https://github.com/cytopia/mysqldump-secure#8-version)
+[Usage](https://github.com/cytopia/mysqldump-secure#5-usage) |
+[Documentation](https://github.com/cytopia/mysqldump-secure#6-documentation) |
+[Contribution](https://github.com/cytopia/mysqldump-secure#7-contribution) |
+[License](https://github.com/cytopia/mysqldump-secure#8-license) |
+[Version](https://github.com/cytopia/mysqldump-secure#9-version)
 
 [![Build Status](https://travis-ci.org/cytopia/mysqldump-secure.svg?branch=master)](https://travis-ci.org/cytopia/mysqldump-secure)
 [![Latest Stable Version](https://poser.pugx.org/cytopia/mysqldump-secure/v/stable)](https://packagist.org/packages/cytopia/mysqldump-secure) [![Total Downloads](https://poser.pugx.org/cytopia/mysqldump-secure/downloads)](https://packagist.org/packages/cytopia/mysqldump-secure) [![Latest Unstable Version](https://poser.pugx.org/cytopia/mysqldump-secure/v/unstable)](https://packagist.org/packages/cytopia/mysqldump-secure) [![License](https://poser.pugx.org/cytopia/mysqldump-secure/license)](http://opensource.org/licenses/MIT)
@@ -64,7 +65,8 @@ You should always define your credentials in a my.cnf file with `chmod 400` or y
 
 
 
-## 2. Feature Overview
+## 2. Features
+
 * Compression (`gzip`, `bzip2`, `pbzip2`, `lzop`, `lzma`, `xz`)
 * Encryption (`openssl` private/public key)
 * Blacklisting
@@ -73,9 +75,9 @@ You should always define your credentials in a my.cnf file with `chmod 400` or y
 * File logging
 * Custom mysqldump options
 * Security validation
+* Self testing
 * Nagios/Icinga integration ([check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure))
 * 100% POSIX compliant
-
 
 
 ## 3. Installation
@@ -83,7 +85,11 @@ You should always define your credentials in a my.cnf file with `chmod 400` or y
 Simply download the source code and use `make install`.
 
 ```shell
+# Download via git
 git clone --recursive https://github.com/cytopia/mysqldump-secure.git
+# Or from archive
+wget https://github.com/cytopia/mysqldump-secure/archive/master.tar.gz -O - | tar -xz
+
 cd mysqldump-secure
 ./configure
 make
@@ -96,12 +102,14 @@ For more detailed instructions go to the [Install guidelines](https://github.com
 ## 4. Configuration
 
 There are two separate configuration files:
+
 * [/etc/mysqldump-secure.cnf](etc/mysqldump-secure.cnf)
 * [/etc/mysqldump-secure.conf](etc/mysqldump-secure.conf)
 
 The first one is to setup the MySQL credentials and the second one configures the behavior of how to backup the databases.
 
 You do not need to worry about file permissions or directories. The script will auto-check the following options and adjust them as required:
+
 * Logfile exists
 * Logfile is writeable
 * Auto creation of logfile
@@ -115,8 +123,25 @@ You do not need to worry about file permissions or directories. The script will 
 
 For more detailed instructions go to the [Setup guidelines](https://github.com/cytopia/mysqldump-secure/blob/master/doc/SETUP.md)
 
+## 5. Usage
 
-## 5. Documentation
+Test if everything is configured correctly:
+```shell
+mysqldump-secure --test
+```
+
+Manual run from commmand line:
+```shell
+mysqldump-secure
+```
+
+Run from within cron
+```shell
+mysqldump-secure --cron
+```
+
+
+## 6. Documentation
 
 | File | Description |
 |------|-------------|
@@ -128,7 +153,7 @@ For more detailed instructions go to the [Setup guidelines](https://github.com/c
 | [www.everythingcli.org](http://www.everythingcli.org/secure-mysqldump-script-with-encryption-and-compression/) | General thoughts and initial idea for this project. |
 
 
-## 6. Contribution
+## 7. Contribution
 Contributors are welcome.
 
 If the script runs on an operating system productively, which is currently not yet included at the top of this document, please let me know, so I can add it for reference.
@@ -138,14 +163,14 @@ If you use the script, star it or let me know somehow.
 If you like have a look at the [Contributing Guidelines](CONTRIBUTING.md) and see if there is anything you would like to take care of.
 
 
-## 7. License
+## 8. License
 [![license](https://poser.pugx.org/cytopia/mysqldump-secure/license)](http://opensource.org/licenses/mit)
 
-## 8. Version
+## 9. Version
 For a complete list of verion see [CHANGELOG](CHANGELOG.md)
 
 
-## 9. Awesome
+## 10. Awesome
 
 Added by the following [![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/sindresorhus/awesome) lists:
 
