@@ -1,6 +1,11 @@
 Version 0.13 (unreleased)
 ------------
 
+- [Enh]     Auto-fix Nagios Log chmod permissions.
+- [Enh]     Add chmod setting for Nagios Log in config.
+- [Fix]		#16 allow 0700 chmod formats as well as 700
+- [Enh]		Added compression preset: pigz
+
 
 Version 0.12
 ------------
