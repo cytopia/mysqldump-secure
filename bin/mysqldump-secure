@@ -214,7 +214,7 @@ permission() {
 
 	# For special cases check the length and add a leading 0
 	_len=$(echo "${_perm}" | awk '{ print length() }')
-	if [ "${len}" = "3" ]; then
+	if [ "${_len}" = "3" ]; then
 		_perm="0${_perm}"
 	fi
 
