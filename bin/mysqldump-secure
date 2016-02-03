@@ -15,8 +15,8 @@ INFO_AUTHOR="Patrick Plocke <patrick@plocke.de>"
 INFO_GPGKEY="0x28BF179F"
 INFO_LICENSE="MIT"
 INFO_URL="https://github.com/cytopia/mysqldump-secure"
-INFO_DATE="2016-02-02"
-INFO_VERSION="0.12"
+INFO_DATE="2016-02-03"
+INFO_VERSION="0.13"
 
 
 ################################################################################
@@ -47,17 +47,22 @@ _PREFIX_ETC=""
 
 # Default Configuration Path/Name
 _DEFAULT_CONFIG_FILE="${_PREFIX_ETC}/etc/mysqldump-secure.conf"
+_DEFAULT_CONFIG_CHMOD="0400"
 
 # Default output Variables
 _DEFAULT_DUMP_FILE_PRE="$(date '+%Y-%m-%d')_$(date '+%H-%M')__"
-_DEFAULT_DUMP_FILE_CHMOD="400"
-_DEFAULT_DUMP_DIR_CHMOD="700"
+_DEFAULT_DUMP_FILE_CHMOD="0400"
+_DEFAULT_DUMP_DIR_CHMOD="0700"
+
+_DEFAULT_MYSQL_CNF_CHMOD="0400"
 
 # Default OpenSSL Variables
 _DEFAULT_OPENSSL_ALGO_ARG="-aes256"
 
+_DEFAULT_LOG_CHMOD="0600"
+
 # Default nagios variables
-_DEFAULT_NAGIOS_LOG_CHMOD="644"
+_DEFAULT_NAGIOS_LOG_CHMOD="0644"
 
 
 # These command line arguments are considered insecure and can lead
@@ -390,9 +395,9 @@ if [ ! -r "${CONFIG_FILE}" ]; then
 	debug "err" "Aborting" "" "" "${_ARG_CRON}"
 	exit 1
 fi
-if [ "$(permission "${CONFIG_FILE}")" != "400" ]; then
+if [ "$(permission "${CONFIG_FILE}")" != "${_DEFAULT_CONFIG_CHMOD}" ]; then
 	debug "err" "[ERR]  Configuration file ${CONFIG_FILE} has dangerous permissions: $(permission "${CONFIG_FILE}")." "" "" "${_ARG_CRON}"
-	debug "err" "[ERR]  Fix it to 400" "" "" "${_ARG_CRON}"
+	debug "err" "[ERR]  Fix it to ${_DEFAULT_CONFIG_CHMOD}" "" "" "${_ARG_CRON}"
 	debug "err" "Aborting" "" "" "${_ARG_CRON}"
 	exit 1
 fi
@@ -418,46 +423,53 @@ if [ -z "${LOG}" ]; then
 	debug "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
 	LOG=0
 elif [ "${LOG}" = "1" ]; then
-	# Logfile not set
+
+	# Check chmod variable
+	if [ -z "${LOG_CHMOD}" ]; then
+		debug "warn" "[WARN] \$LOG_CHMOD variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] Setting default to ${_DEFAULT_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		LOG_CHMOD="${_DEFAULT_LOG_CHMOD}"
+	elif ! valid_chmod "${LOG_CHMOD}" > /dev/null 2>&1; then
+		debug "err"  "[ERR]  Invalid chmod value for \$LOG_CHMOD: ${LOG_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "info" "[INFO] Setting default to ${_DEFAULT_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		LOG_CHMOD="${_DEFAULT_LOG_CHMOD}"
+	fi
+
+	# Check logfile variable
 	if [ -z "${LOGFILE}" ]; then
 		debug "warn" "[WARN] \$LOGFILE variable is not set or empty in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
 		debug "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
 		LOG=0
-	# Logfile not found
-	elif [ ! -f "${LOGFILE}" ]; then
+	fi
 
-		# Check if logging directory exists
-		if [ ! -d "$(dirname "${LOGFILE}")" ]; then
-			debug  "warn" "[WARN] Logfile directory does not exist in $(dirname "${LOGFILE}")" "" "" "${_ARG_CRON}"
-			debugi "info" "[INFO] Trying to create..." "" "" "${_ARG_CRON}"
-			if ! mkdir -p "$(dirname "${LOGFILE}")" > /dev/null 2>&1 ; then
-				debugn "err"  "Failed" "" "" "${_ARG_CRON}"
-				debug  "err"  "[ERR]  Failed to create logfile directoy $(dirname "${LOGFILE}")" "" "" "${_ARG_CRON}"
-				debug  "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
-				LOG=0
-			else
-				debugn "info" "OK" "" "" "${_ARG_CRON}"
-			fi
-		fi
+	# Logging still on?
+	# Check for file
+	if [ "${LOG}" = "1" ]; then
+		# Logfile not found
+		if [ ! -f "${LOGFILE}" ]; then
 
-		# If logging is still OK (dir exists), check if the file can be created
-		if [ "${LOG}" = "1" ]; then
-			debug  "warn" "[WARN] Logfile does not exist in ${LOGFILE}" "" "" "${_ARG_CRON}"
-			debugi "info" "[INFO] Trying to create..." "" "" "${_ARG_CRON}"
-
-			if ! touch "${LOGFILE}" > /dev/null 2>&1 ; then
-				debugn "err"  "Failed" "" "" "${_ARG_CRON}"
-				debug  "err"  "[ERR]  Failed to create file ${LOGFILE}" "" "" "${_ARG_CRON}"
-				debug  "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
-				LOG=0
-			else
-				debugn "info" "OK" "" "" "${_ARG_CRON}"
-				debug  "info" "[INFO] Created file ${LOGFILE}" "" "" "${_ARG_CRON}"
-				debugi "info" "[INFO] Trying to chmod..." "" "" "${_ARG_CRON}"
-
-				if ! chmod 0600 "${LOGFILE}" > /dev/null 2>&1 ; then
+			# Check if logging directory exists
+			if [ ! -d "$(dirname "${LOGFILE}")" ]; then
+				debug  "warn" "[WARN] Logfile directory does not exist in $(dirname "${LOGFILE}")" "" "" "${_ARG_CRON}"
+				debugi "info" "[INFO] Trying to create..." "" "" "${_ARG_CRON}"
+				if ! mkdir -p "$(dirname "${LOGFILE}")" > /dev/null 2>&1 ; then
 					debugn "err"  "Failed" "" "" "${_ARG_CRON}"
-					debug  "err"  "[ERR]  Failed to chmod 0600 ${LOGFILE}" "" "" "${_ARG_CRON}"
+					debug  "err"  "[ERR]  Failed to create logfile directoy $(dirname "${LOGFILE}")" "" "" "${_ARG_CRON}"
+					debug  "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
+					LOG=0
+				else
+					debugn "info" "OK" "" "" "${_ARG_CRON}"
+				fi
+			fi
+
+			# If logging is still OK (dir exists), check if the file can be created
+			if [ "${LOG}" = "1" ]; then
+				debug  "warn" "[WARN] Logfile does not exist in ${LOGFILE}" "" "" "${_ARG_CRON}"
+				debugi "info" "[INFO] Trying to create..." "" "" "${_ARG_CRON}"
+
+				if ! touch "${LOGFILE}" > /dev/null 2>&1 ; then
+					debugn "err"  "Failed" "" "" "${_ARG_CRON}"
+					debug  "err"  "[ERR]  Failed to create file ${LOGFILE}" "" "" "${_ARG_CRON}"
 					debug  "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
 					LOG=0
 				else
@@ -465,41 +477,38 @@ elif [ "${LOG}" = "1" ]; then
 				fi
 			fi
 		fi
-	# Logfile not writeable
-	elif [ ! -w "${LOGFILE}" ]; then
-		debug  "warn" "[WARN] Logfile ${LOGFILE} not writeable" "" "" "${_ARG_CRON}"
-		debugi "info" "[INFO] Trying to chmod..." "" "" "${_ARG_CRON}"
+	fi
 
-		if ! chmod 0600 "${LOGFILE}" > /dev/null 2>&1 ; then
-			debugn "err"  "Failed" "" "" "${_ARG_CRON}"
-			debug  "err"  "[ERR]  Failed to chmod 0600 ${LOGFILE}" "" "" "${_ARG_CRON}"
-			debug  "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
-			LOG=0
-		else
-			# Check again if it is writeable now?
-			if [ ! -w "${LOGFILE}" ]; then
+	# Logging still on?
+	# Check for permissions
+	if [ "${LOG}" = "1" ]; then
+		if [ "$(permission "${LOGFILE}")" != "${LOG_CHMOD}" ]; then
+			debug  "warn" "[WARN] Logfile has wrong permissions: $(permission "${LOGFILE}"), should be: ${LOG_CHMOD}" "" "" "${_ARG_CRON}"
+			debugi "info" "[INFO] Trying to chmod to ${LOG_CHMOD}..." "" "" "${_ARG_CRON}"
+
+			if ! chmod ${LOG_CHMOD} "${LOGFILE}" > /dev/null 2>&1 ; then
 				debugn "err"  "Failed" "" "" "${_ARG_CRON}"
-				debug  "warn" "[WARN] Logfile ${LOGFILE} still not writeable" "" "" "${_ARG_CRON}"
+				debug  "err"  "[ERR]  Failed to chmod ${LOG_CHMOD} ${LOGFILE}" "" "" "${_ARG_CRON}"
 				debug  "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
 				LOG=0
 			else
 				debugn "info" "OK" "" "" "${_ARG_CRON}"
 			fi
 		fi
-	# Logfile has wrong permissions
-	elif [ "$(permission "${LOGFILE}")" != "0600" ]; then
-		debug  "warn" "[WARN] Logfile has dangerous permissions: $(permission "${LOGFILE}")" "" "" "${_ARG_CRON}"
-		debugi "info" "[INFO] Trying to chmod..." "" "" "${_ARG_CRON}"
+	fi
 
-		if ! chmod 0600 "${LOGFILE}" > /dev/null 2>&1 ; then
-			debugn "err"  "Failed" "" "" "${_ARG_CRON}"
-			debug  "err"  "[ERR]  Failed to chmod 0600 ${LOGFILE}" "" "" "${_ARG_CRON}"
+	# Logging still on?
+	# Check if it is writeable
+	if [ "${LOG}" = "1" ]; then
+
+		# Logfile not writeable
+		if [ ! -w "${LOGFILE}" ]; then
+			debug  "err"  "[ERR]  Logfile ${LOGFILE} not writeable. Check \$LOG_CHMOD value inf config." "" "" "${_ARG_CRON}"
 			debug  "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
 			LOG=0
-		else
-			debugn "info" "OK" "" "" "${_ARG_CRON}"
 		fi
 	fi
+
 else
 	debug "info" "[INFO] Logging not enabled in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
 	LOG=0
@@ -640,9 +649,10 @@ if [ ! -r "${MYSQL_CNF_FILE}" ]; then
 	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
 fi
-if [ "$(permission "${MYSQL_CNF_FILE}")" != "400" ]; then
+if [ "$(permission "${MYSQL_CNF_FILE}")" != "${_DEFAULT_MYSQL_CNF_CHMOD}" ]; then
 	debug "err"  "[ERR]  MySQL Configuration file ${MYSQL_CNF_FILE} has dangerous permissions: $(permission "${MYSQL_CNF_FILE}")." $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "[ERR]  Fix it to 400" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "[ERR]  Fix it to ${_DEFAULT_MYSQL_CNF_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "[ERR]  Note: If you are not alone on the machine, the password inside could have been compromised by now." $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "[ERR]  Change your database password!" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
@@ -866,8 +876,7 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 		debug "warn" "[WARN] \$NAGIOS_LOG_CHMOD variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		debug "warn" "[WARN] Setting default to ${_DEFAULT_NAGIOS_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		NAGIOS_LOG_CHMOD="${_DEFAULT_NAGIOS_LOG_CHMOD}"
-	fi
-	if ! valid_chmod "${NAGIOS_LOG_CHMOD}" > /dev/null 2>&1; then
+	elif ! valid_chmod "${NAGIOS_LOG_CHMOD}" > /dev/null 2>&1; then
 		debug "err"  "[ERR]  Invalid chmod value for \$NAGIOS_LOG_CHMOD: ${NAGIOS_LOG_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		debug "info" "[INFO] Setting default to ${_DEFAULT_NAGIOS_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		NAGIOS_LOG_CHMOD="${_DEFAULT_NAGIOS_LOG_CHMOD}"
