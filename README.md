@@ -155,6 +155,7 @@ mysqldump-secure --cron
 |------|-------------|
 | [Installation](https://github.com/cytopia/mysqldump-secure/blob/master/doc/INSTALL.md) | Different ways to install mysqldump-secure |
 | [Configuration](https://github.com/cytopia/mysqldump-secure/blob/master/doc/SETUP.md) | How to configure mysqldump-secure |
+| [Security](https://github.com/cytopia/mysqldump-secure/blob/master/doc/SECURITY.md) | Information and usage about security measurements |
 | [Compression](https://github.com/cytopia/mysqldump-secure/blob/master/doc/COMPRESSION.md) | Information and usage about compression |
 | [Encryption](https://github.com/cytopia/mysqldump-secure/blob/master/doc/ENCRYPTION.md) | Information and usage about the used encryption |
 | [Examples](https://github.com/cytopia/mysqldump-secure/blob/master/doc/EXAMPLES.md) | Some command line examples such as mass importing databases back into the server |
