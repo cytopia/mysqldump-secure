@@ -17,6 +17,11 @@ Installation |
 brew tap cytopia/tap
 brew install mysqldump-secure
 ```
+Or in one line
+```shell
+brew install cytopia/tap/mysqldump-secure
+```
+
 
 ## Linux / BSD
 
