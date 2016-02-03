@@ -181,6 +181,16 @@ sum() {
 	echo  | awk -v "a=${1}" -v "b=${2}" '{print a + b}'
 }
 
+# Subtract two numbers.
+#
+# @param  integer
+# @param  integer
+# @return integer
+sub() {
+	echo  | awk -v "a=${1}" -v "b=${2}" '{print a - b}'
+}
+
+
 
 ############################################################
 # Security checker
@@ -266,7 +276,32 @@ valid_chmod() {
 		# Nope!
 		return 1
 	fi
+}
 
+# Convert 3-digit or 4-digit chmod to 3-digit umask
+#
+# @param  string	numerical chmod (3 or 4 digit)
+# @return string	3-digit umask
+chmod_2_umask() {
+	_CHMOD=${1}
+
+	_len=$(echo "${_CHMOD}" | awk '{ print length()   }')
+
+	if [ "${_len}" = "3" ]; then
+		r=$(echo "${_CHMOD}" | awk '{print substr($0,1,1)}')
+		w=$(echo "${_CHMOD}" | awk '{print substr($0,2,1)}')
+		x=$(echo "${_CHMOD}" | awk '{print substr($0,3,1)}')
+	elif  [ "${_len}" = "4" ]; then
+		r=$(echo "${_CHMOD}" | awk '{print substr($0,2,1)}')
+		w=$(echo "${_CHMOD}" | awk '{print substr($0,3,1)}')
+		x=$(echo "${_CHMOD}" | awk '{print substr($0,4,1)}')
+	fi
+
+	ur="$(sub "7" "${r}")"
+	uw="$(sub "7" "${w}")"
+	ux="$(sub "7" "${x}")"
+
+	echo "${ur}${uw}${ux}"
 }
 
 
@@ -1037,6 +1072,7 @@ for db in ${DATABASES}; do
 				debugi "info"  "Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) " $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 				# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
+				umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
 				exec 4>&1
 				# shellcheck disable=SC2086
 				error_statuses="$( (
@@ -1051,6 +1087,7 @@ for db in ${DATABASES}; do
 				debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (compressed) " $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 				# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
+				umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")"
 				exec 4>&1
 				# shellcheck disable=SC2086
 				error_statuses="$( (
@@ -1066,6 +1103,7 @@ for db in ${DATABASES}; do
 				debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (encrypted) " $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 				# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
+				umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
 				exec 4>&1
 				# shellcheck disable=SC2086
 				error_statuses="$( (
@@ -1079,6 +1117,7 @@ for db in ${DATABASES}; do
 				debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) " $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 				# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
+				umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
 				exec 4>&1
 				# shellcheck disable=SC2086
 				error_statuses="$( (
@@ -1096,7 +1135,6 @@ for db in ${DATABASES}; do
 		if [ -z "$error_statuses" ]; then
 			endtime=$(date +%s)
 			debugn "info" "$((endtime - starttime)) sec" $LOG "${LOGFILE}" "${_ARG_CRON}"
-			chmod ${DUMP_FILE_CHMOD} "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}"
 
 			[ "${NAGIOS_DB_DUMPED}" = "" ] && NAGIOS_DB_DUMPED="${db}" || NAGIOS_DB_DUMPED="${NAGIOS_DB_DUMPED},${db}"
 		else

@@ -1,6 +1,7 @@
 Version 0.13 (unreleased)
 ------------
 
+- [Fix]     #17 [sec] chmod is done after dumping to disk (now using umask before)
 - [Enh]     Improved code readability of integrity checks
 - [Enh]     Auto-fix Nagios Log chmod permissions.
 - [Enh]     Add chmod setting for Nagios Log in config.
