@@ -2,6 +2,7 @@
 Installation |
 [Configuration](https://github.com/cytopia/mysqldump-secure/blob/master/doc/SETUP.md) |
 [Compression](https://github.com/cytopia/mysqldump-secure/blob/master/doc/COMPRESSION.md) |
+[Security](https://github.com/cytopia/mysqldump-secure/blob/master/doc/SECURITY.md) |
 [Encryption](https://github.com/cytopia/mysqldump-secure/blob/master/doc/ENCRYPTION.md) |
 [Examples](https://github.com/cytopia/mysqldump-secure/blob/master/doc/EXAMPLES.md) |
 [Contributing](https://github.com/cytopia/mysqldump-secure/blob/master/CONTRIBUTING.md)
