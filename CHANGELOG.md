@@ -1,12 +1,16 @@
-Version 0.13 (unreleased)
+Version 0.14 (unreleased)
 ------------
 
-- [Enh]     Added documentation about security measurements
+
+Version 0.13
+------------
+
 - [Fix]     #17 [sec] chmod is done after dumping to disk (now using umask before)
+- [Fix]		#16 allow 0700 chmod formats as well as 700
+- [Enh]     Added documentation about security measurements
 - [Enh]     Improved code readability of integrity checks
 - [Enh]     Auto-fix Nagios Log chmod permissions.
 - [Enh]     Add chmod setting for Nagios Log in config.
-- [Fix]		#16 allow 0700 chmod formats as well as 700
 - [Enh]		Added compression preset: pigz
 
 
