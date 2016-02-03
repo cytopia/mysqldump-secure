@@ -366,7 +366,7 @@ print_help() {
 
 	print_usage
 	echo
-	echo "When invoked without any arguments, it will dumping databases as"
+	echo "When invoked without any arguments, it will start dumping databases as"
 	echo "defined in mysqldump-secure.conf."
 	echo
 	echo "--cron            Use for cron run. It will only output errors and warnings"
@@ -468,11 +468,21 @@ if [ ! -r "${CONFIG_FILE}" ]; then
 	exit 1
 fi
 if ! compare_chmod "$(permission "${CONFIG_FILE}")" "${_DEFAULT_CONFIG_CHMOD}" > /dev/null 2>&1 ; then
-	debug "err" "[ERR]  Configuration file ${CONFIG_FILE} has dangerous permissions: $(permission "${CONFIG_FILE}")." "" "" "${_ARG_CRON}"
-	debug "err" "[ERR]  Fix it to ${_DEFAULT_CONFIG_CHMOD}" "" "" "${_ARG_CRON}"
-	debug "err" "Aborting" "" "" "${_ARG_CRON}"
-	exit 1
+	debug  "err"  "[ERR]  Configuration file ${CONFIG_FILE} has dangerous permissions: $(permission "${CONFIG_FILE}"), should be: ${_DEFAULT_CONFIG_CHMOD}" "" "" "${_ARG_CRON}"
+	debugi "info" "[INFO] Trying to chmod to ${_DEFAULT_CONFIG_CHMOD}..." "" "" "${_ARG_CRON}"
+
+	if ! chmod ${_DEFAULT_CONFIG_CHMOD} "${CONFIG_FILE}" > /dev/null 2>&1 ; then
+		debugn "err" "Failed" "" "" "${_ARG_CRON}"
+		debug  "err" "[ERR]  Failed to chmod ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
+		debug  "err" "[ERR]  Fix it manually to ${_DEFAULT_CONFIG_CHMOD}" "" "" "${_ARG_CRON}"
+		debug  "err" "Aborting" "" "" "${_ARG_CRON}"
+		exit 1
+	else
+		debugn "info" "OK" "" "" "${_ARG_CRON}"
+	fi
 fi
+
+
 
 # Read config file
 # Comment required by shellcheck,
@@ -595,6 +605,7 @@ if [ "${LOG}" = "1" ]; then
 		echo "$(date '+%Y-%m-%d') $(date '+%H:%M:%S') Starting";
 	} >> "${LOGFILE}"
 	debug "info" "[INFO] Logging enabled" ${LOG} "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "[INFO] Using config: ${CONFIG_FILE}"
 fi
 
 
@@ -726,7 +737,7 @@ if ! compare_chmod "$(permission "${MYSQL_CNF_FILE}")" "${_DEFAULT_MYSQL_CNF_CHM
 	debug "err"  "[ERR]  MySQL Configuration file ${MYSQL_CNF_FILE} has dangerous permissions: $(permission "${MYSQL_CNF_FILE}")." $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "[ERR]  Fix it to ${_DEFAULT_MYSQL_CNF_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "[ERR]  Note: If you are not alone on the machine, the password inside could have been compromised by now." $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "[ERR]  Change your database password!" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "[ERR]  If so, change your database password." $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
 fi
