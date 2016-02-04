@@ -16,7 +16,7 @@ INFO_GPGKEY="0x28BF179F"
 INFO_LICENSE="MIT"
 INFO_URL="https://github.com/cytopia/mysqldump-secure"
 INFO_DATE="2016-02-04"
-INFO_VERSION="0.14"
+INFO_VERSION="0.14.1"
 
 
 ################################################################################
