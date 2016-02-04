@@ -89,6 +89,7 @@ endif
 	@# Create directories
 	${MKDIR_P} $(BINDIR)
 	${MKDIR_P} $(ETCDIR)
+	${MKDIR_P} $(MANDIR)/man1
 
 	@# Install binary
 	install -m 0644 build/$(DUMP_SH) $(BINDIR)/$(DUMP_SH)
@@ -131,6 +132,7 @@ endif
 	@# Create directories
 	${MKDIR_P} $(BINDIR)
 	${MKDIR_P} $(ETCDIR)
+	${MKDIR_P} $(MANDIR)/man1
 
 	@# Install binary
 	install -m 0755 build/$(DUMP_SH) $(BINDIR)/$(DUMP_SH)
