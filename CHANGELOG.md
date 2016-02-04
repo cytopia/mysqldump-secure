@@ -1,4 +1,8 @@
-Version 0.14 (unreleased)
+Version 0.15 (unreleased)
+------------
+
+
+Version 0.14
 ------------
 
 - [Fix]		Do not silently ignore empty databases, show that they were skipped with reason.
