@@ -1,6 +1,8 @@
 Version 0.15 (unreleased)
 ------------
 
+- [Fix]		[install] Fixed script install permissions
+
 
 Version 0.14.1
 --------------

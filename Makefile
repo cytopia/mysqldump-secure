@@ -92,7 +92,7 @@ endif
 	${MKDIR_P} $(MANDIR)/man1
 
 	@# Install binary
-	install -m 0644 build/$(DUMP_SH) $(BINDIR)/$(DUMP_SH)
+	install -m 0755 build/$(DUMP_SH) $(BINDIR)/$(DUMP_SH)
 
 	@# Install config file and create backup if there is one already
 	install -b -m 0400 build/$(DUMP_CONF) $(ETCDIR)/$(DUMP_CONF)
