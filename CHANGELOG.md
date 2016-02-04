@@ -2,6 +2,12 @@ Version 0.15 (unreleased)
 ------------
 
 
+Version 0.14.1
+--------------
+
+- [Fix]		[install] Create man dir if not exists
+
+
 Version 0.14
 ------------
 
