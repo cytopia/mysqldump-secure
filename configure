@@ -46,8 +46,6 @@ while [ $# -gt 0  ]; do
 done
 
 
-# Write configure configuration file
-echo "${PREFIX}" > configure.in
 
 
 # Create build directory
@@ -59,6 +57,7 @@ fi
 $(which cp) -f bin/mysqldump-secure build/
 $(which cp) -f etc/mysqldump-secure.conf build/
 $(which cp) -f etc/mysqldump-secure.cnf build/
+$(which cp) -f man/mysqldump-secure.1 build/
 
 # Adjust auto-generated vars
 $(which sed) -i'' -e "s|_PREFIX_BIN=\"\"|_PREFIX_BIN=\"${PREFIX}\"|g" build/mysqldump-secure
@@ -67,6 +66,22 @@ $(which sed) -i'' -e "s|_PREFIX_LOG=\"\"|_PREFIX_LOG=\"${PREFIX}\"|g" build/mysq
 
 # Adjust auto-generated vars
 $(which sed) -i'' -e "s|_INSTALL_PREFIX=\"\"|_INSTALL_PREFIX=\"${PREFIX}\"|g" build/mysqldump-secure.conf
+
+if [ -z "${PREFIX}" ]; then
+	ETCDIR="/etc"
+	BINDIR="/usr/bin"
+	MANDIR="/usr/share/man"
+else
+	ETCDIR="${PREFIX}/etc"
+	BINDIR="${PREFIX}/bin"
+	MANDIR="${PREFIX}/share/man"
+fi
+
+# Write configure configuration file
+echo "PREFIX = ${PREFIX}"  > configure.in
+echo "ETCDIR = ${ETCDIR}" >> configure.in
+echo "BINDIR = ${BINDIR}" >> configure.in
+echo "MANDIR = ${MANDIR}" >> configure.in
 
 echo ""
 echo "Configure run successfully"
@@ -78,9 +93,10 @@ else
 fi
 echo ""
 echo "Files will be installed to:"
-echo "     ${PREFIX}/bin/mysqldump-secure"
-echo "     ${PREFIX}/etc/mysqldump-secure.conf"
-echo "     ${PREFIX}/etc/mysqldump-secure.cnf"
+echo "     ${BINDIR}/mysqldump-secure"
+echo "     ${ETCDIR}/mysqldump-secure.conf"
+echo "     ${ETCDIR}/mysqldump-secure.cnf"
+echo "     ${MANDIR}/man1/mysqldump-secure.1"
 echo ""
 echo "Run 'make' to build or 'make help' for options"
 exit 0

@@ -15,8 +15,8 @@ INFO_AUTHOR="Patrick Plocke <patrick@plocke.de>"
 INFO_GPGKEY="0x28BF179F"
 INFO_LICENSE="MIT"
 INFO_URL="https://github.com/cytopia/mysqldump-secure"
-INFO_DATE="2016-02-03"
-INFO_VERSION="0.13"
+INFO_DATE="2016-02-04"
+INFO_VERSION="0.14"
 
 
 ################################################################################
@@ -1061,8 +1061,12 @@ ERROR=0
 
 # Get a list of all databases
 debugi "info" "[INFO] Retrieving list of databases... " $LOG "${LOGFILE}" "${_ARG_CRON}"
-#DATABASES="$( ${MYSQL} --defaults-extra-file="${MYSQL_CNF_FILE}" --batch -e 'show databases;' | sed 1d )"
-DATABASES="$( ${MYSQL} --defaults-extra-file="${MYSQL_CNF_FILE}" --no-auto-rehash --skip-column-names -e 'SELECT DISTINCT table_schema FROM information_schema.tables;')"
+
+# gets all databases (even empty ones)
+DATABASES="$( ${MYSQL} --defaults-extra-file="${MYSQL_CNF_FILE}" --batch -e 'show databases;' | sed 1d )"
+# Only gets databases which have content (tables)
+#DATABASES="$( ${MYSQL} --defaults-extra-file="${MYSQL_CNF_FILE}" --no-auto-rehash --skip-column-names -e 'SELECT DISTINCT table_schema FROM information_schema.tables;')"
+
 NUM_DB="$(echo "${DATABASES}" | wc -l | tr -d ' ')"
 debugn "info" "${NUM_DB}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
@@ -1087,13 +1091,27 @@ debug "info" "[INFO] Backup directory: ${DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_C
 
 for db in ${DATABASES}; do
 
-	# Skip specified databases
+	# Reset skip flag
 	skip=0
+
+	# If a database does not show up in information_schema.tables, it means it
+	# has no tables yet and is therefore empty.
+	EMPTY="$( ${MYSQL} --defaults-extra-file="${MYSQL_CNF_FILE}" --batch \
+		-e "SELECT IF(COUNT(*) = 0, 'yes', 'no') AS empty
+			FROM INFORMATION_SCHEMA.TABLES
+			WHERE TABLE_SCHEMA = '${db}';" | tail -n1 )"
+
+	if [ "${EMPTY}" = "yes" ]; then
+		skip=1
+	fi
+
+	# Skip databases that are scheduled for skipping in config
 	for ign_db in ${IGNORE}; do
 		if [ "${ign_db}" = "${db}" ]; then
-			skip=1
+			skip=2
 		fi
 	done
+
 
 	if [ ${skip} -eq 0 ]; then
 
@@ -1193,14 +1211,16 @@ for db in ${DATABASES}; do
 			[ "${NAGIOS_DB_ERROR}" = "" ] && NAGIOS_DB_ERROR="${db}" || NAGIOS_DB_ERROR="${NAGIOS_DB_ERROR},${db}"
 		fi
 
-
-	else
-		debug "info" "Skipping: ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	elif [ ${skip} -eq 1 ]; then
+		debug "info" "Skipping: ${db} (DB is empty)" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		TOTAL_IGN=$((TOTAL_IGN + 1))
-
 		[ "${NAGIOS_DB_IGNORED}" = "" ] && NAGIOS_DB_IGNORED="${db}" || NAGIOS_DB_IGNORED="${NAGIOS_DB_IGNORED},${db}"
-
+	else
+		debug "info" "Skipping: ${db} (IGNORE=\"${db}\" in config)" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		TOTAL_IGN=$((TOTAL_IGN + 1))
+		[ "${NAGIOS_DB_IGNORED}" = "" ] && NAGIOS_DB_IGNORED="${db}" || NAGIOS_DB_IGNORED="${NAGIOS_DB_IGNORED},${db}"
 	fi
+
 done
 TOTAL_ENDTIME=$(date +%s)
 

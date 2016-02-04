@@ -1,0 +1,36 @@
+.TH mysqldump-secure 1 "04 February 2016" "version 0.14"
+.SH NAME
+mysqldump-secure - secure mysqldump with encryption
+.SH SYNOPSIS
+mysqldump-secure [--cron] [--test] [--help] [--version]
+.SH DESCRIPTION
+.PP
+Mysqldump-secure is a POSIX compliant shell backup script for MySQL databases with strong security in mind. It will backup every available database (which is readable by the specified user) as a separate file with the possibility to opt out via blacklisting. Dumped databases can optionally be piped directly to gzip or openssl in order to compress and/or encrypt the backup. Encryption is done before the file is written to disk to avoid possible race conditions.
+.PP
+Usage: mysqldump-secure
+.BR
+       mysqldump-secure --cron
+.BR
+       mysqldump-secure --test
+.BR
+       mysqldump-secure --help
+.BR
+       mysqldump-secure --version
+.PP
+When invoked without any arguments, it will start dumping databases as defined in mysqldump-secure.conf.
+.PP
+--cron      Use for cron run. It will only output errors and warnings and will silence all debug output.
+.PP
+--test      Test requirements and exit.
+.PP
+--help      Show help screen.
+.PP
+--version   Show version information.
+.SH BUGS
+Please report all bugs to https://github.com/cytopia/mysqldump-secure/issues
+.SH "SEE ALSO"
+For more information, please refer to the mysqldump github page, available online at https://github.com/cytopia/mysqldump-secure
+.sp
+\fBmysqldump\fR(1), \fBmysql\fR(1)
+.SH AUTHOR
+Patrick Plocke (patrick@plocke.de)

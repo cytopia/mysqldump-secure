@@ -4,11 +4,7 @@
 DUMP_SH   = mysqldump-secure
 DUMP_CONF = mysqldump-secure.conf
 DUMP_CNF  = mysqldump-secure.cnf
-
-# System directories
-PREFIX = $(shell cat configure.in 2>/dev/null)
-BINDIR = $(PREFIX)/bin
-ETCDIR = $(PREFIX)/etc
+MAN_PAGE  = mysqldump-secure.1
 
 # Configuration
 SHELL = /bin/sh
@@ -18,6 +14,7 @@ MKDIR_P = mkdir -p
 # Check if './configure' has been run
 ifneq ("$(wildcard configure.in)","")
 CONFIGURED = 1
+include configure.in
 else
 CONFIGURED = 0
 endif
@@ -37,6 +34,9 @@ ifneq ("$(wildcard $(ETCDIR)/$(DUMP_CNF))","")
 INSTALLED = 1
 endif
 ifneq ("$(wildcard $(BINDIR)/$(DUMP_SH))","")
+INSTALLED = 1
+endif
+ifneq ("$(wildcard $(MANDIR)/$(MAN_PAGE))","")
 INSTALLED = 1
 endif
 
@@ -91,7 +91,7 @@ endif
 	${MKDIR_P} $(ETCDIR)
 
 	@# Install binary
-	install -m 0755 build/$(DUMP_SH) $(BINDIR)/$(DUMP_SH)
+	install -m 0644 build/$(DUMP_SH) $(BINDIR)/$(DUMP_SH)
 
 	@# Install config file and create backup if there is one already
 	install -b -m 0400 build/$(DUMP_CONF) $(ETCDIR)/$(DUMP_CONF)
@@ -100,10 +100,15 @@ endif
 	install -b -m 0400 build/$(DUMP_CNF) $(ETCDIR)/$(DUMP_CNF)
 	@echo ""
 
+	@# Install man pages
+	install -b -m 0644 build/$(MAN_PAGE) $(MANDIR)/man1/$(MAN_PAGE)
+	@echo ""
+
 	@echo "Installation complete:"
 	@echo "    $(BINDIR)/$(DUMP_SH)"
 	@echo "    $(ETCDIR)/$(DUMP_CONF)"
 	@echo "    $(ETCDIR)/$(DUMP_CNF)"
+	@echo "    $(MANDIR)/$(MAN_PAGE)"
 	@echo ""
 	@echo "----------------------------------------------------------------------"
 	@echo "Note:"
@@ -144,6 +149,10 @@ endif
 		|| install -m 0400 build/$(DUMP_CNF) $(ETCDIR)/$(DUMP_CNF)
 	@echo ""
 
+	@# Install man pages
+	install -b -m 0644 build/$(MAN_PAGE) $(MANDIR)/man1/$(MAN_PAGE)
+	@echo ""
+
 	@echo "Installation complete"
 	@echo ""
 	@echo "Compare new config: $(ETCDIR)/$(DUMP_CONF).new"
@@ -162,6 +171,7 @@ uninstall:
 	rm -f $(ETCDIR)/$(DUMP_CNF)
 	rm -f $(ETCDIR)/$(DUMP_CONF).new
 	rm -f $(ETCDIR)/$(DUMP_CNF).new
+	rm -f $(MANDIR)/man1/$(MAN_PAGE)
 
 
 

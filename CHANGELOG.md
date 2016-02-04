@@ -1,6 +1,10 @@
 Version 0.14 (unreleased)
 ------------
 
+- [Fix]		Do not silently ignore empty databases, show that they were skipped with reason.
+- [Enh]		Add man page: man 1 mysqldump-secure
+- [Enh]		Improved install routine
+
 
 Version 0.13
 ------------
