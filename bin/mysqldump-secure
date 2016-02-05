@@ -723,28 +723,7 @@ elif [ ! -d "${DUMP_PATH}" ]; then
 	fi
 fi
 
-# Check if destination dir is writeable
-if [ ! -w "${DUMP_PATH}" ]; then
-	debug  "warn" "[WARN] Destination dir ${DUMP_PATH} is not writeable" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debugi "info" "[INFO] Trying to chmod to ${DUMP_DIR_CHMOD}... " $LOG "${LOGFILE}" "${_ARG_CRON}"
-	if ! chmod ${DUMP_DIR_CHMOD} "${DUMP_PATH}" > /dev/null 2>&1 ; then
-		debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		exit 1
-	else
-		debugn "info" "Done" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	fi
-	debugi "info" "[INFO] Trying to chown... " $LOG "${LOGFILE}" "${_ARG_CRON}"
-	if ! chown "$(whoami)" "${DUMP_PATH}" > /dev/null 2>&1 ; then
-		debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		exit 1
-	else
-		debugn "info" "Done" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	fi
-fi
 # Check correct permissions of destination dir
-
 if ! compare_chmod "$(permission "${DUMP_PATH}")" "${DUMP_DIR_CHMOD}" > /dev/null 2>&1 ; then
 	debug  "err"  "[ERR]  Target directory has wrong permissions: $(permission "${DUMP_PATH}"), but should ${DUMP_DIR_CHMOD}." $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debugi "info" "[INFO] Trying to chmod to ${DUMP_DIR_CHMOD}... " $LOG "${LOGFILE}" "${_ARG_CRON}"
@@ -756,6 +735,14 @@ if ! compare_chmod "$(permission "${DUMP_PATH}")" "${DUMP_DIR_CHMOD}" > /dev/nul
 	else
 		debugn "info" "Done" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	fi
+fi
+
+# Check if destination dir is writeable
+if [ ! -w "${DUMP_PATH}" ]; then
+	debug  "err"  "[ERR] Destination dir ${DUMP_PATH} is not writeable" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debugi "err"  "[ERR] Fix your configured permissions" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	exit 1
 fi
 
 
