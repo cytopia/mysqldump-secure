@@ -4,22 +4,24 @@ mysqldump-secure - secure mysqldump with encryption
 .SH SYNOPSIS
  mysqldump-secure
 .BR
- mysqldump-secure [--cron] [--test] [--help] [--version]
+ mysqldump-secure [--conf] [--cron] [--test] [--help] [--version]
 .SH DESCRIPTION
 .PP
 Mysqldump-secure is a POSIX compliant shell backup script for MySQL databases with strong security in mind. It will backup every available database (which is readable by the specified user) as a separate file with the possibility to opt out via blacklisting. Dumped databases can optionally be piped directly to gzip or openssl in order to compress and/or encrypt the backup. Encryption is done before the file is written to disk to avoid possible race conditions.
 .SH OPTIONS
-Usage: mysqldump-secure
+Usage: mysqldump-secure [--conf]
 .BR
-       mysqldump-secure --cron
+       mysqldump-secure --cron [--conf]
 .BR
-       mysqldump-secure --test
+       mysqldump-secure --test [--conf]
 .BR
        mysqldump-secure --help
 .BR
        mysqldump-secure --version
 .PP
 When invoked without any arguments, it will start dumping databases as defined in mysqldump-secure.conf.
+.PP
+--conf      Pass different configuration file than the default one. E.g.: --conf=/etc/mysqldump-secure-alt.conf
 .PP
 --cron      Use for cron run. It will only output errors and warnings and will silence all debug output.
 .PP

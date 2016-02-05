@@ -133,6 +133,8 @@ For more detailed instructions go to the [Setup guidelines](https://github.com/c
 
 ## 5. Usage
 
+### 5.1 Default
+
 Test if everything is configured correctly:
 ```shell
 mysqldump-secure --test
@@ -146,6 +148,26 @@ mysqldump-secure
 Run from within cron
 ```shell
 mysqldump-secure --cron
+```
+
+### 5.2 Custom config
+
+It is possible to have multiple instances of `mysqldump-secure` on your machine via different config files. Imagine the case you want to have some sensitive dumps encrypted and others should be dumped in plain. You can achieve this by using two configuration files and the `IGNORE` blocks of each respective config to exclude the other ones.
+
+
+Test if everything is configured correctly in the specified config:
+```shell
+mysqldump-secure --test --config=/etc/mysqldump-secure.encrypted.conf
+```
+
+Manual run from commmand line:
+```shell
+mysqldump-secure --config=/etc/mysqldump-secure.encrypted.conf
+```
+
+Run from within cron
+```shell
+mysqldump-secure --cron --config=/etc/mysqldump-secure.encrypted.conf
 ```
 
 

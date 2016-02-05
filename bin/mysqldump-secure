@@ -350,10 +350,11 @@ chmod_2_umask() {
 # Usage
 #
 print_usage() {
-#	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--cron] [--test] [--info] [--help] [--version]"
-	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--cron] [--test] [--help] [--version]"
-	printf "%s %s %s\n" "      " "${INFO_NAME}" "--cron"
-	printf "%s %s %s\n" "      " "${INFO_NAME}" "--test"
+#	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cron] [--test] [--info] [--help] [--version]"
+	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cron] [--test] [--help] [--version]"
+	printf "%s %s %s\n" "      " "${INFO_NAME}" "[--conf]"
+	printf "%s %s %s\n" "      " "${INFO_NAME}" "--cron [--conf]"
+	printf "%s %s %s\n" "      " "${INFO_NAME}" "--test [--conf]"
 #	printf "%s %s %s\n" "      " "${INFO_NAME}" "--info"
 	printf "%s %s %s\n" "      " "${INFO_NAME}" "--help"
 	printf "%s %s %s\n" "      " "${INFO_NAME}" "--version"
@@ -369,6 +370,9 @@ print_help() {
 	echo "When invoked without any arguments, it will start dumping databases as"
 	echo "defined in mysqldump-secure.conf."
 	echo
+	echo "--conf            Pass different configuration file than the default one."
+	echo "                  E.g.: --conf=/etc/mysqldump-secure-alt.conf"
+	echo
 	echo "--cron            Use for cron run. It will only output errors and warnings"
 	echo "                  and will silence all debug output."
 	echo
@@ -383,7 +387,6 @@ print_help() {
 # TODO:
 # --------
 # --info			Shows current configuration and paths
-# --config=<foo>	Use alternative configuration file
 # --cli				Start interactive cli (mysqldump-secure-cli) to show dumps, import dumps, set configs, etc
 
 
@@ -411,35 +414,77 @@ print_version() {
 ############################################################
 
 
+_ARG_CONF="0"
 _ARG_CRON="0"
 _ARG_TEST="0"
+_ARG_HELP="0"
+_ARG_VERS="0"
+_CUS_CONF=""
 #_ARG_INFO="0"
 
-if [ $# -gt 1 ]; then
-	echo "Too many arguments."
-	echo "Type '${INFO_NAME} --help' for available options."
-	exit 1
-fi
+#if [ $# -gt 1 ]; then
+#	echo "Too many arguments."
+#	echo "Type '${INFO_NAME} --help' for available options."
+#	exit 1
+#fi
 
 while [ $# -gt 0  ]; do
 	case "$1" in
+
+		--conf=*)
+			if [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ]; then
+				echo "Arguments cannot be mixed."
+				echo "Type '${INFO_NAME} --help' for available options."
+				exit 1
+			fi
+			_ARG_CONF="1"
+			_CUS_CONF="$(echo "$1" | sed 's/--conf=//g')"
+			;;
+
 		--cron)
+			if [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ]; then
+				echo "Arguments cannot be mixed."
+				echo "Type '${INFO_NAME} --help' for available options."
+				exit 1
+			fi
 			_ARG_CRON="1"
 			;;
+
 		--test)
+			if [ "${_ARG_CRON}" = "1" ] || [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ]; then
+				echo "Arguments cannot be mixed."
+				echo "Type '${INFO_NAME} --help' for available options."
+				exit 1
+			fi
 			_ARG_TEST="1"
 			;;
+
 #		--info)
 #			_ARG_INFO="1"
 #			;;
+
 		--help)
+			if [ "${_ARG_CONF}" = "1" ] || [ "${_ARG_CRON}" = "1" ] || [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_VERS}" = "1" ]; then
+				echo "Arguments cannot be mixed."
+				echo "Type '${INFO_NAME} --help' for available options."
+				exit 1
+			fi
+			_ARG_HELP="1"
 			print_help
 			exit 0
 			;;
+
 		--version)
+			if [ "${_ARG_CONF}" = "1" ] || [ "${_ARG_CRON}" = "1" ] || [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_HELP}" = "1" ]; then
+				echo "Arguments cannot be mixed."
+				echo "Type '${INFO_NAME} --help' for available options."
+				exit 1
+			fi
+			_ARG_VERS="1"
 			print_version
 			exit 0
 			;;
+
 		*)
 			echo "Invalid argument: '${1}'."
 			echo "Type '${INFO_NAME} --help' for available options."
@@ -450,8 +495,13 @@ while [ $# -gt 0  ]; do
 done
 
 
-# TODO: optionally read in different config file location
-CONFIG_FILE="${_DEFAULT_CONFIG_FILE}"
+# Use default config or user specified config file
+if [ -z "${_CUS_CONF}" ]; then
+	CONFIG_FILE="${_DEFAULT_CONFIG_FILE}"
+else
+	CONFIG_FILE="${_CUS_CONF}"
+fi
+
 
 ############################################################
 # Config File
@@ -756,6 +806,8 @@ if ! $(which mysql) --defaults-extra-file="${MYSQL_CNF_FILE}" -e exit > /dev/nul
 	debug "err"  "[ERR]  Cannot connect to mysql database. Check credentials in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 3
+else
+	debug "info" "[INFO] MySQL connection test successful."
 fi
 
 
@@ -1020,13 +1072,21 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 			debug "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			NAGIOS_LOG=0
 		else
-			debug "info" "[INFO] Nagios plugin log enabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "info" "[INFO] Nagios plugin log enabled: ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		fi
 	fi
 
 else
 	debug "info" "[INFO] Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
+
+
+
+############################################################
+# Print additional information
+############################################################
+
+debug "info" "[INFO] Backup directory: ${DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 
 
@@ -1086,8 +1146,6 @@ NAGIOS_DB_DUMPED=""
 NAGIOS_DB_IGNORED=""
 NAGIOS_DB_ERROR=""
 
-
-debug "info" "[INFO] Backup directory: ${DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 for db in ${DATABASES}; do
 
