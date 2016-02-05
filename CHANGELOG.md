@@ -1,4 +1,8 @@
-Version 0.15 (unreleased)
+Version 0.16 (unreleased)
+------------
+
+
+Version 0.15
 ------------
 
 - [Fix]		Exception Handling: Show error when file already exists on disk
