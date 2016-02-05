@@ -165,9 +165,8 @@ endif
 
 uninstall:
 
-	@# Never ever delete the public private keys!!
-	@# Also keep the logfile, as we do not know its location (it is set in config)
-	@# Just remove the binary and config files
+	@# Keep the logfile, as we do not know its location (it is set in config)
+	@# Just remove the binaries, man(1) and config files.
 	rm -f $(BINDIR)/$(DUMP_SH)
 	rm -f $(ETCDIR)/$(DUMP_CONF)
 	rm -f $(ETCDIR)/$(DUMP_CNF)
@@ -182,3 +181,4 @@ clean:
 	rm -rf build/*
 	rm -f configure.in
 	rm -f Makefile.in
+
