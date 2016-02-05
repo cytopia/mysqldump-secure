@@ -1,6 +1,7 @@
 Version 0.15 (unreleased)
 ------------
 
+- [Fix]		Exception Handling: Show error when file already exists on disk
 - [Fix]		[install] Fixed script install permissions
 - [Enh]		[conf] Allow to specify custom config via argument
 - [Enh]		Cleaned debug output
