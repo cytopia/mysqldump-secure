@@ -341,6 +341,53 @@ chmod_2_umask() {
 	echo "${ur}${uw}${ux}"
 }
 
+############################################################
+# Nagios helper
+############################################################
+
+# Aggregate nagios exit code.
+# OK < Warning < Error < Unknown
+# @param  integer The current exit code.
+# @param  integer The new exit code
+# @output integer The combined exit code
+# @return integer The combined exit code
+merge_exit_codes() {
+	_curr_exit="$1"
+	_next_exit="$2"
+
+	# OK
+	if [ "${_curr_exit}" = "0" ]; then
+		_curr_exit="${_next_exit}"
+	# Warning
+	elif [ "${_curr_exit}" = "1" ]; then
+		if [ "${_next_exit}" = "0" ]; then
+			_curr_exit="1"
+		elif [ "${_next_exit}" = "1" ]; then
+			_curr_exit="1"
+		elif [ "${_next_exit}" = "2" ]; then
+			_curr_exit="2"
+		elif [ "${_next_exit}" = "3" ]; then # UNKNOWN -> WARNING
+			_curr_exit="1"
+		fi
+	# Error
+	elif [ "${_curr_exit}" = "2" ]; then
+		_curr_exit="2"
+	# Unknown
+	elif [ "${_curr_exit}" = "3" ]; then
+		if [ "${_next_exit}" = "0" ]; then
+			_curr_exit="3"
+		elif [ "${_next_exit}" = "1" ]; then
+			_curr_exit="1"
+		elif [ "${_next_exit}" = "2" ]; then
+			_curr_exit="2"
+		elif [ "${_next_exit}" = "3" ]; then # UNKNOWN -> WARNING
+			_curr_exit="3"
+		fi
+	fi
+	echo "${_curr_exit}"
+	return ${_curr_exit}
+}
+
 
 ############################################################
 # Usage/Help/Version
@@ -1101,6 +1148,7 @@ MYSQLDUMP="$(which mysqldump)"
 OPENSSL="$(which openssl)"
 TMPWATCH="$(which "${DELETE_METHOD}")"	# This can be tmpwatch or tmpreaper
 
+# Error code for nagios
 ERROR=0
 
 
@@ -1130,6 +1178,7 @@ TOTAL_STARTTIME=$(date +%s)
 TOTAL_SIZE=0
 TOTAL_DBS=0
 TOTAL_IGN=0
+TOTAL_ERR=0
 
 # Get info for nagios log
 NAGIOS_DB_DUMPED=""
@@ -1182,11 +1231,14 @@ for db in ${DATABASES}; do
 		# File already exists on disk?
 		if [ -f "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" ]; then
 
+			# Increment total dbs error count
+			TOTAL_ERR=$((TOTAL_ERR + 1))
+
 			# Add failed db to nagios log
 			[ "${NAGIOS_DB_ERROR}" = "" ] && NAGIOS_DB_ERROR="${db}" || NAGIOS_DB_ERROR="${NAGIOS_DB_ERROR},${db}"
 
 			debugn "err"  "ERROR:    ${db} cannot be written to disk (file exists: ${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext})" $LOG "${LOGFILE}" "${_ARG_CRON}"
-			ERROR=1
+			ERROR="$(merge_exit_codes ${ERROR} 2)"
 
 		# All Good, file can be written
 		else
@@ -1270,18 +1322,18 @@ for db in ${DATABASES}; do
 				fi
 			fi
 
-			TOTAL_DBS=$((TOTAL_DBS + 1))
-
-
 			# No errors in POSIX pipestatus emulation
 			if [ -z "$error_statuses" ]; then
+				TOTAL_DBS=$((TOTAL_DBS + 1))
 				endtime=$(date +%s)
 				debugn "info" "$((endtime - starttime)) sec" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 				[ "${NAGIOS_DB_DUMPED}" = "" ] && NAGIOS_DB_DUMPED="${db}" || NAGIOS_DB_DUMPED="${NAGIOS_DB_DUMPED},${db}"
 			else
+				# Increment total dbs error count
+				TOTAL_ERR=$((TOTAL_ERR + 1))
 				debugn "err"  "ERROR" $LOG "${LOGFILE}" "${_ARG_CRON}"
-				ERROR=1
+				ERROR="$(merge_exit_codes ${ERROR} 2)"
 
 				[ "${NAGIOS_DB_ERROR}" = "" ] && NAGIOS_DB_ERROR="${db}" || NAGIOS_DB_ERROR="${NAGIOS_DB_ERROR},${db}"
 			fi
@@ -1304,11 +1356,11 @@ TOTAL_ENDTIME=$(date +%s)
 
 for req in ${REQUIRE}; do
 	debug "err"  "[ERR]  Required database: \"${req}\" has not been dumped." $LOG "${LOGFILE}" "${_ARG_CRON}"
-	ERROR=1
+	ERROR="$(merge_exit_codes ${ERROR} 2)"
 done
 
 
-debug "info" "[INFO] Dumping finished" $LOG "${LOGFILE}" "${_ARG_CRON}"
+debug "info" "[INFO] Dumping finished (OK: ${TOTAL_DBS} dbs, IGN: ${TOTAL_IGN} dbs, ERR: ${TOTAL_ERR}, TOTAL: ${NUM_DB})" $LOG "${LOGFILE}" "${_ARG_CRON}"
 debug "info" "[INFO] Took $((TOTAL_ENDTIME - TOTAL_STARTTIME)) seconds" $LOG "${LOGFILE}" "${_ARG_CRON}"
 debug "info" "[INFO] Total size dumped: ${TOTAL_SIZE} MB" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
@@ -1326,7 +1378,7 @@ if [ ${DELETE} -eq 1 ]; then
 	DELETED="$(${TMPWATCH} ${FORCE_ARG} -m "$DELETE_IF_OLDER" -v "${DUMP_PATH}/")"
 	NUM_DEL="$( echo "${DELETED}" | grep -c 'removing' )"
 	if [ $? -ne 0 ]; then
-		ERROR=1
+		ERROR="$(merge_exit_codes ${ERROR} 1)"
 	fi
 	debug "info" "${DELETED}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
@@ -1355,6 +1407,7 @@ if [ "${NAGIOS_LOG}" = "1" ]; then
 		echo "[messages]";
 		echo "msg_dbs = ${TOTAL_DBS}";
 		echo "msg_ign = ${TOTAL_IGN}";
+		echo "msg_err = ${TOTAL_ERR}";
 		echo "msg_meg = ${TOTAL_SIZE}";
 		echo "msg_sec = $((TOTAL_ENDTIME - TOTAL_STARTTIME))";
 		echo "msg_del = ${NUM_DEL}";
