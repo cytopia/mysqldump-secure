@@ -1026,9 +1026,9 @@ if [ "${DELETE}" = "1" ]; then
 
 
 	if [ "${DELETE_FORCE}" = 1 ]; then
-		debug "info" "[INFO] Using '--force' option for ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "info" "[INFO] ${DELETE_METHOD}: Using '--force' option for ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	else
-		debug "info" "[INFO] Not forcing (--force) deletion on read-only files for ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "info" "[INFO] ${DELETE_METHOD}: Not forcing (--force) deletion on read-only files for ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	fi
 
 fi
@@ -1376,10 +1376,10 @@ if [ ${DELETE} -eq 1 ]; then
 
 	debug "info" "[INFO] Deleting files older than ${DELETE_IF_OLDER} hours" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	DELETED="$(${TMPWATCH} ${FORCE_ARG} -m "$DELETE_IF_OLDER" -v "${DUMP_PATH}/")"
-	NUM_DEL="$( echo "${DELETED}" | grep -c 'removing' )"
 	if [ $? -ne 0 ]; then
 		ERROR="$(merge_exit_codes "${ERROR}" 1)"
 	fi
+	NUM_DEL="$( echo "${DELETED}" | grep -c 'removing' )"
 	debug "info" "${DELETED}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
