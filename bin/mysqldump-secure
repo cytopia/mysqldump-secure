@@ -518,7 +518,7 @@ if [ ! -r "${CONFIG_FILE}" ]; then
 	exit 1
 fi
 if ! compare_chmod "$(permission "${CONFIG_FILE}")" "${_DEFAULT_CONFIG_CHMOD}" > /dev/null 2>&1 ; then
-	debug  "err"  "[ERR]  Configuration file ${CONFIG_FILE} has dangerous permissions: $(permission "${CONFIG_FILE}"), should be: ${_DEFAULT_CONFIG_CHMOD}" "" "" "${_ARG_CRON}"
+	debug  "warn" "[WARN] Configuration file ${CONFIG_FILE} has dangerous permissions: $(permission "${CONFIG_FILE}"), should be: ${_DEFAULT_CONFIG_CHMOD}" "" "" "${_ARG_CRON}"
 	debugi "info" "[INFO] Trying to chmod to ${_DEFAULT_CONFIG_CHMOD}..." "" "" "${_ARG_CRON}"
 
 	if ! chmod ${_DEFAULT_CONFIG_CHMOD} "${CONFIG_FILE}" > /dev/null 2>&1 ; then
@@ -552,7 +552,7 @@ fi
 # that no other has read permissions to the file.
 if [ -z "${LOG}" ]; then
 	debug "warn" "[WARN] \$LOG variable is not set or empty in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
-	debug "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
+	debug "warn" "[WARN] (OPT) Logging disabled" "" "" "${_ARG_CRON}"
 	LOG=0
 elif [ "${LOG}" = "1" ]; then
 
@@ -570,7 +570,7 @@ elif [ "${LOG}" = "1" ]; then
 	# Check logfile variable
 	if [ -z "${LOGFILE}" ]; then
 		debug "warn" "[WARN] \$LOGFILE variable is not set or empty in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
-		debug "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
+		debug "warn" "[WARN] (OPT) Logging disabled" "" "" "${_ARG_CRON}"
 		LOG=0
 	fi
 
@@ -587,7 +587,7 @@ elif [ "${LOG}" = "1" ]; then
 				if ! mkdir -p "$(dirname "${LOGFILE}")" > /dev/null 2>&1 ; then
 					debugn "err"  "Failed" "" "" "${_ARG_CRON}"
 					debug  "err"  "[ERR]  Failed to create logfile directoy $(dirname "${LOGFILE}")" "" "" "${_ARG_CRON}"
-					debug  "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
+					debug  "warn" "[WARN] (OPT) Logging disabled" "" "" "${_ARG_CRON}"
 					LOG=0
 				else
 					debugn "info" "OK" "" "" "${_ARG_CRON}"
@@ -602,7 +602,7 @@ elif [ "${LOG}" = "1" ]; then
 				if ! touch "${LOGFILE}" > /dev/null 2>&1 ; then
 					debugn "err"  "Failed" "" "" "${_ARG_CRON}"
 					debug  "err"  "[ERR]  Failed to create file ${LOGFILE}" "" "" "${_ARG_CRON}"
-					debug  "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
+					debug  "warn" "[WARN] (OPT) Logging disabled" "" "" "${_ARG_CRON}"
 					LOG=0
 				else
 					debugn "info" "OK" "" "" "${_ARG_CRON}"
@@ -621,7 +621,7 @@ elif [ "${LOG}" = "1" ]; then
 			if ! chmod ${LOG_CHMOD} "${LOGFILE}" > /dev/null 2>&1 ; then
 				debugn "err"  "Failed" "" "" "${_ARG_CRON}"
 				debug  "err"  "[ERR]  Failed to chmod ${LOG_CHMOD} ${LOGFILE}" "" "" "${_ARG_CRON}"
-				debug  "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
+				debug  "warn" "[WARN] (OPT) Logging disabled" "" "" "${_ARG_CRON}"
 				LOG=0
 			else
 				debugn "info" "OK" "" "" "${_ARG_CRON}"
@@ -636,13 +636,13 @@ elif [ "${LOG}" = "1" ]; then
 		# Logfile not writeable
 		if [ ! -w "${LOGFILE}" ]; then
 			debug  "err"  "[ERR]  Logfile ${LOGFILE} not writeable. Check \$LOG_CHMOD value inf config." "" "" "${_ARG_CRON}"
-			debug  "warn" "[WARN] Logging disabled" "" "" "${_ARG_CRON}"
+			debug  "warn" "[WARN] (OPT) Logging disabled" "" "" "${_ARG_CRON}"
 			LOG=0
 		fi
 	fi
 
 else
-	debug "info" "[INFO] Logging not enabled in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
+	debug "info" "[INFO] (OPT) Logging disabled" "" "" "${_ARG_CRON}"
 	LOG=0
 fi
 
@@ -654,19 +654,22 @@ if [ "${LOG}" = "1" ]; then
 		echo "--------------------------------------------------------------------------------";
 		echo "$(date '+%Y-%m-%d') $(date '+%H:%M:%S') Starting";
 	} >> "${LOGFILE}"
-	debug "info" "[INFO] Logging enabled" ${LOG} "${LOGFILE}" "${_ARG_CRON}"
-	debug "info" "[INFO] Using config: ${CONFIG_FILE}"
+	debug "info" "[INFO] Using config: ${CONFIG_FILE}" ${LOG} "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "[INFO] (OPT) Logging enabled" ${LOG} "${LOGFILE}" "${_ARG_CRON}"
+else
+	debug "info" "[INFO] Using config: ${CONFIG_FILE}" ${LOG} "${LOGFILE}" "${_ARG_CRON}"
 fi
+
 
 
 ############################################################
 # Command line arguments
 ############################################################
 if [ "${_ARG_CRON}" = "1" ]; then
-	debug "info" "[INFO] Running in cron mode (--cron)."  ${LOG} "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "[INFO] Running in cron mode (--cron)." ${LOG} "${LOGFILE}" "${_ARG_CRON}"
 fi
 if [ "${_ARG_TEST}" = "1" ]; then
-	debug "info" "[INFO] Running tests only (--test)."  ${LOG} "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "[INFO] Running tests only (--test)." ${LOG} "${LOGFILE}" "${_ARG_CRON}"
 fi
 #if [ "${_ARG_INFO}" = "1" ]; then
 #	debug "info" "[INFO] Showing information only (--info)."  ${LOG} "${LOGFILE}" "${_ARG_CRON}"
@@ -855,7 +858,7 @@ fi
 ############################################################
 if [ -z "${COMPRESS}" ]; then
 	debug "warn" "[WARN] \$COMPRESS variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "warn" "[WARN] Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "[WARN] (OPT) Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	COMPRESS=0
 fi
 if [ "${COMPRESS}" = "1" ]; then
@@ -880,10 +883,10 @@ if [ "${COMPRESS}" = "1" ]; then
 		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 2
 	else
-		debug "info" "[INFO] Compression enabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "info" "[INFO] (OPT) Compression enabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	fi
 else
-	debug "info" "[INFO] Compression not enabled in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "[INFO] (OPT) Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 
@@ -893,7 +896,7 @@ fi
 ############################################################
 if [ -z "${ENCRYPT}" ]; then
 	debug "warn" "[WARN] \$ENCRYPT variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "warn" "[WARN] Encryption disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "[WARN] (OPT) Encryption disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	ENCRYPT=0
 fi
 if [ "${ENCRYPT}" = "1" ]; then
@@ -919,10 +922,10 @@ if [ "${ENCRYPT}" = "1" ]; then
 		exit 2
 	fi
 
-	debug "info" "[INFO] Encryption enabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "[INFO] (OPT) Encryption enabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 else
-	debug "info" "[INFO] Encryption not enabled in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "[INFO] (OPT) Encryption disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 
@@ -932,43 +935,43 @@ fi
 ############################################################
 if [ -z "${DELETE}" ]; then
 	debug "warn" "[WARN] \$DELETE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "[WARN] (OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	DELETE=0
 fi
 if [ "${DELETE}" = "1"  ]; then
 	if [ -z "${DELETE_METHOD}" ]; then
 		debug "warn" "[WARN] \$DELETE_METHOD variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] (OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
 	elif [ "${DELETE_METHOD}" = "tmpwatch" ] &&  ! command -v tmpwatch > /dev/null 2>&1 ; then
 		debug "warn" "[WARN] 'tmpwatch' not found" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] (OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
 	elif [ "${DELETE_METHOD}" = "tmpreaper" ] && ! command -v tmpreaper > /dev/null 2>&1 ; then
 		debug "warn" "[WARN] 'tmpreaper' not found" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] (OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
 	elif [ "${DELETE_METHOD}" != "tmpwatch" ] && [ "${DELETE_METHOD}" != 'tmpreaper' ]; then
 		debug "warn" "[WARN] \$DELETE_METHOD must be either 'tmpwatch' or 'tmpreaper' in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] (OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
 	elif [ -z "${DELETE_IF_OLDER}" ]; then
 		debug "warn" "[WARN] \$DELETE_IF_OLDER variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] (OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
 	elif ! isint "${DELETE_IF_OLDER}" > /dev/null 2>&1 ; then
 		debug "warn" "[WARN] \$DELETE_IF_OLDER variable is not a valid integer" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] (OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
 	elif [ "${DELETE_IF_OLDER}" -lt 1 ]; then
 		debug "warn" "[WARN] \$DELETE_IF_OLDER is smaller than 1 hour" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "warn" "[WARN] Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] (OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
 	else
-		debug "info" "[INFO] Deletion enabled. Using: ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "info" "[INFO] (OPT) Deletion enabled. Using: ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	fi
 else
-	debug "info" "[INFO] Deletion not enabled in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "[INFO] (OPT) Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 # Check for forced deletion
@@ -1003,7 +1006,7 @@ fi
 ############################################################
 if [ -z "${NAGIOS_LOG}" ]; then
 	debug "warn" "[WARN] \$NAGIOS_LOG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "[WARN] (OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	NAGIOS_LOG=0
 elif [ "${NAGIOS_LOG}" = "1"  ]; then
 
@@ -1021,7 +1024,7 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 	# Checking logfile variable
 	if [ -z "${NAGIOS_LOGFILE}" ]; then
 		debug "warn" "[WARN] \$NAGIOS_LOG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "[WARN] (OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		NAGIOS_LOG=0
 	# Check if file exists
 	elif [ ! -f "${NAGIOS_LOGFILE}" ]; then
@@ -1031,7 +1034,7 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 		if ! touch "${NAGIOS_LOGFILE}" > /dev/null 2>&1 ; then
 			debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			debug  "err"  "[ERR]  Failed to create file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-			debug  "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug  "warn" "[WARN] (OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			NAGIOS_LOG=0
 		else
 			debugn "info" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}"
@@ -1041,7 +1044,7 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 			if ! chmod ${NAGIOS_LOG_CHMOD} "${NAGIOS_LOGFILE}" > /dev/null 2>&1 ; then
 				debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}"
 				debug  "err"  "[ERR]  Failed to chmod ${NAGIOS_LOG_CHMOD} ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-				debug  "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+				debug  "warn" "[WARN] (OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 				NAGIOS_LOG=0
 			else
 				debugn "info" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}"
@@ -1054,7 +1057,7 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 		if ! chmod "${NAGIOS_LOG_CHMOD}" "${NAGIOS_LOGFILE}" > /dev/null 2>&1 ; then
 			debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			debug  "err"  "[ERR]  Failed to chmod ${NAGIOS_LOG_CHMOD} ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-			debug  "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug  "warn" "[WARN] (OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			NAGIOS_LOG=0
 		else
 			debugn "info" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}"
@@ -1065,19 +1068,19 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 	if [ "${NAGIOS_LOG}" = "1"  ]; then
 		if [ ! -r "${NAGIOS_LOGFILE}" ]; then
 			debug "warn" "[WARN] ${NAGIOS_LOGFILE} not readable. Fix CHMOD permissions in config." $LOG "${LOGFILE}" "${_ARG_CRON}"
-			debug "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "warn" "[WARN] (OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			NAGIOS_LOG=0
 		elif [ ! -w "${NAGIOS_LOGFILE}" ]; then
 			debug "warn" "[WARN] ${NAGIOS_LOGFILE} not writeable. Fix CHMOD permissions in config." $LOG "${LOGFILE}" "${_ARG_CRON}"
-			debug "warn" "[WARN] Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "warn" "[WARN] (OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			NAGIOS_LOG=0
 		else
-			debug "info" "[INFO] Nagios plugin log enabled: ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "info" "[INFO] (OPT) Nagios plugin log enabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		fi
 	fi
 
 else
-	debug "info" "[INFO] Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "[INFO] (OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 

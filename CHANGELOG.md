@@ -1,8 +1,9 @@
 Version 0.15 (unreleased)
 ------------
 
-- [Enh]		[conf] Allow to specify custom config via argument
 - [Fix]		[install] Fixed script install permissions
+- [Enh]		[conf] Allow to specify custom config via argument
+- [Enh]		Cleaned debug output
 
 
 Version 0.14.1
