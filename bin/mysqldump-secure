@@ -655,7 +655,7 @@ if [ "${LOG}" = "1" ]; then
 		echo "$(date '+%Y-%m-%d') $(date '+%H:%M:%S') Starting";
 	} >> "${LOGFILE}"
 	debug "info" "[INFO] Using config: ${CONFIG_FILE}" ${LOG} "${LOGFILE}" "${_ARG_CRON}"
-	debug "info" "[INFO] (OPT) Logging enabled" ${LOG} "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "[INFO] (OPT) Logging enabled: ${LOGFILE}" ${LOG} "${LOGFILE}" "${_ARG_CRON}"
 else
 	debug "info" "[INFO] Using config: ${CONFIG_FILE}" ${LOG} "${LOGFILE}" "${_ARG_CRON}"
 fi
@@ -810,7 +810,7 @@ if ! $(which mysql) --defaults-extra-file="${MYSQL_CNF_FILE}" -e exit > /dev/nul
 	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 3
 else
-	debug "info" "[INFO] MySQL connection test successful."
+	debug "info" "[INFO] MySQL connection test successful." $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 
@@ -883,7 +883,7 @@ if [ "${COMPRESS}" = "1" ]; then
 		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 2
 	else
-		debug "info" "[INFO] (OPT) Compression enabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "info" "[INFO] (OPT) Compression enabled: Using ${COMPRESS_BIN} ${COMPRESS_ARG}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	fi
 else
 	debug "info" "[INFO] (OPT) Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
@@ -1075,7 +1075,7 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 			debug "warn" "[WARN] (OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			NAGIOS_LOG=0
 		else
-			debug "info" "[INFO] (OPT) Nagios plugin log enabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "info" "[INFO] (OPT) Nagios plugin log enabled: ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		fi
 	fi
 
