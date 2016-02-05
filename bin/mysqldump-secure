@@ -1238,7 +1238,7 @@ for db in ${DATABASES}; do
 			[ "${NAGIOS_DB_ERROR}" = "" ] && NAGIOS_DB_ERROR="${db}" || NAGIOS_DB_ERROR="${NAGIOS_DB_ERROR},${db}"
 
 			debugn "err"  "ERROR:    ${db} cannot be written to disk (file exists: ${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext})" $LOG "${LOGFILE}" "${_ARG_CRON}"
-			ERROR="$(merge_exit_codes ${ERROR} 2)"
+			ERROR="$(merge_exit_codes "${ERROR}" 2)"
 
 		# All Good, file can be written
 		else
@@ -1333,7 +1333,7 @@ for db in ${DATABASES}; do
 				# Increment total dbs error count
 				TOTAL_ERR=$((TOTAL_ERR + 1))
 				debugn "err"  "ERROR" $LOG "${LOGFILE}" "${_ARG_CRON}"
-				ERROR="$(merge_exit_codes ${ERROR} 2)"
+				ERROR="$(merge_exit_codes "${ERROR}" 2)"
 
 				[ "${NAGIOS_DB_ERROR}" = "" ] && NAGIOS_DB_ERROR="${db}" || NAGIOS_DB_ERROR="${NAGIOS_DB_ERROR},${db}"
 			fi
@@ -1356,7 +1356,7 @@ TOTAL_ENDTIME=$(date +%s)
 
 for req in ${REQUIRE}; do
 	debug "err"  "[ERR]  Required database: \"${req}\" has not been dumped." $LOG "${LOGFILE}" "${_ARG_CRON}"
-	ERROR="$(merge_exit_codes ${ERROR} 2)"
+	ERROR="$(merge_exit_codes "${ERROR}" 2)"
 done
 
 
@@ -1378,7 +1378,7 @@ if [ ${DELETE} -eq 1 ]; then
 	DELETED="$(${TMPWATCH} ${FORCE_ARG} -m "$DELETE_IF_OLDER" -v "${DUMP_PATH}/")"
 	NUM_DEL="$( echo "${DELETED}" | grep -c 'removing' )"
 	if [ $? -ne 0 ]; then
-		ERROR="$(merge_exit_codes ${ERROR} 1)"
+		ERROR="$(merge_exit_codes "${ERROR}" 1)"
 	fi
 	debug "info" "${DELETED}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
@@ -1438,7 +1438,7 @@ fi
 # Exit
 ############################################################
 
-if [ $ERROR -ne 0 ]; then
+if [ "${ERROR}" != "0" ]; then
 	# Send bad exit code
 	debug "err"  "[FAIL] Finished with errors" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 4
