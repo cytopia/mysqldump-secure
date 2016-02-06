@@ -39,22 +39,41 @@ brew install --HEAD cytopia/tap/mysqldump-secure
 
 ### 2.1 Download
 
-**Download Tarball**
+**Download Tarball (stable)**
 ```shell
 wget https://github.com/cytopia/mysqldump-secure/archive/0.15.tar.gz -O - | tar -xz
 cd mysqldump-secure
 ```
-**Download via git**
+**Download Tarball (devel)**
+```shell
+wget https://github.com/cytopia/mysqldump-secure/archive/master.tar.gz -O - | tar -xz
+cd mysqldump-secure
+```
+
+**Download via git (stable)**
 ```shell
 git clone https://github.com/cytopia/mysqldump-secure.git
 cd mysqldump-secure
 git checkout 0.15
 ```
-**Download via composer**
+**Download via git (devel)**
+```shell
+git clone https://github.com/cytopia/mysqldump-secure.git
+cd mysqldump-secure
+```
+
+**Download via composer (stable)**
 ```shell
 composer create-project cytopia/mysqldump-secure
 cd mysqldump-secure
 ```
+**Download via composer (devel)**
+```shell
+composer create-project -s dev cytopia/mysqldump-secure
+cd mysqldump-secure
+```
+
+
 
 ### 2.2 Configure
 Configure for system default location
