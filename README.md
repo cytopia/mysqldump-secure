@@ -69,7 +69,7 @@ You should always define your credentials in a my.cnf file with `chmod 400` or y
 ## 2. Features
 
 * Compression (`gzip`, `pigz`, `bzip2`, `pbzip2`, `lzop`, `lzma`, `xz`)
-* Encryption (`openssl` private/public key)
+* Encryption (hybrid encryption: private/public key and aes)
 * Blacklisting
 * Whitelisting
 * Tmpwatch integration (`tmpwatch` or `tmpreaper`)
