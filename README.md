@@ -129,7 +129,32 @@ For more detailed instructions go to the [Setup guidelines](https://github.com/c
 
 ## 5. Usage
 
-### 5.1 Default
+### 5.1 Usage
+```shell
+Usage: mysqldump-secure [--conf] [--cron] [--test] [--help] [--version]
+       mysqldump-secure [--conf]
+       mysqldump-secure --cron [--conf]
+       mysqldump-secure --test [--conf]
+       mysqldump-secure --help
+       mysqldump-secure --version
+
+When invoked without any arguments, it will start dumping databases as
+defined in mysqldump-secure.conf.
+
+--conf            Pass different configuration file than the default one.
+                  E.g.: --conf=/etc/mysqldump-secure-alt.conf
+
+--cron            Use for cron run. It will only output errors and warnings
+                  and will silence all debug output.
+
+--test            Test requirements and exit.
+
+--help            Show this help screen.
+
+--version         Show version information.
+```
+
+### 5.2 Default
 
 Test if everything is configured correctly:
 ```shell
