@@ -69,7 +69,7 @@ You should always define your credentials in a my.cnf file with `chmod 400` or y
 ## 2. Features
 
 * Compression (`gzip`, `pigz`, `bzip2`, `pbzip2`, `lzop`, `lzma`, `xz`)
-* Encryption (`openssl` private/public key)
+* Encryption (hybrid encryption: private/public key and aes)
 * Blacklisting
 * Whitelisting
 * Tmpwatch integration (`tmpwatch` or `tmpreaper`)
@@ -83,14 +83,10 @@ You should always define your credentials in a my.cnf file with `chmod 400` or y
 
 ## 3. Installation
 
-### 3.1 Linux/BSD
+### 3.1 Linux, BSD and OSX
 
 ```shell
-# Download via git
-git clone --recursive https://github.com/cytopia/mysqldump-secure.git
-# Or from archive
-wget https://github.com/cytopia/mysqldump-secure/archive/master.tar.gz -O - | tar -xz
-
+wget https://github.com/cytopia/mysqldump-secure/archive/0.15.tar.gz -O - | tar -xz
 cd mysqldump-secure
 ./configure
 make
@@ -98,13 +94,13 @@ sudo make install
 ```
 
 ### 3.2 OSX
-
 ```shell
 brew tap cytopia/tap
 brew install mysqldump-secure
 ```
 
-For more detailed instructions go to the [Install guidelines](https://github.com/cytopia/mysqldump-secure/blob/master/doc/INSTALL.md)
+
+For more detailed instructions go to the **[Install guidelines](https://github.com/cytopia/mysqldump-secure/blob/master/doc/INSTALL.md)**
 
 
 ## 4. Configuration
