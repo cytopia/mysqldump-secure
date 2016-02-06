@@ -72,3 +72,10 @@ make
 sudo make install
 ```
 
+
+### 3. Checking
+
+Once mysqldump-secure is install you should run the self-test which tells you all about the stuff that is wrong or missing. By default only the mysql connection will fail and the rest will be auto-configured:
+```shell
+mysqldump-secure --test
+```
