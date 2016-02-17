@@ -18,6 +18,8 @@
 Mysqldump-secure is a POSIX compliant shell backup script for MySQL databases with strong security in mind.
 It will backup every available database (which is readable by the specified user) as a separate file with the possibility to opt out via blacklisting. Dumped databases can optionally be piped directly to gzip or openssl in order to compress and/or encrypt the backup. Encryption is done before the file is written to disk to avoid possible race conditions.
 
+
+Find the project website at [mysqldump-secure.org](http://mysqldump-secure.org)  
 Find the whole post at [www.everythingcli.org](http://www.everythingcli.org/index.php/2015/06/13/secure-mysqldump-script-with-encryption-and-compression/)
 
 ##### Tested on
@@ -129,7 +131,32 @@ For more detailed instructions go to the [Setup guidelines](https://github.com/c
 
 ## 5. Usage
 
-### 5.1 Default
+### 5.1 Usage
+```shell
+Usage: mysqldump-secure [--conf] [--cron] [--test] [--help] [--version]
+       mysqldump-secure [--conf]
+       mysqldump-secure --cron [--conf]
+       mysqldump-secure --test [--conf]
+       mysqldump-secure --help
+       mysqldump-secure --version
+
+When invoked without any arguments, it will start dumping databases as
+defined in mysqldump-secure.conf.
+
+--conf            Pass different configuration file than the default one.
+                  E.g.: --conf=/etc/mysqldump-secure-alt.conf
+
+--cron            Use for cron run. It will only output errors and warnings
+                  and will silence all debug output.
+
+--test            Test requirements and exit.
+
+--help            Show this help screen.
+
+--version         Show version information.
+```
+
+### 5.2 Default
 
 Test if everything is configured correctly:
 ```shell
@@ -195,11 +222,3 @@ If you like have a look at the [Contributing Guidelines](CONTRIBUTING.md) and se
 
 ## 9. Version
 For a complete list of verion see [CHANGELOG](CHANGELOG.md)
-
-
-## 10. Awesome
-
-Added by the following [![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/sindresorhus/awesome) lists:
-
-* [awesome-mysql](https://shlomi-noach.github.io/awesome-mysql/) ([github](https://github.com/shlomi-noach/awesome-mysql))
-

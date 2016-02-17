@@ -39,22 +39,41 @@ brew install --HEAD cytopia/tap/mysqldump-secure
 
 ### 2.1 Download
 
-**Download Tarball**
+**Tarball (stable)**
 ```shell
 wget https://github.com/cytopia/mysqldump-secure/archive/0.15.tar.gz -O - | tar -xz
 cd mysqldump-secure
 ```
-**Download via git**
+**Tarball (devel)**
+```shell
+wget https://github.com/cytopia/mysqldump-secure/archive/master.tar.gz -O - | tar -xz
+cd mysqldump-secure
+```
+
+**Git (stable)**
 ```shell
 git clone https://github.com/cytopia/mysqldump-secure.git
 cd mysqldump-secure
 git checkout 0.15
 ```
-**Download via composer**
+**Git (devel)**
+```shell
+git clone https://github.com/cytopia/mysqldump-secure.git
+cd mysqldump-secure
+```
+
+**Composer (stable)**
 ```shell
 composer create-project cytopia/mysqldump-secure
 cd mysqldump-secure
 ```
+**Composer (devel)**
+```shell
+composer create-project -s dev cytopia/mysqldump-secure
+cd mysqldump-secure
+```
+
+
 
 ### 2.2 Configure
 Configure for system default location
@@ -72,3 +91,10 @@ make
 sudo make install
 ```
 
+
+### 3. Checking
+
+Once mysqldump-secure is installed you should run the self-test which tells you all about the stuff that is wrong or missing. By default only the mysql connection will fail and the rest will be auto-configured:
+```shell
+mysqldump-secure --test
+```
