@@ -25,5 +25,11 @@ script:
   - ./configure
   - make
   - sudo make install
+  - echo '[client]' | sudo tee /etc/mysqldump-secure.cnf
+  - echo 'host = localhost' | sudo tee --append /etc/mysqldump-secure.cnf
+  - echo 'user = root' | sudo tee --append /etc/mysqldump-secure.cnf
+  - echo 'password = ' | sudo tee --append /etc/mysqldump-secure.cnf
+
   - sudo mysqldump-secure --test
+  - sudo mysqldump-secure
 
