@@ -24,5 +24,6 @@ script:
 
   - ./configure
   - make
-  - make install
+  - sudo make install
+  - mysqldump-secure --test
 
