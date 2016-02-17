@@ -850,6 +850,16 @@ fi
 
 
 ############################################################
+# MySQL Dump Opts
+############################################################
+if [ -z "${MYSQL_OPTS}" ]; then
+	debug "warn" "[WARN] \$MYSQL_OPTS variable is not set or empty" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	MYSQL_OPTS=""
+fi
+debug "info"  "[INFO] mysqldump options: ${MYSQL_OPTS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+
+
+############################################################
 # Bad MySQL Opts
 ############################################################
 for opt in ${MYSQL_OPTS}; do

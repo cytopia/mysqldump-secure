@@ -1,6 +1,8 @@
 Version 0.16 (unreleased)
 ------------
 
+- [Fix]		Validate MYSQL_OPTS
+
 
 Version 0.15
 ------------
