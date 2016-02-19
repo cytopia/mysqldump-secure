@@ -7,8 +7,8 @@
 	"license": "MIT",
 	"authors": [
 		{
-			"name" : "Patrick Plocke",
-			"homepage": "https://github.com/cytopia",
+			"name" : "cytopia",
+			"homepage": "http://mysqldump-secure.org",
 			"role": "Developer"
 		}
 	],
