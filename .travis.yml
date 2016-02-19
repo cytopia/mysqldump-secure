@@ -3,40 +3,64 @@ services:
   - mysql
 
 before_script:
+  # Install 'shellcheck'
   - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu/ trusty-backports restricted main universe"
   - sudo apt-get update -qq
   - sudo apt-get install -qq shellcheck
 
+  # Add SQL data
   - mysql -uroot -e 'create database my_empty_db1;'
   - mysql -uroot -e 'create database my_empty_db2;'
   - mysql -uroot -e 'create database my_full_db1;'
   - mysql -uroot -e 'create database my_full_db2;'
-  - echo "CREATE TABLE test (b1 LONGTEXT, b2 LONGTEXT, b3 LONGTEXT, b4 LONGTEXT, b5 LONGTEXT, b6 LONGTEXT, b7 LONGTEXT, b8 LONGTEXT, b9 LONGTEXT, ba LONGTEXT, bb LONGTEXT, bc LONGTEXT, bd LONGTEXT, be LONGTEXT, bf LONGTEXT);" > my_full_db.sql
+  - echo "CREATE TABLE IF NOT EXISTS test (b1 LONGTEXT, b2 LONGTEXT, b3 LONGTEXT, b4 LONGTEXT, b5 LONGTEXT, b6 LONGTEXT, b7 LONGTEXT, b8 LONGTEXT, b9 LONGTEXT, ba LONGTEXT, bb LONGTEXT, bc LONGTEXT, bd LONGTEXT, be LONGTEXT, bf LONGTEXT);" > my_full_db.sql
   - for (( i=1; i < 10000; i++ )); do echo "INSERT INTO test VALUES(\"1000000000000000000000000000000000000000000000000000000000000\", \"2000000000000000000000000000000000000000000000000000000000000\", \"3000000000000000000000000000000000000000000000000000000000000\", \"4000000000000000000000000000000000000000000000000000000000000\", \"5000000000000000000000000000000000000000000000000000000000000\", \"6000000000000000000000000000000000000000000000000000000000000\", \"7000000000000000000000000000000000000000000000000000000000000\", \"8000000000000000000000000000000000000000000000000000000000000\", \"9000000000000000000000000000000000000000000000000000000000000\", \"A0000000000000000000000000000000000000000000000000000000000000\", \"B000000000000000000000000000000000000000000000000000000000000\", \"C000000000000000000000000000000000000000000000000000000000000\", \"D000000000000000000000000000000000000000000000000000000000000\", \"E0000000000000000000000000000000000000000000000000000000000000\", \"F000000000000000000000000000000000000000000000000000000000000\");" >> my_full_db.sql; done;
+  - mysql -uroot my_full_db1 < my_full_db.sql
   - mysql -uroot my_full_db1 < my_full_db.sql
   - mysql -uroot my_full_db2 < my_full_db.sql
 
+  # install mysqldump-secure
+  - ./configure
+  - make
+  - sudo make install
+
+  # Create credentials file
+  - echo '[client]' | sudo tee /etc/mysqldump-secure.cnf
+  - echo 'host = localhost' | sudo tee --append /etc/mysqldump-secure.cnf
+  - echo 'user = root' | sudo tee --append /etc/mysqldump-secure.cnf
+  - echo 'password = ' | sudo tee --append /etc/mysqldump-secure.cnf
+
+  # Create public key
+  - echo "-----BEGIN CERTIFICATE-----" | sudo tee /etc/mysqldump-secure.pub.pem
+  - echo "MIICKzCCAdWgAwIBAgIJAK8CnVnY1v8TMA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNV | sudo tee -a /etc/mysqldump-secure.pub.pem
+  - echo "BAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBX | sudo tee -a /etc/mysqldump-secure.pub.pem
+  - echo "aWRnaXRzIFB0eSBMdGQwHhcNMTYwMjE5MTI1MzQwWhcNMTYwMzIwMTI1MzQwWjBF | sudo tee -a /etc/mysqldump-secure.pub.pem
+  - echo "MQswCQYDVQQGEwJBVTETMBEGA1UECBMKU29tZS1TdGF0ZTEhMB8GA1UEChMYSW50 | sudo tee -a /etc/mysqldump-secure.pub.pem
+  - echo "ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJbs | sudo tee -a /etc/mysqldump-secure.pub.pem
+  - echo "9Fl9MpFv6ANYWv1gyHwjBIOjQj1c7txI6Sl8xupeptaCXID4u+8ApVSdX6/sYzNa | sudo tee -a /etc/mysqldump-secure.pub.pem
+  - echo "P6X94ylMxe5KKLKplKkCAwEAAaOBpzCBpDAdBgNVHQ4EFgQUAsaaTBKduky2krrA | sudo tee -a /etc/mysqldump-secure.pub.pem
+  - echo "sLwKI1qjKMowdQYDVR0jBG4wbIAUAsaaTBKduky2krrAsLwKI1qjKMqhSaRHMEUx | sudo tee -a /etc/mysqldump-secure.pub.pem
+  - echo "CzAJBgNVBAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRl | sudo tee -a /etc/mysqldump-secure.pub.pem
+  - echo "cm5ldCBXaWRnaXRzIFB0eSBMdGSCCQCvAp1Z2Nb/EzAMBgNVHRMEBTADAQH/MA0G | sudo tee -a /etc/mysqldump-secure.pub.pem
+  - echo "CSqGSIb3DQEBBQUAA0EAiOW8UkIM1aE3O5RnKm+PwoWuDr1lzYxfe0WTMeHuXpSQ | sudo tee -a /etc/mysqldump-secure.pub.pem
+  - echo "HHOCKmg8MbLpaXJulypJ1lTupqX8G5vlfYMNZldGAg== | sudo tee -a /etc/mysqldump-secure.pub.pem
+  - echo "-----END CERTIFICATE----- | sudo tee -a /etc/mysqldump-secure.pub.pem
+
+  # Enable encryption
+  - sudo sed -i'' 's/^ENCRYPT=0/ENCRYPT=1/' /etc/mysqldump-secure.conf
+
+
 sudo: required
-#install:
-#      - sudo apt-get -qq update
-#      - sudo apt-get -qq install git devscripts shunit2
 
 script:
+  # Shellcheck
   - shellcheck --shell=sh bin/mysqldump-secure
   - shellcheck --shell=sh bin/create-keypair.sh
   - shellcheck --shell=sh bin/decrypt.sh
   - shellcheck --shell=sh bin/encrypt.sh
   - shellcheck --shell=sh --exclude=SC2034,SC2148 etc/mysqldump-secure.conf
 
-  # install mysqldump-secure
-  - ./configure
-  - make
-  - sudo make install
-  - echo '[client]' | sudo tee /etc/mysqldump-secure.cnf
-  - echo 'host = localhost' | sudo tee --append /etc/mysqldump-secure.cnf
-  - echo 'user = root' | sudo tee --append /etc/mysqldump-secure.cnf
-  - echo 'password = ' | sudo tee --append /etc/mysqldump-secure.cnf
-
+  # Test mysqldump-secure
   - sudo mysqldump-secure --test
   - sudo mysqldump-secure
 
