@@ -9,8 +9,8 @@ before_script:
 
   - mysql -uroot -e 'create database my_empty_db;'
   - mysql -uroot -e 'create database my_full_db;'
-  - mysql -uroot -e 'Use my_full_db; CREATE TABLE test (blob_col BLOB, INDEX(blob_col(10)));'
-  - for (( i=1; i < 500000; i++ )); do mysql -uroot -e 'use my_full_db; INSERT INTO test(blob_col) VALUES("asdasdasd");'; done;
+  - mysql -uroot -e 'Use my_full_db; CREATE TABLE test (b1 BLOB, b2 BLOB, b3 BLOB, b4 BLOB, b5 BLOB, b6 BLOB, b7 BLOB, b8 BLOB, b9 BLOB, b10 BLOB);'
+  - for (( i=1; i < 5000; i++ )); do mysql -uroot -e 'use my_full_db; INSERT INTO test VALUES("1", "2", "3", "4", "5", "6", "7", "8", "9", "10");'; done;
 
 
 sudo: required
