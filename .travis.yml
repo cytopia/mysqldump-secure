@@ -75,3 +75,5 @@ script:
   # Nagios Check
   - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log
 
+  # Show files
+  - sudo ls -la /var/mysqldump-secure
