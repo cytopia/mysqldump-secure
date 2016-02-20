@@ -198,6 +198,7 @@ mysqldump-secure --cron --config=/etc/mysqldump-secure.encrypted.conf
 
 | File | Description |
 |------|-------------|
+| [mysqldump-secure.org](http://mysqldump-secure.org) | mysqldump-secure homepage |
 | [Installation](https://github.com/cytopia/mysqldump-secure/blob/master/doc/INSTALL.md) | Different ways to install mysqldump-secure |
 | [Configuration](https://github.com/cytopia/mysqldump-secure/blob/master/doc/SETUP.md) | How to configure mysqldump-secure |
 | [Security](https://github.com/cytopia/mysqldump-secure/blob/master/doc/SECURITY.md) | Information and usage about security measurements |
