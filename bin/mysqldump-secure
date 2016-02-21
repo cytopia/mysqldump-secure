@@ -124,6 +124,51 @@ debug() {
 	return 0
 }
 
+
+# Output to stdout/stderr and to file (with multiple lines).
+#
+# @param  string  _lvl	Debug Level
+# @param  string  _msg	Output message
+# @param  string  _log	'1': log to file | else: do not log to file
+# @param  string  _file	Full path to logfile
+# @param  string  _cron '1': Cron usage - do not print 'info' | else: print all
+# @return integer 0
+debugr() {
+	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
+	_msg="${2}"		# message to output
+	_log="${3}"		# log to file?
+	_file="${4}"	# full path to logfile
+	_cron="${5}"	# run for cron?
+
+	# Hide info output when in cron-mode
+	if [ "${_cron}" != "1" ]; then
+		if [ "${_lvl}" = "info" ]; then
+			printf %s "${_msg}" | while IFS= read -r line; do
+				printf "[INFO] %s\n" "${line}"
+			done
+		fi
+	fi
+
+	# Always show warn and error
+	[ -t 1 ] && tput setaf 3
+	[ "${_lvl}" = "warn" ] && printf "[WARN] %s\n" "${_msg}" 1>&2	# stdout -> stderr
+	[ -t 1 ] && tput setaf 1
+	[ "${_lvl}" = "err"  ] && printf "[ERR]  %s\n" "${_msg}" 1>&2	# stdout -> stderr
+	[ -t 1 ] && tput setaf 7
+	[ -t 1 ] && tput sgr0
+
+	# Log to file
+	if [ "${_log}" = "1"    ]; then
+		_pre=""
+		[ "${_lvl}" = "info" ] && _pre="[INFO]"
+		[ "${_lvl}" = "warn" ] && _pre="[WARN]"
+		[ "${_lvl}" = "err" ]  && _pre="[ERR] "
+		printf "%s %s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${_msg}" >> "${_file}"
+	fi
+	return 0
+}
+
+
 # Inline Output to stdout/stderr and to file (no newline).
 #
 # @param  string  _lvl	Debug Level
@@ -1423,13 +1468,13 @@ if [ ${DELETE} -eq 1 ]; then
 	# Force deletion?
 	[ "${DELETE_FORCE}" = "1" ] && FORCE_ARG="--force" || FORCE_ARG=""
 
-	debug "info" "Deleting files older than ${DELETE_IF_OLDER} hours" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	DELETED="$(${TMPWATCH} ${FORCE_ARG} -m "$DELETE_IF_OLDER" -v "${DUMP_PATH}/")"
 	if [ $? -ne 0 ]; then
 		ERROR="$(merge_exit_codes "${ERROR}" 1)"
 	fi
 	NUM_DEL="$( echo "${DELETED}" | grep -c 'removing' )"
-	debug "info" "${DELETED}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug  "info" "Deleting files older than ${DELETE_IF_OLDER} hours... ${NUM_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debugr "info" "${DELETED}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 else
 	NUM_DEL="0"
 fi
