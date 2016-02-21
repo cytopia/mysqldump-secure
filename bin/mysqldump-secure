@@ -1391,6 +1391,8 @@ if [ ${DELETE} -eq 1 ]; then
 	fi
 	NUM_DEL="$( echo "${DELETED}" | grep -c 'removing' )"
 	debug "info" "${DELETED}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+else
+	NUM_DEL="0"
 fi
 
 
