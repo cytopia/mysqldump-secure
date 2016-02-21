@@ -143,26 +143,18 @@ debugr() {
 	# [INFO] Hide info output when in cron-mode
 	if [ "${_cron}" != "1" ]; then
 		if [ "${_lvl}" = "info" ]; then
-#			printf %s "${_msg}" | while IFS= read -r line; do
-#				printf "[INFO] %s\n" "${line}"
-#			done
-		IFS='
-		'
-		for line in ${_msg}; do
-			printf "[WARN] %s\n" "${line}" 1>&2	# stdout -> stderr
-		done
-		unset IFS
-
-
+			IFS='
+			'
+			for line in ${_msg}; do
+				printf "[INFO] %s\n" "${line}"
+			done
+			unset IFS
 		fi
 	fi
 
 	# [WARN] Always show warn and error
 	if [ "${_lvl}" = "warn" ]; then
 		[ -t 1 ] && tput setaf 3
-		#printf %s "${_msg}" | while IFS= read -r line; do
-		#	printf "[WARN] %s\n" "${line}" 1>&2	# stdout -> stderr
-		#done
 		IFS='
 		'
 		for line in ${_msg}; do
@@ -176,9 +168,12 @@ debugr() {
 	# [ERR] Always show warn and error
 	if [ "${_lvl}" = "err" ]; then
 		[ -t 1 ] && tput setaf 3
-		printf %s "${_msg}" | while IFS= read -r line; do
+		IFS='
+		'
+		for line in ${_msg}; do
 			printf "[ERR]  %s\n" "${line}" 1>&2	# stdout -> stderr
 		done
+		unset IFS
 		[ -t 1 ] && tput setaf 7
 		[ -t 1 ] && tput sgr0
 	fi
@@ -190,9 +185,12 @@ debugr() {
 		[ "${_lvl}" = "warn" ] && _pre="[WARN]"
 		[ "${_lvl}" = "err" ]  && _pre="[ERR] "
 
-		printf %s "${_msg}" | while IFS= read -r line; do
+		IFS='
+		'
+		for line in ${_msg}; do
 			printf "%s %s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${line}" >> "${_file}"
 		done
+		unset IFS
 	fi
 	return 0
 }
