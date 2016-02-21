@@ -143,9 +143,17 @@ debugr() {
 	# [INFO] Hide info output when in cron-mode
 	if [ "${_cron}" != "1" ]; then
 		if [ "${_lvl}" = "info" ]; then
-			printf %s "${_msg}" | while IFS= read -r line; do
-				printf "[INFO] %s\n" "${line}"
-			done
+#			printf %s "${_msg}" | while IFS= read -r line; do
+#				printf "[INFO] %s\n" "${line}"
+#			done
+		IFS='
+		'
+		for line in ${_msg}; do
+			printf "[WARN] %s\n" "${line}" 1>&2	# stdout -> stderr
+		done
+		unset IFS
+
+
 		fi
 	fi
 
