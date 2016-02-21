@@ -140,7 +140,7 @@ debugr() {
 	_file="${4}"	# full path to logfile
 	_cron="${5}"	# run for cron?
 
-	# Hide info output when in cron-mode
+	# [INFO] Hide info output when in cron-mode
 	if [ "${_cron}" != "1" ]; then
 		if [ "${_lvl}" = "info" ]; then
 			printf %s "${_msg}" | while IFS= read -r line; do
@@ -149,13 +149,25 @@ debugr() {
 		fi
 	fi
 
-	# Always show warn and error
-	[ -t 1 ] && tput setaf 3
-	[ "${_lvl}" = "warn" ] && printf "[WARN] %s\n" "${_msg}" 1>&2	# stdout -> stderr
-	[ -t 1 ] && tput setaf 1
-	[ "${_lvl}" = "err"  ] && printf "[ERR]  %s\n" "${_msg}" 1>&2	# stdout -> stderr
-	[ -t 1 ] && tput setaf 7
-	[ -t 1 ] && tput sgr0
+	# [WARN] Always show warn and error
+	if [ "${_lvl}" = "warn" ]; then
+		[ -t 1 ] && tput setaf 3
+		printf %s "${_msg}" | while IFS= read -r line; do
+			printf "[WARN] %s\n" "${line}" 1>&2	# stdout -> stderr
+		done
+		[ -t 1 ] && tput setaf 7
+		[ -t 1 ] && tput sgr0
+	fi
+
+	# [ERR] Always show warn and error
+	if [ "${_lvl}" = "err" ]; then
+		[ -t 1 ] && tput setaf 3
+		printf %s "${_msg}" | while IFS= read -r line; do
+			printf "[ERR]  %s\n" "${line}" 1>&2	# stdout -> stderr
+		done
+		[ -t 1 ] && tput setaf 7
+		[ -t 1 ] && tput sgr0
+	fi
 
 	# Log to file
 	if [ "${_log}" = "1"    ]; then
@@ -163,7 +175,10 @@ debugr() {
 		[ "${_lvl}" = "info" ] && _pre="[INFO]"
 		[ "${_lvl}" = "warn" ] && _pre="[WARN]"
 		[ "${_lvl}" = "err" ]  && _pre="[ERR] "
-		printf "%s %s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${_msg}" >> "${_file}"
+
+		printf %s "${_msg}" | while IFS= read -r line; do
+			printf "%s %s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${line}" >> "${_file}"
+		done
 	fi
 	return 0
 }
@@ -1472,7 +1487,7 @@ if [ ${DELETE} -eq 1 ]; then
 	if [ $? -ne 0 ]; then
 		ERROR="$(merge_exit_codes "${ERROR}" 1)"
 	fi
-	NUM_DEL="$( echo "${DELETED}" | grep -c 'removing' )"
+	NUM_DEL="$( echo "${DELETED}" | grep -ci 'Removing' )"
 	debug  "info" "Deleting files older than ${DELETE_IF_OLDER} hours... ${NUM_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debugr "info" "${DELETED}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 else
