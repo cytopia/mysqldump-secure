@@ -8,11 +8,6 @@ before_script:
   - sudo apt-get update -qq
   - sudo apt-get install -qq shellcheck tmpreaper
 
-  # Create directory and dummy files that can be deleted
-  - sudo mkdir -p /var/mysqldump-secure
-  - sudo touch /var/mysqldump-secure/deleteme1
-  - sudo touch /var/mysqldump-secure/deleteme2
-
   # Add SQL data
   - mysql -uroot -e 'create database my_empty_db1;'
   - mysql -uroot -e 'create database my_empty_db2;'
@@ -60,7 +55,7 @@ before_script:
   - sudo sed -i'' 's/^DELETE=0/DELETE=1/' /etc/mysqldump-secure.conf
   - sudo sed -i'' 's/^DELETE_FORCE=0/DELETE_FORCE=1/' /etc/mysqldump-secure.conf
   - sudo sed -i'' 's/^DELETE_METHOD="tmpwatch"/DELETE_METHOD="tmpreaper"/' /etc/mysqldump-secure.conf
-  - sudo sed -i'' 's/^DELETE_IF_OLDER=720/DELETE_IF_OLDER=1m/' /etc/mysqldump-secure.conf
+  - sudo sed -i'' 's/^DELETE_IF_OLDER=720/DELETE_IF_OLDER=1/' /etc/mysqldump-secure.conf
 
 
 sudo: required
@@ -75,17 +70,17 @@ script:
 
   # Test mysqldump-secure
   - sudo mysqldump-secure --test
+
+    # Add dummy files for deletion and run mysqldump-secure
+  - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-1.txt
+  - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-2.txt
   - sudo mysqldump-secure
 
-  # Wait >1minute to test file deletions
-  - echo "Sleeping 35 seconds"
-  - sleep 35
-  - echo "Sleeping 35 seconds"
-  - sleep 35
 
-  # Testing mysqldump-secure with file deletions
-  - sudo mysqldump-secure
-
+    # Add dummy files for deletion and run mysqldump-secure in cron mode (silent)
+  - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt
+  - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
+  - sudo mysqldump-secure --cron
 
   # Nagios Check
   - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log
