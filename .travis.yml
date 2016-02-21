@@ -71,16 +71,22 @@ script:
   # Test mysqldump-secure
   - sudo mysqldump-secure --test
 
-    # Add dummy files for deletion and run mysqldump-secure
+  # Add dummy files for deletion and run mysqldump-secure
   - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-1.txt
   - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-2.txt
   - sudo mysqldump-secure
 
+  # Wait 61 seconds
+  - sleep 61
 
-    # Add dummy files for deletion and run mysqldump-secure in cron mode (silent)
+
+  # Add dummy files for deletion and run mysqldump-secure in cron mode (silent)
   - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt
   - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
   - sudo mysqldump-secure --cron
+
+  # Show the logfile
+  - sudo cat /var/log/mysqldump-secure.log
 
   # Nagios Check
   - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log
