@@ -51,11 +51,11 @@ before_script:
   # Enable Nagios log
   - sudo sed -i'' 's/^NAGIOS_LOG=0/NAGIOS_LOG=1/' /etc/mysqldump-secure.conf
 
-  # Enable Deletion
+  # Enable Deletion (Delete all if older than 1 minute [for testing])
   - sudo sed -i'' 's/^DELETE=0/DELETE=1/' /etc/mysqldump-secure.conf
   - sudo sed -i'' 's/^DELETE_FORCE=0/DELETE_FORCE=1/' /etc/mysqldump-secure.conf
   - sudo sed -i'' 's/^DELETE_METHOD="tmpwatch"/DELETE_METHOD="tmpreaper"/' /etc/mysqldump-secure.conf
-  - sudo sed -i'' 's/^DELETE_IF_OLDER=720/DELETE_IF_OLDER=1/' /etc/mysqldump-secure.conf
+  - sudo sed -i'' 's/^DELETE_IF_OLDER=720/DELETE_IF_OLDER=1m/' /etc/mysqldump-secure.conf
 
 
 sudo: required
@@ -71,6 +71,16 @@ script:
   # Test mysqldump-secure
   - sudo mysqldump-secure --test
   - sudo mysqldump-secure
+
+  # Wait >1minute to test file deletions
+  - echo "Sleeping 35 seconds"
+  - sleep 35
+  - echo "Sleeping 35 seconds"
+  - sleep 35
+
+  # Testing mysqldump-secure with file deletions
+  - sudo mysqldump-secure
+
 
   # Nagios Check
   - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log
