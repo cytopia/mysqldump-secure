@@ -104,12 +104,18 @@ script:
   - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
   - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log || echo "---------- Error triggered successfully ----------"
 
-  # 6. [ERROR] mysqldump-secure (producing an error by running non-priviledged)
+  # 6. [ERROR] mysqldump-secure (producing an error by not found required database)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/REQUIRE="mysql"/REQUIRE="mysql2"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log || echo "---------- Error triggered successfully ----------"
+
+  # 7. [ERROR] mysqldump-secure (producing an error by running non-priviledged)
   - mysqldump-secure || echo "---------- Error triggered successfully ----------"
 
-  # 7. [ERROR] mysqldump-secure (producing an error by Wrong credentials)
+  # 8. [ERROR] mysqldump-secure (producing an error by Wrong credentials)
   - sudo sed -i'' 's/localhost/localhost2/' /etc/mysqldump-secure.cnf
   - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
 
-  # 8. Show files
+  # 9. Show files
   - sudo ls -la /var/mysqldump-secure
