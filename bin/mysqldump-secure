@@ -152,9 +152,15 @@ debugr() {
 	# [WARN] Always show warn and error
 	if [ "${_lvl}" = "warn" ]; then
 		[ -t 1 ] && tput setaf 3
-		printf %s "${_msg}" | while IFS= read -r line; do
+		#printf %s "${_msg}" | while IFS= read -r line; do
+		#	printf "[WARN] %s\n" "${line}" 1>&2	# stdout -> stderr
+		#done
+		IFS='
+		'
+		for line in ${_msg}; do
 			printf "[WARN] %s\n" "${line}" 1>&2	# stdout -> stderr
 		done
+		unset IFS
 		[ -t 1 ] && tput setaf 7
 		[ -t 1 ] && tput sgr0
 	fi
