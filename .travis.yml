@@ -18,7 +18,7 @@ before_script:
   - for (( i=1; i < 10; i++ )); do mysql -uroot my_full_db1 < my_full_db.sql; done
   - mysql -uroot my_full_db2 < my_full_db.sql
 
-  # install mysqldump-secure
+  # Install mysqldump-secure
   - ./configure
   - make
   - sudo make install
@@ -51,7 +51,7 @@ before_script:
   # Enable Nagios log
   - sudo sed -i'' 's/^NAGIOS_LOG=0/NAGIOS_LOG=1/' /etc/mysqldump-secure.conf
 
-  # Enable Deletion (Delete all if older than 1 minute [for testing])
+  # Enable Deletion (Delete all if older than 1 hour)
   - sudo sed -i'' 's/^DELETE=0/DELETE=1/' /etc/mysqldump-secure.conf
   - sudo sed -i'' 's/^DELETE_FORCE=0/DELETE_FORCE=1/' /etc/mysqldump-secure.conf
   - sudo sed -i'' 's/^DELETE_METHOD="tmpwatch"/DELETE_METHOD="tmpreaper"/' /etc/mysqldump-secure.conf
@@ -71,7 +71,22 @@ script:
   # 2. mysqldump-secure (testmode)
   - sudo mysqldump-secure --test
 
-  # 3. mysqldump-secure (normal mode)
+  # 3. mysqldump-secure (cron mode)
+  - sudo rm /var/log/mysqldump-secure.log
+  - sudo touch /var/log/mysqldump-secure.log
+  - sudo chmod 600 /var/log/mysqldump-secure.log
+  - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-1.txt
+  - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-2.txt
+  - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt
+  - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
+  - sudo mysqldump-secure --cron
+  - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log
+  - sudo cat /var/log/mysqldump-secure.log
+
+  # 4. mysqldump-secure (normal mode)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo mkdir -p /var/mysqldump-secure/
+  - sudo chmod 700 /var/mysqldump-secure/
   - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-1.txt
   - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-2.txt
   - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt
@@ -79,21 +94,9 @@ script:
   - sudo mysqldump-secure
   - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log
 
-  # 4. mysqldump-secure (producing an error by trying to overwrite existing files)
-  - sudo mysqldump-secure || echo "Error triggered successfully."
-  - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log || echo "Error triggered successfully."
+  # 5. mysqldump-secure (producing an error by trying to overwrite existing files)
+  - sudo mysqldump-secure || printf "\n\n--- Error triggered successfully -- \n\n"
+  - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log || printf "\n\n--- Error triggered successfully -- \n\n"
 
-  # 5. mysqldump-secure (cron-mode)
-  - sudo rm -rf /var/mysqldump-secure/
-  - sudo mkdir -p /var/mysqldump-secure/
-  - sudo chmod 700 /var/mysqldump-secure/
-  - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-5.txt
-  - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-6.txt
-  - sudo mysqldump-secure --cron
-  - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log
-
-  # 6. Show the logfile
-  - sudo cat /var/log/mysqldump-secure.log
-
-  # 7. Show files
+  # 6. Show files
   - sudo ls -la /var/mysqldump-secure
