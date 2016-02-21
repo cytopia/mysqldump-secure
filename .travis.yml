@@ -74,6 +74,8 @@ script:
   # 3. mysqldump-secure (normal mode)
   - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-1.txt
   - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-2.txt
+  - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt
+  - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
   - sudo mysqldump-secure
   - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log
 
@@ -82,9 +84,11 @@ script:
   - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log || echo "Error triggered successfully."
 
   # 5. mysqldump-secure (cron-mode)
-  - sudo rm -rf /var/mysqldump-secure/*
-  - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt
-  - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo mkdir -p /var/mysqldump-secure/
+  - sudo chmod 700 /var/mysqldump-secure/
+  - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-5.txt
+  - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-6.txt
   - sudo mysqldump-secure --cron
   - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log
 
