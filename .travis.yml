@@ -85,7 +85,7 @@ script:
 
   # 3. [WARNING] [CRON-MODE] mysqldump-secure (with warnings)
   - sudo rm -rf /var/mysqldump-secure/ &&
-    sudo rm /var/log/mysqldump-secure.log &&
+    sudo rm /var/log/mysqldump-secure.log
   - sudo mysqldump-secure --cron
 
 
@@ -96,20 +96,20 @@ script:
     sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-1.txt &&
     sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-2.txt &&
     sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt &&
-    sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt &&
-    sudo mysqldump-secure
+    sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
+  - sudo mysqldump-secure
   - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log
 
   # 5. [ERROR] mysqldump-secure (producing an error by trying to overwrite existing files)
-  - sudo mysqldump-secure || printf "\n\n--- Error triggered successfully -- \n\n"
-  - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log || printf "\n\n--- Error triggered successfully --"
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log || echo "---------- Error triggered successfully ----------"
 
   # 6. [ERROR] mysqldump-secure (producing an error by running non-priviledged)
-  - mysqldump-secure || printf "\n\n--- Error triggered successfully --"
+  - mysqldump-secure || echo "---------- Error triggered successfully ----------"
 
   # 7. [ERROR] mysqldump-secure (producing an error by Wrong credentials)
   - sudo sed -i'' 's/localhost/localhost2/' /etc/mysqldump-secure.cnf
-  - sudo mysqldump-secure || printf "\n\n--- Error triggered successfully --"
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
 
   # 8. Show files
   - sudo ls -la /var/mysqldump-secure
