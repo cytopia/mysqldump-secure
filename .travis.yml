@@ -61,35 +61,35 @@ before_script:
 sudo: required
 
 script:
-  # Shellcheck
+  # 1. Shellcheck
   - shellcheck --shell=sh bin/mysqldump-secure
   - shellcheck --shell=sh bin/create-keypair.sh
   - shellcheck --shell=sh bin/decrypt.sh
   - shellcheck --shell=sh bin/encrypt.sh
   - shellcheck --shell=sh --exclude=SC2034,SC2148 etc/mysqldump-secure.conf
 
-  # Test mysqldump-secure
+  # 2. mysqldump-secure (testmode)
   - sudo mysqldump-secure --test
 
-  # Add dummy files for deletion and run mysqldump-secure
+  # 3. mysqldump-secure (normal mode)
   - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-1.txt
   - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-2.txt
   - sudo mysqldump-secure
+  - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log
 
-  # Wait 61 seconds
-  - sleep 61
+  # 4. mysqldump-secure (producing an error by trying to overwrite existing files)
+  - sudo mysqldump-secure || echo "Error triggered successfully."
+  - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log || echo "Error triggered successfully."
 
-
-  # Add dummy files for deletion and run mysqldump-secure in cron mode (silent)
+  # 5. mysqldump-secure (cron-mode)
+  - sudo rm -rf /var/mysqldump-secure/*
   - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt
   - sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
   - sudo mysqldump-secure --cron
-
-  # Show the logfile
-  - sudo cat /var/log/mysqldump-secure.log
-
-  # Nagios Check
   - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log
 
-  # Show files
+  # 6. Show the logfile
+  - sudo cat /var/log/mysqldump-secure.log
+
+  # 7. Show files
   - sudo ls -la /var/mysqldump-secure
