@@ -106,8 +106,11 @@ debug() {
 	fi
 
 	# Always show warn and error
+	tput setaf 3
 	[ "${_lvl}" = "warn" ] && printf "[WARN] %s\n" "${_msg}" 1>&2	# stdout -> stderr
+	tput setaf 1
 	[ "${_lvl}" = "err"  ] && printf "[ERR]  %s\n" "${_msg}" 1>&2	# stdout -> stderr
+	tput sgr0
 
 	# Log to file
 	if [ "${_log}" = "1"    ]; then
@@ -141,8 +144,11 @@ debugi() {
 	fi
 
 	# Always show warn and error
+	tput setaf 3
 	[ "${_lvl}" = "warn" ] && printf "[WARN] %s" "${_msg}" 1>&2	# stdout -> stderr
+	tput setaf 1
 	[ "${_lvl}" = "err"  ] && printf "[ERR]  %s" "${_msg}" 1>&2	# stdout -> stderr
+	tput sgr0
 
 	# Log to file
 	if [ "${_log}" = "1"    ]; then
@@ -173,8 +179,12 @@ debugn() {
 	if [ "${_cron}" != "1" ]; then
 		[ "${_lvl}" = "info" ] && printf "%s\n" "${_msg}"	# only show error if not in cron
 	fi
+	tput setaf 3
 	[ "${_lvl}" = "warn" ] && printf "%s\n" "${_msg}" 1>&2	# stdout -> stderr
+	tput setaf 1
 	[ "${_lvl}" = "err"  ] && printf "%s\n" "${_msg}" 1>&2	# stdout -> stderr
+	tput sgr0
+
 	[ "${_log}" = "1"    ] && printf "%s\n" "${_msg}" >> "${_file}"
 	return 0
 }

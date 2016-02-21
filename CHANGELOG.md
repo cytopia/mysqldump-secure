@@ -4,6 +4,7 @@ Version 0.16 (unreleased)
 - [Fix]		Unset variable: $NUM_DEL was not set, if no files have been deleted
 - [Fix]		Validate MYSQL_OPTS
 - [Enh]		Use #!/bin/sh -u to check against unset variables
+- [Enh]		Colorized logging
 - [Enh]		Consolidate logging
 
 

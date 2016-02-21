@@ -88,7 +88,6 @@ script:
     sudo rm /var/log/mysqldump-secure.log
   - sudo mysqldump-secure --cron
 
-
   # 4. [NORMAL] mysqldump-secure
   - sudo rm -rf /var/mysqldump-secure/ &&
     sudo mkdir -p /var/mysqldump-secure/ &&
