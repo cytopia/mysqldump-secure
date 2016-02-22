@@ -1144,6 +1144,7 @@ if [ "${COMPRESS}" = "1" ]; then
 	fi
 else
 	debug "info" "(OPT) Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	COMPRESS="0"
 fi
 
 
@@ -1183,6 +1184,7 @@ if [ "${ENCRYPT}" = "1" ]; then
 
 else
 	debug "info" "(OPT) Encryption disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	ENCRYPT="0"
 fi
 
 
@@ -1335,6 +1337,7 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 
 else
 	debug "info" "(OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	NAGIOS_LOG="0"
 fi
 
 
