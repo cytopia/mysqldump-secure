@@ -1,5 +1,9 @@
 #!/bin/sh -u
 #
+# -u: nounset (enable: set -u | disable: set +u)
+# -e: errexit
+# -r: restricted
+#
 # Script to dump databases one by one
 #
 # Exit Codes
@@ -759,7 +763,7 @@ done
 
 
 # Use default config or user specified config file
-if [ -z "${_CUS_CONF}" ]; then
+if [ -z "${_CUS_CONF-}" ]; then
 	CONFIG_FILE="${_DEFAULT_CONFIG_FILE}"
 else
 	CONFIG_FILE="${_CUS_CONF}"
@@ -813,14 +817,14 @@ fi
 # Be really strict on checking if we are going to log to file
 # or not. Also make sure that the logfile is writeable and
 # that no other has read permissions to the file.
-if [ -z "${LOG}" ]; then
+if [ -z "${LOG-}" ]; then
 	debug "warn" "\$LOG variable is not set or empty in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
 	debug "warn" "(OPT) Logging disabled" "" "" "${_ARG_CRON}"
 	LOG=0
 elif [ "${LOG}" = "1" ]; then
 
 	# Check chmod variable
-	if [ -z "${LOG_CHMOD}" ]; then
+	if [ -z "${LOG_CHMOD-}" ]; then
 		debug "warn" "\$LOG_CHMOD variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		debug "warn" "Setting default to ${_DEFAULT_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		LOG_CHMOD="${_DEFAULT_LOG_CHMOD}"
@@ -831,7 +835,7 @@ elif [ "${LOG}" = "1" ]; then
 	fi
 
 	# Check logfile variable
-	if [ -z "${LOGFILE}" ]; then
+	if [ -z "${LOGFILE-}" ]; then
 		debug "warn" "\$LOGFILE variable is not set or empty in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
 		debug "warn" "(OPT) Logging disabled" "" "" "${_ARG_CRON}"
 		LOG=0
@@ -944,12 +948,12 @@ fi
 ############################################################
 
 # Check if CHMOD exists, otherwise use default values
-if [ -z "${DUMP_DIR_CHMOD}" ]; then
+if [ -z "${DUMP_DIR_CHMOD-}" ]; then
 	debug "warn" "\$DUMP_DIR_CHMOD is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "warn" "Setting \$DUMP_DIR_CHMOD to ${_DEFAULT_DUMP_DIR_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	DUMP_DIR_CHMOD=${_DEFAULT_DUMP_DIR_CHMOD}
 fi
-if [ -z "${DUMP_FILE_CHMOD}" ]; then
+if [ -z "${DUMP_FILE_CHMOD-}" ]; then
 	debug "warn" "\$DUMP_FILE_CHMOD is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "warn" "Setting \$DUMP_FILE_CHMOD to ${_DEFAULT_DUMP_FILE_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	DUMP_FILE_CHMOD=${_DEFAULT_DUMP_FILE_CHMOD}
@@ -966,7 +970,7 @@ if ! valid_chmod "${DUMP_FILE_CHMOD}" > /dev/null 2>&1; then
 fi
 
 # Check if destination dir exists
-if [ -z "${DUMP_PATH}" ]; then
+if [ -z "${DUMP_PATH-}" ]; then
 	debug "err" "\$DUMP_PATH variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err" "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
@@ -1007,7 +1011,7 @@ if [ ! -w "${DUMP_PATH}" ]; then
 fi
 
 # Check output Prefix
-if [ -z "${DUMP_FILE_PRE}" ]; then
+if [ -z "${DUMP_FILE_PRE-}" ]; then
 	debug "warn" "\$DUMP_FILE_PRE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "warn" "Using default 'date-time' prefix: ${_DEFAULT_DUMP_FILE_PRE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	DUMP_FILE_PRE="${_DEFAULT_DUMP_FILE_PRE}"
@@ -1018,7 +1022,21 @@ fi
 ############################################################
 # MySQL
 ############################################################
-if [ -z "${MYSQL_CNF_FILE}" ]; then
+
+# Binaries do exist?
+if ! command -v mysql > /dev/null 2>&1 ; then
+	debug "err"  "'mysql' not found" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	exit 2
+fi
+if ! command -v mysqldump > /dev/null 2>&1 ; then
+	debug "err"  "'mysqldump' not found" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	exit 2
+fi
+
+# Credentials file
+if [ -z "${MYSQL_CNF_FILE-}" ]; then
 	debug "err"  "\$MYSQL_CNF_FILE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
@@ -1041,31 +1059,84 @@ if ! compare_chmod "$(permission "${MYSQL_CNF_FILE}")" "${_DEFAULT_MYSQL_CNF_CHM
 	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
 fi
-if ! command -v mysql > /dev/null 2>&1 ; then
-	debug "err"  "'mysql' not found" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	exit 2
+
+# SSL
+if [ -z "${MYSQL_SSL_ENABLE-}" ]; then
+	debug "err"  "\$MYSQL_SSL_ENABLE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "Aborting, as it is not clear whether or not you only allow secure connections." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	exit 1
 fi
-if ! command -v mysqldump > /dev/null 2>&1 ; then
-	debug "err"  "'mysqldump' not found" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	exit 2
+if [  "${MYSQL_SSL_ENABLE}" = "1" ]; then
+	if [ -z "${MYSQL_SSL_CA_PEM-}" ]; then
+		debug "err"  "\$MYSQL_SSL_CA_PEM variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err"  "Aborting, as you don't want clear-text connections." $LOG "${LOGFILE}" "${_ARG_CRON}"
+		exit 1
+	fi
+	if [ ! -f "${MYSQL_SSL_CA_PEM}" ]; then
+		debug "err"  "\$MYSQL_SSL_CA_PEM=\"$MYSQL_SSL_CA_PEM\" does not exist" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err"  "Aborting, as you don't want clear-text connections." $LOG "${LOGFILE}" "${_ARG_CRON}"
+		exit 1
+	fi
+
+	MYSQL_SSL_ARGS="--ssl-ca=${MYSQL_SSL_CA_PEM}"
+
+	if [ -n "${MYSQL_SSL_CLIENT_CERT_PEM-}" ]; then
+		if [ ! -f "${MYSQL_SSL_CLIENT_CERT_PEM}" ]; then
+			debug "err"  "\$MYSQL_SSL_CLIENT_CERT_PEM=\"$MYSQL_SSL_CLIENT_CERT_PEM\" does not exist" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "Comment it out or specify the correct path." $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
+			exit 1
+		fi
+		MYSQL_SSL_ARGS="${MYSQL_SSL_ARGS} ---ssl-cert=${MYSQL_SSL_CLIENT_CERT_PEM}"
+	fi
+	if [ -n "${MYSQL_SSL_CLIENT_KEY_PEM-}" ]; then
+		if [ ! -f "${MYSQL_SSL_CLIENT_KEY_PEM}" ]; then
+			debug "err"  "\$MYSQL_SSL_CLIENT_KEY_PEM=\"$MYSQL_SSL_CLIENT_KEY_PEM\" does not exist" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "Comment it out or specify the correct path." $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
+			exit 1
+		fi
+		MYSQL_SSL_ARGS="${MYSQL_SSL_ARGS} ---ssl-key=${MYSQL_SSL_CLIENT_KEY_PEM}"
+	fi
+
+	debug "info" "(OPT) MySQL enabled SSL connection." $LOG "${LOGFILE}" "${_ARG_CRON}"
+else
+	MYSQL_SSL_ENABLE=0
+	MYSQL_SSL_ARGS=""
+	debug "info" "(OPT) MySQL disabled SSL connection." $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
+
+
 # Testing MySQL connection
-if ! $(which mysql) --defaults-extra-file="${MYSQL_CNF_FILE}" -e exit > /dev/null 2>&1 ; then
-	debug "err"  "Cannot connect to mysql database. Check credentials in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+# Todo: get actual mysql error here
+if ! $(which mysql) --defaults-extra-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e exit > /dev/null 2>&1 ; then
+	debug "err"  "Cannot connect to mysql database. Check credentials in ${MYSQL_CNF_FILE} or SSL settings" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 3
 else
 	debug "info" "MySQL connection test successful." $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
+# Testing MySQL for SSL connection
+MYSQL_SSL_STATUS="$($(which mysql) --defaults-extra-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e 'status;' 2>&1 | grep -E '^SSL:.*' | sed 's/SSL:\s*//g')"
+if [ "${MYSQL_SSL_STATUS}" = "Not in use" ]; then
+	if [ "${MYSQL_SSL_ENABLE}" = "1" ]; then
+		debug "err"  "MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}"
+		exit 1
+	else
+		debug "info"  "MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	fi
+else
+	debug "info" "MySQL connection is using SSL: ${MYSQL_SSL_STATUS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+fi
+
+
 
 
 ############################################################
 # MySQL Dump Opts
 ############################################################
-if [ -z "${MYSQL_OPTS}" ]; then
+if [ -z "${MYSQL_OPTS-}" ]; then
 	debug "warn" "\$MYSQL_OPTS variable is not set or empty" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	MYSQL_OPTS=""
 fi
@@ -1097,14 +1168,14 @@ done
 ############################################################
 # IGNORE/REQUIRE
 ############################################################
-if [ -z "${IGNORE}" ]; then
-	debug "warn" "\$IGNORE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "warn" "No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}"
+if [ -z "${IGNORE-}" ]; then
+	debug "info" "\$IGNORE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	IGNORE=""
 fi
-if [ -z "${REQUIRE}" ]; then
-	debug "warn" "\$REQUIRE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "warn" "No database will explicitly be required" $LOG "${LOGFILE}" "${_ARG_CRON}"
+if [ -z "${REQUIRE-}" ]; then
+	debug "info" "\$REQUIRE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "No database will explicitly be required" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	REQUIRE=""
 fi
 
@@ -1113,23 +1184,23 @@ fi
 ############################################################
 # Compression
 ############################################################
-if [ -z "${COMPRESS}" ]; then
+if [ -z "${COMPRESS-}" ]; then
 	debug "warn" "\$COMPRESS variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "warn" "(OPT) Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	COMPRESS=0
 fi
 if [ "${COMPRESS}" = "1" ]; then
-	if [ -z "${COMPRESS_BIN}" ]; then
+	if [ -z "${COMPRESS_BIN-}" ]; then
 		debug "err"  "\$COMPRESS_BIN variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 2
 	fi
-	if [ -z "${COMPRESS_ARG}" ]; then
+	if [ -z "${COMPRESS_ARG-}" ]; then
 		debug "err"  "\$COMPRESS_ARG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 2
 	fi
-	if [ -z "${COMPRESS_EXT}" ]; then
+	if [ -z "${COMPRESS_EXT-}" ]; then
 		debug "err"  "\$COMPRESS_EXT variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 2
@@ -1152,7 +1223,7 @@ fi
 ############################################################
 # Encryption
 ############################################################
-if [ -z "${ENCRYPT}" ]; then
+if [ -z "${ENCRYPT-}" ]; then
 	debug "warn" "\$ENCRYPT variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "warn" "(OPT) Encryption disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	ENCRYPT=0
@@ -1168,7 +1239,7 @@ if [ "${ENCRYPT}" = "1" ]; then
 		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 2
 	fi
-	if [ -z "${OPENSSL_ALGO_ARG}" ]; then
+	if [ -z "${OPENSSL_ALGO_ARG-}" ]; then
 		debug "warn" "\$OPENSSL_ALGO_ARG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		debug "warn" "Encryption defaults to: ${OPENSSL_ALGO_ARG}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		OPENSSL_ALGO_ARG="${_DEFAULT_OPENSSL_ALGO_ARG}"
@@ -1192,13 +1263,13 @@ fi
 ############################################################
 # Deletion
 ############################################################
-if [ -z "${DELETE}" ]; then
+if [ -z "${DELETE-}" ]; then
 	debug "warn" "\$DELETE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "warn" "(OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	DELETE=0
 fi
 if [ "${DELETE}" = "1"  ]; then
-	if [ -z "${DELETE_METHOD}" ]; then
+	if [ -z "${DELETE_METHOD-}" ]; then
 		debug "warn" "\$DELETE_METHOD variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		debug "warn" "(OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
@@ -1214,12 +1285,12 @@ if [ "${DELETE}" = "1"  ]; then
 		debug "warn" "\$DELETE_METHOD must be either 'tmpwatch' or 'tmpreaper' in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		debug "warn" "(OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
-	elif [ -z "${DELETE_IF_OLDER}" ]; then
+	elif [ -z "${DELETE_IF_OLDER-}" ]; then
 		debug "warn" "\$DELETE_IF_OLDER variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		debug "warn" "(OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
 	elif ! valid_tmpwatch "${DELETE_IF_OLDER}" > /dev/null 2>&1 ; then
-		debug "warn" "\$DELETE_IF_OLDER does not have a valid ${DELETE_METHOD} value: See man ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "warn" "\$DELETE_IF_OLDER does not have a valid ${DELETE_METHOD} value: ${DELETE_IF_OLDER} (See: man ${DELETE_METHOD})" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		debug "warn" "(OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
 	else
@@ -1231,7 +1302,7 @@ fi
 
 # Check for forced deletion
 if [ "${DELETE}" = "1" ]; then
-	if [ -z "${DELETE_FORCE}" ]; then
+	if [ -z "${DELETE_FORCE-}" ]; then
 		debug "warn" "\$DELETE_FORCE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		debug "warn" "Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE_FORCE=0
@@ -1260,14 +1331,14 @@ fi
 ############################################################
 # Nagios
 ############################################################
-if [ -z "${NAGIOS_LOG}" ]; then
+if [ -z "${NAGIOS_LOG-}" ]; then
 	debug "warn" "\$NAGIOS_LOG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "warn" "(OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	NAGIOS_LOG=0
 elif [ "${NAGIOS_LOG}" = "1"  ]; then
 
 	# Checking chmod variable
-	if [ -z "${NAGIOS_LOG_CHMOD}" ]; then
+	if [ -z "${NAGIOS_LOG_CHMOD-}" ]; then
 		debug "warn" "\$NAGIOS_LOG_CHMOD variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		debug "warn" "Setting default to ${_DEFAULT_NAGIOS_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		NAGIOS_LOG_CHMOD="${_DEFAULT_NAGIOS_LOG_CHMOD}"
@@ -1278,7 +1349,7 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 	fi
 
 	# Checking logfile variable
-	if [ -z "${NAGIOS_LOGFILE}" ]; then
+	if [ -z "${NAGIOS_LOGFILE-}" ]; then
 		debug "warn" "\$NAGIOS_LOG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		debug "warn" "(OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		NAGIOS_LOG=0

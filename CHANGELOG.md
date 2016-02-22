@@ -1,11 +1,14 @@
 Version 0.16 (unreleased)
 ------------
 
+- [Fix]		Do not throw a warning on empty $IGNORE/$REQUIRE variables
+- [Fix]		Handle all unbound variables
 - [Fix]		Catch error in case of wrong values in all 0/1 variables
 - [Fix]		tmpreaper/tmpwatch values now also accept and validate units (m, h, d)
 - [Fix]		$NUM_DEL was unset, if no files have been deleted
 - [Fix]		Output/Log did not show all deleted files by tmpwatch/tmpreaper
 - [Fix]		Validate MYSQL_OPTS
+- [Enh]		Add ability to use mysql connection over SSL and validate it.
 - [Enh]		Use #!/bin/sh -u to check against unset variables
 - [Enh]		Colorized logging
 - [Enh]		Consolidate logging
