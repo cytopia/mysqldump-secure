@@ -162,7 +162,7 @@ script:
   # 9.g [ERROR] mysqldump-secure (producing an error by wrong config)
   - sudo rm -rf /var/mysqldump-secure/
   - sudo sed -i'' 's/COMPRESS_BIN="gzip"/COMPRESS_BIN="gzip22"/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure && echo "---------- Complains about \$COMPRESS_BIN? ----------"
+  - sudo mysqldump-secure || echo "---------- ERROR on \$COMPRESS_BIN? ----------"
   - sudo sed -i'' 's/COMPRESS_BIN="gzip22"/COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
 
   # 9.h [ERROR] mysqldump-secure (producing an error by wrong config)
@@ -174,13 +174,13 @@ script:
   # 9.i [ERROR] mysqldump-secure (producing an error by wrong config)
   - sudo rm -rf /var/mysqldump-secure/
   - sudo sed -i'' 's/OPENSSL_PUBKEY_PEM="${_INSTALL_PREFIX}\/etc\/mysqldump-secure.pub.pem"/OPENSSL_PUBKEY_PEM=pem/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure && echo "---------- Complains about \$OPENSSL_PUBKEY_PEM? ----------"
+  - sudo mysqldump-secure || echo "---------- ERROR on \$OPENSSL_PUBKEY_PEM? ----------"
   - sudo sed -i'' 's/OPENSSL_PUBKEY_PEM=pem/OPENSSL_PUBKEY_PEM="${_INSTALL_PREFIX}\/etc\/mysqldump-secure.pub.pem"/' /etc/mysqldump-secure.conf
 
   # 9.j [ERROR] mysqldump-secure (producing an error by wrong config)
   - sudo rm -rf /var/mysqldump-secure/
   - sudo sed -i'' 's/OPENSSL_ALGO_ARG="-aes256"/OPENSSL_ALGO_ARG="-aes2561"/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure && echo "---------- Complains about \$OPENSSL_ALGO_ARG? ----------"
+  - sudo mysqldump-secure || echo "---------- ERROR on \$OPENSSL_ALGO_ARG? ----------"
   - sudo sed -i'' 's/OPENSSL_ALGO_ARG="-aes2561"/OPENSSL_ALGO_ARG="-aes256"/' /etc/mysqldump-secure.conf
 
   # 9.k [ERROR] mysqldump-secure (producing an error by wrong config)
