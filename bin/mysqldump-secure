@@ -1249,7 +1249,8 @@ if [ "${DELETE}" = "1" ]; then
 	else
 		debug "info" "${DELETE_METHOD}: Not forcing (--force) deletion on read-only files for ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	fi
-
+else
+	DELETE="0"
 fi
 
 
