@@ -1,6 +1,7 @@
 Version 0.16 (unreleased)
 ------------
 
+- [Fix]		tmpreaper/tmpwatch values now also accept and validate units (m, h, d)
 - [Fix]		$NUM_DEL was unset, if no files have been deleted
 - [Fix]		Output/Log did not show all deleted files by tmpwatch/tmpreaper
 - [Fix]		Validate MYSQL_OPTS

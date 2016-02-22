@@ -453,6 +453,111 @@ chmod_2_umask() {
 }
 
 ############################################################
+# tmpwatch/tmpreaper checker/helper
+############################################################
+
+# Check for correct tmpwatch/tmpreaper value
+#
+# @param  string    tmpwatch/tmpreaper deletion value (1, 1m, 1h, 1d)
+# @return integer   0: success, 1: failure
+valid_tmpwatch() {
+	_val="${1}"
+
+	# No unit (auto-defaults to hours)
+	if echo "${_val}" | grep -Eq '^[0-9]+$'; then
+		if [ "${_val}" -gt 0 ]; then
+			return 0
+		fi
+	# 'm' for minutes
+	elif echo "${_val}" | grep -Eq '^[0-9]+m$'; then
+		_num="$(echo "${_val}" | sed 's/m//g')"
+		if [ "${_num}" -gt 0 ]; then
+			return 0
+		fi
+	# 'h' for hours
+	elif echo "${_val}" | grep -Eq '^[0-9]+h$'; then
+		_num="$(echo "${_val}" | sed 's/h//g')"
+		if [ "${_num}" -gt 0 ]; then
+			return 0
+		fi
+	# 'd' for days
+	elif echo "${_val}" | grep -Eq '^[0-9]+d$'; then
+		_num="$(echo "${_val}" | sed 's/d//g')"
+		if [ "${_num}" -gt 0 ]; then
+			return 0
+		fi
+	fi
+
+	# Fuck off
+	return 1
+}
+
+# Get numerical value for tmpwatch/tmpreaper deletions
+#
+# @param  string    tmpwatch/tmpreaper deletion value (1, 1m, 1h, 1d)
+# @return integer   value
+get_tmpwatch_value() {
+	_val="${1}"
+
+	# No unit (auto-defaults to hours)
+	if echo "${_val}" | grep -Eq '^[0-9]+$'; then
+		echo "${_val}"
+	# 'm' for minutes
+	elif echo "${_val}" | grep -Eq '^[0-9]+m$'; then
+		echo "${_val}" | sed 's/m//g'
+	# 'h' for hours
+	elif echo "${_val}" | grep -Eq '^[0-9]+h$'; then
+		echo "${_val}" | sed 's/h//g'
+	# 'd' for days
+	elif echo "${_val}" | grep -Eq '^[0-9]+d$'; then
+		echo "${_val}" | sed 's/d//g'
+	fi
+}
+
+# Get human readable unit for tmpwatch/tmpreaper deletions (plural or singular)
+#
+# @param  string    tmpwatch/tmpreaper deletion value (1, 1m, 1h, 1d)
+# @return string    Human readable unit
+get_tmpwatch_unit_name() {
+	_val="${1}"
+
+	# No unit (auto-defaults to hours)
+	if echo "${_val}" | grep -Eq '^[0-9]+$'; then
+		if [ "${_val}" -gt 1 ]; then
+			echo "hours"
+		else
+			echo "hour"
+		fi
+	# 'm' for minutes
+	elif echo "${_val}" | grep -Eq '^[0-9]+m$'; then
+		_num="$(echo "${_val}" | sed 's/m//g')"
+		if [ "${_num}" -gt 1 ]; then
+			echo "minutes"
+		else
+			echo "minute"
+		fi
+	# 'h' for hours
+	elif echo "${_val}" | grep -Eq '^[0-9]+h$'; then
+		_num="$(echo "${_val}" | sed 's/h//g')"
+		if [ "${_num}" -gt 1 ]; then
+			echo "hours"
+		else
+			echo "hour"
+		fi
+	# 'd' for days
+	elif echo "${_val}" | grep -Eq '^[0-9]+d$'; then
+		_num="$(echo "${_val}" | sed 's/d//g')"
+		if [ "${_num}" -gt 1 ]; then
+			echo "days"
+		else
+			echo "day"
+		fi
+	fi
+}
+
+
+
+############################################################
 # Nagios helper
 ############################################################
 
@@ -860,8 +965,6 @@ if ! valid_chmod "${DUMP_FILE_CHMOD}" > /dev/null 2>&1; then
 	DUMP_FILE_CHMOD=${_DEFAULT_DUMP_FILE_CHMOD}
 fi
 
-
-
 # Check if destination dir exists
 if [ -z "${DUMP_PATH}" ]; then
 	debug "err" "\$DUMP_PATH variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
@@ -902,7 +1005,6 @@ if [ ! -w "${DUMP_PATH}" ]; then
 	debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
 fi
-
 
 # Check output Prefix
 if [ -z "${DUMP_FILE_PRE}" ]; then
@@ -1114,16 +1216,12 @@ if [ "${DELETE}" = "1"  ]; then
 		debug "warn" "\$DELETE_IF_OLDER variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		debug "warn" "(OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
-	elif ! isint "${DELETE_IF_OLDER}" > /dev/null 2>&1 ; then
-		debug "warn" "\$DELETE_IF_OLDER variable is not a valid integer" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "warn" "(OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		DELETE=0
-	elif [ "${DELETE_IF_OLDER}" -lt 1 ]; then
-		debug "warn" "\$DELETE_IF_OLDER is smaller than 1 hour" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	elif ! valid_tmpwatch "${DELETE_IF_OLDER}" > /dev/null 2>&1 ; then
+		debug "warn" "\$DELETE_IF_OLDER does not have a valid ${DELETE_METHOD} value: See man ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		debug "warn" "(OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		DELETE=0
 	else
-		debug "info" "(OPT) Deletion enabled. Using: ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "info" "(OPT) Deletion enabled. Deleting files older than $(get_tmpwatch_value "${DELETE_IF_OLDER}") $(get_tmpwatch_unit_name "${DELETE_IF_OLDER}"). Using: ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	fi
 else
 	debug "info" "(OPT) Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"

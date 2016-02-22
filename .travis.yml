@@ -112,8 +112,7 @@ script:
     sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt && sudo chmod 400 /var/mysqldump-secure/delete-me-3.txt &&
     sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt && sudo chmod 400 /var/mysqldump-secure/delete-me-4.txt
   - sudo sed -i'' 's/DELETE_FORCE=1/DELETE_FORCE=0/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
-  - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log || echo "---------- Error triggered successfully ----------"
+  - sudo mysqldump-secure
 
   # 7. [ERROR] mysqldump-secure (producing an error by not found required database)
   - sudo rm -rf /var/mysqldump-secure/
