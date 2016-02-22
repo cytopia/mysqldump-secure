@@ -119,13 +119,117 @@ script:
   - sudo sed -i'' 's/REQUIRE="mysql"/REQUIRE="mysql2"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
   - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log || echo "---------- Error triggered successfully ----------"
+  - sudo sed -i'' 's/REQUIRE="mysql2"/REQUIRE="mysql"/' /etc/mysqldump-secure.conf
+
+  # 8. [ERROR] mysqldump-secure (producing an error by config not found)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo mysqldump-secure --conf /etc/mysqldump-secure.conf.notfound || echo "---------- Error triggered successfully ----------"
 
   # 8. [ERROR] mysqldump-secure (producing an error by running non-priviledged)
   - mysqldump-secure || echo "---------- Error triggered successfully ----------"
 
-  # 9. [ERROR] mysqldump-secure (producing an error by Wrong credentials)
+  # ------------ WRONG config -----------
+  # 9.a [ERROR] mysqldump-secure (producing an error by wrong config)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/DUMP_DIR_CHMOD="0700"/DUMP_DIR_CHMOD="0700a"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - sudo sed -i'' 's/DUMP_DIR_CHMOD="0700a"/DUMP_DIR_CHMOD="0700"/' /etc/mysqldump-secure.conf
+
+  # 9.b [ERROR] mysqldump-secure (producing an error by wrong config)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/DUMP_FILE_CHMOD="0700"/DUMP_FILE_CHMOD="0700a"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - sudo sed -i'' 's/DUMP_FILE_CHMOD="0700a"/DUMP_FILE_CHMOD="0700"/' /etc/mysqldump-secure.conf
+
+  # 9.c [ERROR] mysqldump-secure (producing an error by wrong config)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/DUMP_FILE_CHMOD="0700"/DUMP_FILE_CHMOD="0700a"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - sudo sed -i'' 's/DUMP_FILE_CHMOD="0700a"/DUMP_FILE_CHMOD="0700"/' /etc/mysqldump-secure.conf
+
+  # 9.d [ERROR] mysqldump-secure (producing an error by wrong config)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/LOG="1"/LOG="2"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - sudo sed -i'' 's/LOG="2"/LOG="1"/' /etc/mysqldump-secure.conf
+
+  # 9.e [ERROR] mysqldump-secure (producing an error by wrong config)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/LOG_CHMOD="0600"/LOG_CHMOD="0600a"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - sudo sed -i'' 's/LOG_CHMOD="0600a"/LOG_CHMOD="0600"/' /etc/mysqldump-secure.conf
+
+  # 9.f [ERROR] mysqldump-secure (producing an error by wrong config)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/COMPRESS="1"/COMPRESS="2"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - sudo sed -i'' 's/COMPRESS="2"/COMPRESS="1"/' /etc/mysqldump-secure.conf
+
+  # 9.g [ERROR] mysqldump-secure (producing an error by wrong config)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/COMPRESS_BIN="gzip"/COMPRESS_BIN="gzip22"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - sudo sed -i'' 's/COMPRESS_BIN="gzip22"/COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
+
+  # 9.h [ERROR] mysqldump-secure (producing an error by wrong config)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/ENCRYPT="1"/ENCRYPT="2"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - sudo sed -i'' 's/ENCRYPT="2"/ENCRYPT="1"/' /etc/mysqldump-secure.conf
+
+  # 9.i [ERROR] mysqldump-secure (producing an error by wrong config)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/OPENSSL_PUBKEY_PEM="${_INSTALL_PREFIX}/etc/mysqldump-secure.pub.pem"/OPENSSL_PUBKEY_PEM=pem/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - sudo sed -i'' 's/OPENSSL_PUBKEY_PEM=pem/OPENSSL_PUBKEY_PEM="${_INSTALL_PREFIX}/etc/mysqldump-secure.pub.pem"/' /etc/mysqldump-secure.conf
+
+  # 9.j [ERROR] mysqldump-secure (producing an error by wrong config)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/OPENSSL_ALGO_ARG="-aes256"/OPENSSL_ALGO_ARG="-aes2561"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - sudo sed -i'' 's/OPENSSL_ALGO_ARG="-aes2562"/OPENSSL_ALGO_ARG="-aes256"/' /etc/mysqldump-secure.conf
+
+  # 9.k [ERROR] mysqldump-secure (producing an error by wrong config)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/DELETE="1"/DELETE="2"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - sudo sed -i'' 's/DELETE="2"/DELETE="1"/' /etc/mysqldump-secure.conf
+
+  # 9.l [ERROR] mysqldump-secure (producing an error by wrong config)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/DELETE_METHOD="tmpreaper"/DELETE_METHOD="tmpreaper2"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - sudo sed -i'' 's/DELETE_METHOD="tmpreaper2"/DELETE_METHOD="tmpreaper"/' /etc/mysqldump-secure.conf
+
+  # 9.m [ERROR] mysqldump-secure (producing an error by wrong config)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/DELETE_FORCE="1"/DELETE_FORCE="2"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - sudo sed -i'' 's/DELETE_FORCE="2"/DELETE_FORCE="1"/' /etc/mysqldump-secure.conf
+
+  # 9.o [ERROR] mysqldump-secure (producing an error by wrong config)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/DELETE_IF_OLDER=1m/DELETE_IF_OLDER=1mm/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - sudo sed -i'' 's/DELETE_IF_OLDER=1mm/DELETE_IF_OLDER=1m/' /etc/mysqldump-secure.conf
+
+  # 9.p [ERROR] mysqldump-secure (producing an error by wrong config)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/NAGIOS_LOG="1"/NAGIOS_LOG="2"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - sudo sed -i'' 's/NAGIOS_LOG="2"/NAGIOS_LOG="1"/' /etc/mysqldump-secure.conf
+
+  # 9.q [ERROR] mysqldump-secure (producing an error by wrong config)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/NAGIOS_LOG_CHMOD="0644"/NAGIOS_LOG_CHMOD="0644a"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - sudo sed -i'' 's/NAGIOS_LOG_CHMOD="0644a"/NAGIOS_LOG_CHMOD="0644"/' /etc/mysqldump-secure.conf
+
+
+
+  # 10. [ERROR] mysqldump-secure (producing an error by Wrong credentials)
   - sudo sed -i'' 's/localhost/localhost2/' /etc/mysqldump-secure.cnf
   - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
 
-  # 10. Show files
+  # 11. Show files
   - sudo ls -la /var/mysqldump-secure
