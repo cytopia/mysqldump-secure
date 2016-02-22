@@ -187,7 +187,7 @@ script:
   - sudo rm -rf /var/mysqldump-secure/
   - sudo sed -i'' 's/OPENSSL_ALGO_ARG="-aes256"/OPENSSL_ALGO_ARG="-aes2561"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
-  - sudo sed -i'' 's/OPENSSL_ALGO_ARG="-aes2562"/OPENSSL_ALGO_ARG="-aes256"/' /etc/mysqldump-secure.conf
+  - sudo sed -i'' 's/OPENSSL_ALGO_ARG="-aes2561"/OPENSSL_ALGO_ARG="-aes256"/' /etc/mysqldump-secure.conf
 
   # 9.k [ERROR] mysqldump-secure (producing an error by wrong config)
   - sudo rm -rf /var/mysqldump-secure/
