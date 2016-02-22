@@ -52,7 +52,7 @@ before_script:
   - sudo sed -i'' 's/^NAGIOS_LOG=0/NAGIOS_LOG=1/' /etc/mysqldump-secure.conf
 
   # Enable Deletion (Delete all if older than 1 hour)
-  - sudo sed -i'' 's/^DELETE=0/DELETE=1/' /etc/mysqldump-secure.conf
+  - sudo sed -i'' 's/^DELETE=0/DELETE=1m/' /etc/mysqldump-secure.conf
   - sudo sed -i'' 's/^DELETE_FORCE=0/DELETE_FORCE=1/' /etc/mysqldump-secure.conf
   - sudo sed -i'' 's/^DELETE_METHOD="tmpwatch"/DELETE_METHOD="tmpreaper"/' /etc/mysqldump-secure.conf
   - sudo sed -i'' 's/^DELETE_IF_OLDER=720/DELETE_IF_OLDER=1/' /etc/mysqldump-secure.conf
