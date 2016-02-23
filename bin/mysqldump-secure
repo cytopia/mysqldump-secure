@@ -1629,7 +1629,7 @@ for db in ${DATABASES}; do
 			else
 				# Increment total dbs error count
 				TOTAL_ERR=$((TOTAL_ERR + 1))
-				debugn "err" "Error dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+				debug "err" "Error dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 				ERROR="$(merge_exit_codes "${ERROR}" 2)"
 
 				[ "${NAGIOS_DB_ERROR}" = "" ] && NAGIOS_DB_ERROR="${db}" || NAGIOS_DB_ERROR="${NAGIOS_DB_ERROR},${db}"
