@@ -103,4 +103,38 @@ sudo mysqldump-secure --cron && echo "--> [OK] Expected" || { echo "--> [FAIL] U
 
 
 
+echo
+echo
+echo "--------------------------------------------------------------------------------"
+echo "-"
+echo "-  1.4 cmd arguments"
+echo "-"
+echo "--------------------------------------------------------------------------------"
+
+echo
+echo "----------------------------------------"
+echo " 1.4.1 --help"
+echo "----------------------------------------"
+sudo mysqldump-secure --help && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
+
+echo
+echo "----------------------------------------"
+echo " 1.4.2 --conf (does not exist)"
+echo "----------------------------------------"
+sudo mysqldump-secure --conf=/etc/nothere && { echo "--> [FAIL] Unexpected OK. Exit code: $?"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
+
+echo
+echo "----------------------------------------"
+echo " 1.4.3 --conf (random file)"
+echo "----------------------------------------"
+sudo mysqldump-secure --conf=/etc/mysqldump-secure.cnf && { echo "--> [FAIL] Unexpected OK. Exit code: $?"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
+
+echo
+echo "----------------------------------------"
+echo " 1.4.4 wrong argument"
+echo "----------------------------------------"
+sudo mysqldump-secure wrong && { echo "--> [FAIL] Unexpected OK. Exit code: $?"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
+
+
+
 exit $ERROR
