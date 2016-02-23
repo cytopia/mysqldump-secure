@@ -294,28 +294,28 @@ sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpect
 sudo sed -i'' 's/^#IGNORE/IGNORE/' /etc/mysqldump-secure.conf
 
 echo
-echo "b) IGNORE=\"\""
+echo "b) IGNORE=\"\"  (dumping performance_schema, which is a virtual db and requires --skip-events)" 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 sudo sed -i'' 's/IGNORE="information_schema performance_schema"/IGNORE=""/' /etc/mysqldump-secure.conf
 echo "\$ sudo mysqldump-secure --cron"
-sudo mysqldump-secure --cron && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
+sudo mysqldump-secure --cron && { echo "--> [FAIL] Unexpected OK. Exit code: $?"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 echo
 echo "\$ sudo mysqldump-secure"
-sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
+sudo mysqldump-secure && { echo "--> [FAIL] Unexpected OK. Exit code: $?"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
 sudo sed -i'' 's/IGNORE=""/IGNORE="information_schema performance_schema"/' /etc/mysqldump-secure.conf
 
 echo
-echo "c) IGNORE=\"notfound\""
+echo "c) IGNORE=\"notfound performance_schema\""
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-sudo sed -i'' 's/IGNORE="information_schema performance_schema"/IGNORE="notfound"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/IGNORE="information_schema performance_schema"/IGNORE="notfound performance_schema"/' /etc/mysqldump-secure.conf
 echo "\$ sudo mysqldump-secure --cron"
 sudo mysqldump-secure --cron && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 echo
 echo "\$ sudo mysqldump-secure"
 sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
-sudo sed -i'' 's/IGNORE="notfound"/IGNORE="information_schema performance_schema"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/IGNORE="notfound performance_schema"/IGNORE="information_schema performance_schema"/' /etc/mysqldump-secure.conf
 
 
 
