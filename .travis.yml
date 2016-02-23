@@ -49,14 +49,22 @@ before_script:
   - sudo cp -f ./.travis/certs/mysqldump-secure.priv.pem /etc/ && sudo chmod 600 /etc/mysqldump-secure.priv.pem
   - sudo cp -f ./.travis/certs/mysqldump-secure.pub.pem  /etc/ && sudo chmod 600 /etc/mysqldump-secure.pub.pem
 
-  # 4. Alter configuration
-  # Add seconds to Dump file prefix to prevent duplicate files while dumping many times
+  # -------------------- mysqldump-secure configuration --------------------
+
+  # 1. Add seconds to Dump file prefix to prevent duplicate files while dumping many times
   - sudo sed -i'' 's/+%H-%M/+%H-%M-%s/g' /etc/mysqldump-secure.conf
-  # Enable encryption
+
+  # 2. Enable SSL Connection
+  - sudo sed -i'' 's/MYSQL_SSL_ENABLE=0/MYSQL_SSL_ENABLE=1' /etc/mysqldump-secure.conf
+  - sudo sed -i'' 's/MYSQL_SSL_CA_PEM="\/path\/to\/ca.pem"/MYSQL_SSL_CA_PEM="\/etc\/mysql.ca.pem"' /etc/mysqldump-secure.conf
+
+  # 3. Enable encryption
   - sudo sed -i'' 's/^ENCRYPT=0/ENCRYPT=1/'       /etc/mysqldump-secure.conf
-  # Enable Nagios log
+
+  # 4. Enable Nagios log
   - sudo sed -i'' 's/^NAGIOS_LOG=0/NAGIOS_LOG=1/' /etc/mysqldump-secure.conf
-  # Enable Deletion (Delete all files older than 1 minute)
+
+  # 5. Enable Deletion (Delete all files older than 1 minute)
   - sudo sed -i'' 's/^DELETE=0/DELETE=1/'                                  /etc/mysqldump-secure.conf
   - sudo sed -i'' 's/^DELETE_FORCE=0/DELETE_FORCE=1/'                      /etc/mysqldump-secure.conf
   - sudo sed -i'' 's/^DELETE_METHOD="tmpwatch"/DELETE_METHOD="tmpreaper"/' /etc/mysqldump-secure.conf
