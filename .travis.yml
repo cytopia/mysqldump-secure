@@ -2,12 +2,16 @@ language: bash
 services:
   - mysql
 
-before_script:
+before_install:
   # Install 'shellcheck' and 'tmpreaper'
   - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu/ trusty-backports restricted main universe"
   - sudo apt-get update -qq
   - sudo apt-get install -qq shellcheck tmpreaper
+  - sudo cat /etc/my.cnf
+  - sudo service mysqld status
 
+
+before_script:
   # Add SQL data
   - mysql -uroot -e 'create database my_empty_db1;'
   - mysql -uroot -e 'create database my_empty_db2;'
