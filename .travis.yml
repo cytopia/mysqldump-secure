@@ -27,6 +27,8 @@ before_script:
   # Restart MySQL
   - sudo service mysql restart
   - sudo mysql --verbose --help
+  - mysql -uroot -e 'status;'
+
 
   # Add MySQL data
   - mysql -uroot -e 'create database my_empty_db1;'
