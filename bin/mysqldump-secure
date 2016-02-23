@@ -1088,7 +1088,7 @@ if [  "${MYSQL_SSL_ENABLE}" = "1" ]; then
 			debug "err"  "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
 			exit 1
 		fi
-		MYSQL_SSL_ARGS="${MYSQL_SSL_ARGS} ---ssl-cert=${MYSQL_SSL_CLIENT_CERT_PEM}"
+		MYSQL_SSL_ARGS="${MYSQL_SSL_ARGS} --ssl-cert=${MYSQL_SSL_CLIENT_CERT_PEM}"
 	fi
 	if [ -n "${MYSQL_SSL_CLIENT_KEY_PEM-}" ]; then
 		if [ ! -f "${MYSQL_SSL_CLIENT_KEY_PEM}" ]; then
@@ -1097,7 +1097,7 @@ if [  "${MYSQL_SSL_ENABLE}" = "1" ]; then
 			debug "err"  "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
 			exit 1
 		fi
-		MYSQL_SSL_ARGS="${MYSQL_SSL_ARGS} ---ssl-key=${MYSQL_SSL_CLIENT_KEY_PEM}"
+		MYSQL_SSL_ARGS="${MYSQL_SSL_ARGS} --ssl-key=${MYSQL_SSL_CLIENT_KEY_PEM}"
 	fi
 
 	debug "info" "(OPT) MySQL SSL connection enabled: ${MYSQL_SSL_ARGS}." $LOG "${LOGFILE}" "${_ARG_CRON}"
