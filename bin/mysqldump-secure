@@ -172,7 +172,7 @@ debugr() {
 
 	# [ERR] Always show warn and error
 	if [ "${_lvl}" = "err" ]; then
-		[ -t 1 ] && tput setaf 3
+		[ -t 1 ] && tput setaf 1
 		IFS='
 		'
 		for line in ${_msg}; do
@@ -1109,12 +1109,12 @@ fi
 
 
 # Testing MySQL connection
-# Todo: get actual mysql error here
-_CONN_ERR="$($(which mysql) --defaults-extra-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e exit  2>&1)"
+_CONN_ERR="$($(which mysql) --defaults-extra-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e exit 2>&1)"
 if [ "$?" != "0" ]; then
-	debug "err"  "Cannot connect to mysql database." $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "${_CONN_ERR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug  "err"  "Cannot connect to mysql database." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debugr "err"  "CMD: $(which mysql) --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_SSL_ARGS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debugr "err"  "SQL: ${_CONN_ERR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 3
 else
 	debug "info" "MySQL connection test successful." $LOG "${LOGFILE}" "${_ARG_CRON}"
