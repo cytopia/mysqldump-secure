@@ -63,6 +63,7 @@ before_script:
   - sudo sed -i'' 's/MYSQL_SSL_CA_PEM="\/path\/to\/ca.pem"/MYSQL_SSL_CA_PEM="\/etc\/mysql.ca.pem"/g' /etc/mysqldump-secure.conf
   - sudo sed -i'' 's/#MYSQL_SSL_CLIENT_CERT_PEM="\/path\/to\/client-cert.pem"/MYSQL_SSL_CLIENT_CERT_PEM="\/etc\/mysql.client-cert.pem"/g' /etc/mysqldump-secure.conf
   - sudo sed -i'' 's/#MYSQL_SSL_CLIENT_KEY_PEM="\/path\/to\/client-key.pem"/MYSQL_SSL_CLIENT_KEY_PEM="\/etc\/mysql.client-key.pem"/g' /etc/mysqldump-secure.conf
+  - sudo cat /etc/mysqldump-secure.conf
 
   # 3. Enable encryption
   - sudo sed -i'' 's/^ENCRYPT=0/ENCRYPT=1/' /etc/mysqldump-secure.conf
@@ -396,6 +397,23 @@ script:
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/ENCRYPT=2/ENCRYPT=1/' /etc/mysqldump-secure.conf
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   # 9.h [ERROR] mysqldump-secure (producing an error by wrong config)
