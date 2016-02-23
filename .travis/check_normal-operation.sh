@@ -44,9 +44,9 @@ echo
 echo "----------------------------------------"
 echo " 1.2.1 Normal mode first run"
 echo "----------------------------------------"
-sudo rm /var/log/mysqldump-secure.log
-sudo rm /var/log/mysqldump-secure.nagios.log
-sudo rm -rf /var/mysqldump-secure/
+sudo rm /var/log/mysqldump-secure.log 2>/dev/null
+sudo rm /var/log/mysqldump-secure.nagios.log 2>/dev/null
+sudo rm -rf /var/mysqldump-secure/ 2>/dev/null
 sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
 
 echo
@@ -80,9 +80,9 @@ echo
 echo "----------------------------------------"
 echo " 1.3.1 Cron mode first run"
 echo "----------------------------------------"
-sudo rm /var/log/mysqldump-secure.log
-sudo rm /var/log/mysqldump-secure.nagios.log
-sudo rm -rf /var/mysqldump-secure/
+sudo rm /var/log/mysqldump-secure.log 2>/dev/null
+sudo rm /var/log/mysqldump-secure.nagios.log 2>/dev/null
+sudo rm -rf /var/mysqldump-secure/ 2>/dev/null
 sudo mysqldump-secure --cron && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
 
 echo
