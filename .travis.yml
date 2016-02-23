@@ -184,12 +184,11 @@ script:
 
 
 
-  - printf "
-  # --------------------------------------------------------------------------------\n
-  #\n
-  # WRONG CONFIGURATION SETTINGS\n
-  #\n
-  # --------------------------------------------------------------------------------\n"
+  # --------------------------------------------------------------------------------
+  #
+  # WRONG CONFIGURATION SETTINGS
+  #
+  # --------------------------------------------------------------------------------
 
 
   # ---------- Output files/folders
@@ -227,20 +226,20 @@ script:
   # 9.c [ERROR] $MYSQL_CNF_FILE
   - echo "---------- \$MYSQL_CNF_FILE ----------"
   - sudo sed -i'' 's/MYSQL_CNF_FILE/#MYSQL_CNF_FILE/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure --cron
-  - sudo mysqldump-secure
+  - sudo mysqldump-secure --cron || true
+  - sudo mysqldump-secure || true
   - sudo sed -i'' 's/#MYSQL_CNF_FILE/MYSQL_CNF_FILE/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$MYSQL_CNF_FILE ----------"
   - sudo sed -i'' 's/MYSQL_CNF_FILE="${_/MYSQL_CNF_FILE="${__/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure --cron
-  - sudo mysqldump-secure
+  - sudo mysqldump-secure --cron || true
+  - sudo mysqldump-secure || true
   - sudo sed -i'' 's/MYSQL_CNF_FILE="${__/MYSQL_CNF_FILE="${_/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$MYSQL_CNF_FILE ----------"
   - sudo sed -i'' 's/mysqldump-secure.cnf/mysqldump-secure.cnf2/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure --cron
-  - sudo mysqldump-secure
+  - sudo mysqldump-secure --cron || true
+  - sudo mysqldump-secure || true
   - sudo sed -i'' 's/mysqldump-secure.cnf2/mysqldump-secure.cnf/' /etc/mysqldump-secure.conf
 
 
@@ -261,45 +260,45 @@ script:
   # 9.e [ERROR] $MYSQL_SSL_CA_PEM
   - echo "---------- \$MYSQL_SSL_CA_PEM ----------"
   - sudo sed -i'' 's/MYSQL_SSL_CA_PEM/#MYSQL_SSL_CA_PEM/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure --cron
-  - sudo mysqldump-secure
+  - sudo mysqldump-secure --cron || true
+  - sudo mysqldump-secure || true
   - sudo sed -i'' 's/#MYSQL_SSL_CA_PEM/MYSQL_SSL_CA_PEM/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$MYSQL_SSL_CA_PEM ----------"
   - sudo sed -i'' 's/MYSQL_SSL_ENABLE=1/MYSQL_SSL_ENABLE=2/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure --cron
-  - sudo mysqldump-secure
+  - sudo mysqldump-secure --cron || true
+  - sudo mysqldump-secure || true
   - sudo sed -i'' 's/MYSQL_SSL_ENABLE=2/MYSQL_SSL_ENABLE=1/' /etc/mysqldump-secure.conf
 
 
   # 9.f [ERROR] $MYSQL_SSL_CLIENT_CERT_PEM
   # TODO:
-  - echo "---------- \$MYSQL_SSL_CLIENT_CERT_PEM ----------"
-  - sudo sed -i'' 's/MYSQL_SSL_CLIENT_CERT_PEM/#MYSQL_SSL_CLIENT_CERT_PEM/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure --cron
-  - sudo mysqldump-secure
-  - sudo sed -i'' 's/#MYSQL_SSL_CLIENT_CERT_PEM/MYSQL_SSL_CLIENT_CERT_PEM/' /etc/mysqldump-secure.conf
+  #- echo "---------- \$MYSQL_SSL_CLIENT_CERT_PEM ----------"
+  #- sudo sed -i'' 's/MYSQL_SSL_CLIENT_CERT_PEM/#MYSQL_SSL_CLIENT_CERT_PEM/' /etc/mysqldump-secure.conf
+  #- sudo mysqldump-secure --cron
+  #- sudo mysqldump-secure
+  #- sudo sed -i'' 's/#MYSQL_SSL_CLIENT_CERT_PEM/MYSQL_SSL_CLIENT_CERT_PEM/' /etc/mysqldump-secure.conf
 
-  - echo "---------- \$MYSQL_SSL_CLIENT_CERT_PEM ----------"
-  - sudo sed -i'' 's/client-cert.pem/client-cert.pem2/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure --cron
-  - sudo mysqldump-secure
-  - sudo sed -i'' 's/client-cert.pem2/client-cert.pem/' /etc/mysqldump-secure.conf
+  #- echo "---------- \$MYSQL_SSL_CLIENT_CERT_PEM ----------"
+  #- sudo sed -i'' 's/client-cert.pem/client-cert.pem2/' /etc/mysqldump-secure.conf
+  #- sudo mysqldump-secure --cron
+  #- sudo mysqldump-secure
+  #- sudo sed -i'' 's/client-cert.pem2/client-cert.pem/' /etc/mysqldump-secure.conf
 
 
   # 9.g [ERROR] $MYSQL_SSL_CLIENT_KEY_PEM
   # TODO:
-  - echo "---------- \$MYSQL_SSL_CLIENT_KEY_PEM ----------"
-  - sudo sed -i'' 's/MYSQL_SSL_CLIENT_KEY_PEM/#MYSQL_SSL_CLIENT_KEY_PEM/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure --cron
-  - sudo mysqldump-secure
-  - sudo sed -i'' 's/#MYSQL_SSL_CLIENT_KEY_PEM/MYSQL_SSL_CLIENT_KEY_PEM/' /etc/mysqldump-secure.conf
+  #- echo "---------- \$MYSQL_SSL_CLIENT_KEY_PEM ----------"
+  #- sudo sed -i'' 's/MYSQL_SSL_CLIENT_KEY_PEM/#MYSQL_SSL_CLIENT_KEY_PEM/' /etc/mysqldump-secure.conf
+  #- sudo mysqldump-secure --cron
+  #- sudo mysqldump-secure
+  #- sudo sed -i'' 's/#MYSQL_SSL_CLIENT_KEY_PEM/MYSQL_SSL_CLIENT_KEY_PEM/' /etc/mysqldump-secure.conf
 
-  - echo "---------- \$MYSQL_SSL_CLIENT_KEY_PEM ----------"
-  - sudo sed -i'' 's/client-key.pem/client-key.pem2/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure --cron
-  - sudo mysqldump-secure
-  - sudo sed -i'' 's/client-key.pem2/client-key.pem/' /etc/mysqldump-secure.conf
+  #- echo "---------- \$MYSQL_SSL_CLIENT_KEY_PEM ----------"
+  #- sudo sed -i'' 's/client-key.pem/client-key.pem2/' /etc/mysqldump-secure.conf
+  #- sudo mysqldump-secure --cron
+  #- sudo mysqldump-secure
+  #- sudo sed -i'' 's/client-key.pem2/client-key.pem/' /etc/mysqldump-secure.conf
 
 
   # ---------- MySQL Dump settings
@@ -347,8 +346,8 @@ script:
 
   - echo "---------- \$REQUIRE ----------"
   - sudo sed -i'' 's/REQUIRE="mysql"/REQUIRE="doesnotexist"/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure --cron
-  - sudo mysqldump-secure
+  - sudo mysqldump-secure --cron || true
+  - sudo mysqldump-secure || true
   - sudo sed -i'' 's/REQUIRE="doesnotexist"/REQUIRE="mysql"/' /etc/mysqldump-secure.conf
 
 
@@ -421,8 +420,8 @@ script:
 
   - echo "---------- \$COMPRESS_BIN ----------"
   - sudo sed -i'' 's/COMPRESS_BIN="gzip"/COMPRESS_BIN="gzipaa"/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure --cron
-  - sudo mysqldump-secure
+  - sudo mysqldump-secure --cron || true
+  - sudo mysqldump-secure || true
   - sudo sed -i'' 's/COMPRESS_BIN="gzipaa"/COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
 
 
@@ -442,16 +441,16 @@ script:
 
   # 9.o [ERROR] $COMPRESS_EXT
   - echo "---------- \$COMPRESS_EXT ----------"
-  - sudo sed -i'' 's/^COMPRESS_EXT="gz"/^#COMPRESS_EXT="gz"/' /etc/mysqldump-secure.conf
+  - sudo sed -i'' 's/COMPRESS_EXT="gz"/#COMPRESS_EXT="gz"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
-  - sudo sed -i'' 's/^#COMPRESS_EXT="gz"/^COMPRESS_EXT="gz"/' /etc/mysqldump-secure.conf
+  - sudo sed -i'' 's/#COMPRESS_EXT="gz"/COMPRESS_EXT="gz"/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$COMPRESS_EXT ----------"
-  - sudo sed -i'' 's/^COMPRESS_EXT="gz"/^#COMPRESS_EXT=""/' /etc/mysqldump-secure.conf
+  - sudo sed -i'' 's/COMPRESS_EXT="gz"/COMPRESS_EXT=""/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
-  - sudo sed -i'' 's/^#COMPRESS_EXT=""/^COMPRESS_EXT="gz"/' /etc/mysqldump-secure.conf
+  - sudo sed -i'' 's/COMPRESS_EXT=""/COMPRESS_EXT="gz"/' /etc/mysqldump-secure.conf
 
 
   # ---------- (OPT) Encryption
