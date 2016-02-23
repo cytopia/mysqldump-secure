@@ -1100,7 +1100,7 @@ if [  "${MYSQL_SSL_ENABLE}" = "1" ]; then
 		MYSQL_SSL_ARGS="${MYSQL_SSL_ARGS} ---ssl-key=${MYSQL_SSL_CLIENT_KEY_PEM}"
 	fi
 
-	debug "info" "(OPT) MySQL SSL connection enabled." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(OPT) MySQL SSL connection enabled: ${MYSQL_SSL_ARGS}." $LOG "${LOGFILE}" "${_ARG_CRON}"
 else
 	MYSQL_SSL_ENABLE=0
 	MYSQL_SSL_ARGS=""
