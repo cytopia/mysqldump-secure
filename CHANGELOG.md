@@ -1,6 +1,7 @@
 Version 0.16 (unreleased)
 ------------
 
+- [Fix]		Using --defaults-file instead of --defaults-extra-file to make sure no unwanted options are loaded.
 - [Fix]		Do not throw a warning on empty $IGNORE/$REQUIRE variables
 - [Fix]		Handle all unbound variables
 - [Fix]		Catch error in case of wrong values in all 0/1 variables

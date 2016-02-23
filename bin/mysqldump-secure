@@ -1109,10 +1109,10 @@ fi
 
 
 # Testing MySQL connection
-_CONN_ERR="$($(which mysql) --defaults-extra-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e exit 2>&1)"
+_CONN_ERR="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e exit 2>&1)"
 if [ "$?" != "0" ]; then
 	debug  "err"  "Cannot connect to mysql database." $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debugr "err"  "CMD: $(which mysql) --defaults-extra-file=${MYSQL_CNF_FILE} ${MYSQL_SSL_ARGS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debugr "err"  "CMD: $(which mysql) --defaults-file=${MYSQL_CNF_FILE} ${MYSQL_SSL_ARGS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debugr "err"  "SQL: ${_CONN_ERR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 3
@@ -1121,7 +1121,7 @@ else
 fi
 
 # Testing MySQL for SSL connection
-MYSQL_SSL_STATUS="$($(which mysql) --defaults-extra-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e 'status;' 2>&1 | grep -E '^SSL:.*' | sed 's/SSL:\s*//g')"
+MYSQL_SSL_STATUS="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e 'status;' 2>&1 | grep -E '^SSL:.*' | sed 's/SSL:\s*//g')"
 if [ "${MYSQL_SSL_STATUS}" = "Not in use" ]; then
 	if [ "${MYSQL_SSL_ENABLE}" = "1" ]; then
 		debug "err"  "MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}"
@@ -1458,9 +1458,9 @@ ERROR=0
 debugi "info" "Retrieving list of databases... " $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 # gets all databases (even empty ones)
-DATABASES="$( ${MYSQL} --defaults-extra-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" --batch -e 'show databases;' | sed 1d )"
+DATABASES="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" --batch -e 'show databases;' | sed 1d )"
 # Only gets databases which have content (tables)
-#DATABASES="$( ${MYSQL} --defaults-extra-file="${MYSQL_CNF_FILE}" --no-auto-rehash --skip-column-names -e 'SELECT DISTINCT table_schema FROM information_schema.tables;')"
+#DATABASES="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" --no-auto-rehash --skip-column-names -e 'SELECT DISTINCT table_schema FROM information_schema.tables;')"
 
 NUM_DB="$(echo "${DATABASES}" | wc -l | tr -d ' ')"
 debugn "info" "${NUM_DB}" $LOG "${LOGFILE}" "${_ARG_CRON}"
@@ -1490,7 +1490,7 @@ for db in ${DATABASES}; do
 
 	# If a database does not show up in information_schema.tables, it means it
 	# has no tables yet and is therefore empty.
-	EMPTY="$( ${MYSQL} --defaults-extra-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" --batch \
+	EMPTY="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" --batch \
 		-e "SELECT IF(COUNT(*) = 0, 'yes', 'no') AS empty
 			FROM INFORMATION_SCHEMA.TABLES
 			WHERE TABLE_SCHEMA = '${db}';" | tail -n1 )"
@@ -1549,7 +1549,7 @@ for db in ${DATABASES}; do
 				fi
 			done
 
-			DB_SIZE="$( ${MYSQL} --defaults-extra-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" --batch \
+			DB_SIZE="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" --batch \
 				-e "SELECT SUM(ROUND(((DATA_LENGTH + INDEX_LENGTH ) / 1024 / 1024),2)) AS Size
 					FROM INFORMATION_SCHEMA.TABLES
 					WHERE TABLE_SCHEMA = '${db}';" | tail -n1 )"
@@ -1567,7 +1567,7 @@ for db in ${DATABASES}; do
 					exec 4>&1
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-extra-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
+						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
 						(${COMPRESS_BIN} ${COMPRESS_ARG} || echo "1:$?" >&3) |
 						(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" || echo "2:$?" >&3)
 					) 3>&1 >&4)"
@@ -1582,7 +1582,7 @@ for db in ${DATABASES}; do
 					exec 4>&1
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-extra-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
+						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
 						(${COMPRESS_BIN} ${COMPRESS_ARG} > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" || echo "1:$?" >&3)
 					) 3>&1 >&4)"
 					exec 4>&-
@@ -1598,7 +1598,7 @@ for db in ${DATABASES}; do
 					exec 4>&1
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-extra-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
+						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
 						(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" || echo "1:$?" >&3)
 					) 3>&1 >&4)"
 					exec 4>&-
@@ -1612,7 +1612,7 @@ for db in ${DATABASES}; do
 					exec 4>&1
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-extra-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" ${MYSQL_OPTS} "${db}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" || echo "0:$?" >&3)
+						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" ${MYSQL_OPTS} "${db}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" || echo "0:$?" >&3)
 					) 3>&1 >&4)"
 					exec 4>&-
 
