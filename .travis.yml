@@ -27,7 +27,7 @@ before_script:
   # Restart MySQL
   - sudo service mysql restart
   - sudo mysql --verbose --help
-  - mysql -uroot -e 'status;'
+  - sudo mysql --ssl-ca=/etc/mysql.ca.pem -uroot -e 'status;'
 
 
   # Add MySQL data
