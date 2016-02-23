@@ -3,7 +3,7 @@ services:
   - mysql
 
 before_script:
-  # Install 'shellcheck'
+  # Install 'shellcheck' and 'tmpreaper'
   - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu/ trusty-backports restricted main universe"
   - sudo apt-get update -qq
   - sudo apt-get install -qq shellcheck tmpreaper
@@ -12,11 +12,7 @@ before_script:
   - mysql -uroot -e 'create database my_empty_db1;'
   - mysql -uroot -e 'create database my_empty_db2;'
   - mysql -uroot -e 'create database my_full_db1;'
-  - mysql -uroot -e 'create database my_full_db2;'
-  - echo "CREATE TABLE IF NOT EXISTS test (b1 LONGTEXT, b2 LONGTEXT, b3 LONGTEXT, b4 LONGTEXT, b5 LONGTEXT, b6 LONGTEXT, b7 LONGTEXT, b8 LONGTEXT, b9 LONGTEXT, ba LONGTEXT, bb LONGTEXT, bc LONGTEXT, bd LONGTEXT, be LONGTEXT, bf LONGTEXT);" > my_full_db.sql
-  - for (( i=1; i < 10000; i++ )); do echo "INSERT INTO test VALUES(\"1000000000000000000000000000000000000000000000000000000000000\", \"2000000000000000000000000000000000000000000000000000000000000\", \"3000000000000000000000000000000000000000000000000000000000000\", \"4000000000000000000000000000000000000000000000000000000000000\", \"5000000000000000000000000000000000000000000000000000000000000\", \"6000000000000000000000000000000000000000000000000000000000000\", \"7000000000000000000000000000000000000000000000000000000000000\", \"8000000000000000000000000000000000000000000000000000000000000\", \"9000000000000000000000000000000000000000000000000000000000000\", \"A0000000000000000000000000000000000000000000000000000000000000\", \"B000000000000000000000000000000000000000000000000000000000000\", \"C000000000000000000000000000000000000000000000000000000000000\", \"D000000000000000000000000000000000000000000000000000000000000\", \"E0000000000000000000000000000000000000000000000000000000000000\", \"F000000000000000000000000000000000000000000000000000000000000\");" >> my_full_db.sql; done;
-  - for (( i=1; i < 10; i++ )); do mysql -uroot my_full_db1 < my_full_db.sql; done
-  - mysql -uroot my_full_db2 < my_full_db.sql
+  - gunzip < ./.travis/db.sql.gzip | mysql -uroot my_full_db1
 
   # Install mysqldump-secure
   - ./configure
@@ -24,38 +20,29 @@ before_script:
   - sudo make install
 
   # Create credentials file
-  - echo '[client]' | sudo tee /etc/mysqldump-secure.cnf
-  - echo 'host = localhost' | sudo tee --append /etc/mysqldump-secure.cnf
-  - echo 'user = root' | sudo tee --append /etc/mysqldump-secure.cnf
-  - echo 'password = ' | sudo tee --append /etc/mysqldump-secure.cnf
+  - printf '[client]\nhost = localhost\nuser = root\npassword =' | sudo tee /etc/mysqldump-secure.cnf
 
-  # Create public key
-  - echo "-----BEGIN CERTIFICATE-----" | sudo tee /etc/mysqldump-secure.pub.pem
-  - echo "MIICKzCCAdWgAwIBAgIJAK8CnVnY1v8TMA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNV" | sudo tee -a /etc/mysqldump-secure.pub.pem
-  - echo "BAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBX" | sudo tee -a /etc/mysqldump-secure.pub.pem
-  - echo "aWRnaXRzIFB0eSBMdGQwHhcNMTYwMjE5MTI1MzQwWhcNMTYwMzIwMTI1MzQwWjBF" | sudo tee -a /etc/mysqldump-secure.pub.pem
-  - echo "MQswCQYDVQQGEwJBVTETMBEGA1UECBMKU29tZS1TdGF0ZTEhMB8GA1UEChMYSW50" | sudo tee -a /etc/mysqldump-secure.pub.pem
-  - echo "ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAJbs" | sudo tee -a /etc/mysqldump-secure.pub.pem
-  - echo "9Fl9MpFv6ANYWv1gyHwjBIOjQj1c7txI6Sl8xupeptaCXID4u+8ApVSdX6/sYzNa" | sudo tee -a /etc/mysqldump-secure.pub.pem
-  - echo "P6X94ylMxe5KKLKplKkCAwEAAaOBpzCBpDAdBgNVHQ4EFgQUAsaaTBKduky2krrA" | sudo tee -a /etc/mysqldump-secure.pub.pem
-  - echo "sLwKI1qjKMowdQYDVR0jBG4wbIAUAsaaTBKduky2krrAsLwKI1qjKMqhSaRHMEUx" | sudo tee -a /etc/mysqldump-secure.pub.pem
-  - echo "CzAJBgNVBAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRl" | sudo tee -a /etc/mysqldump-secure.pub.pem
-  - echo "cm5ldCBXaWRnaXRzIFB0eSBMdGSCCQCvAp1Z2Nb/EzAMBgNVHRMEBTADAQH/MA0G" | sudo tee -a /etc/mysqldump-secure.pub.pem
-  - echo "CSqGSIb3DQEBBQUAA0EAiOW8UkIM1aE3O5RnKm+PwoWuDr1lzYxfe0WTMeHuXpSQ" | sudo tee -a /etc/mysqldump-secure.pub.pem
-  - echo "HHOCKmg8MbLpaXJulypJ1lTupqX8G5vlfYMNZldGAg==" | sudo tee -a /etc/mysqldump-secure.pub.pem
-  - echo "-----END CERTIFICATE-----" | sudo tee -a /etc/mysqldump-secure.pub.pem
+  # Copy keys
+  - sudo cp -f ./.travis/certs/mysqldump-secure.priv.pem /etc/ && sudo chmod 600 /etc/mysqldump-secure.priv.pem
+  - sudo cp -f ./.travis/certs/mysqldump-secure.pub.pem  /etc/ && sudo chmod 600 /etc/mysqldump-secure.pub.pem
+  - sudo cp -f ./.travis/certs/mysql.ca-key.pem          /etc/ && sudo chmod 600 /etc/mysql.ca-key.pem
+  - sudo cp -f ./.travis/certs/mysql.ca.pem              /etc/ && sudo chmod 600 /etc/mysql.ca.pem
+  - sudo cp -f ./.travis/certs/mysql.server-cert.pem     /etc/ && sudo chmod 600 /etc/mysql.server-cert.pem
+  - sudo cp -f ./.travis/certs/mysql.server-key.pem      /etc/ && sudo chmod 600 /etc/mysql.server-key.pem
+  - sudo cp -f ./.travis/certs/mysql.client-cert.pem     /etc/ && sudo chmod 600 /etc/mysql.client-cert.pem
+  - sudo cp -f ./.travis/certs/mysql.client-key.pem      /etc/ && sudo chmod 600 /etc/mysql.client-key.pem
 
+  # Add seconds to Dump file prefix to prevent duplicate files while dumping many times
+  - sudo sed -i'' 's/+%H-%M/+%H-%M-%s/g' /etc/mysqldump-secure.conf
   # Enable encryption
-  - sudo sed -i'' 's/^ENCRYPT=0/ENCRYPT=1/' /etc/mysqldump-secure.conf
-
+  - sudo sed -i'' 's/^ENCRYPT=0/ENCRYPT=1/'       /etc/mysqldump-secure.conf
   # Enable Nagios log
   - sudo sed -i'' 's/^NAGIOS_LOG=0/NAGIOS_LOG=1/' /etc/mysqldump-secure.conf
-
-  # Enable Deletion (Delete all if older than 1 hour)
-  - sudo sed -i'' 's/^DELETE=0/DELETE=1/' /etc/mysqldump-secure.conf
-  - sudo sed -i'' 's/^DELETE_FORCE=0/DELETE_FORCE=1/' /etc/mysqldump-secure.conf
+  # Enable Deletion (Delete all files older than 1 minute)
+  - sudo sed -i'' 's/^DELETE=0/DELETE=1/'                                  /etc/mysqldump-secure.conf
+  - sudo sed -i'' 's/^DELETE_FORCE=0/DELETE_FORCE=1/'                      /etc/mysqldump-secure.conf
   - sudo sed -i'' 's/^DELETE_METHOD="tmpwatch"/DELETE_METHOD="tmpreaper"/' /etc/mysqldump-secure.conf
-  - sudo sed -i'' 's/^DELETE_IF_OLDER=720/DELETE_IF_OLDER=1m/' /etc/mysqldump-secure.conf
+  - sudo sed -i'' 's/^DELETE_IF_OLDER=720/DELETE_IF_OLDER=1m/'             /etc/mysqldump-secure.conf
 
 
 sudo: required
@@ -68,10 +55,13 @@ script:
   - shellcheck --shell=sh bin/encrypt.sh
   - shellcheck --shell=sh --exclude=SC2034,SC2148 etc/mysqldump-secure.conf
 
-  # 2. [TEST-MODE] mysqldump-secure
+
+  # -------------------- Successful Dumps --------------------
+
+  # 2.a [TEST-MODE] mysqldump-secure
   - sudo mysqldump-secure --test
 
-  # 3. [CRON-MODE] mysqldump-secure
+  # 2.b [CRON-MODE] mysqldump-secure
   - sudo rm /var/log/mysqldump-secure.log &&
     sudo touch /var/log/mysqldump-secure.log &&
     sudo chmod 600 /var/log/mysqldump-secure.log &&
@@ -83,12 +73,12 @@ script:
   - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log
   - sudo cat /var/log/mysqldump-secure.log
 
-  # 3. [WARNING] [CRON-MODE] mysqldump-secure (with warnings)
+  # 2.c [WARNING] [CRON-MODE] mysqldump-secure (with warnings)
   - sudo rm -rf /var/mysqldump-secure/ &&
     sudo rm /var/log/mysqldump-secure.log
   - sudo mysqldump-secure --cron
 
-  # 4. [NORMAL] mysqldump-secure
+  # 2.d [NORMAL] mysqldump-secure
   - sudo rm -rf /var/mysqldump-secure/ &&
     sudo mkdir -p /var/mysqldump-secure/ &&
     sudo chmod 700 /var/mysqldump-secure/ &&
@@ -98,6 +88,8 @@ script:
     sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
   - sudo mysqldump-secure
   - ./nagios/check_mysqldump-secure -i24 -e -c -l -d1 -f/var/log/mysqldump-secure.nagios.log
+
+
 
   # 5. [ERROR] mysqldump-secure (producing an error by trying to overwrite existing files)
   - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
@@ -114,6 +106,8 @@ script:
   - sudo sed -i'' 's/DELETE_FORCE=1/DELETE_FORCE=0/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure
 
+
+
   # 7. [ERROR] mysqldump-secure (producing an error by not found required database)
   - sudo rm -rf /var/mysqldump-secure/
   - sudo sed -i'' 's/REQUIRE="mysql"/REQUIRE="mysql2"/' /etc/mysqldump-secure.conf
@@ -128,9 +122,11 @@ script:
   # 8. [ERROR] mysqldump-secure (producing an error by running non-priviledged)
   - mysqldump-secure || echo "---------- Error triggered successfully ----------"
 
-  # ------------ WRONG config -----------
+
+
+  # -------------------- Wrong Config --------------------
+
   # 9.a [ERROR] mysqldump-secure (producing an error by wrong config)
-  - sudo rm -rf /var/mysqldump-secure/
   - sudo sed -i'' 's/DUMP_DIR_CHMOD="0700"/DUMP_DIR_CHMOD="0700a"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure && echo "---------- Complains about \$DUMP_DIR_CHMOD? ----------"
   - sudo sed -i'' 's/DUMP_DIR_CHMOD="0700a"/DUMP_DIR_CHMOD="0700"/' /etc/mysqldump-secure.conf
