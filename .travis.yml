@@ -98,6 +98,20 @@ script:
   - shellcheck --shell=sh --exclude=SC2034,SC2148 etc/mysqldump-secure.conf
 
 
+  # --------------------------------------------------------------------------------
+  #
+  # Checks
+  #
+  # --------------------------------------------------------------------------------
+
+  - /bin/sh ./.travis/check.sh
+
+
+
+
+
+
+
   # -------------------- Successful Dumps --------------------
 
   # 2.a [TEST-MODE] mysqldump-secure
