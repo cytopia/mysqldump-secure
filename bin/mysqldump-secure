@@ -75,7 +75,8 @@ MYSQL_EVIL_OPTS="--password -p"
 
 # Do not allow to read any other MySQL configuration file
 # than the one specified in the configuration.
-MYSQL_BAD_OPTS="--defaults-extra-file --defaults-file"
+# Also all SSL Options are done via configuration
+MYSQL_BAD_OPTS="--defaults-extra-file --defaults-file --ssl --ssl-ca --ssl-cert --ssl-key"
 
 
 
@@ -1078,7 +1079,7 @@ if [  "${MYSQL_SSL_ENABLE}" = "1" ]; then
 		exit 1
 	fi
 
-	MYSQL_SSL_ARGS="--ssl-ca=${MYSQL_SSL_CA_PEM}"
+	MYSQL_SSL_ARGS="--ssl --ssl-ca=${MYSQL_SSL_CA_PEM}"
 
 	if [ -n "${MYSQL_SSL_CLIENT_CERT_PEM-}" ]; then
 		if [ ! -f "${MYSQL_SSL_CLIENT_CERT_PEM}" ]; then

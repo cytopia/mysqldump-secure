@@ -61,6 +61,8 @@ before_script:
   # 2. Enable SSL Connection
   - sudo sed -i'' 's/MYSQL_SSL_ENABLE=0/MYSQL_SSL_ENABLE=1/g' /etc/mysqldump-secure.conf
   - sudo sed -i'' 's/MYSQL_SSL_CA_PEM="\/path\/to\/ca.pem"/MYSQL_SSL_CA_PEM="\/etc\/mysql.ca.pem"/g' /etc/mysqldump-secure.conf
+  - sudo sed -i'' 's/#MYSQL_SSL_CLIENT_CERT_PEM="\/path\/to\/client-cert.pem"/MYSQL_SSL_CLIENT_CERT_PEM="\/etc\/mysql.client-cert.pem"/g' /etc/mysqldump-secure.conf
+  - sudo sed -i'' 's/#MYSQL_SSL_CLIENT_KEY_PEM="\/path\/to\/client-key.pem"/MYSQL_SSL_CLIENT_KEY_PEM="\/etc\/mysql.client-key.pem"/g' /etc/mysqldump-secure.conf
 
   # 3. Enable encryption
   - sudo sed -i'' 's/^ENCRYPT=0/ENCRYPT=1/' /etc/mysqldump-secure.conf
@@ -154,40 +156,247 @@ script:
 
   # -------------------- Wrong Config --------------------
 
-  # 9.a [ERROR] mysqldump-secure (producing an error by wrong config)
+  # ---------- Output files/folders
+
+  # 9.a [ERROR] $DUMP_DIR_CHMOD
+  - sudo sed -i'' 's/DUMP_DIR_CHMOD="0700"/#DUMP_DIR_CHMOD="0700"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/#DUMP_DIR_CHMOD="0700"/DUMP_DIR_CHMOD="0700"/' /etc/mysqldump-secure.conf
+
   - sudo sed -i'' 's/DUMP_DIR_CHMOD="0700"/DUMP_DIR_CHMOD="0700a"/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure && echo "---------- Complains about \$DUMP_DIR_CHMOD? ----------"
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
   - sudo sed -i'' 's/DUMP_DIR_CHMOD="0700a"/DUMP_DIR_CHMOD="0700"/' /etc/mysqldump-secure.conf
 
-  # 9.b [ERROR] mysqldump-secure (producing an error by wrong config)
-  - sudo rm -rf /var/mysqldump-secure/
+  # 9.b [ERROR] $DUMP_FILE_CHMOD  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/DUMP_FILE_CHMOD="0400"/#DUMP_FILE_CHMOD="0400"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/#DUMP_FILE_CHMOD="0400"/DUMP_FILE_CHMOD="0400"/' /etc/mysqldump-secure.conf
+
   - sudo sed -i'' 's/DUMP_FILE_CHMOD="0400"/DUMP_FILE_CHMOD="0400a"/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure && echo "---------- Complains about \$DUMP_FILE_CHMOD? ----------"
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
   - sudo sed -i'' 's/DUMP_FILE_CHMOD="0400a"/DUMP_FILE_CHMOD="0400"/' /etc/mysqldump-secure.conf
 
-  # 9.d [ERROR] mysqldump-secure (producing an error by wrong config)
+
+  # ---------- MySQL Connection settings
+
+  # 9.c [ERROR] $MYSQL_CNF_FILE
+  - sudo sed -i'' 's/MYSQL_CNF_FILE/#MYSQL_CNF_FILE/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/#MYSQL_CNF_FILE/MYSQL_CNF_FILE/' /etc/mysqldump-secure.conf
+
+  - sudo sed -i'' 's/MYSQL_CNF_FILE="${_/MYSQL_CNF_FILE="${__/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/MYSQL_CNF_FILE="${__/MYSQL_CNF_FILE="${_/' /etc/mysqldump-secure.conf
+
+  - sudo sed -i'' 's/mysqldump-secure.cnf/mysqldump-secure.cnf2/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/mysqldump-secure.cnf2/mysqldump-secure.cnf/' /etc/mysqldump-secure.conf
+
+  # 9.d [ERROR] $MYSQL_SSL_ENABLE
+  - sudo sed -i'' 's/MYSQL_SSL_ENABLE/#MYSQL_SSL_ENABLE/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/#MYSQL_SSL_ENABLE/MYSQL_SSL_ENABLE/' /etc/mysqldump-secure.conf
+
+  - sudo sed -i'' 's/MYSQL_SSL_ENABLE=1/MYSQL_SSL_ENABLE=2/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/MYSQL_SSL_ENABLE=2/MYSQL_SSL_ENABLE=1/' /etc/mysqldump-secure.conf
+
+  # 9.e [ERROR] $MYSQL_SSL_CA_PEM
+  - sudo sed -i'' 's/MYSQL_SSL_CA_PEM/#MYSQL_SSL_CA_PEM/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/#MYSQL_SSL_CA_PEM/MYSQL_SSL_CA_PEM/' /etc/mysqldump-secure.conf
+
+  - sudo sed -i'' 's/MYSQL_SSL_ENABLE=1/MYSQL_SSL_ENABLE=2/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/MYSQL_SSL_ENABLE=2/MYSQL_SSL_ENABLE=1/' /etc/mysqldump-secure.conf
+
+  # 9.f [ERROR] $MYSQL_SSL_CLIENT_CERT_PEM
+  - sudo sed -i'' 's/MYSQL_SSL_CLIENT_CERT_PEM/#MYSQL_SSL_CLIENT_CERT_PEM/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/#MYSQL_SSL_CLIENT_CERT_PEM/MYSQL_SSL_CLIENT_CERT_PEM/' /etc/mysqldump-secure.conf
+
+  - sudo sed -i'' 's/client-cert.pem/client-cert.pem2/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/client-cert.pem2/client-cert.pem/' /etc/mysqldump-secure.conf
+
+  # 9.g [ERROR] $MYSQL_SSL_CLIENT_KEY_PEM
+  - sudo sed -i'' 's/MYSQL_SSL_CLIENT_KEY_PEM/#MYSQL_SSL_CLIENT_KEY_PEM/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/#MYSQL_SSL_CLIENT_KEY_PEM/MYSQL_SSL_CLIENT_KEY_PEM/' /etc/mysqldump-secure.conf
+
+  - sudo sed -i'' 's/client-key.pem/client-key.pem2/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/client-key.pem2/client-key.pem/' /etc/mysqldump-secure.conf
+
+
+  # ---------- MySQL Dump settings
+
+  # 9.h [ERROR] $MYSQL_OPTS
+  - sudo sed -i'' 's/MYSQL_OPTS/#MYSQL_OPTS/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/#MYSQL_OPTS/MYSQL_OPTS/' /etc/mysqldump-secure.conf
+
+  - sudo sed -i'' 's/ --opt/ --opt2/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/ --opt2/ --opt/' /etc/mysqldump-secure.conf
+
+  # 9.i [ERROR] $IGNORE
+  - sudo sed -i'' 's/IGNORE/#IGNORE/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/#IGNORE/IGNORE/' /etc/mysqldump-secure.conf
+
+  - sudo sed -i'' 's/ performance_schema/ performance_schema doesnotexist/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/ performance_schema doesnotexist/ performance_schema/' /etc/mysqldump-secure.conf
+
+  # 9.j [ERROR] $REQUIRE
+  - sudo sed -i'' 's/REQUIRE/#REQUIRE/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/#REQUIRE/REQUIRE/' /etc/mysqldump-secure.conf
+
+  - sudo sed -i'' 's/REQUIRE="mysql"/REQUIRE=""/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/REQUIRE=""/REQUIRE="mysql"/' /etc/mysqldump-secure.conf
+
+  - sudo sed -i'' 's/REQUIRE="mysql"/REQUIRE="doesnotexist"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/REQUIRE="doesnotexist"/REQUIRE="mysql"/' /etc/mysqldump-secure.conf
+
+
+  # ---------- (OPT) Logging
+
+  # 9.k [ERROR] $LOG
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/LOG=/#LOG=/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/#LOG=/LOG=/' /etc/mysqldump-secure.conf
+
   - sudo rm -rf /var/mysqldump-secure/
   - sudo sed -i'' 's/LOG=1/LOG=2/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure && echo "---------- Complains about \$LOG? ----------"
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
   - sudo sed -i'' 's/LOG=2/LOG=1/' /etc/mysqldump-secure.conf
 
-  # 9.e [ERROR] mysqldump-secure (producing an error by wrong config)
+  # 9.l [ERROR] $LOG_CHMOD
   - sudo rm -rf /var/mysqldump-secure/
-  - sudo sed -i'' 's/LOG_CHMOD="0600"/LOG_CHMOD="0600a"/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure && echo "---------- Complains about \$LOG_CHMOD? ----------"
-  - sudo sed -i'' 's/LOG_CHMOD="0600a"/LOG_CHMOD="0600"/' /etc/mysqldump-secure.conf
+  - sudo sed -i'' 's/LOG_CHMOD="0600"/#LOG_CHMOD="0600"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/#LOG_CHMOD="0600"/LOG_CHMOD="0600"/' /etc/mysqldump-secure.conf
 
-  # 9.f [ERROR] mysqldump-secure (producing an error by wrong config)
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/LOG_CHMOD="0600"/LOG_CHMOD="abc"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/LOG_CHMOD="abc"/LOG_CHMOD="0600"/' /etc/mysqldump-secure.conf
+
+  # 9.m [ERROR] $LOGFILE
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/LOGFILE=/#LOGFILE=/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/#LOGFILE=/LOGFILE=/' /etc/mysqldump-secure.conf
+
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/mysqldump-secure.log/mysqldump-secure.log1/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/mysqldump-secure.log1/mysqldump-secure.log/' /etc/mysqldump-secure.conf
+
+
+  # ---------- (OPT) Compression
+
+  # 9.n [ERROR] $COMPRESS
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/COMPRESS=/#COMPRESS=/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/#COMPRESS=/COMPRESS=/' /etc/mysqldump-secure.conf
+
   - sudo rm -rf /var/mysqldump-secure/
   - sudo sed -i'' 's/COMPRESS=1/COMPRESS=2/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure && echo "---------- Complains about \$COMPRESS? ----------"
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
   - sudo sed -i'' 's/COMPRESS=2/COMPRESS=1/' /etc/mysqldump-secure.conf
 
-  # 9.g [ERROR] mysqldump-secure (producing an error by wrong config)
+  # 9.o [ERROR] $COMPRESS_BIN
   - sudo rm -rf /var/mysqldump-secure/
-  - sudo sed -i'' 's/COMPRESS_BIN="gzip"/COMPRESS_BIN="gzip22"/' /etc/mysqldump-secure.conf
-  - sudo mysqldump-secure || echo "---------- ERROR on \$COMPRESS_BIN? ----------"
-  - sudo sed -i'' 's/COMPRESS_BIN="gzip22"/COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
+  - sudo sed -i'' 's/COMPRESS_BIN="gzip"/#COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/#COMPRESS_BIN="gzip"/COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
+
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/COMPRESS_BIN="gzip"/COMPRESS_BIN="gzipaa"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/COMPRESS_BIN="gzipaa"/COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
+
+  # 9.p [ERROR] $COMPRESS_ARG
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/COMPRESS_ARG="gzip"/#COMPRESS_ARG="gzip"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/#COMPRESS_ARG="gzip"/COMPRESS_ARG="gzip"/' /etc/mysqldump-secure.conf
+
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/COMPRESS_ARG="-9 --stdout"/COMPRESS_ARG="-9 --stdoutaa"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/COMPRESS_ARG="-9 --stdoutaa"/COMPRESS_ARG="-9 --stdout"/' /etc/mysqldump-secure.conf
+
+  # 9.o [ERROR] $COMPRESS_EXT
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/^COMPRESS_EXT="gz"/^#COMPRESS_EXT="gz"/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/^#COMPRESS_EXT="gz"/^COMPRESS_EXT="gz"/' /etc/mysqldump-secure.conf
+
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/^COMPRESS_EXT="gz"/^#COMPRESS_EXT=""/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/^#COMPRESS_EXT=""/^COMPRESS_EXT="gz"/' /etc/mysqldump-secure.conf
+
+
+  # ---------- (OPT) Encryption
+
+  # 9.n [ERROR] $ENCRYPT
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/ENCRYPT=/#ENCRYPT=/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/#ENCRYPT=/ENCRYPT=/' /etc/mysqldump-secure.conf
+
+  - sudo rm -rf /var/mysqldump-secure/
+  - sudo sed -i'' 's/ENCRYPT=1/ENCRYPT=2/' /etc/mysqldump-secure.conf
+  - sudo mysqldump-secure --cron
+  - sudo mysqldump-secure
+  - sudo sed -i'' 's/ENCRYPT=2/ENCRYPT=1/' /etc/mysqldump-secure.conf
+
 
   # 9.h [ERROR] mysqldump-secure (producing an error by wrong config)
   - sudo rm -rf /var/mysqldump-secure/
