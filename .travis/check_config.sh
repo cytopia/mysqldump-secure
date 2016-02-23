@@ -20,7 +20,38 @@ echo "--------------------------------------------------------------------------
 
 echo
 echo "----------------------------------------"
-echo " 2.1.1 \$DUMP_DIR_CHMOD"
+echo " 2.1.1 \$DUMP_PATH"
+echo "----------------------------------------"
+
+echo
+echo "a) #DUMP_PATH=\"\${_INSTALL_PREFIX}/var/mysqldump-secure/\""
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+sudo sed -i'' 's/DUMP_PATH/#DUMP_PATH/' /etc/mysqldump-secure.conf
+echo "\$ sudo mysqldump-secure --cron"
+sudo mysqldump-secure --cron && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+echo
+echo "\$ sudo mysqldump-secure"
+sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
+sudo sed -i'' 's/#DUMP_PATH/DUMP_PATH/' /etc/mysqldump-secure.conf
+
+echo "b) DUMP_PATH=\"\${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2\""
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+sudo sed -i'' 's/var\/mysqldump-secure/var\/mysqldump-secure\/dir1\/dir2/' /etc/mysqldump-secure.conf
+echo "\$ sudo mysqldump-secure --cron"
+sudo mysqldump-secure --cron && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+echo
+echo "\$ sudo mysqldump-secure"
+sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
+sudo sed -i'' 's/var\/mysqldump-secure\/dir1\/dir2/var\/mysqldump-secure/' /etc/mysqldump-secure.conf
+sudo rm -rf /var/mysqldump-secure/dir1/dir2
+
+
+
+echo
+echo "----------------------------------------"
+echo " 2.1.2 \$DUMP_DIR_CHMOD"
 echo "----------------------------------------"
 
 echo
@@ -50,7 +81,7 @@ sudo sed -i'' 's/DUMP_DIR_CHMOD="0700a"/DUMP_DIR_CHMOD="0700"/' /etc/mysqldump-s
 
 echo
 echo "----------------------------------------"
-echo " 2.1.2 \$DUMP_FILE_CHMOD"
+echo " 2.1.3 \$DUMP_FILE_CHMOD"
 echo "----------------------------------------"
 
 echo
@@ -263,7 +294,7 @@ sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpect
 sudo sed -i'' 's/^#IGNORE/IGNORE/' /etc/mysqldump-secure.conf
 
 echo
-echo "b) #IGNORE=\"\""
+echo "b) IGNORE=\"\""
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 sudo sed -i'' 's/IGNORE="information_schema performance_schema"/IGNORE=""/' /etc/mysqldump-secure.conf
 echo "\$ sudo mysqldump-secure --cron"
@@ -275,7 +306,7 @@ sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpect
 sudo sed -i'' 's/IGNORE=""/IGNORE="information_schema performance_schema"/' /etc/mysqldump-secure.conf
 
 echo
-echo "c) #IGNORE=\"notfound\""
+echo "c) IGNORE=\"notfound\""
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 sudo sed -i'' 's/IGNORE="information_schema performance_schema"/IGNORE="notfound"/' /etc/mysqldump-secure.conf
 echo "\$ sudo mysqldump-secure --cron"
