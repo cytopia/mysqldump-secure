@@ -55,8 +55,8 @@ before_script:
   - sudo sed -i'' 's/+%H-%M/+%H-%M-%s/g' /etc/mysqldump-secure.conf
 
   # 2. Enable SSL Connection
-  - sudo sed -i'' 's/MYSQL_SSL_ENABLE=0/MYSQL_SSL_ENABLE=1' /etc/mysqldump-secure.conf
-  - sudo sed -i'' 's/MYSQL_SSL_CA_PEM="\/path\/to\/ca.pem"/MYSQL_SSL_CA_PEM="\/etc\/mysql.ca.pem"' /etc/mysqldump-secure.conf
+  - sudo sed -i'' 's/MYSQL_SSL_ENABLE=0/MYSQL_SSL_ENABLE=1/g' /etc/mysqldump-secure.conf
+  - sudo sed -i'' 's/MYSQL_SSL_CA_PEM="\/path\/to\/ca.pem"/MYSQL_SSL_CA_PEM="\/etc\/mysql.ca.pem"/g' /etc/mysqldump-secure.conf
 
   # 3. Enable encryption
   - sudo sed -i'' 's/^ENCRYPT=0/ENCRYPT=1/'       /etc/mysqldump-secure.conf
