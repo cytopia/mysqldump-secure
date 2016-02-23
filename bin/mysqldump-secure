@@ -1043,17 +1043,17 @@ if [ -z "${MYSQL_CNF_FILE-}" ]; then
 	exit 1
 fi
 if [ ! -f "${MYSQL_CNF_FILE}" ]; then
-	debug "err"  "MySQL Configuration file not found in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "MySQL CNF file not found in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
 fi
 if [ ! -r "${MYSQL_CNF_FILE}" ]; then
-	debug "err"  "MySQL Configuration file is not readable in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "MySQL CNF file is not readable in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
 fi
 if ! compare_chmod "$(permission "${MYSQL_CNF_FILE}")" "${_DEFAULT_MYSQL_CNF_CHMOD}" > /dev/null 2>&1 ; then
-	debug "err"  "MySQL Configuration file ${MYSQL_CNF_FILE} has dangerous permissions: $(permission "${MYSQL_CNF_FILE}")." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "MySQL CNF file ${MYSQL_CNF_FILE} has dangerous permissions: $(permission "${MYSQL_CNF_FILE}")." $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "Fix it to ${_DEFAULT_MYSQL_CNF_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "Note: If you are not alone on the machine, the password inside could have been compromised by now." $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "If so, change your database password." $LOG "${LOGFILE}" "${_ARG_CRON}"
