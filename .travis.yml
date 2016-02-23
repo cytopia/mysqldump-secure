@@ -28,7 +28,6 @@ before_script:
 
   # Restart MySQL
   - sudo service mysql restart
-  - sudo mysql --verbose --help
   - sudo mysql --ssl-ca=/etc/mysql.ca.pem -uroot -e 'status;'
 
 
@@ -36,7 +35,7 @@ before_script:
   - mysql -uroot -e 'create database my_empty_db1;'
   - mysql -uroot -e 'create database my_empty_db2;'
   - mysql -uroot -e 'create database my_full_db1;'
-  - gunzip < ./.travis/db.sql.gzip | mysql -uroot my_full_db1
+  - gunzip < ./.travis/db.sql.gz | mysql -uroot my_full_db1
 
 
 
