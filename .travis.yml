@@ -1,4 +1,6 @@
+sudo: required
 language: bash
+
 services:
   - mysql
 
@@ -15,9 +17,9 @@ before_script:
 
   # Copy MySQL certificates
   - sudo cp -f ./.travis/certs/mysql.ca-key.pem          /etc/ && sudo chmod 600 /etc/mysql.ca-key.pem
-  - sudo cp -f ./.travis/certs/mysql.ca.pem              /etc/ && sudo chmod 600 /etc/mysql.ca.pem
-  - sudo cp -f ./.travis/certs/mysql.server-cert.pem     /etc/ && sudo chmod 600 /etc/mysql.server-cert.pem
-  - sudo cp -f ./.travis/certs/mysql.server-key.pem      /etc/ && sudo chmod 600 /etc/mysql.server-key.pem
+  - sudo cp -f ./.travis/certs/mysql.ca.pem              /etc/ && sudo chmod 644 /etc/mysql.ca.pem
+  - sudo cp -f ./.travis/certs/mysql.server-cert.pem     /etc/ && sudo chmod 644 /etc/mysql.server-cert.pem
+  - sudo cp -f ./.travis/certs/mysql.server-key.pem      /etc/ && sudo chmod 644 /etc/mysql.server-key.pem
   - sudo cp -f ./.travis/certs/mysql.client-cert.pem     /etc/ && sudo chmod 600 /etc/mysql.client-cert.pem
   - sudo cp -f ./.travis/certs/mysql.client-key.pem      /etc/ && sudo chmod 600 /etc/mysql.client-key.pem
 
@@ -73,8 +75,6 @@ before_script:
   - sudo sed -i'' 's/^DELETE_METHOD="tmpwatch"/DELETE_METHOD="tmpreaper"/' /etc/mysqldump-secure.conf
   - sudo sed -i'' 's/^DELETE_IF_OLDER=720/DELETE_IF_OLDER=1m/'             /etc/mysqldump-secure.conf
 
-
-sudo: required
 
 script:
   # 1. [LINTING] Shellcheck
