@@ -1460,7 +1460,7 @@ debugi "info" "Retrieving list of databases... " $LOG "${LOGFILE}" "${_ARG_CRON}
 # gets all databases (even empty ones)
 DATABASES="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" --batch -e 'show databases;' | sed 1d )"
 # Only gets databases which have content (tables)
-#DATABASES="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" --no-auto-rehash --skip-column-names -e 'SELECT DISTINCT table_schema FROM information_schema.tables;')"
+#DATABASES="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" --no-auto-rehash --skip-column-names -e 'SELECT DISTINCT table_schema FROM information_schema.tables;')"
 
 NUM_DB="$(echo "${DATABASES}" | wc -l | tr -d ' ')"
 debugn "info" "${NUM_DB}" $LOG "${LOGFILE}" "${_ARG_CRON}"
@@ -1556,6 +1556,7 @@ for db in ${DATABASES}; do
 
 			TOTAL_SIZE=$( sum "${TOTAL_SIZE}" "${DB_SIZE}" )
 			starttime=$(date +%s)
+			MYSQLDUMP_CMD=""
 
 			if [ ${COMPRESS} -eq 1 ]; then
 				if [ ${ENCRYPT} -eq 1 ]; then
@@ -1567,11 +1568,12 @@ for db in ${DATABASES}; do
 					exec 4>&1
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
+						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
 						(${COMPRESS_BIN} ${COMPRESS_ARG} || echo "1:$?" >&3) |
 						(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" || echo "2:$?" >&3)
 					) 3>&1 >&4)"
 					exec 4>&-
+					CMD=""
 
 				else
 					ext=".sql.${COMPRESS_EXT}"
@@ -1582,10 +1584,11 @@ for db in ${DATABASES}; do
 					exec 4>&1
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
+						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
 						(${COMPRESS_BIN} ${COMPRESS_ARG} > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" || echo "1:$?" >&3)
 					) 3>&1 >&4)"
 					exec 4>&-
+					MYSQLDUMP_CMD="${MYSQLDUMP} --defaults-file=\"${MYSQL_CNF_FILE}\" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} \"${db}\" | ${COMPRESS_BIN} ${COMPRESS_ARG} > \"${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}\""
 
 				fi
 			else
@@ -1598,7 +1601,7 @@ for db in ${DATABASES}; do
 					exec 4>&1
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
+						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" || echo "0:$?" >&3) |
 						(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" || echo "1:$?" >&3)
 					) 3>&1 >&4)"
 					exec 4>&-
@@ -1612,7 +1615,7 @@ for db in ${DATABASES}; do
 					exec 4>&1
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" ${MYSQL_OPTS} "${db}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" || echo "0:$?" >&3)
+						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" || echo "0:$?" >&3)
 					) 3>&1 >&4)"
 					exec 4>&-
 
@@ -1630,6 +1633,7 @@ for db in ${DATABASES}; do
 				# Increment total dbs error count
 				TOTAL_ERR=$((TOTAL_ERR + 1))
 				debug "err" "Error dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+				debug "err" "${MYSQLDUMP_CMD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 				ERROR="$(merge_exit_codes "${ERROR}" 2)"
 
 				[ "${NAGIOS_DB_ERROR}" = "" ] && NAGIOS_DB_ERROR="${db}" || NAGIOS_DB_ERROR="${NAGIOS_DB_ERROR},${db}"
