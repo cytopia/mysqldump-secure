@@ -26,6 +26,7 @@ before_script:
 
   # Restart MySQL
   - sudo service mysql restart
+  - sudo mysql --verbose --help
 
   # Add MySQL data
   - mysql -uroot -e 'create database my_empty_db1;'
@@ -59,7 +60,7 @@ before_script:
   - sudo sed -i'' 's/MYSQL_SSL_CA_PEM="\/path\/to\/ca.pem"/MYSQL_SSL_CA_PEM="\/etc\/mysql.ca.pem"/g' /etc/mysqldump-secure.conf
 
   # 3. Enable encryption
-  - sudo sed -i'' 's/^ENCRYPT=0/ENCRYPT=1/'       /etc/mysqldump-secure.conf
+  - sudo sed -i'' 's/^ENCRYPT=0/ENCRYPT=1/' /etc/mysqldump-secure.conf
 
   # 4. Enable Nagios log
   - sudo sed -i'' 's/^NAGIOS_LOG=0/NAGIOS_LOG=1/' /etc/mysqldump-secure.conf
