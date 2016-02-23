@@ -321,7 +321,7 @@ sudo sed -i'' 's/IGNORE="notfound performance_schema"/IGNORE="information_schema
 
 echo
 echo "----------------------------------------"
-echo " 2.3.2 \$REQUIRE"
+echo " 2.3.3 \$REQUIRE"
 echo "----------------------------------------"
 
 echo
@@ -360,6 +360,21 @@ echo "\$ sudo mysqldump-secure"
 sudo mysqldump-secure && { echo "--> [FAIL] Unexpected OK. Exit code: $?"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
 sudo sed -i'' 's/REQUIRE="notfound"/REQUIRE="mysql"/' /etc/mysqldump-secure.conf
 
+
+
+
+echo
+echo
+echo "--------------------------------------------------------------------------------"
+echo "-"
+echo "-  2.4 (OPT) Logging"
+echo "-"
+echo "--------------------------------------------------------------------------------"
+
+echo
+echo "----------------------------------------"
+echo " 2.4.1 \$LOG"
+echo "----------------------------------------"
 
 
 exit $ERROR
