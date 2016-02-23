@@ -1079,7 +1079,7 @@ if [  "${MYSQL_SSL_ENABLE}" = "1" ]; then
 		exit 1
 	fi
 
-	MYSQL_SSL_ARGS="--ssl --ssl-ca=${MYSQL_SSL_CA_PEM}"
+	MYSQL_SSL_ARGS="--ssl-ca=${MYSQL_SSL_CA_PEM}"
 
 	if [ -n "${MYSQL_SSL_CLIENT_CERT_PEM-}" ]; then
 		if [ ! -f "${MYSQL_SSL_CLIENT_CERT_PEM}" ]; then
@@ -1110,8 +1110,10 @@ fi
 
 # Testing MySQL connection
 # Todo: get actual mysql error here
-if ! $(which mysql) --defaults-extra-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e exit > /dev/null 2>&1 ; then
-	debug "err"  "Cannot connect to mysql database. Check credentials in ${MYSQL_CNF_FILE} or SSL settings" $LOG "${LOGFILE}" "${_ARG_CRON}"
+_CONN_ERR="$($(which mysql) --defaults-extra-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e exit  2>&1)"
+if [ "$?" != "0" ]; then
+	debug "err"  "Cannot connect to mysql database." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "${_CONN_ERR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 3
 else
