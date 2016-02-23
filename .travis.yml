@@ -166,6 +166,7 @@ script:
   # 10. [ERROR] mysqldump-secure (producing an error by Wrong credentials)
   - sudo sed -i'' 's/localhost/localhost2/' /etc/mysqldump-secure.cnf
   - sudo mysqldump-secure || echo "---------- Error triggered successfully ----------"
+  - sudo sed -i'' 's/localhost2/localhost/' /etc/mysqldump-secure.cnf
 
 
 
