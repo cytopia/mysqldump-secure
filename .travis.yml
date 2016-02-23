@@ -195,12 +195,14 @@ script:
 
   # 9.a [ERROR] $DUMP_DIR_CHMOD
   - echo "---------- \$DUMP_DIR_CHMOD ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/DUMP_DIR_CHMOD="0700"/#DUMP_DIR_CHMOD="0700"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#DUMP_DIR_CHMOD="0700"/DUMP_DIR_CHMOD="0700"/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$DUMP_DIR_CHMOD ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/DUMP_DIR_CHMOD="0700"/DUMP_DIR_CHMOD="0700a"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -209,12 +211,14 @@ script:
 
   # 9.b [ERROR] $DUMP_FILE_CHMOD  - sudo rm -rf /var/mysqldump-secure/
   - echo "---------- \$DUMP_FILE_CHMOD ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/DUMP_FILE_CHMOD="0400"/#DUMP_FILE_CHMOD="0400"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#DUMP_FILE_CHMOD="0400"/DUMP_FILE_CHMOD="0400"/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$DUMP_FILE_CHMOD ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/DUMP_FILE_CHMOD="0400"/DUMP_FILE_CHMOD="0400a"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -225,18 +229,21 @@ script:
 
   # 9.c [ERROR] $MYSQL_CNF_FILE
   - echo "---------- \$MYSQL_CNF_FILE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/MYSQL_CNF_FILE/#MYSQL_CNF_FILE/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron || true
   - sudo mysqldump-secure || true
   - sudo sed -i'' 's/#MYSQL_CNF_FILE/MYSQL_CNF_FILE/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$MYSQL_CNF_FILE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/MYSQL_CNF_FILE="${_/MYSQL_CNF_FILE="${__/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron || true
   - sudo mysqldump-secure || true
   - sudo sed -i'' 's/MYSQL_CNF_FILE="${__/MYSQL_CNF_FILE="${_/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$MYSQL_CNF_FILE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/mysqldump-secure.cnf/mysqldump-secure.cnf2/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron || true
   - sudo mysqldump-secure || true
@@ -245,12 +252,14 @@ script:
 
   # 9.d [ERROR] $MYSQL_SSL_ENABLE
   - echo "---------- \$MYSQL_SSL_ENABLE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/MYSQL_SSL_ENABLE/#MYSQL_SSL_ENABLE/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#MYSQL_SSL_ENABLE/MYSQL_SSL_ENABLE/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$MYSQL_SSL_ENABLE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/MYSQL_SSL_ENABLE=1/MYSQL_SSL_ENABLE=2/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -259,12 +268,14 @@ script:
 
   # 9.e [ERROR] $MYSQL_SSL_CA_PEM
   - echo "---------- \$MYSQL_SSL_CA_PEM ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/MYSQL_SSL_CA_PEM/#MYSQL_SSL_CA_PEM/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron || true
   - sudo mysqldump-secure || true
   - sudo sed -i'' 's/#MYSQL_SSL_CA_PEM/MYSQL_SSL_CA_PEM/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$MYSQL_SSL_CA_PEM ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/MYSQL_SSL_ENABLE=1/MYSQL_SSL_ENABLE=2/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron || true
   - sudo mysqldump-secure || true
@@ -305,12 +316,14 @@ script:
 
   # 9.h [ERROR] $MYSQL_OPTS
   - echo "---------- \$MYSQL_OPTS ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/MYSQL_OPTS/#MYSQL_OPTS/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#MYSQL_OPTS/MYSQL_OPTS/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$MYSQL_OPTS ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/ --opt/ --opt2/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -319,12 +332,14 @@ script:
 
   # 9.i [ERROR] $IGNORE
   - echo "---------- \$IGNORE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/IGNORE/#IGNORE/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#IGNORE/IGNORE/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$IGNORE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/ performance_schema/ performance_schema doesnotexist/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -333,18 +348,21 @@ script:
 
   # 9.j [ERROR] $REQUIRE
   - echo "---------- \$REQUIRE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/REQUIRE/#REQUIRE/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#REQUIRE/REQUIRE/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$REQUIRE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/REQUIRE="mysql"/REQUIRE=""/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/REQUIRE=""/REQUIRE="mysql"/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$REQUIRE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/REQUIRE="mysql"/REQUIRE="doesnotexist"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron || true
   - sudo mysqldump-secure || true
@@ -355,12 +373,14 @@ script:
 
   # 9.k [ERROR] $LOG
   - echo "---------- \$LOG ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/LOG=/#LOG=/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#LOG=/LOG=/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$LOG ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/LOG=1/LOG=2/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -369,12 +389,14 @@ script:
 
   # 9.l [ERROR] $LOG_CHMOD
   - echo "---------- \$LOG_CHMOD ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/LOG_CHMOD="0600"/#LOG_CHMOD="0600"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#LOG_CHMOD="0600"/LOG_CHMOD="0600"/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$LOG_CHMOD ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/LOG_CHMOD="0600"/LOG_CHMOD="abc"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -383,12 +405,14 @@ script:
 
   # 9.m [ERROR] $LOGFILE
   - echo "---------- \$LOGFILE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/LOGFILE=/#LOGFILE=/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#LOGFILE=/LOGFILE=/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$LOGFILE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/mysqldump-secure.log/mysqldump-secure.log1/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -399,12 +423,14 @@ script:
 
   # 9.n [ERROR] $COMPRESS
   - echo "---------- \$COMPRESS ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/COMPRESS=/#COMPRESS=/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#COMPRESS=/COMPRESS=/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$COMPRESS ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/COMPRESS=1/COMPRESS=2/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -413,12 +439,14 @@ script:
 
   # 9.o [ERROR] $COMPRESS_BIN
   - echo "---------- \$COMPRESS_BIN ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/COMPRESS_BIN="gzip"/#COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#COMPRESS_BIN="gzip"/COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$COMPRESS_BIN ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/COMPRESS_BIN="gzip"/COMPRESS_BIN="gzipaa"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron || true
   - sudo mysqldump-secure || true
@@ -427,12 +455,14 @@ script:
 
   # 9.p [ERROR] $COMPRESS_ARG
   - echo "---------- \$COMPRESS_ARG ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/COMPRESS_ARG="gzip"/#COMPRESS_ARG="gzip"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#COMPRESS_ARG="gzip"/COMPRESS_ARG="gzip"/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$COMPRESS_ARG ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/COMPRESS_ARG="-9 --stdout"/COMPRESS_ARG="-9 --stdoutaa"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -441,12 +471,14 @@ script:
 
   # 9.o [ERROR] $COMPRESS_EXT
   - echo "---------- \$COMPRESS_EXT ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/COMPRESS_EXT="gz"/#COMPRESS_EXT="gz"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#COMPRESS_EXT="gz"/COMPRESS_EXT="gz"/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$COMPRESS_EXT ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/COMPRESS_EXT="gz"/COMPRESS_EXT=""/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -457,12 +489,14 @@ script:
 
   # 9.p [ERROR] $ENCRYPT
   - echo "---------- \$ENCRYPT ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/ENCRYPT=/#ENCRYPT=/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#ENCRYPT=/ENCRYPT=/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$ENCRYPT ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/ENCRYPT=1/ENCRYPT=2/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -471,12 +505,14 @@ script:
 
   # 9.q [ERROR] $OPENSSL_PUBKEY_PEM
   - echo "---------- \$OPENSSL_PUBKEY_PEM ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/OPENSSL_PUBKEY_PEM=/#OPENSSL_PUBKEY_PEM=/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#OPENSSL_PUBKEY_PEM=/OPENSSL_PUBKEY_PEM=/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$OPENSSL_PUBKEY_PEM ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/mysqldump-secure.pub.pem/mysqldump-secure.pub.pemaa/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -485,12 +521,14 @@ script:
 
   # 9.r [ERROR] $OPENSSL_ALGO_ARG
   - echo "---------- \$OPENSSL_ALGO_ARG ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/OPENSSL_ALGO_ARG=/#OPENSSL_ALGO_ARG=/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#OPENSSL_ALGO_ARG=/OPENSSL_ALGO_ARG=/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$OPENSSL_ALGO_ARG ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/OPENSSL_ALGO_ARG="-aes256"/OPENSSL_ALGO_ARG="-aes256111"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -501,12 +539,14 @@ script:
 
   # 9.s [ERROR] $DELETE
   - echo "---------- \$DELETE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/DELETE=/#DELETE=/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#DELETE=/DELETE=/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$DELETE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/DELETE=1/DELETE=2/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -515,12 +555,14 @@ script:
 
   # 9.t [ERROR] $DELETE_METHOD
   - echo "---------- \$DELETE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/DELETE_METHOD="tmpreaper"/#DELETE_METHOD="tmpreaper"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#DELETE_METHOD="tmpreaper"/DELETE_METHOD="tmpreaper"/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$DELETE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/DELETE_METHOD="tmpreaper"/DELETE_METHOD="tmpreaper11"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -529,18 +571,21 @@ script:
 
   # 9.u [ERROR] $DELETE_FORCE
   - echo "---------- \$DELETE_FORCE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/DELETE_FORCE=/#DELETE_FORCE=/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#DELETE_FORCE=/DELETE_FORCE=/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$DELETE_FORCE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/DELETE_FORCE=1/DELETE_FORCE=9/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/DELETE_FORCE=9/DELETE_FORCE=1/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$DELETE_FORCE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/DELETE_FORCE=1/DELETE_FORCE=9/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -549,18 +594,21 @@ script:
 
   # 9.v [ERROR] $DELETE_IF_OLDER
   - echo "---------- \$DELETE_IF_OLDER ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/DELETE_IF_OLDER=/#DELETE_IF_OLDER=/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#DELETE_IF_OLDER=/DELETE_IF_OLDER=/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$DELETE_IF_OLDER ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/DELETE_IF_OLDER=1m/DELETE_IF_OLDER=0/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/DELETE_IF_OLDER=0/DELETE_IF_OLDER=1m/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$DELETE_IF_OLDER ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/DELETE_IF_OLDER=1m/DELETE_IF_OLDER=1p/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -571,12 +619,14 @@ script:
 
   # 9.w [ERROR] $NAGIOS_LOG
   - echo "---------- \$NAGIOS_LOG ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/NAGIOS_LOG=/#NAGIOS_LOG=/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#NAGIOS_LOG=/NAGIOS_LOG=/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$NAGIOS_LOG ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/NAGIOS_LOG=1/NAGIOS_LOG=9/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -585,18 +635,21 @@ script:
 
   # 9.x [ERROR] $NAGIOS_LOGFILE
   - echo "---------- \$NAGIOS_LOGFILE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/NAGIOS_LOGFILE=/#NAGIOS_LOGFILE=/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#NAGIOS_LOGFILE=/NAGIOS_LOGFILE=/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$NAGIOS_LOGFILE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/mysqldump-secure.nagios.log/mysqldump-secure.nagios.log11/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/mysqldump-secure.nagios.log11/mysqldump-secure.nagios.log/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$NAGIOS_LOGFILE ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/mysqldump-secure.nagios.log/\/nodir\/mysqldump-secure.nagios.log/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
@@ -606,12 +659,14 @@ script:
 
   # 9.y [ERROR] $NAGIOS_LOG_CHMOD
   - echo "---------- \$NAGIOS_LOG_CHMOD ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/NAGIOS_LOG_CHMOD=/#NAGIOS_LOG_CHMOD=/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
   - sudo sed -i'' 's/#NAGIOS_LOG_CHMOD=/NAGIOS_LOG_CHMOD=/' /etc/mysqldump-secure.conf
 
   - echo "---------- \$NAGIOS_LOG_CHMOD ----------"
+  - sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
   - sudo sed -i'' 's/NAGIOS_LOG_CHMOD="0644"/NAGIOS_LOG_CHMOD="abc"/' /etc/mysqldump-secure.conf
   - sudo mysqldump-secure --cron
   - sudo mysqldump-secure
