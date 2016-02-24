@@ -1681,9 +1681,21 @@ for db in ${DATABASES}; do
 
 				if [ "${_type}" = "0" ]; then
 					if [ "${_exit}" != "0" ]; then
-						[ -z "${MY_ERRORS}" ] && MY_ERRORS="${_msg}" || MY_ERRORS="${MY_ERRORS}\n${_msg}"
+						[ -z "${MY_ERRORS}" ] && MY_ERRORS="mysqldump: ${_msg}" || MY_ERRORS="${MY_ERRORS}\nmysqldump: ${_msg}"
 					elif [ "${_msg}" != "" ]; then
-						[ -z "${MY_WARNINGS}" ] && MY_WARNINGS="${_msg}" || MY_WARNINGS="${MY_WARNINGS}\n${_msg}"
+						[ -z "${MY_WARNINGS}" ] && MY_WARNINGS="mysqldump: ${_msg}" || MY_WARNINGS="${MY_WARNINGS}\nmysqldump: ${_msg}"
+					fi
+				elif [ "${_type}" = "1" ]; then
+					if [ "${_exit}" != "0" ]; then
+						[ -z "${MY_ERRORS}" ] && MY_ERRORS="compression: ${_msg}" || MY_ERRORS="${MY_ERRORS}\ncompression: ${_msg}"
+					elif [ "${_msg}" != "" ]; then
+						[ -z "${MY_WARNINGS}" ] && MY_WARNINGS="compression: ${_msg}" || MY_WARNINGS="${MY_WARNINGS}\ncompression: ${_msg}"
+					fi
+				elif [ "${_type}" = "2" ]; then
+					if [ "${_exit}" != "0" ]; then
+						[ -z "${MY_ERRORS}" ] && MY_ERRORS="encryption: ${_msg}" || MY_ERRORS="${MY_ERRORS}\nencryption: ${_msg}"
+					elif [ "${_msg}" != "" ]; then
+						[ -z "${MY_WARNINGS}" ] && MY_WARNINGS="encryption: ${_msg}" || MY_WARNINGS="${MY_WARNINGS}\nencryption: ${_msg}"
 					fi
 				fi
 
@@ -1761,6 +1773,14 @@ debug "info" "Dumping finished (OK: ${TOTAL_DBS} dbs, IGN: ${TOTAL_IGN} dbs, ERR
 debug "info" "Took $((TOTAL_ENDTIME - TOTAL_STARTTIME)) seconds" $LOG "${LOGFILE}" "${_ARG_CRON}"
 debug "info" "Total size dumped: ${TOTAL_SIZE} MB" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
+
+
+#
+#
+# TODO: DELETE TMPFILES AND DIRS
+#
+#
+#
 
 
 ############################################################
