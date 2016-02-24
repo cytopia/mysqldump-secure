@@ -790,4 +790,31 @@ sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpect
 sudo sed -i'' 's/^COMPRESS_EXT=/COMPRESS_EXT="gz"/' /etc/mysqldump-secure.conf
 
 
+
+echo
+echo
+echo "--------------------------------------------------------------------------------"
+echo "-"
+echo "-  2.6 (OPT) Encryption"
+echo "-"
+echo "--------------------------------------------------------------------------------"
+
+echo
+echo "----------------------------------------"
+echo " 2.6.1 \$ENCRYPT"
+echo "----------------------------------------"
+
+echo
+echo "a) #ENCRYPT=1"
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+sudo sed -i'' 's/^ENCRYPT=1/#ENCRYPT=1/' /etc/mysqldump-secure.conf
+echo "\$ sudo mysqldump-secure --cron"
+sudo mysqldump-secure --cron && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+echo
+echo "\$ sudo mysqldump-secure"
+sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
+sudo sed -i'' 's/^#ENCRYPT=1/ENCRYPT=1/' /etc/mysqldump-secure.conf
+
+
 exit $ERROR
