@@ -191,28 +191,28 @@ debugr() {
 
 	# [WARN] Always show warn and error
 	if [ "${_lvl}" = "warn" ]; then
-		[ -t 1 ] && tput setaf 3
 		IFS='
 		'
 		for line in ${_msg}; do
+			[ -t 1 ] && tput setaf 3
 			printf "[WARN]  %s\n" "${line}" 1>&2	# stdout -> stderr
+			[ -t 1 ] && tput setaf 7
+			[ -t 1 ] && tput sgr0
 		done
 		unset IFS
-		[ -t 1 ] && tput setaf 7
-		[ -t 1 ] && tput sgr0
 	fi
 
 	# [ERR] Always show warn and error
 	if [ "${_lvl}" = "err" ]; then
-		[ -t 1 ] && tput setaf 1
 		IFS='
 		'
 		for line in ${_msg}; do
+			[ -t 1 ] && tput setaf 1
 			printf "[ERR]   %s\n" "${line}" 1>&2	# stdout -> stderr
+			[ -t 1 ] && tput setaf 7
+			[ -t 1 ] && tput sgr0
 		done
 		unset IFS
-		[ -t 1 ] && tput setaf 7
-		[ -t 1 ] && tput sgr0
 	fi
 
 	# Log to file
