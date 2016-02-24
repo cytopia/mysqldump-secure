@@ -1250,14 +1250,13 @@ if [ "${COMPRESS}" = "1" ]; then
 		exit 2
 	fi
 	if [ -z "${COMPRESS_ARG-}" ]; then
-		debug "err"  "\$COMPRESS_ARG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		exit 2
+		debug "info"  "\$COMPRESS_ARG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		COMPRESS_ARG=""
 	fi
 	if [ -z "${COMPRESS_EXT-}" ]; then
-		debug "err"  "\$COMPRESS_EXT variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		exit 2
+		debug "info"  "\$COMPRESS_EXT variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "info"  "Using 'compressed' as file extension." $LOG "${LOGFILE}" "${_ARG_CRON}"
+		COMPRESS_EXT="compressed"
 	fi
 
 	if ! command -v "${COMPRESS_BIN}" > /dev/null 2>&1 ; then
