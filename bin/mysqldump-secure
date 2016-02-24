@@ -1680,9 +1680,9 @@ for db in ${DATABASES}; do
 					exec 4>&1
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3) |
-						(${COMPRESS_BIN} ${COMPRESS_ARG} 2> "${MY_TMP_FILE_COMP}" || echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" && echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3) |
-						(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" 2> "${MY_TMP_FILE_ENCR}" || echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" && echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3)
+						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3) |
+						(${COMPRESS_BIN} ${COMPRESS_ARG} 2> "${MY_TMP_FILE_COMP}" && echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" || echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3) |
+						(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" 2> "${MY_TMP_FILE_ENCR}" && echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" || echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3)
 					) 3>&1 >&4)"
 					exec 4>&-
 
@@ -1695,8 +1695,8 @@ for db in ${DATABASES}; do
 					exec 4>&1
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3) |
-						(${COMPRESS_BIN} ${COMPRESS_ARG} 2> "${MY_TMP_FILE_COMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" || echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" && echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3)
+						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3) |
+						(${COMPRESS_BIN} ${COMPRESS_ARG} 2> "${MY_TMP_FILE_COMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" && echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" || echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3)
 					) 3>&1 >&4)"
 					exec 4>&-
 
@@ -1711,8 +1711,8 @@ for db in ${DATABASES}; do
 					exec 4>&1
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3) |
-						(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" 2> "${MY_TMP_FILE_ENCR}" || echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" && echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3)
+						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3) |
+						(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" 2> "${MY_TMP_FILE_ENCR}" && echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" || echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3)
 					) 3>&1 >&4)"
 					exec 4>&-
 
@@ -1725,7 +1725,7 @@ for db in ${DATABASES}; do
 					exec 4>&1
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3)
+						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3)
 					) 3>&1 >&4)"
 					exec 4>&-
 
