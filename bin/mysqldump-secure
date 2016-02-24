@@ -114,7 +114,10 @@ debug() {
 
 	# Show debug output?
 	if [ "${_debug}" = "1" ]; then
+		[ -t 1 ] && tput setaf 1
 		[ "${_lvl}" = "debug" ] && printf "[DEBUG] %s\n" "${_msg}"
+		[ -t 1 ] && tput setaf 7
+		[ -t 1 ] && tput sgr0
 	fi
 
 	# Always show warn and error
@@ -170,12 +173,15 @@ debugr() {
 	# [DEBUG] Show debug output?
 	if [ "${_debug}" = "1" ]; then
 		if [ "${_lvl}" = "debug" ]; then
+			[ -t 1 ] && tput setaf 0
 			IFS='
 			'
 			for line in ${_msg}; do
 				printf "[DEBUG] %s\n" "${line}"
 			done
 			unset IFS
+			[ -t 1 ] && tput setaf 7
+			[ -t 1 ] && tput sgr0
 		fi
 	fi
 
@@ -249,7 +255,10 @@ debugi() {
 
 	# Show debug output?
 	if [ "${_debug}" = "1" ]; then
+		[ -t 1 ] && tput setaf 0
 		[ "${_lvl}" = "debug" ] && printf "[DEBUG] %s" "${_msg}"
+		[ -t 1 ] && tput setaf 7
+		[ -t 1 ] && tput sgr0
 	fi
 
 
@@ -297,7 +306,10 @@ debugn() {
 
 	# Show debug output?
 	if [ "${_debug}" = "1" ]; then
+		[ -t 1 ] && tput setaf 0
 		[ "${_lvl}" = "debug" ] && printf "%s\n" "${_msg}"
+		[ -t 1 ] && tput setaf 7
+		[ -t 1 ] && tput sgr0
 	fi
 
 
