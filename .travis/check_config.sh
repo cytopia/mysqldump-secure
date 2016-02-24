@@ -698,50 +698,50 @@ echo "----------------------------------------"
 echo
 echo "a) #COMPRESS_BIN=\"gzip\""
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-sudo sed -i'' 's/^COMPRESS_BIN="gzip"/#COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^COMPRESS_BIN="gzip"$/#COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
 echo "\$ sudo mysqldump-secure --cron"
 sudo mysqldump-secure --cron && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 echo
 echo "\$ sudo mysqldump-secure"
 sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
-sudo sed -i'' 's/^#COMPRESS_BIN="gzip"/COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^#COMPRESS_BIN="gzip"$/COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
 
 echo
 echo "b) COMPRESS_BIN=\"\""
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-sudo sed -i'' 's/^COMPRESS_BIN="gzip"/COMPRESS_BIN=""/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^COMPRESS_BIN="gzip"$/COMPRESS_BIN=""/' /etc/mysqldump-secure.conf
 echo "\$ sudo mysqldump-secure --cron"
 sudo mysqldump-secure --cron && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 echo
 echo "\$ sudo mysqldump-secure"
 sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
-sudo sed -i'' 's/^COMPRESS_BIN=""/COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^COMPRESS_BIN=""$/COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
 
 echo
 echo "c) COMPRESS_BIN="
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-sudo sed -i'' 's/^COMPRESS_BIN="gzip"/COMPRESS_BIN=/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^COMPRESS_BIN="gzip"$/COMPRESS_BIN=/' /etc/mysqldump-secure.conf
 echo "\$ sudo mysqldump-secure --cron"
 sudo mysqldump-secure --cron && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 echo
 echo "\$ sudo mysqldump-secure"
 sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
-sudo sed -i'' 's/^COMPRESS_BIN=/COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^COMPRESS_BIN=$/COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
 
 echo
 echo "d) COMPRESS_BIN=\"wrong\""
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-sudo sed -i'' 's/^COMPRESS_BIN="gzip"/COMPRESS_BIN="wrong"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^COMPRESS_BIN="gzip"$/COMPRESS_BIN="wrong"/' /etc/mysqldump-secure.conf
 echo "\$ sudo mysqldump-secure --cron"
 sudo mysqldump-secure --cron && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 echo
 echo "\$ sudo mysqldump-secure"
 sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
-sudo sed -i'' 's/^COMPRESS_BIN="wrong"/COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^COMPRESS_BIN="wrong"$/COMPRESS_BIN="gzip"/' /etc/mysqldump-secure.conf
 
 
 echo
@@ -752,50 +752,50 @@ echo "----------------------------------------"
 echo
 echo "a) #COMPRESS_ARG=\"-9 --stdout\""
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-sudo sed -i'' 's/^COMPRESS_ARG="-9 --stdout"/#COMPRESS_ARG="-9 --stdout"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^COMPRESS_ARG="-9 --stdout"$/#COMPRESS_ARG="-9 --stdout"/' /etc/mysqldump-secure.conf
 echo "\$ sudo mysqldump-secure --cron"
 sudo mysqldump-secure --cron && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 echo
 echo "\$ sudo mysqldump-secure"
 sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
-sudo sed -i'' 's/^#COMPRESS_ARG="-9 --stdout"/COMPRESS_ARG="-9 --stdout"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^#COMPRESS_ARG="-9 --stdout"$/COMPRESS_ARG="-9 --stdout"/' /etc/mysqldump-secure.conf
 
 echo
 echo "b) COMPRESS_ARG=\"\""
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-sudo sed -i'' 's/^COMPRESS_ARG="-9 --stdout"/COMPRESS_ARG=""/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^COMPRESS_ARG="-9 --stdout"$/COMPRESS_ARG=""/' /etc/mysqldump-secure.conf
 echo "\$ sudo mysqldump-secure --cron"
 sudo mysqldump-secure --cron && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 echo
 echo "\$ sudo mysqldump-secure"
 sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
-sudo sed -i'' 's/^COMPRESS_ARG=""/COMPRESS_ARG="-9 --stdout"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^COMPRESS_ARG=""$/COMPRESS_ARG="-9 --stdout"/' /etc/mysqldump-secure.conf
 
 echo
 echo "c) COMPRESS_ARG="
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-sudo sed -i'' 's/^COMPRESS_ARG="-9 --stdout"/COMPRESS_ARG=/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^COMPRESS_ARG="-9 --stdout"$/COMPRESS_ARG=/' /etc/mysqldump-secure.conf
 echo "\$ sudo mysqldump-secure --cron"
 sudo mysqldump-secure --cron && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 echo
 echo "\$ sudo mysqldump-secure"
 sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
-sudo sed -i'' 's/^COMPRESS_ARG=/COMPRESS_ARG="-9 --stdout"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^COMPRESS_ARG=$/COMPRESS_ARG="-9 --stdout"/' /etc/mysqldump-secure.conf
 
 echo
 echo "d) COMPRESS_ARG=\"wrong\""
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-sudo sed -i'' 's/^COMPRESS_ARG="-9 --stdout"/COMPRESS_ARG="wrong"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^COMPRESS_ARG="-9 --stdout"$/COMPRESS_ARG="wrong"/' /etc/mysqldump-secure.conf
 echo "\$ sudo mysqldump-secure --cron"
 sudo mysqldump-secure --cron && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 echo
 echo "\$ sudo mysqldump-secure"
 sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
-sudo sed -i'' 's/^COMPRESS_ARG="wrong"/COMPRESS_ARG="-9 --stdout"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^COMPRESS_ARG="wrong"$/COMPRESS_ARG="-9 --stdout"/' /etc/mysqldump-secure.conf
 
 
 echo
