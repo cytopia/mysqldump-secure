@@ -1678,6 +1678,7 @@ for db in ${DATABASES}; do
 			TOTAL_SIZE=$( sum "${TOTAL_SIZE}" "${DB_SIZE}" )
 			starttime=$(date +%s)
 
+			error_statuses=""
 			if [ ${COMPRESS} -eq 1 ]; then
 				if [ ${ENCRYPT} -eq 1 ]; then
 					ext=".sql.${COMPRESS_EXT}.enc"
@@ -1688,9 +1689,9 @@ for db in ${DATABASES}; do
 					exec 4>&1
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3) |
-						(${COMPRESS_BIN} ${COMPRESS_ARG} 2> "${MY_TMP_FILE_COMP}" && echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" || echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3) |
-						(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" 2> "${MY_TMP_FILE_ENCR}" && echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" || echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3)
+						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3 || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3) |
+						(${COMPRESS_BIN} ${COMPRESS_ARG} 2> "${MY_TMP_FILE_COMP}" && echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3 || echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3) |
+						(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" 2> "${MY_TMP_FILE_ENCR}" && echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3 || echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3)
 					) 3>&1 >&4)"
 					exec 4>&-
 
@@ -1703,8 +1704,8 @@ for db in ${DATABASES}; do
 					exec 4>&1
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3) |
-						(${COMPRESS_BIN} ${COMPRESS_ARG} 2> "${MY_TMP_FILE_COMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" && echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" || echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3)
+						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3 || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3) |
+						(${COMPRESS_BIN} ${COMPRESS_ARG} 2> "${MY_TMP_FILE_COMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" && echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3 || echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3)
 					) 3>&1 >&4)"
 					exec 4>&-
 
@@ -1719,8 +1720,8 @@ for db in ${DATABASES}; do
 					exec 4>&1
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3) |
-						(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" 2> "${MY_TMP_FILE_ENCR}" && echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" || echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3)
+						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3 || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3) |
+						(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" 2> "${MY_TMP_FILE_ENCR}" && echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3 || echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3)
 					) 3>&1 >&4)"
 					exec 4>&-
 
@@ -1733,7 +1734,7 @@ for db in ${DATABASES}; do
 					exec 4>&1
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3)
+						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3 || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3)
 					) 3>&1 >&4)"
 					exec 4>&-
 
@@ -1763,11 +1764,6 @@ for db in ${DATABASES}; do
 				_type="$( echo "${_err}" | awk -F ':' '{print $1}' )"
 				_exit="$( echo "${_err}" | awk -F ':' '{print $2}' )"
 				_msg="$(  echo "${_err}" | awk -F ':' '{for (i=3; i<NF; i++) printf $i " "; print $NF}' )"
-
-				# Reset variables in loop
-				MY_ERRORS=""
-				MY_WARNINGS=""
-
 
 				if [ "${_type}" = "0" ]; then
 					if [ "${_exit}" != "0" ]; then
