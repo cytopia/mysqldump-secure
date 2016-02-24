@@ -177,14 +177,14 @@ echo "----------------------------------------"
 echo
 echo "a) #MYSQL_CNF_FILE=\"/etc/mysqldump-secure.cnf\""
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-sudo sed -i'' 's/MYSQL_CNF_FILE/#MYSQL_CNF_FILE/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^MYSQL_CNF_FILE=/#MYSQL_CNF_FILE=/' /etc/mysqldump-secure.conf
 echo "\$ sudo mysqldump-secure --cron"
 sudo mysqldump-secure --cron && { echo "--> [FAIL] Unexpected OK"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 echo
 echo "\$ sudo mysqldump-secure"
 sudo mysqldump-secure && { echo "--> [FAIL] Unexpected OK"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
-sudo sed -i'' 's/#MYSQL_CNF_FILE/MYSQL_CNF_FILE/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^#MYSQL_CNF_FILE=/MYSQL_CNF_FILE=/' /etc/mysqldump-secure.conf
 
 echo
 echo "b) #MYSQL_CNF_FILE=\"/etc/mysqldump-secure.cnf2\""
@@ -201,14 +201,14 @@ sudo sed -i'' 's/mysqldump-secure.cnf2/mysqldump-secure.cnf/' /etc/mysqldump-sec
 echo
 echo "c) #MYSQL_CNF_FILE=\"\""
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-sudo sed -i'' 's/MYSQL_CNF_FILE="\/etc\/mysqldump-secure.cnf"/MYSQL_CNF_FILE=""/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/MYSQL_CNF_FILE="\${_INSTALL_PREFIX}\/etc\/mysqldump-secure.cnf"/MYSQL_CNF_FILE=""/' /etc/mysqldump-secure.conf
 echo "\$ sudo mysqldump-secure --cron"
 sudo mysqldump-secure --cron && { echo "--> [FAIL] Unexpected OK"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 echo
 echo "\$ sudo mysqldump-secure"
 sudo mysqldump-secure && { echo "--> [FAIL] Unexpected OK"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
-sudo sed -i'' 's/MYSQL_CNF_FILE=""/MYSQL_CNF_FILE="\/etc\/mysqldump-secure.cnf"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/MYSQL_CNF_FILE=""/MYSQL_CNF_FILE="\${_INSTALL_PREFIX}\/etc\/mysqldump-secure.cnf"/' /etc/mysqldump-secure.conf
 
 
 
@@ -234,11 +234,11 @@ echo "b) MYSQL_SSL_ENABLE=2"
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 sudo sed -i'' 's/MYSQL_SSL_ENABLE=1/MYSQL_SSL_ENABLE=2/' /etc/mysqldump-secure.conf
 echo "\$ sudo mysqldump-secure --cron"
-sudo mysqldump-secure --cron && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
+sudo mysqldump-secure --cron && { echo "--> [FAIL] Unexpected OK"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 echo
 echo "\$ sudo mysqldump-secure"
-sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
+sudo mysqldump-secure && { echo "--> [FAIL] Unexpected OK"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
 sudo sed -i'' 's/MYSQL_SSL_ENABLE=2/MYSQL_SSL_ENABLE=1/' /etc/mysqldump-secure.conf
 
 echo
@@ -246,11 +246,11 @@ echo "c) MYSQL_SSL_ENABLE="
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 sudo sed -i'' 's/MYSQL_SSL_ENABLE=1/MYSQL_SSL_ENABLE=/' /etc/mysqldump-secure.conf
 echo "\$ sudo mysqldump-secure --cron"
-sudo mysqldump-secure --cron && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
+sudo mysqldump-secure --cron && { echo "--> [FAIL] Unexpected OK"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 echo
 echo "\$ sudo mysqldump-secure"
-sudo mysqldump-secure && echo "--> [OK] Expected" || { echo "--> [FAIL] Unexpected exit code: $?"; ERROR=1; }
+sudo mysqldump-secure && { echo "--> [FAIL] Unexpected OK"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
 sudo sed -i'' 's/MYSQL_SSL_ENABLE=/MYSQL_SSL_ENABLE=1/' /etc/mysqldump-secure.conf
 
 
