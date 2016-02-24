@@ -173,15 +173,15 @@ debugr() {
 	# [DEBUG] Show debug output?
 	if [ "${_debug}" = "1" ]; then
 		if [ "${_lvl}" = "debug" ]; then
-			[ -t 1 ] && tput setaf 0
 			IFS='
 			'
 			for line in ${_msg}; do
+				[ -t 1 ] && tput setaf 0
 				printf "[DEBUG] %s\n" "${line}"
+				[ -t 1 ] && tput setaf 7
+				[ -t 1 ] && tput sgr0
 			done
 			unset IFS
-			[ -t 1 ] && tput setaf 7
-			[ -t 1 ] && tput sgr0
 		fi
 	fi
 
