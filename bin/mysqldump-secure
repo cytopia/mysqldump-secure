@@ -345,6 +345,11 @@ debug_nl() {
 	# Hide info output when in cron-mode
 	if [ "${_cron}" != "1" ]; then
 		[ "${_lvl}" = "info" ] && printf "\n"
+
+		# Show debug output?
+		if [ "${_debug}" = "1" ]; then
+			[ "${_lvl}" = "debug" ] && printf "\n"
+		fi
 	fi
 
 	# Always show warn and error
