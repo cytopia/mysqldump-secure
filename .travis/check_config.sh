@@ -365,7 +365,19 @@ sudo mysqldump-secure && { echo "--> [FAIL] Unexpected OK. Exit code: $?"; ERROR
 sudo sed -i'' 's/ --password/ --opt/' /etc/mysqldump-secure.conf
 
 echo
-echo "d) --defaults-extra-file (MYSQL_BAD_OPTS)"
+echo "d) --password=foo (MYSQL_EVIL_OPTS)"
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+sudo sed -i'' 's/ --opt/ --password=foo/' /etc/mysqldump-secure.conf
+echo "\$ sudo mysqldump-secure --cron"
+sudo mysqldump-secure --cron && { echo "--> [FAIL] Unexpected OK. Exit code: $?"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+echo
+echo "\$ sudo mysqldump-secure"
+sudo mysqldump-secure && { echo "--> [FAIL] Unexpected OK. Exit code: $?"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
+sudo sed -i'' 's/ --password=foo/ --opt/' /etc/mysqldump-secure.conf
+
+echo
+echo "e) --defaults-extra-file (MYSQL_BAD_OPTS)"
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 sudo sed -i'' 's/ --opt/ --defaults-extra-file/' /etc/mysqldump-secure.conf
 echo "\$ sudo mysqldump-secure --cron"
@@ -375,6 +387,18 @@ echo
 echo "\$ sudo mysqldump-secure"
 sudo mysqldump-secure && { echo "--> [FAIL] Unexpected OK. Exit code: $?"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
 sudo sed -i'' 's/ --defaults-extra-file/ --opt/' /etc/mysqldump-secure.conf
+
+echo
+echo "f) --defaults-extra-file=bla (MYSQL_BAD_OPTS)"
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+sudo sed -i'' 's/ --opt/ --defaults-extra-file=bla/' /etc/mysqldump-secure.conf
+echo "\$ sudo mysqldump-secure --cron"
+sudo mysqldump-secure --cron && { echo "--> [FAIL] Unexpected OK. Exit code: $?"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+echo
+echo "\$ sudo mysqldump-secure"
+sudo mysqldump-secure && { echo "--> [FAIL] Unexpected OK. Exit code: $?"; ERROR=1; } || echo "--> [OK] Expected Error. Exit code: $?"
+sudo sed -i'' 's/ --defaults-extra-file=bla/ --opt/' /etc/mysqldump-secure.conf
 
 
 
