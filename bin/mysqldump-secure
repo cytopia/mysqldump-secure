@@ -1270,7 +1270,7 @@ for opt in ${MYSQL_OPTS}; do
 		fi
 	done
 	for bad in ${MYSQL_BAD_OPTS}; do
-		if [ "${opt}" = "${evil}" ]; then
+		if [ "${opt}" = "${bad}" ]; then
 			debug "err"  "Disallowed mysqldump option found in MYSQL_OPTS: '${bad}'" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			exit 3
