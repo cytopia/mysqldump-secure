@@ -1679,7 +1679,7 @@ for db in ${DATABASES}; do
 			for _err in ${error_statuses}; do
 				_type="$( echo "${_err}" | awk -F ':' '{print $1}' )"
 				_exit="$( echo "${_err}" | awk -F ':' '{print $2}' )"
-				_msg="$(  echo "${_err}" | awk -F ':' '{print $3}' )"
+				_msg="$(  echo "${_err}" | awk -F ':' '{for (i=3; i<NF; i++) printf $i " "; print $NF}' )"
 
 				if [ "${_type}" = "0" ]; then
 					if [ "${_exit}" != "0" ]; then
