@@ -371,16 +371,27 @@ permission() {
 # @param  string	numerical chmod
 # @return boolean	0: valid, 1: invalid
 valid_chmod() {
-	CHMOD=${1}
+	CHMOD="${1}"
 
-	len=$(echo "${CHMOD}" | awk '{ print length()   }')
+	len="$(echo "${CHMOD}" | awk '{ print length()   }')"
 
 
 	if [ "${len}" = "3" ]; then
 
-		r=$(echo "${CHMOD}" | awk '{print substr($0,1,1)}')
-		w=$(echo "${CHMOD}" | awk '{print substr($0,2,1)}')
-		x=$(echo "${CHMOD}" | awk '{print substr($0,3,1)}')
+		r="$(echo "${CHMOD}" | awk '{print substr($0,1,1)}')"
+		w="$(echo "${CHMOD}" | awk '{print substr($0,2,1)}')"
+		x="$(echo "${CHMOD}" | awk '{print substr($0,3,1)}')"
+
+
+		# Check if it is an integer
+		if ! isint "${r}" > /dev/null 2>&1 ; then
+			return 1
+		elif ! isint "${w}" > /dev/null 2>&1 ; then
+			return 1
+		elif ! isint "${x}" > /dev/null 2>&1 ; then
+			return 1
+		fi
+
 
 		if [ "$r" -lt 0 ] || [ "$r" -gt 7 ]; then
 			return 1
@@ -396,10 +407,22 @@ valid_chmod() {
 
 	elif  [ "${len}" = "4" ]; then
 
-		s=$(echo "${CHMOD}" | awk '{print substr($0,1,1)}')
-		r=$(echo "${CHMOD}" | awk '{print substr($0,2,1)}')
-		w=$(echo "${CHMOD}" | awk '{print substr($0,3,1)}')
-		x=$(echo "${CHMOD}" | awk '{print substr($0,4,1)}')
+		s="$(echo "${CHMOD}" | awk '{print substr($0,1,1)}')"
+		r="$(echo "${CHMOD}" | awk '{print substr($0,2,1)}')"
+		w="$(echo "${CHMOD}" | awk '{print substr($0,3,1)}')"
+		x="$(echo "${CHMOD}" | awk '{print substr($0,4,1)}')"
+
+		# Check if it is an integer
+		if ! isint "${s}" > /dev/null 2>&1 ; then
+			return 1
+		elif ! isint "${r}" > /dev/null 2>&1 ; then
+			return 1
+		elif ! isint "${w}" > /dev/null 2>&1 ; then
+			return 1
+		elif ! isint "${x}" > /dev/null 2>&1 ; then
+			return 1
+		fi
+
 
 		if [ "$s" -lt 0 ] || [ "$s" -gt 7 ]; then
 			return 1
