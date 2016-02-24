@@ -1774,12 +1774,6 @@ debug "info" "Total size dumped: ${TOTAL_SIZE} MB" $LOG "${LOGFILE}" "${_ARG_CRO
 
 
 
-#
-#
-# TODO: DELETE TMPFILES AND DIRS
-#
-#
-#
 
 
 ############################################################
@@ -1849,6 +1843,14 @@ if [ "${NAGIOS_LOG}" = "1" ]; then
 fi
 
 
+############################################################
+# Delete temporary files
+############################################################
+
+rm "${MY_TMP_FILE_DUMP}" 2>/dev/null || debug "warn"  "Cannot delete tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+rm "${MY_TMP_FILE_COMP}" 2>/dev/null || debug "warn"  "Cannot delete tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+rm "${MY_TMP_FILE_ENCR}" 2>/dev/null || debug "warn"  "Cannot delete tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+rm -rf "${MY_TMP_DIR}"   2>/dev/null || debug "warn"  "Cannot delete tmp dir: ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 
 
