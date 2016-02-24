@@ -1657,6 +1657,9 @@ for db in ${DATABASES}; do
 				fi
 			fi
 
+
+			# Error Checking
+			#
 			# Inside $error_statuses we have the following information.
 			# Note: Not all lines must be there (depends on enabled options)
 			#
@@ -1668,7 +1671,6 @@ for db in ${DATABASES}; do
 			#  1. Error code == 0 and <stderr msg> empty      => OK
 			#  2. Error code == 0 and <stderr msg> not empty  => Warning
 			#  3. Error code != 0                             => Error
-
 			MY_ERRORS=""
 			MY_WARNINGS=""
 
@@ -1698,34 +1700,31 @@ for db in ${DATABASES}; do
 						[ -z "${MY_WARNINGS}" ] && MY_WARNINGS="encryption: ${_msg}" || MY_WARNINGS="${MY_WARNINGS}\nencryption: ${_msg}"
 					fi
 				fi
-
 			done
 			unset IFS
 
+
+
+			# Error Evaluation
+			#
 			if [ "${MY_ERRORS}" != "" ]; then
 				TOTAL_ERR=$((TOTAL_ERR + 1))
 				debug_nl "info" $LOG "${LOGFILE}" "${_ARG_CRON}"
 				debug "err" "Error dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-				debug "err" "${MY_ERRORS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+				debugr "err" "${MY_ERRORS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 				ERROR="$(merge_exit_codes "${ERROR}" 2)"
 				[ "${NAGIOS_DB_ERROR}" = "" ] && NAGIOS_DB_ERROR="${db}" || NAGIOS_DB_ERROR="${NAGIOS_DB_ERROR},${db}"
-			fi
-			if [ "${MY_WARNINGS}" != "" ]; then
+			else
 				TOTAL_DBS=$((TOTAL_DBS + 1))
 				endtime=$(date +%s)
 				debugn "info" "$((endtime - starttime)) sec" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 				[ "${NAGIOS_DB_DUMPED}" = "" ] && NAGIOS_DB_DUMPED="${db}" || NAGIOS_DB_DUMPED="${NAGIOS_DB_DUMPED},${db}"
-				debug "warn" "Warning dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-				debug "warn" "${MY_ERRORS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-			fi
-			# No errors and no warnings
-			if [ "${MY_ERRORS}" = "" ] && [ "${MY_WARNINGS}" = "" ]; then
-				TOTAL_DBS=$((TOTAL_DBS + 1))
-				endtime=$(date +%s)
-				debugn "info" "$((endtime - starttime)) sec" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
-				[ "${NAGIOS_DB_DUMPED}" = "" ] && NAGIOS_DB_DUMPED="${db}" || NAGIOS_DB_DUMPED="${NAGIOS_DB_DUMPED},${db}"
+				if [ "${MY_WARNINGS}" != "" ]; then
+					debug  "warn" "Warning dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+					debugr "warn" "${MY_WARNINGS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+				fi
 			fi
 
 
