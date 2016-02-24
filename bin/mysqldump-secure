@@ -107,18 +107,19 @@ debug() {
 	_cron="${5}"	# run for cron?
 	_debug="${6-0}"	# run in debug mode?
 
-	# Hide info output when in cron-mode
+	# Hide info/debug output when in cron-mode
 	if [ "${_cron}" != "1" ]; then
 		[ "${_lvl}" = "info" ] && printf "[INFO]  %s\n" "${_msg}"
+
+		# Show debug output?
+		if [ "${_debug}" = "1" ]; then
+			[ -t 1 ] && tput setaf 1
+			[ "${_lvl}" = "debug" ] && printf "[DEBUG] %s\n" "${_msg}"
+			[ -t 1 ] && tput setaf 7
+			[ -t 1 ] && tput sgr0
+		fi
 	fi
 
-	# Show debug output?
-	if [ "${_debug}" = "1" ]; then
-		[ -t 1 ] && tput setaf 1
-		[ "${_lvl}" = "debug" ] && printf "[DEBUG] %s\n" "${_msg}"
-		[ -t 1 ] && tput setaf 7
-		[ -t 1 ] && tput sgr0
-	fi
 
 	# Always show warn and error
 	[ -t 1 ] && tput setaf 3
@@ -158,8 +159,9 @@ debugr() {
 	_cron="${5}"	# run for cron?
 	_debug="${6-0}"	# run in debug mode?
 
-	# [INFO] Hide info output when in cron-mode
+	# [INFO]/[DEBUG] Hide info/debug output when in cron-mode
 	if [ "${_cron}" != "1" ]; then
+		# [INFO]
 		if [ "${_lvl}" = "info" ]; then
 			IFS='
 			'
@@ -168,22 +170,23 @@ debugr() {
 			done
 			unset IFS
 		fi
-	fi
 
-	# [DEBUG] Show debug output?
-	if [ "${_debug}" = "1" ]; then
-		if [ "${_lvl}" = "debug" ]; then
-			IFS='
-			'
-			for line in ${_msg}; do
-				[ -t 1 ] && tput setaf 0
-				printf "[DEBUG] %s\n" "${line}"
-				[ -t 1 ] && tput setaf 7
-				[ -t 1 ] && tput sgr0
-			done
-			unset IFS
+		# [DEBUG] Show debug output?
+		if [ "${_debug}" = "1" ]; then
+			if [ "${_lvl}" = "debug" ]; then
+				IFS='
+				'
+				for line in ${_msg}; do
+					[ -t 1 ] && tput setaf 0
+					printf "[DEBUG] %s\n" "${line}"
+					[ -t 1 ] && tput setaf 7
+					[ -t 1 ] && tput sgr0
+				done
+				unset IFS
+			fi
 		fi
 	fi
+
 
 
 	# [WARN] Always show warn and error
@@ -248,17 +251,17 @@ debugi() {
 	_cron="${5}"	# run for cron?
 	_debug="${6-0}"	# run in debug mode?
 
-	# Hide info output when in cron-mode
+	# Hide info/debug output when in cron-mode
 	if [ "${_cron}" != "1" ]; then
 		[ "${_lvl}" = "info" ] && printf "[INFO]  %s" "${_msg}"
-	fi
 
-	# Show debug output?
-	if [ "${_debug}" = "1" ]; then
-		[ -t 1 ] && tput setaf 0
-		[ "${_lvl}" = "debug" ] && printf "[DEBUG] %s" "${_msg}"
-		[ -t 1 ] && tput setaf 7
-		[ -t 1 ] && tput sgr0
+		# Show debug output?
+		if [ "${_debug}" = "1" ]; then
+			[ -t 1 ] && tput setaf 0
+			[ "${_lvl}" = "debug" ] && printf "[DEBUG] %s" "${_msg}"
+			[ -t 1 ] && tput setaf 7
+			[ -t 1 ] && tput sgr0
+		fi
 	fi
 
 
@@ -299,17 +302,17 @@ debugn() {
 	_cron="${5}"	# run for cron?
 	_debug="${6-0}"	# run in debug mode?
 
-	# Hide info output when in cron-mode
+	# Hide info/debug output when in cron-mode
 	if [ "${_cron}" != "1" ]; then
 		[ "${_lvl}" = "info" ] && printf "%s\n" "${_msg}"
-	fi
 
-	# Show debug output?
-	if [ "${_debug}" = "1" ]; then
-		[ -t 1 ] && tput setaf 0
-		[ "${_lvl}" = "debug" ] && printf "%s\n" "${_msg}"
-		[ -t 1 ] && tput setaf 7
-		[ -t 1 ] && tput sgr0
+		# Show debug output?
+		if [ "${_debug}" = "1" ]; then
+			[ -t 1 ] && tput setaf 0
+			[ "${_lvl}" = "debug" ] && printf "%s\n" "${_msg}"
+			[ -t 1 ] && tput setaf 7
+			[ -t 1 ] && tput sgr0
+		fi
 	fi
 
 
