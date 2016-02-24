@@ -1564,10 +1564,30 @@ ERROR=0
 ############################################################
 # Create tmp files and folders
 ############################################################
-MY_TMP_DIR="$( mktemp -d /tmp/mysqldump-secure.XXXXXXXXXX )"    && debug "debug"  "Creating tmp dir: ${MY_TMP_DIR}"        $LOG "${LOGFILE}" "${_ARG_CRON}" || debug "err"  "Cannot create tmp dir: ${MY_TMP_DIR}"        $LOG "${LOGFILE}" "${_ARG_CRON}"
-MY_TMP_FILE_DUMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" )" && debug "debug"  "Creating tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" || debug "err"  "Cannot create tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-MY_TMP_FILE_COMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" )" && debug "debug"  "Creating tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" || debug "err"  "Cannot create tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-MY_TMP_FILE_ENCR="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" )" && debug "debug"  "Creating tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" || debug "err"  "Cannot create tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+
+if MY_TMP_DIR="$( mktemp -d /tmp/mysqldump-secure.XXXXXXXXXX 2>/dev/null)"; then
+	debug "debug"  "Creating tmp dir: ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+else
+	debug "err"  "Cannot create tmp dir: ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+fi
+
+if MY_TMP_FILE_DUMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
+	debug "debug"  "Creating tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+else
+	debug "err"  "Cannot create tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+fi
+
+if MY_TMP_FILE_COMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
+	debug "debug"  "Creating tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+else
+	debug "err"  "Cannot create tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+fi
+
+if MY_TMP_FILE_ENCR="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
+	debug "debug"  "Creating tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+else
+	debug "err"  "Cannot create tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+fi
 
 
 ############################################################
@@ -1688,7 +1708,11 @@ for db in ${DATABASES}; do
 					exec 4>&1
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3 || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3) |
+						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
+							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
+						else
+							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
+						fi) |
 						(${COMPRESS_BIN} ${COMPRESS_ARG} 2> "${MY_TMP_FILE_COMP}" && echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3 || echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3) |
 						(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" 2> "${MY_TMP_FILE_ENCR}" && echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3 || echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3)
 					) 3>&1 >&4)"
@@ -1918,10 +1942,29 @@ fi
 # Delete temporary files
 ############################################################
 
-rm "${MY_TMP_FILE_DUMP}" 2>/dev/null && debug "debug"  "Deleting tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" || debug "warn"  "Cannot delete tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-rm "${MY_TMP_FILE_COMP}" 2>/dev/null && debug "debug"  "Deleting tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" || debug "warn"  "Cannot delete tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-rm "${MY_TMP_FILE_ENCR}" 2>/dev/null && debug "debug"  "Deleting tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" || debug "warn"  "Cannot delete tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-rm -rf "${MY_TMP_DIR}"   2>/dev/null && debug "debug"  "Deleting tmp dir: ${MY_TMP_DIR}"        $LOG "${LOGFILE}" "${_ARG_CRON}" || debug "warn"  "Cannot delete tmp dir: ${MY_TMP_DIR}"        $LOG "${LOGFILE}" "${_ARG_CRON}"
+if rm "${MY_TMP_FILE_DUMP}" 2>/dev/null; then
+	debug "debug"  "Deleting tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+else
+	debug "warn"  "Cannot delete tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+fi
+
+if rm "${MY_TMP_FILE_COMP}" 2>/dev/null; then
+	debug "debug"  "Deleting tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+else
+	debug "warn"  "Cannot delete tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+fi
+
+if rm "${MY_TMP_FILE_ENCR}" 2>/dev/null; then
+	debug "debug"  "Deleting tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+else
+	debug "warn"  "Cannot delete tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+fi
+
+if rm -rf "${MY_TMP_DIR}" 2>/dev/null; then
+	debug "debug"  "Deleting tmp dir: ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+else
+	debug "warn"  "Cannot delete tmp dir: ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+fi
 
 
 
