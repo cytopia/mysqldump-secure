@@ -1764,6 +1764,11 @@ for db in ${DATABASES}; do
 				_exit="$( echo "${_err}" | awk -F ':' '{print $2}' )"
 				_msg="$(  echo "${_err}" | awk -F ':' '{for (i=3; i<NF; i++) printf $i " "; print $NF}' )"
 
+				# Reset variables in loop
+				MY_ERRORS=""
+				MY_WARNINGS=""
+
+
 				if [ "${_type}" = "0" ]; then
 					if [ "${_exit}" != "0" ]; then
 						[ -z "${MY_ERRORS}" ] && MY_ERRORS="mysqldump: ${_msg}" || MY_ERRORS="$( printf "%s\nmysqldump: %s" "${MY_ERRORS}" "${_msg}")"
