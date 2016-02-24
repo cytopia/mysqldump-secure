@@ -97,6 +97,7 @@ MYSQL_BAD_OPTS="--defaults-extra-file --defaults-file --ssl --ssl-ca --ssl-cert 
 # @param  string  _log	'1': log to file | else: do not log to file
 # @param  string  _file	Full path to logfile
 # @param  string  _cron '1': Cron usage - do not print 'info' | else: print all
+# @param  string  _debug '1': Show debug output | else: do not show debug output
 # @return integer 0
 debug() {
 	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
@@ -104,26 +105,33 @@ debug() {
 	_log="${3}"		# log to file?
 	_file="${4}"	# full path to logfile
 	_cron="${5}"	# run for cron?
+	_debug="${6-0}"	# run in debug mode?
 
 	# Hide info output when in cron-mode
 	if [ "${_cron}" != "1" ]; then
-		[ "${_lvl}" = "info" ] && printf "[INFO] %s\n" "${_msg}"
+		[ "${_lvl}" = "info" ] && printf "[INFO]  %s\n" "${_msg}"
+	fi
+
+	# Show debug output?
+	if [ "${_debug}" = "1" ]; then
+		[ "${_lvl}" = "debug" ] && printf "[DEBUG] %s\n" "${_msg}"
 	fi
 
 	# Always show warn and error
 	[ -t 1 ] && tput setaf 3
-	[ "${_lvl}" = "warn" ] && printf "[WARN] %s\n" "${_msg}" 1>&2	# stdout -> stderr
+	[ "${_lvl}" = "warn" ] && printf "[WARN]  %s\n" "${_msg}" 1>&2	# stdout -> stderr
 	[ -t 1 ] && tput setaf 1
-	[ "${_lvl}" = "err"  ] && printf "[ERR]  %s\n" "${_msg}" 1>&2	# stdout -> stderr
+	[ "${_lvl}" = "err"  ] && printf "[ERR]   %s\n" "${_msg}" 1>&2	# stdout -> stderr
 	[ -t 1 ] && tput setaf 7
 	[ -t 1 ] && tput sgr0
 
 	# Log to file
 	if [ "${_log}" = "1"    ]; then
 		_pre=""
-		[ "${_lvl}" = "info" ] && _pre="[INFO]"
-		[ "${_lvl}" = "warn" ] && _pre="[WARN]"
-		[ "${_lvl}" = "err" ]  && _pre="[ERR] "
+		[ "${_lvl}" = "debug" ] && _pre="[DEBUG]"
+		[ "${_lvl}" = "info" ]  && _pre="[INFO] "
+		[ "${_lvl}" = "warn" ]  && _pre="[WARN] "
+		[ "${_lvl}" = "err" ]   && _pre="[ERR]  "
 		printf "%s %s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${_msg}" >> "${_file}"
 	fi
 	return 0
@@ -137,6 +145,7 @@ debug() {
 # @param  string  _log	'1': log to file | else: do not log to file
 # @param  string  _file	Full path to logfile
 # @param  string  _cron '1': Cron usage - do not print 'info' | else: print all
+# @param  string  _debug '1': Show debug output | else: do not show debug output
 # @return integer 0
 debugr() {
 	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
@@ -144,6 +153,7 @@ debugr() {
 	_log="${3}"		# log to file?
 	_file="${4}"	# full path to logfile
 	_cron="${5}"	# run for cron?
+	_debug="${6-0}"	# run in debug mode?
 
 	# [INFO] Hide info output when in cron-mode
 	if [ "${_cron}" != "1" ]; then
@@ -151,11 +161,24 @@ debugr() {
 			IFS='
 			'
 			for line in ${_msg}; do
-				printf "[INFO] %s\n" "${line}"
+				printf "[INFO]  %s\n" "${line}"
 			done
 			unset IFS
 		fi
 	fi
+
+	# [DEBUG] Show debug output?
+	if [ "${_debug}" = "1" ]; then
+		if [ "${_lvl}" = "debug" ]; then
+			IFS='
+			'
+			for line in ${_msg}; do
+				printf "[DEBUG] %s\n" "${line}"
+			done
+			unset IFS
+		fi
+	fi
+
 
 	# [WARN] Always show warn and error
 	if [ "${_lvl}" = "warn" ]; then
@@ -163,7 +186,7 @@ debugr() {
 		IFS='
 		'
 		for line in ${_msg}; do
-			printf "[WARN] %s\n" "${line}" 1>&2	# stdout -> stderr
+			printf "[WARN]  %s\n" "${line}" 1>&2	# stdout -> stderr
 		done
 		unset IFS
 		[ -t 1 ] && tput setaf 7
@@ -176,7 +199,7 @@ debugr() {
 		IFS='
 		'
 		for line in ${_msg}; do
-			printf "[ERR]  %s\n" "${line}" 1>&2	# stdout -> stderr
+			printf "[ERR]   %s\n" "${line}" 1>&2	# stdout -> stderr
 		done
 		unset IFS
 		[ -t 1 ] && tput setaf 7
@@ -186,9 +209,10 @@ debugr() {
 	# Log to file
 	if [ "${_log}" = "1"    ]; then
 		_pre=""
-		[ "${_lvl}" = "info" ] && _pre="[INFO]"
-		[ "${_lvl}" = "warn" ] && _pre="[WARN]"
-		[ "${_lvl}" = "err" ]  && _pre="[ERR] "
+		[ "${_lvl}" = "debug" ] && _pre="[DEBUG]"
+		[ "${_lvl}" = "info" ]  && _pre="[INFO] "
+		[ "${_lvl}" = "warn" ]  && _pre="[WARN] "
+		[ "${_lvl}" = "err" ]   && _pre="[ERR]  "
 
 		IFS='
 		'
@@ -208,6 +232,7 @@ debugr() {
 # @param  string  _log	'1': log to file | else: do not log to file
 # @param  string  _file	Full path to logfile
 # @param  string  _cron '1': Cron usage - do not print 'info' | else: print all
+# @param  string  _debug '1': Show debug output | else: do not show debug output
 # @return integer 0
 debugi() {
 	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
@@ -215,26 +240,34 @@ debugi() {
 	_log="${3}"		# log to file?
 	_file="${4}"	# full path to logfile
 	_cron="${5}"	# run for cron?
+	_debug="${6-0}"	# run in debug mode?
 
 	# Hide info output when in cron-mode
 	if [ "${_cron}" != "1" ]; then
-		[ "${_lvl}" = "info" ] && printf "[INFO] %s" "${_msg}"
+		[ "${_lvl}" = "info" ] && printf "[INFO]  %s" "${_msg}"
 	fi
+
+	# Show debug output?
+	if [ "${_debug}" = "1" ]; then
+		[ "${_lvl}" = "debug" ] && printf "[DEBUG] %s" "${_msg}"
+	fi
+
 
 	# Always show warn and error
 	[ -t 1 ] && tput setaf 3
-	[ "${_lvl}" = "warn" ] && printf "[WARN] %s" "${_msg}" 1>&2	# stdout -> stderr
+	[ "${_lvl}" = "warn" ] && printf "[WARN]  %s" "${_msg}" 1>&2	# stdout -> stderr
 	[ -t 1 ] && tput setaf 1
-	[ "${_lvl}" = "err"  ] && printf "[ERR]  %s" "${_msg}" 1>&2	# stdout -> stderr
+	[ "${_lvl}" = "err"  ] && printf "[ERR]   %s" "${_msg}" 1>&2	# stdout -> stderr
 	[ -t 1 ] && tput setaf 7
 	[ -t 1 ] && tput sgr0
 
 	# Log to file
 	if [ "${_log}" = "1"    ]; then
 		_pre=""
-		[ "${_lvl}" = "info" ] && _pre="[INFO]"
-		[ "${_lvl}" = "warn" ] && _pre="[WARN]"
-		[ "${_lvl}" = "err" ]  && _pre="[ERR] "
+		[ "${_lvl}" = "debug" ] && _pre="[DEBUG]"
+		[ "${_lvl}" = "info" ]  && _pre="[INFO] "
+		[ "${_lvl}" = "warn" ]  && _pre="[WARN] "
+		[ "${_lvl}" = "err" ]   && _pre="[ERR]  "
 		printf "%s %s %s %s" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${_msg}" >> "${_file}"
 	fi
 	return 0
@@ -247,6 +280,7 @@ debugi() {
 # @param  string  _log	'1': log to file | else: do not log to file
 # @param  string  _file	Full path to logfile
 # @param  string  _cron '1': Cron usage - do not print 'info' | else: print all
+# @param  string  _debug '1': Show debug output | else: do not show debug output
 # @return integer 0
 debugn() {
 	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
@@ -254,11 +288,18 @@ debugn() {
 	_log="${3}"		# log to file?
 	_file="${4}"	# full path to logfile
 	_cron="${5}"	# run for cron?
+	_debug="${6-0}"	# run in debug mode?
 
 	# Hide info output when in cron-mode
 	if [ "${_cron}" != "1" ]; then
 		[ "${_lvl}" = "info" ] && printf "%s\n" "${_msg}"
 	fi
+
+	# Show debug output?
+	if [ "${_debug}" = "1" ]; then
+		[ "${_lvl}" = "debug" ] && printf "%s\n" "${_msg}"
+	fi
+
 
 	# Always show warn and error
 	[ -t 1 ] && tput setaf 3
@@ -1750,23 +1791,9 @@ for db in ${DATABASES}; do
 			fi
 
 
-			# No errors in POSIX pipestatus emulation
-			if [ -z "$error_statuses" ]; then
-				TOTAL_DBS=$((TOTAL_DBS + 1))
-				endtime=$(date +%s)
-				debugn "info" "$((endtime - starttime)) sec" $LOG "${LOGFILE}" "${_ARG_CRON}"
-
-				[ "${NAGIOS_DB_DUMPED}" = "" ] && NAGIOS_DB_DUMPED="${db}" || NAGIOS_DB_DUMPED="${NAGIOS_DB_DUMPED},${db}"
-			else
-				# Increment total dbs error count
-				TOTAL_ERR=$((TOTAL_ERR + 1))
-				debug_nl "info" $LOG "${LOGFILE}" "${_ARG_CRON}"
-				debug "err" "Error dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-				debug "err" "${error_statuses}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-				ERROR="$(merge_exit_codes "${ERROR}" 2)"
-
-				[ "${NAGIOS_DB_ERROR}" = "" ] && NAGIOS_DB_ERROR="${db}" || NAGIOS_DB_ERROR="${NAGIOS_DB_ERROR},${db}"
-			fi
+			# Debug output.
+			# TODO: add --debug flag and remove '1'
+			debugr "debug" "${error_statuses}" $LOG "${LOGFILE}" "${_ARG_CRON}" 1
 
 		fi
 
