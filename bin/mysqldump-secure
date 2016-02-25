@@ -732,8 +732,7 @@ merge_exit_codes() {
 print_usage() {
 #	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cron] [--verbose] [--test] [--info] [--help] [--version]"
 	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cron] [--verbose] [--test] [--help] [--version]"
-	printf "%s %s %s\n" "      " "${INFO_NAME}" "[--conf] [--verbose]"
-	printf "%s %s %s\n" "      " "${INFO_NAME}" "[--conf] --cron"
+	printf "%s %s %s\n" "      " "${INFO_NAME}" "[--conf] [--cron] [--verbose]"
 	printf "%s %s %s\n" "      " "${INFO_NAME}" "--test [--conf] [--verbose]"
 #	printf "%s %s %s\n" "      " "${INFO_NAME}" "--info"
 	printf "%s %s %s\n" "      " "${INFO_NAME}" "--help"
@@ -756,7 +755,8 @@ print_help() {
 	echo "--cron            Use for cron run. It will only output errors and warnings"
 	echo "                  and will silence all debug output."
 	echo
-	echo "--verbose         Show verbose debug output."
+	echo "--verbose         Show verbose debug output. If in cron mode, verbose output"
+	echo "                  will go to the logfile instead of stdout."
 	echo
 	echo "--test            Test requirements and exit."
 	echo
@@ -825,7 +825,7 @@ while [ $# -gt 0  ]; do
 			;;
 
 		--verbose)
-			if [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ] || [ "${_ARG_CRON}" = "1" ]; then
+			if [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ]; then
 				echo "Arguments cannot be mixed."
 				echo "Type '${INFO_NAME} --help' for available options."
 				exit 1
@@ -835,7 +835,7 @@ while [ $# -gt 0  ]; do
 
 
 		--cron)
-			if [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ] || [ "${_ARG_VERB}" = "1" ]; then
+			if [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ]; then
 				echo "Arguments cannot be mixed."
 				echo "Type '${INFO_NAME} --help' for available options."
 				exit 1
