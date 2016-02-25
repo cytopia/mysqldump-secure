@@ -10,6 +10,7 @@ Version 0.16 (unreleased)
 - [Fix]		$NUM_DEL was unset, if no files have been deleted
 - [Fix]		Output/Log did not show all deleted files by tmpwatch/tmpreaper
 - [Fix]		Validate MYSQL_OPTS
+- [Enh]		Adding option for consistend database dumps (MyISAM and InnoDB ready)
 - [Enh]		Adding debug output
 - [Enh]		Add ability to use mysql connection over SSL and validate it.
 - [Enh]		Use #!/bin/sh -u to check against unset variables

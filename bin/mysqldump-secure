@@ -1303,7 +1303,8 @@ fi
 ############################################################
 for opt in ${MYSQL_OPTS}; do
 	for evil in ${MYSQL_EVIL_OPTS}; do
-		if echo "${opt}" | grep -e "${evil}" > /dev/null 2>&1; then
+		if echo "${opt}" | grep -e "^${evil}" > /dev/null 2>&1; then
+			echo "opt: ${opt}   | evil: ${evil}"
 			debug "err"  "Insecure mysqldump option found in MYSQL_OPTS: '${opt}'" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			debug "err"  "Remove it. This option is handled by the tool itself." $LOG "${LOGFILE}" "${_ARG_CRON}"
 			debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
@@ -1311,7 +1312,7 @@ for opt in ${MYSQL_OPTS}; do
 		fi
 	done
 	for bad in ${MYSQL_BAD_OPTS}; do
-		if echo "${opt}" | grep -e "${bad}" > /dev/null 2>&1; then
+		if echo "${opt}" | grep -e "^${bad}" > /dev/null 2>&1; then
 			debug "err"  "Disallowed mysqldump option found in MYSQL_OPTS: '${opt}'" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			debug "err"  "Remove it. This option can be controlled via the configuration file itself." $LOG "${LOGFILE}" "${_ARG_CRON}"
 			debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
