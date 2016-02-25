@@ -964,6 +964,7 @@ elif [ "${LOG}" = "1" ]; then
 	if [ -z "${LOGFILE-}" ]; then
 		debug "warn" "\$LOGFILE variable is not set or empty in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
 		debug "warn" "(OPT) Logging disabled" "" "" "${_ARG_CRON}"
+		LOGFILE=""
 		LOG=0
 	fi
 
