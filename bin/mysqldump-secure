@@ -1776,7 +1776,7 @@ for db in ${DATABASES}; do
 					LOCK_OPTS="--lock-tables"
 				else
 					debug "debug" "All tables use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-					LOCK_OPTS="---single-transaction"
+					LOCK_OPTS="--single-transaction"
 				fi
 			else
 				debug "warn" "Not dumping consistently with '--lock-tables' or '--single-transaction'. Turn on via \$CONSISTENT_DUMP" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
