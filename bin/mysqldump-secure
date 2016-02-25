@@ -113,7 +113,7 @@ debug() {
 
 		# Show debug output?
 		if [ "${_debug}" = "1" ]; then
-			[ -t 1 ] && tput setaf 1
+			[ -t 1 ] && tput setaf 0
 			[ "${_lvl}" = "debug" ] && printf "[DEBUG] %s\n" "${_msg}"
 			[ -t 1 ] && tput setaf 7
 			[ -t 1 ] && tput sgr0
