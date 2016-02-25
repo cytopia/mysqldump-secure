@@ -466,5 +466,9 @@ sudo sed -i'' 's/^IGNORE_CONSISTENT_DUMP_WARNINGS="wrong"/IGNORE_CONSISTENT_DUMP
 
 
 
-
+echo
+echo
+echo "${txtblu}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
+echo "${txtblu}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   END OF CHECK   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
+echo "${txtblu}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
 exit $ERROR

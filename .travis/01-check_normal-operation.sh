@@ -162,4 +162,9 @@ sudo mysqldump-secure --wrong && { echo "${txtpur}===> [FAIL] Unexpected OK${txt
 
 
 
+echo
+echo
+echo "${txtblu}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
+echo "${txtblu}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   END OF CHECK   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
+echo "${txtblu}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
 exit $ERROR

@@ -82,6 +82,26 @@ MYSQL_BAD_OPTS="--no-defaults --defaults-extra-file --defaults-file --ssl --ssl-
 
 ################################################################################
 #
+# T E R M I N A L   C O L O R S
+#
+################################################################################
+
+if [ -t 1 ]; then
+	CLR_ERROR="$(tput setaf 1 2>/dev/null)"
+	CLR_WARNING="$(tput setaf 3 2>/dev/null)"
+	CLR_DEBUG="$(tput setaf 7 2>/dev/null)"
+	CLR_RESET="$(tput sgr0 2>/dev/null)"
+else
+	CLR_ERROR=""
+	CLR_WARNING=""
+	CLR_DEBUG=""
+	CLR_RESET=""
+fi
+
+
+
+################################################################################
+#
 # F U N C T I O N S
 #
 ################################################################################
@@ -113,26 +133,19 @@ debug() {
 
 		# Show debug output?
 		if [ "${_debug}" = "1" ]; then
-			[ -t 1 ] && tput setaf 0
-			[ "${_lvl}" = "debug" ] && printf "[DEBUG] %s\n" "${_msg}"
-			[ -t 1 ] && tput setaf 7
-			[ -t 1 ] && tput sgr0
+			[ "${_lvl}" = "verbose" ] && printf "${CLR_DEBUG}[DEBUG] %s\n${CLR_RESET}" "${_msg}"
 		fi
 	fi
 
 
 	# Always show warn and error
-	[ -t 1 ] && tput setaf 3
-	[ "${_lvl}" = "warn" ] && printf "[WARN]  %s\n" "${_msg}" 1>&2	# stdout -> stderr
-	[ -t 1 ] && tput setaf 1
-	[ "${_lvl}" = "err"  ] && printf "[ERR]   %s\n" "${_msg}" 1>&2	# stdout -> stderr
-	[ -t 1 ] && tput setaf 7
-	[ -t 1 ] && tput sgr0
+	[ "${_lvl}" = "warn" ] && printf "${CLR_WARNING}[WARN]  %s\n${CLR_RESET}" "${_msg}" 1>&2	# stdout -> stderr
+	[ "${_lvl}" = "err"  ] && printf "${CLR_ERROR}[ERR]   %s\n${CLR_RESET}" "${_msg}" 1>&2	# stdout -> stderr
 
 	# Log to file
 	if [ "${_log}" = "1"    ]; then
 		_pre=""
-		[ "${_lvl}" = "debug" ] && _pre="[DEBUG]"
+		[ "${_lvl}" = "verbose" ] && _pre="[DEBUG]"
 		[ "${_lvl}" = "info" ]  && _pre="[INFO] "
 		[ "${_lvl}" = "warn" ]  && _pre="[WARN] "
 		[ "${_lvl}" = "err" ]   && _pre="[ERR]  "
@@ -173,14 +186,11 @@ debugr() {
 
 		# [DEBUG] Show debug output?
 		if [ "${_debug}" = "1" ]; then
-			if [ "${_lvl}" = "debug" ]; then
+			if [ "${_lvl}" = "verbose" ]; then
 				IFS='
 				'
 				for line in ${_msg}; do
-					[ -t 1 ] && tput setaf 0
-					printf "[DEBUG] %s\n" "${line}"
-					[ -t 1 ] && tput setaf 7
-					[ -t 1 ] && tput sgr0
+					printf "${CLR_DEBUG}[DEBUG] %s\n${CLR_RESET}" "${line}"
 				done
 				unset IFS
 			fi
@@ -194,10 +204,7 @@ debugr() {
 		IFS='
 		'
 		for line in ${_msg}; do
-			[ -t 1 ] && tput setaf 3
-			printf "[WARN]  %s\n" "${line}" 1>&2	# stdout -> stderr
-			[ -t 1 ] && tput setaf 7
-			[ -t 1 ] && tput sgr0
+			printf "${CLR_WARNING}[WARN]  %s\n${CLR_RESET}" "${line}" 1>&2	# stdout -> stderr
 		done
 		unset IFS
 	fi
@@ -207,10 +214,7 @@ debugr() {
 		IFS='
 		'
 		for line in ${_msg}; do
-			[ -t 1 ] && tput setaf 1
-			printf "[ERR]   %s\n" "${line}" 1>&2	# stdout -> stderr
-			[ -t 1 ] && tput setaf 7
-			[ -t 1 ] && tput sgr0
+			printf "${CLR_ERROR}[ERR]   %s\n${CLR_RESET}" "${line}" 1>&2	# stdout -> stderr
 		done
 		unset IFS
 	fi
@@ -218,7 +222,7 @@ debugr() {
 	# Log to file
 	if [ "${_log}" = "1"    ]; then
 		_pre=""
-		[ "${_lvl}" = "debug" ] && _pre="[DEBUG]"
+		[ "${_lvl}" = "verbose" ] && _pre="[DEBUG]"
 		[ "${_lvl}" = "info" ]  && _pre="[INFO] "
 		[ "${_lvl}" = "warn" ]  && _pre="[WARN] "
 		[ "${_lvl}" = "err" ]   && _pre="[ERR]  "
@@ -257,26 +261,19 @@ debugi() {
 
 		# Show debug output?
 		if [ "${_debug}" = "1" ]; then
-			[ -t 1 ] && tput setaf 0
-			[ "${_lvl}" = "debug" ] && printf "[DEBUG] %s" "${_msg}"
-			[ -t 1 ] && tput setaf 7
-			[ -t 1 ] && tput sgr0
+			[ "${_lvl}" = "verbose" ] && printf "${CLR_DEBUG}[DEBUG] %s${CLR_RESET}" "${_msg}"
 		fi
 	fi
 
 
 	# Always show warn and error
-	[ -t 1 ] && tput setaf 3
-	[ "${_lvl}" = "warn" ] && printf "[WARN]  %s" "${_msg}" 1>&2	# stdout -> stderr
-	[ -t 1 ] && tput setaf 1
-	[ "${_lvl}" = "err"  ] && printf "[ERR]   %s" "${_msg}" 1>&2	# stdout -> stderr
-	[ -t 1 ] && tput setaf 7
-	[ -t 1 ] && tput sgr0
+	[ "${_lvl}" = "warn" ] && printf "${CLR_WARNING}[WARN]  %s${CLR_RESET}" "${_msg}" 1>&2	# stdout -> stderr
+	[ "${_lvl}" = "err"  ] && printf "${CLR_ERROR}[ERR]   %s${CLR_RESET}" "${_msg}" 1>&2	# stdout -> stderr
 
 	# Log to file
 	if [ "${_log}" = "1"    ]; then
 		_pre=""
-		[ "${_lvl}" = "debug" ] && _pre="[DEBUG]"
+		[ "${_lvl}" = "verbose" ] && _pre="[DEBUG]"
 		[ "${_lvl}" = "info" ]  && _pre="[INFO] "
 		[ "${_lvl}" = "warn" ]  && _pre="[WARN] "
 		[ "${_lvl}" = "err" ]   && _pre="[ERR]  "
@@ -308,21 +305,14 @@ debugn() {
 
 		# Show debug output?
 		if [ "${_debug}" = "1" ]; then
-			[ -t 1 ] && tput setaf 0
-			[ "${_lvl}" = "debug" ] && printf "%s\n" "${_msg}"
-			[ -t 1 ] && tput setaf 7
-			[ -t 1 ] && tput sgr0
+			[ "${_lvl}" = "verbose" ] && printf "${CLR_DEBUG}%s\n${CLR_RESET}" "${_msg}"
 		fi
 	fi
 
 
 	# Always show warn and error
-	[ -t 1 ] && tput setaf 3
-	[ "${_lvl}" = "warn" ] && printf "%s\n" "${_msg}" 1>&2	# stdout -> stderr
-	[ -t 1 ] && tput setaf 1
-	[ "${_lvl}" = "err"  ] && printf "%s\n" "${_msg}" 1>&2	# stdout -> stderr
-	[ -t 1 ] && tput setaf 7
-	[ -t 1 ] && tput sgr0
+	[ "${_lvl}" = "warn" ] && printf "${CLR_WARNING}%s\n${CLR_RESET}" "${_msg}" 1>&2	# stdout -> stderr
+	[ "${_lvl}" = "err"  ] && printf "${CLR_ERROR}%s\n${CLR_RESET}" "${_msg}" 1>&2	# stdout -> stderr
 
 	# Log to file
 	[ "${_log}" = "1"    ] && printf "%s\n" "${_msg}" >> "${_file}"
@@ -348,7 +338,7 @@ debug_nl() {
 
 		# Show debug output?
 		if [ "${_debug}" = "1" ]; then
-			[ "${_lvl}" = "debug" ] && printf "\n"
+			[ "${_lvl}" = "verbose" ] && printf "\n"
 		fi
 	fi
 
@@ -1278,9 +1268,9 @@ if [ -z "${IGNORE_CONSISTENT_DUMP_WARNINGS-}" ]; then
 	debug "warn"  "Intentionally warning about not inconsistent dumps" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	IGNORE_CONSISTENT_DUMP_WARNINGS=0
 elif [ "${IGNORE_CONSISTENT_DUMP_WARNINGS}" = "1" ]; then
-	debug "debug" "Not warning about inconsistent database dumps" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose" "Consistent Dumps: Warnings disabled (unsafe)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "debug" "Warning about inconsistent database dumps" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose" "Consistent Dumps: Warning enabled (safe)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 
@@ -1609,25 +1599,25 @@ ERROR=0
 ############################################################
 
 if MY_TMP_DIR="$( mktemp -d /tmp/mysqldump-secure.XXXXXXXXXX 2>/dev/null)"; then
-	debug "debug"  "Creating tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose"  "Creating tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "Cannot create tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 if MY_TMP_FILE_DUMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
-	debug "debug"  "Creating tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose"  "Creating tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "Cannot create tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 if MY_TMP_FILE_COMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
-	debug "debug"  "Creating tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose"  "Creating tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "Cannot create tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 if MY_TMP_FILE_ENCR="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
-	debug "debug"  "Creating tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose"  "Creating tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "Cannot create tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
@@ -1769,13 +1759,13 @@ for db in ${DATABASES}; do
 			# Set dump options if consistent dumping is enabled
 			if [ "${CONSISTENT_DUMP}" = "1" ]; then
 				if [ "${_TABLES_MYISAM}" != "" ]; then
-					debug "debug" "Some tables use MyISAM (${_TABLES_MYISAM}). Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debug "verbose" "Some tables use MyISAM (${_TABLES_MYISAM}). Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 					LOCK_OPTS="--lock-tables"
 				elif [ "${_TABLES_OTHER}" != "" ]; then
-					debug "debug" "Some tables use an unknown Engine (${_TABLES_OTHER}). Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debug "verbose" "Some tables use an unknown Engine (${_TABLES_OTHER}). Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 					LOCK_OPTS="--lock-tables"
 				else
-					debug "debug" "All tables use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debug "verbose" "All tables use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 					LOCK_OPTS="--single-transaction"
 				fi
 			else
@@ -1992,7 +1982,7 @@ for db in ${DATABASES}; do
 			fi
 
 			# Debug output.
-			debugr "debug" "${error_statuses}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debugr "verbose" "${error_statuses}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		fi
 
 	elif [ ${skip} -eq 1 ]; then
@@ -2095,25 +2085,25 @@ fi
 ############################################################
 
 if rm "${MY_TMP_FILE_DUMP}" 2>/dev/null; then
-	debug "debug"  "Deleting tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose"  "Deleting tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "warn"  "Cannot delete tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 if rm "${MY_TMP_FILE_COMP}" 2>/dev/null; then
-	debug "debug"  "Deleting tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose"  "Deleting tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "warn"  "Cannot delete tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 if rm "${MY_TMP_FILE_ENCR}" 2>/dev/null; then
-	debug "debug"  "Deleting tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose"  "Deleting tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "warn"  "Cannot delete tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 if rm -rf "${MY_TMP_DIR}" 2>/dev/null; then
-	debug "debug"  "Deleting tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose"  "Deleting tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "warn"  "Cannot delete tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi

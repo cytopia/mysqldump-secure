@@ -228,5 +228,9 @@ sudo mysqldump-secure --verbose && echo "${txtgrn}===> [OK] Success${txtrst}" ||
 sudo sed -i'' 's/DUMP_FILE_CHMOD=""/DUMP_FILE_CHMOD="0400"/' /etc/mysqldump-secure.conf
 
 
-
+echo
+echo
+echo "${txtblu}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
+echo "${txtblu}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@   END OF CHECK   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
+echo "${txtblu}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
 exit $ERROR
