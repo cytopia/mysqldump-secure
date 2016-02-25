@@ -71,12 +71,12 @@ _DEFAULT_NAGIOS_LOG_CHMOD="0644"
 
 # These command line arguments are considered insecure and can lead
 # to compromising your data
-MYSQL_EVIL_OPTS="--password -p"
+MYSQL_EVIL_OPTS="--password -p --port -P --user -u --host -h --socket -s"
 
 # Do not allow to read any other MySQL configuration file
 # than the one specified in the configuration.
 # Also all SSL Options are done via configuration
-MYSQL_BAD_OPTS="--defaults-extra-file --defaults-file --ssl --ssl-ca --ssl-cert --ssl-key"
+MYSQL_BAD_OPTS="--no-defaults --defaults-extra-file --defaults-file --ssl --ssl-ca --ssl-cert --ssl-key --single-transaction --lock-tables"
 
 
 
@@ -1273,20 +1273,47 @@ fi
 debug "info"  "mysqldump options: ${MYSQL_OPTS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 
+if [ -z "${IGNORE_CONSISTENT_DUMP_WARNINGS-}" ]; then
+	debug "warn"  "\$IGNORE_CONSISTENT_DUMP_WARNINGS variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn"  "Intentionally warning about not inconsistent dumps" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	IGNORE_CONSISTENT_DUMP_WARNINGS=0
+elif [ "${IGNORE_CONSISTENT_DUMP_WARNINGS}" = "1" ]; then
+	debug "debug" "Not warning about inconsistent database dumps" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+else
+	debug "debug" "Warning about inconsistent database dumps" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+fi
+
+
+if [ -z "${CONSISTENT_DUMP-}" ]; then
+	debug "warn"  "\$CONSISTENT_DUMP variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn"  "Intentionally disabling consistent dumps (no '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	CONSISTENT_DUMP=0
+elif [ "${CONSISTENT_DUMP}" = "1" ]; then
+	debug "info"  "Dumping consistently across tables (using '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}"
+else
+	debug "warn"  "Wrong value fuer \$CONSISTENT_DUMP in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn"  "Intentionally disabling consistent dumps (no '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	CONSISTENT_DUMP=0
+fi
+
+
+
 ############################################################
 # Bad MySQL Opts
 ############################################################
 for opt in ${MYSQL_OPTS}; do
 	for evil in ${MYSQL_EVIL_OPTS}; do
-		if [ "${opt}" = "${evil}" ]; then
-			debug "err"  "Insecure mysqldump option found in MYSQL_OPTS: '${evil}'" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		if echo "${opt}" | grep -e "${evil}" > /dev/null 2>&1; then
+			debug "err"  "Insecure mysqldump option found in MYSQL_OPTS: '${opt}'" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "Remove it. This option is handled by the tool itself." $LOG "${LOGFILE}" "${_ARG_CRON}"
 			debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			exit 3
 		fi
 	done
 	for bad in ${MYSQL_BAD_OPTS}; do
-		if [ "${opt}" = "${bad}" ]; then
-			debug "err"  "Disallowed mysqldump option found in MYSQL_OPTS: '${bad}'" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		if echo "${opt}" | grep -e "${bad}" > /dev/null 2>&1; then
+			debug "err"  "Disallowed mysqldump option found in MYSQL_OPTS: '${opt}'" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "Remove it. This option can be controlled via the configuration file itself." $LOG "${LOGFILE}" "${_ARG_CRON}"
 			debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			exit 3
 		fi
@@ -1695,7 +1722,9 @@ for db in ${DATABASES}; do
 		# All Good, file can be written
 		else
 
-			# Check required databases
+			#
+			# REQUIRED DATABASES
+			#
 			for req in ${REQUIRE}; do
 				# Required database found?
 				# Remove from variable
@@ -1704,82 +1733,191 @@ for db in ${DATABASES}; do
 				fi
 			done
 
-			DB_SIZE="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" --batch \
+
+			#
+			# TABLE ENGINES
+			#
+			_TABLES_INNODB=""
+			_TABLES_MYISAM=""
+			_TABLES_OTHER=""
+			LOCK_OPTS=""
+
+			# Gather all table engines.
+			TBL_ENGINES="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} --batch \
+				-e "SELECT CONCAT(TABLE_NAME, '#',ENGINE) AS t
+					FROM information_schema.TABLES
+					WHERE TABLE_SCHEMA = '${db}';" | grep -E '^.*[#].*$')"
+			IFS='
+			'
+
+			# Assign Dump options to table engines.
+			for _line in ${TBL_ENGINES}; do
+				_table="$(echo "${_line}" | awk -F '#' '{print $1}')"
+				_engine="$(echo "${_line}" | awk -F '#' '{print $2}')"
+
+				if [ "${_engine}" = "InnoDB" ]; then
+					[ -z "${_TABLES_INNODB}" ] && _TABLES_INNODB="${_table}" || _TABLES_INNODB="$( printf "%s %s" "${_TABLES_INNODB}" "${_table}")"
+				elif  [ "${_engine}" = "MyISAM" ]; then
+					[ -z "${_TABLES_MYISAM}" ] && _TABLES_MYISAM="${_table}" || _TABLES_MYISAM="$( printf "%s %s" "${_TABLES_MYISAM}" "${_table}")"
+				else
+					[ -z "${_TABLES_OTHER}" ] && _TABLES_OTHER="${_table}" || _TABLES_OTHER="$( printf "%s %s" "${_TABLES_OTHER}" "${_table}")"
+				fi
+			done
+			unset IFS
+
+			# Set dump options if consistent dumping is enabled
+			if [ "${CONSISTENT_DUMP}" = "1" ]; then
+				if [ "${_TABLES_MYISAM}" != "" ]; then
+					debug "debug" "Some tables use MyISAM (${_TABLES_MYISAM}). Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					LOCK_OPTS="--lock-tables"
+				elif [ "${_TABLES_OTHER}" != "" ]; then
+					debug "debug" "Some tables use an unknown Engine (${_TABLES_OTHER}). Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					LOCK_OPTS="--lock-tables"
+				else
+					debug "debug" "All tables use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					LOCK_OPTS="---single-transaction"
+				fi
+			else
+				debug "warn" "Not dumping consistently with '--lock-tables' or '--single-transaction'. Turn on via \$CONSISTENT_DUMP" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			fi
+
+
+			#
+			# DATABASE SIZE
+			#
+			DB_SIZE="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} --batch \
 				-e "SELECT SUM(ROUND(((DATA_LENGTH + INDEX_LENGTH ) / 1024 / 1024),2)) AS Size
 					FROM INFORMATION_SCHEMA.TABLES
 					WHERE TABLE_SCHEMA = '${db}';" | tail -n1 )"
 
 			TOTAL_SIZE=$( sum "${TOTAL_SIZE}" "${DB_SIZE}" )
+
+
+			#
+			# RESET pipefail VARIABLE
+			#
+			error_statuses=""
+
+
+			#
+			# TRACK TIME
+			#
 			starttime=$(date +%s)
 
-			error_statuses=""
+
+			#
+			# GO GO GO!
+			#
 			if [ ${COMPRESS} -eq 1 ]; then
+				#
+				# Case 1/4 Compressed & Encrypted
+				#
 				if [ ${ENCRYPT} -eq 1 ]; then
 					ext=".sql.${COMPRESS_EXT}.enc"
 					debugi "info"  "Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) " $LOG "${LOGFILE}" "${_ARG_CRON}"
 
-					# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
+
+					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
+
+					# POSIX pipefail emulation
 					exec 4>&1
-					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
+						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${LOCK_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
 						else
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
 						fi) |
-						(${COMPRESS_BIN} ${COMPRESS_ARG} 2> "${MY_TMP_FILE_COMP}" && echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3 || echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3) |
-						(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" 2> "${MY_TMP_FILE_ENCR}" && echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3 || echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3)
+						(if ${COMPRESS_BIN} ${COMPRESS_ARG} 2> "${MY_TMP_FILE_COMP}"; then
+							echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3;
+						else
+							echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3
+						fi) |
+						(if ${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" 2> "${MY_TMP_FILE_ENCR}"; then
+							echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3;
+						else
+							echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3;
+						fi)
 					) 3>&1 >&4)"
 					exec 4>&-
-
+				#
+				# Case 2/4 Compressed Only
+				#
 				else
 					ext=".sql.${COMPRESS_EXT}"
 					debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (compressed) " $LOG "${LOGFILE}" "${_ARG_CRON}"
 
-					# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
+					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")"
+
+					# POSIX pipefail emulation
 					exec 4>&1
-					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3 || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3) |
-						(${COMPRESS_BIN} ${COMPRESS_ARG} 2> "${MY_TMP_FILE_COMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" && echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3 || echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3)
+						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${LOCK_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
+							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
+						else
+							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
+						fi) |
+						(if ${COMPRESS_BIN} ${COMPRESS_ARG} 2> "${MY_TMP_FILE_COMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}"; then
+							echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3;
+						else
+							echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3
+						fi)
 					) 3>&1 >&4)"
 					exec 4>&-
 
 				fi
 			else
+				#
+				# Case 3/4 Encrypted Only
+				#
 				if [ ${ENCRYPT} -eq 1 ]; then
 					ext=".sql.enc"
 					debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (encrypted) " $LOG "${LOGFILE}" "${_ARG_CRON}"
 
-					# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
+					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
+
+					# POSIX pipefail emulation
 					exec 4>&1
-					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3 || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3) |
-						(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" 2> "${MY_TMP_FILE_ENCR}" && echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3 || echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3)
+						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${LOCK_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
+							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
+						else
+							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
+						fi) |
+						(if ${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" 2> "${MY_TMP_FILE_ENCR}"; then
+							echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3;
+						else
+							echo "2:$?:$(cat "${MY_TMP_FILE_ENCR}")" >&3;
+						fi)
 					) 3>&1 >&4)"
 					exec 4>&-
-
+				#
+				# Case 4/4 Plain
+				#
 				else
 					ext=".sql"
 					debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) " $LOG "${LOGFILE}" "${_ARG_CRON}"
 
-					# execute with POSIX pipestatus emulation (needs to get rid of shellcheck)
+					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
+
+					# POSIX pipefail emulation
 					exec 4>&1
-					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" && echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3 || echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3)
+						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${LOCK_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}"; then
+							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
+						else
+							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
+						fi)
 					) 3>&1 >&4)"
 					exec 4>&-
-
 				fi
 			fi
 
 
+			#
 			# Error Checking
 			#
 			# Inside $error_statuses we have the following information.
@@ -1826,7 +1964,7 @@ for db in ${DATABASES}; do
 			unset IFS
 
 
-
+			#
 			# Error Evaluation
 			#
 			if [ "${MY_ERRORS}" != "" ]; then
@@ -1871,7 +2009,7 @@ TOTAL_ENDTIME=$(date +%s)
 
 
 for req in ${REQUIRE}; do
-	debug "err"  "Required database: \"${req}\" has not been dumped." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err" "Required database: \"${req}\" has not been dumped." $LOG "${LOGFILE}" "${_ARG_CRON}"
 	ERROR="$(merge_exit_codes "${ERROR}" 2)"
 done
 
