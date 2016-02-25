@@ -104,9 +104,12 @@ script:
   #
   # --------------------------------------------------------------------------------
 
-  - /bin/sh ./.travis/check_normal-operation.sh
+  - /bin/sh ./.travis/01-check_normal-operation.sh
+
+  - /bin/sh ./.travis/02-check_output_dirs.sh
 
   - /bin/sh ./.travis/check_config.sh
+
 
 
 
