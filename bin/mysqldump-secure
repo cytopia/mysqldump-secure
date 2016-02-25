@@ -947,6 +947,7 @@ if [ -z "${LOG-}" ]; then
 	debug "warn" "\$LOG variable is not set or empty in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
 	debug "warn" "(OPT) Logging disabled" "" "" "${_ARG_CRON}"
 	LOG=0
+	LOGFILE=""
 elif [ "${LOG}" = "1" ]; then
 
 	# Check chmod variable
