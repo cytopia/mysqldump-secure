@@ -730,11 +730,11 @@ merge_exit_codes() {
 # Usage
 #
 print_usage() {
-#	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cron] [--test] [--info] [--help] [--version]"
-	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cron] [--test] [--help] [--version]"
-	printf "%s %s %s\n" "      " "${INFO_NAME}" "[--conf]"
-	printf "%s %s %s\n" "      " "${INFO_NAME}" "--cron [--conf]"
-	printf "%s %s %s\n" "      " "${INFO_NAME}" "--test [--conf]"
+#	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cron] [--verbose] [--test] [--info] [--help] [--version]"
+	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cron] [--verbose] [--test] [--help] [--version]"
+	printf "%s %s %s\n" "      " "${INFO_NAME}" "[--conf] [--verbose]"
+	printf "%s %s %s\n" "      " "${INFO_NAME}" "[--conf] --cron"
+	printf "%s %s %s\n" "      " "${INFO_NAME}" "--test [--conf] [--verbose]"
 #	printf "%s %s %s\n" "      " "${INFO_NAME}" "--info"
 	printf "%s %s %s\n" "      " "${INFO_NAME}" "--help"
 	printf "%s %s %s\n" "      " "${INFO_NAME}" "--version"
@@ -755,6 +755,8 @@ print_help() {
 	echo
 	echo "--cron            Use for cron run. It will only output errors and warnings"
 	echo "                  and will silence all debug output."
+	echo
+	echo "--verbose         Show verbose debug output."
 	echo
 	echo "--test            Test requirements and exit."
 	echo
@@ -795,6 +797,7 @@ print_version() {
 
 
 _ARG_CONF="0"
+_ARG_VERB="0"
 _ARG_CRON="0"
 _ARG_TEST="0"
 _ARG_HELP="0"
@@ -821,8 +824,18 @@ while [ $# -gt 0  ]; do
 			_CUS_CONF="$(echo "$1" | sed 's/--conf=//g')"
 			;;
 
+		--verbose)
+			if [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ] || [ "${_ARG_CRON}" = "1" ]; then
+				echo "Arguments cannot be mixed."
+				echo "Type '${INFO_NAME} --help' for available options."
+				exit 1
+			fi
+			_ARG_VERB="1"
+			;;
+
+
 		--cron)
-			if [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ]; then
+			if [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ] || [ "${_ARG_VERB}" = "1" ]; then
 				echo "Arguments cannot be mixed."
 				echo "Type '${INFO_NAME} --help' for available options."
 				exit 1
@@ -844,7 +857,7 @@ while [ $# -gt 0  ]; do
 #			;;
 
 		--help)
-			if [ "${_ARG_CONF}" = "1" ] || [ "${_ARG_CRON}" = "1" ] || [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_VERS}" = "1" ]; then
+			if [ "${_ARG_CONF}" = "1" ] || [ "${_ARG_CRON}" = "1" ] || [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_VERS}" = "1" ] || [ "${_ARG_VERB}" = "1" ]; then
 				echo "Arguments cannot be mixed."
 				echo "Type '${INFO_NAME} --help' for available options."
 				exit 1
@@ -855,7 +868,7 @@ while [ $# -gt 0  ]; do
 			;;
 
 		--version)
-			if [ "${_ARG_CONF}" = "1" ] || [ "${_ARG_CRON}" = "1" ] || [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_HELP}" = "1" ]; then
+			if [ "${_ARG_CONF}" = "1" ] || [ "${_ARG_CRON}" = "1" ] || [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERB}" = "1" ]; then
 				echo "Arguments cannot be mixed."
 				echo "Type '${INFO_NAME} --help' for available options."
 				exit 1
@@ -1566,25 +1579,25 @@ ERROR=0
 ############################################################
 
 if MY_TMP_DIR="$( mktemp -d /tmp/mysqldump-secure.XXXXXXXXXX 2>/dev/null)"; then
-	debug "debug"  "Creating tmp dir: ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "debug"  "Creating tmp dir: ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "Cannot create tmp dir: ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 if MY_TMP_FILE_DUMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
-	debug "debug"  "Creating tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "debug"  "Creating tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "Cannot create tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 if MY_TMP_FILE_COMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
-	debug "debug"  "Creating tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "debug"  "Creating tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "Cannot create tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 if MY_TMP_FILE_ENCR="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
-	debug "debug"  "Creating tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "debug"  "Creating tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "Cannot create tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
@@ -1837,10 +1850,8 @@ for db in ${DATABASES}; do
 				fi
 			fi
 
-
 			# Debug output.
-			# TODO: add --debug flag and remove '1'
-			debugr "debug" "${error_statuses}" $LOG "${LOGFILE}" "${_ARG_CRON}" 1
+			debugr "debug" "${error_statuses}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		fi
 
 	elif [ ${skip} -eq 1 ]; then
@@ -1943,25 +1954,25 @@ fi
 ############################################################
 
 if rm "${MY_TMP_FILE_DUMP}" 2>/dev/null; then
-	debug "debug"  "Deleting tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "debug"  "Deleting tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "warn"  "Cannot delete tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 if rm "${MY_TMP_FILE_COMP}" 2>/dev/null; then
-	debug "debug"  "Deleting tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "debug"  "Deleting tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "warn"  "Cannot delete tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 if rm "${MY_TMP_FILE_ENCR}" 2>/dev/null; then
-	debug "debug"  "Deleting tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "debug"  "Deleting tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "warn"  "Cannot delete tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 if rm -rf "${MY_TMP_DIR}" 2>/dev/null; then
-	debug "debug"  "Deleting tmp dir: ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "debug"  "Deleting tmp dir: ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "warn"  "Cannot delete tmp dir: ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
