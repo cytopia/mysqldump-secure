@@ -1579,9 +1579,9 @@ ERROR=0
 ############################################################
 
 if MY_TMP_DIR="$( mktemp -d /tmp/mysqldump-secure.XXXXXXXXXX 2>/dev/null)"; then
-	debug "debug"  "Creating tmp dir: ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug"  "Creating tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "err"  "Cannot create tmp dir: ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "Cannot create tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 if MY_TMP_FILE_DUMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
@@ -1972,9 +1972,9 @@ else
 fi
 
 if rm -rf "${MY_TMP_DIR}" 2>/dev/null; then
-	debug "debug"  "Deleting tmp dir: ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug"  "Deleting tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "warn"  "Cannot delete tmp dir: ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn"  "Cannot delete tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 
