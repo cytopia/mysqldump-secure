@@ -1284,10 +1284,12 @@ if [ -z "${CONSISTENT_DUMP-}" ]; then
 	CONSISTENT_DUMP=0
 elif [ "${CONSISTENT_DUMP}" = "1" ]; then
 	debug "info"  "Dumping consistently across tables (using '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}"
+elif [ "${CONSISTENT_DUMP}" = "0" ]; then
+	debug "info"  "Not dumping consistently across tables (unsafe)" $LOG "${LOGFILE}" "${_ARG_CRON}"
 else
-	debug "warn"  "Wrong value fuer \$CONSISTENT_DUMP in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "warn"  "Intentionally disabling consistent dumps (no '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	CONSISTENT_DUMP=0
+	debug "err"   "Wrong value fuer \$CONSISTENT_DUMP in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"   "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	exit 1
 fi
 
 
