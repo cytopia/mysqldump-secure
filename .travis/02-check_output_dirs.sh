@@ -45,6 +45,12 @@ echo "\$ sudo mysqldump-secure --verbose"
 sudo mysqldump-secure --verbose && { echo "${txtpur}===> [FAIL] Unexpected OK${txtrst}"; ERROR=1; } || echo "${txtgrn}===> [OK] Expected Error. Exit code: $?${txtrst}"
 sudo sed -i'' 's/#DUMP_PATH/DUMP_PATH/' /etc/mysqldump-secure.conf
 
+echo
+echo "Unbound variable test"
+unbound="$(sudo mysqldump-secure --verbose 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
+[ "$unbound" != "" ] && { echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}{txtrst}" ERROR=1; } ||  echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}"
+
+
 
 echo
 echo "----------------------------------------"
