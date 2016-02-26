@@ -1268,13 +1268,17 @@ debug "info"  "mysqldump options: ${MYSQL_OPTS}" $LOG "${LOGFILE}" "${_ARG_CRON}
 
 
 if [ -z "${IGNORE_CONSISTENT_DUMP_WARNINGS-}" ]; then
-	debug "warn"  "\$IGNORE_CONSISTENT_DUMP_WARNINGS variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "warn"  "Intentionally warning about not inconsistent dumps" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	IGNORE_CONSISTENT_DUMP_WARNINGS=0
+	debug "err"  "\$IGNORE_CONSISTENT_DUMP_WARNINGS variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "Aborting"
+	exit 1
 elif [ "${IGNORE_CONSISTENT_DUMP_WARNINGS}" = "1" ]; then
 	debug "verbose" "Consistent Dumps: Warnings disabled (unsafe)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-else
+elif [ "${IGNORE_CONSISTENT_DUMP_WARNINGS}" = "0" ]; then
 	debug "verbose" "Consistent Dumps: Warning enabled (safe)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+else
+	debug "err"  "\$IGNORE_CONSISTENT_DUMP_WARNINGS variable has an invalid value: ${IGNORE_CONSISTENT_DUMP_WARNINGS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "Aborting"
+	exit 1
 fi
 
 
