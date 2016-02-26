@@ -1184,7 +1184,7 @@ if [ -z "${MYSQL_SSL_ENABLE-}" ]; then
 	debug "err"  "Aborting, as it is not clear whether or not you only allow secure connections." $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
 fi
-if [  "${MYSQL_SSL_ENABLE}" = "1" ]; then
+if [ "${MYSQL_SSL_ENABLE}" = "1" ]; then
 	if [ -z "${MYSQL_SSL_CA_PEM-}" ]; then
 		debug "err"  "\$MYSQL_SSL_CA_PEM variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		debug "err"  "Aborting, as you don't want clear-text connections." $LOG "${LOGFILE}" "${_ARG_CRON}"
@@ -1218,10 +1218,14 @@ if [  "${MYSQL_SSL_ENABLE}" = "1" ]; then
 	fi
 
 	debug "info" "(OPT) MySQL SSL connection enabled: ${MYSQL_SSL_ARGS}." $LOG "${LOGFILE}" "${_ARG_CRON}"
-else
+elif [ "${MYSQL_SSL_ENABLE}" = "0" ]; then
 	MYSQL_SSL_ENABLE=0
 	MYSQL_SSL_ARGS=""
 	debug "info" "(OPT) MySQL SSL connection disabled." $LOG "${LOGFILE}" "${_ARG_CRON}"
+else
+	debug "err"  "Wrong value for \$MYSQL_SSL_ENABLE: $MYSQL_SSL_ENABLE" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "Aborting, as it is not clear whether or not you only allow secure connections." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	exit 1
 fi
 
 
