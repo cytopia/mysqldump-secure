@@ -87,9 +87,9 @@ MYSQL_BAD_OPTS="--no-defaults --defaults-extra-file --defaults-file --ssl --ssl-
 ################################################################################
 
 if [ -t 1 ]; then
-	CLR_ERROR="$(tput setaf 1 2>/dev/null)"
-	CLR_WARNING="$(tput setaf 3 2>/dev/null)"
-	CLR_DEBUG="$(tput setaf 7 2>/dev/null)"
+	CLR_ERROR="$(tput setf 4 2>/dev/null || tput setaf 1 2>/dev/null)"
+	CLR_WARNING="$(tput setf 6 2>/dev/null || tput setaf 3 2>/dev/null)"
+	CLR_DEBUG="$(tput setf 0 2>/dev/null || tput setaf 7 2>/dev/null)"
 	CLR_RESET="$(tput sgr0 2>/dev/null)"
 else
 	CLR_ERROR=""
