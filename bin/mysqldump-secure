@@ -1731,7 +1731,7 @@ for db in ${DATABASES}; do
 			_TABLES_INNODB=""
 			_TABLES_MYISAM=""
 			_TABLES_OTHER=""
-			LOCK_OPTS=""
+			MYSQL_LOCK_OPTS=""
 
 			# Gather all table engines.
 			TBL_ENGINES="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} --batch \
@@ -1761,19 +1761,19 @@ for db in ${DATABASES}; do
 
 				# information_schema and performance schema are special tables, which do not allow locking
 				if [ "${db}" = "information_schema" ] || [ "${db}" = "performance_schema" ]; then
-					debug "info" "\"${db}\" cannot be dumped with --lock-tables. Adding --skip-lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-					LOCK_OPTS="--skip-lock-tables"
+					debug "verbose" "\"${db}\" cannot be dumped with --lock-tables. Adding --skip-lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					MYSQL_LOCK_OPTS="--skip-lock-tables"
 				# All other tables
 				else
 					if [ "${_TABLES_MYISAM}" != "" ]; then
 						debug "verbose" "Some tables use MyISAM (${_TABLES_MYISAM}). Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-						LOCK_OPTS="--lock-tables"
+						MYSQL_LOCK_OPTS="--lock-tables"
 					elif [ "${_TABLES_OTHER}" != "" ]; then
 						debug "verbose" "Some tables use an unknown Engine (${_TABLES_OTHER}). Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-						LOCK_OPTS="--lock-tables"
+						MYSQL_LOCK_OPTS="--lock-tables"
 					else
 						debug "verbose" "All tables use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-						LOCK_OPTS="--single-transaction"
+						MYSQL_LOCK_OPTS="--single-transaction"
 					fi
 				fi
 			else
@@ -1813,7 +1813,7 @@ for db in ${DATABASES}; do
 				#
 				if [ ${ENCRYPT} -eq 1 ]; then
 					ext=".sql.${COMPRESS_EXT}.enc"
-					debugi "info"  "Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) " $LOG "${LOGFILE}" "${_ARG_CRON}"
+					debugi "info"  "Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) " )" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 
 					# Set umask prior writing
@@ -1822,7 +1822,7 @@ for db in ${DATABASES}; do
 					# POSIX pipefail emulation
 					exec 4>&1
 					error_statuses="$( (
-						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${LOCK_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
+						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
 						else
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
@@ -1844,7 +1844,7 @@ for db in ${DATABASES}; do
 				#
 				else
 					ext=".sql.${COMPRESS_EXT}"
-					debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (compressed) " $LOG "${LOGFILE}" "${_ARG_CRON}"
+					debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (compressed) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) " )" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")"
@@ -1852,7 +1852,7 @@ for db in ${DATABASES}; do
 					# POSIX pipefail emulation
 					exec 4>&1
 					error_statuses="$( (
-						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${LOCK_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
+						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
 						else
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
@@ -1872,7 +1872,7 @@ for db in ${DATABASES}; do
 				#
 				if [ ${ENCRYPT} -eq 1 ]; then
 					ext=".sql.enc"
-					debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (encrypted) " $LOG "${LOGFILE}" "${_ARG_CRON}"
+					debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) " )" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
@@ -1880,7 +1880,7 @@ for db in ${DATABASES}; do
 					# POSIX pipefail emulation
 					exec 4>&1
 					error_statuses="$( (
-						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${LOCK_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
+						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
 						else
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
@@ -1897,7 +1897,7 @@ for db in ${DATABASES}; do
 				#
 				else
 					ext=".sql"
-					debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) " $LOG "${LOGFILE}" "${_ARG_CRON}"
+					debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) " )" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
@@ -1905,7 +1905,7 @@ for db in ${DATABASES}; do
 					# POSIX pipefail emulation
 					exec 4>&1
 					error_statuses="$( (
-						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${LOCK_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}"; then
+						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}"; then
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
 						else
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
