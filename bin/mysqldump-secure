@@ -1758,15 +1758,23 @@ for db in ${DATABASES}; do
 
 			# Set dump options if consistent dumping is enabled
 			if [ "${CONSISTENT_DUMP}" = "1" ]; then
-				if [ "${_TABLES_MYISAM}" != "" ]; then
-					debug "verbose" "Some tables use MyISAM (${_TABLES_MYISAM}). Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-					LOCK_OPTS="--lock-tables"
-				elif [ "${_TABLES_OTHER}" != "" ]; then
-					debug "verbose" "Some tables use an unknown Engine (${_TABLES_OTHER}). Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-					LOCK_OPTS="--lock-tables"
+
+				# information_schema and performance schema are special tables, which do not allow locking
+				if [ "${db}" = "information_schema" ] || [ "${db}" = "performance_schema" ]; then
+					debug "info" "\"${db}\" cannot be dumped with --lock-tables. Adding --skip-lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					LOCK_OPTS="--skip-lock-tables"
+				# All other tables
 				else
-					debug "verbose" "All tables use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-					LOCK_OPTS="--single-transaction"
+					if [ "${_TABLES_MYISAM}" != "" ]; then
+						debug "verbose" "Some tables use MyISAM (${_TABLES_MYISAM}). Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+						LOCK_OPTS="--lock-tables"
+					elif [ "${_TABLES_OTHER}" != "" ]; then
+						debug "verbose" "Some tables use an unknown Engine (${_TABLES_OTHER}). Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+						LOCK_OPTS="--lock-tables"
+					else
+						debug "verbose" "All tables use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+						LOCK_OPTS="--single-transaction"
+					fi
 				fi
 			else
 				debug "warn" "Not dumping consistently with '--lock-tables' or '--single-transaction'. Turn on via \$CONSISTENT_DUMP" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
