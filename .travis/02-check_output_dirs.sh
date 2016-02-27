@@ -5,6 +5,8 @@ ERROR=0
 . "./.travis/functions.bash"
 
 
+# TODO: File exists checks!!!!!!!!
+
 
 echo "##########################################################################################"
 echo "#"
@@ -29,24 +31,48 @@ echo
 echo "----------------------------------------"
 echo " 2.1.1 #DUMP_PATH=\"\${_INSTALL_PREFIX}/var/mysqldump-secure/\""
 echo "----------------------------------------"
-echo
 sudo sed -i'' 's/DUMP_PATH/#DUMP_PATH/' /etc/mysqldump-secure.conf
 
-echo "\$ sudo mysqldump-secure --cron"
-sudo mysqldump-secure --cron && { echo "${txtpur}===> [FAIL] Unexpected OK${txtrst}"; ERROR=1; } || echo "${txtgrn}===> [OK] Expected Error. Exit code: $?${txtrst}"
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-
-echo
-echo "\$ sudo mysqldump-secure --verbose"
-sudo mysqldump-secure --verbose && { echo "${txtpur}===> [FAIL] Unexpected OK${txtrst}"; ERROR=1; } || echo "${txtgrn}===> [OK] Expected Error. Exit code: $?${txtrst}"
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-
-echo
-echo "Unbound variable test"
-unbound="$(sudo mysqldump-secure --verbose 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
-[ "$unbound" != "" ] && { echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}{txtrst}" ERROR=1; } ||  echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}"
+echo "---------- CRON MODE ----------"
+CMD="sudo mysqldump-secure --cron"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+
+echo "---------- NORMAL MODE ----------"
+CMD="sudo mysqldump-secure"
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+
+echo "---------- VERBOSE MODE ----------"
+CMD="sudo mysqldump-secure --verbose"
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+
+
 sudo sed -i'' 's/#DUMP_PATH/DUMP_PATH/' /etc/mysqldump-secure.conf
 
 

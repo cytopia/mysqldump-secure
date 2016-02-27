@@ -74,9 +74,6 @@ before_script:
 
   # -------------------- mysqldump-secure configuration --------------------
 
-  # 1. Add seconds to Dump file prefix to prevent duplicate files while dumping many times
-  - sudo sed -i'' 's/+%H-%M/+%H-%M-%s/g' /etc/mysqldump-secure.conf
-
   # 2. Enable SSL Connection
   - sudo sed -i'' 's/MYSQL_SSL_ENABLE=0/MYSQL_SSL_ENABLE=1/g' /etc/mysqldump-secure.conf
   - sudo sed -i'' 's/MYSQL_SSL_CA_PEM="\/path\/to\/ca.pem"/MYSQL_SSL_CA_PEM="\/etc\/mysql.ca.pem"/g' /etc/mysqldump-secure.conf
