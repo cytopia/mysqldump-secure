@@ -1,4 +1,4 @@
-#!/bin/sh -ue
+#!/bin/sh -u
 #
 # -u: nounset (enable: set -u | disable: set +u)
 # -e: errexit
@@ -19,7 +19,7 @@ INFO_AUTHOR="Patrick Plocke <patrick@plocke.de>"
 INFO_GPGKEY="0x28BF179F"
 INFO_LICENSE="MIT"
 INFO_URL="https://github.com/cytopia/mysqldump-secure"
-INFO_DATE="2016-02-21"
+INFO_DATE="2016-02-27"
 INFO_VERSION="0.16"
 
 
