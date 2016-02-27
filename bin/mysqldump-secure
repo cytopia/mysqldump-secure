@@ -57,13 +57,20 @@ _DEFAULT_CONFIG_CHMOD="0400"
 _DEFAULT_DUMP_FILE_PRE="$(date '+%Y-%m-%d')_$(date '+%H-%M')__"
 _DEFAULT_DUMP_FILE_CHMOD="0400"
 _DEFAULT_DUMP_DIR_CHMOD="0700"
+_DEFAULT_DUMP_PATH="${_PREFIX_ETC}/var/mysqldump-secure"
 
+
+# MySQL defaults
 _DEFAULT_MYSQL_CNF_CHMOD="0400"
+_DEFAULT_MYSQL_CNF_FILE="${_PREFIX_ETC}/etc/mysqldump-secure.cnf"
+
 
 # Default OpenSSL Variables
 _DEFAULT_OPENSSL_ALGO_ARG="-aes256"
 
+# Logging defaults
 _DEFAULT_LOG_CHMOD="0600"
+_DEFAULT_LOGFILE="${_PREFIX_ETC}/var/log/mysqldump-secure.log"
 
 # Default nagios variables
 _DEFAULT_NAGIOS_LOG_CHMOD="0644"
@@ -559,6 +566,15 @@ chmod_2_umask() {
 	echo "${ur}${uw}${ux}"
 }
 
+
+# Get the real path of a file if it is a symlink
+# @param  string	path (file, folder or symlink)
+# @return integer	Success
+_realpath() {
+	echo "$(realpath "${1}")"
+	return $?
+}
+
 ############################################################
 # tmpwatch/tmpreaper checker/helper
 ############################################################
@@ -891,18 +907,28 @@ fi
 ############################################################
 
 if [ ! -f "${CONFIG_FILE}" ]; then
-	debug "err" "Configuration file not found in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
+	debug "err" "(RUN): Configuration file not found in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
 	debug "err" "Aborting" "" "" "${_ARG_CRON}"
 	exit 1
 fi
+if [ -L "${CONFIG_FILE}" ]; then
+	if _TMP="$(_realpath "${CONFIG_FILE}")" >/dev/null 2>&1; then
+		debug "verbose" "(RUN): \$CONFIG_FILE is a symlink. Setting target to: ${_TMP}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		CONFIG_FILE="${_TMP}"
+	else
+		debug "err"    "(RUN): Cannot resolve symlink of: $CONFIG_FILE" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err"    "Aborting"
+		exit 1
+	fi
+fi
 if [ ! -r "${CONFIG_FILE}" ]; then
-	debug "err" "Configuration file is not readable in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
+	debug "err" "(RUN): Configuration file is not readable in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
 	debug "err" "Aborting" "" "" "${_ARG_CRON}"
 	exit 1
 fi
 if ! compare_chmod "$(permission "${CONFIG_FILE}")" "${_DEFAULT_CONFIG_CHMOD}" > /dev/null 2>&1 ; then
-	debug  "warn" "Configuration file ${CONFIG_FILE} has dangerous permissions: $(permission "${CONFIG_FILE}"), should be: ${_DEFAULT_CONFIG_CHMOD}" "" "" "${_ARG_CRON}"
-	debugi "info" "Trying to chmod to ${_DEFAULT_CONFIG_CHMOD}..." "" "" "${_ARG_CRON}"
+	debug  "warn" "(RUN): Configuration file ${CONFIG_FILE} has dangerous permissions: $(permission "${CONFIG_FILE}"), should be: ${_DEFAULT_CONFIG_CHMOD}" "" "" "${_ARG_CRON}"
+	debugi "info" "(RUN): Trying to chmod to ${_DEFAULT_CONFIG_CHMOD}..." "" "" "${_ARG_CRON}"
 
 	if ! chmod ${_DEFAULT_CONFIG_CHMOD} "${CONFIG_FILE}" > /dev/null 2>&1 ; then
 		debugn "err" "Failed" "" "" "${_ARG_CRON}"
@@ -921,6 +947,8 @@ fi
 # Comment required by shellcheck,
 # See problem here: https://github.com/koalaman/shellcheck/wiki/SC1090
 # shellcheck disable=SC1090
+#
+# TODO: Manually parse the file via sed or awk to be safer
 . "${CONFIG_FILE}"
 
 
@@ -933,65 +961,80 @@ fi
 # Be really strict on checking if we are going to log to file
 # or not. Also make sure that the logfile is writeable and
 # that no other has read permissions to the file.
-if [ -z "${LOG-}" ]; then
-	debug "warn" "\$LOG variable is not set or empty in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
-	debug "warn" "(OPT) Logging disabled" "" "" "${_ARG_CRON}"
+if ! set | grep '^LOG=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$LOG variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(OPT): Logging disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	LOG=0
-	LOGFILE=""
+elif [ -z "${LOG}" ]; then
+	debug "warn" "(CFG): \$LOG variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(OPT): Logging disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	LOG=0
 elif [ "${LOG}" = "1" ]; then
-
 	# Check chmod variable
-	if [ -z "${LOG_CHMOD-}" ]; then
-		debug "warn" "\$LOG_CHMOD variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "warn" "Setting default to ${_DEFAULT_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	if ! set | grep '^LOG_CHMOD=' >/dev/null 2>&1; then
+		debug "warn" "(CFG): \$LOG_CHMOD variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(CFG): Setting default to: ${_DEFAULT_LOG_CHMOD}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		LOG_CHMOD="${_DEFAULT_LOG_CHMOD}"
+	elif [ -z "${LOG_CHMOD}" ]; then
+		debug "warn" "(CFG): \$LOG_CHMOD variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(CFG): Setting default to: ${_DEFAULT_LOG_CHMOD}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		LOG_CHMOD="${_DEFAULT_LOG_CHMOD}"
 	elif ! valid_chmod "${LOG_CHMOD}" > /dev/null 2>&1; then
-		debug "err"  "Invalid chmod value for \$LOG_CHMOD: ${LOG_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "info" "Setting default to ${_DEFAULT_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err"  "(CFG): Invalid value for \$LOG_CHMOD: ${LOG_CHMOD}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err"  "(CFG): Setting default to: ${_DEFAULT_LOG_CHMOD}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		LOG_CHMOD="${_DEFAULT_LOG_CHMOD}"
 	fi
 
 	# Check logfile variable
-	if [ -z "${LOGFILE-}" ]; then
-		debug "warn" "\$LOGFILE variable is not set or empty in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
-		debug "warn" "(OPT) Logging disabled" "" "" "${_ARG_CRON}"
-		LOGFILE=""
-		LOG=0
+	if ! set | grep '^LOGFILE=' >/dev/null 2>&1; then
+		debug "warn" "(CFG): \$LOGFILE variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(CFG): Setting default to: ${_DEFAULT_LOGFILE}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		LOGFILE="${_DEFAULT_LOGFILE}"
+	elif [ -z "${LOGFILE}" ]; then
+		debug "warn" "(CFG): \$LOGFILE variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(CFG): Setting default to: ${_DEFAULT_LOGFILE}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		LOGFILE="${_DEFAULT_LOGFILE}"
 	fi
 
-	# Logging still on?
-	# Check for file
-	if [ "${LOG}" = "1" ]; then
-		# Logfile not found
-		if [ ! -f "${LOGFILE}" ]; then
+	# Resolve symlink?
+	if [ -L "${LOGFILE}" ]; then
+		if _TMP="$(_realpath "${LOGFILE}")" >/dev/null 2>&1; then
+			debug "verbose" "(RUN): \$LOGFILE is a symlink. Setting target to: ${_TMP}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			LOGFILE="${_TMP}"
+		else
+			debug "err"    "(RUN): Cannot resolve symlink of: $LOGFILE" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err"    "Aborting"
+			exit 1
+		fi
+	fi
 
-			# Check if logging directory exists
-			if [ ! -d "$(dirname "${LOGFILE}")" ]; then
-				debug  "warn" "Logfile directory does not exist in $(dirname "${LOGFILE}")" "" "" "${_ARG_CRON}"
-				debugi "info" "Trying to create..." "" "" "${_ARG_CRON}"
-				if ! mkdir -p "$(dirname "${LOGFILE}")" > /dev/null 2>&1 ; then
-					debugn "err"  "Failed" "" "" "${_ARG_CRON}"
-					debug  "err"  "Failed to create logfile directoy $(dirname "${LOGFILE}")" "" "" "${_ARG_CRON}"
-					debug  "warn" "(OPT) Logging disabled" "" "" "${_ARG_CRON}"
-					LOG=0
-				else
-					debugn "info" "OK" "" "" "${_ARG_CRON}"
-				fi
+
+	if [ ! -f "${LOGFILE}" ]; then
+		# Check if logging directory exists
+		if [ ! -d "$(dirname "${LOGFILE}")" ]; then
+			debug  "warn" "(RUN): Logfile directory does not exist in $(dirname "${LOGFILE}")" "" "" "${_ARG_CRON}"
+			debugi "info" "(RUN): Trying to create..." "" "" "${_ARG_CRON}"
+			if ! mkdir -p "$(dirname "${LOGFILE}")" > /dev/null 2>&1 ; then
+				debugn "err"  "Failed" "" "" "${_ARG_CRON}"
+				debug  "err"  "(RUN): Failed to create directoy: $(dirname "${LOGFILE}")" "" "" "${_ARG_CRON}"
+				debug  "warn" "(OPT): Logging disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+				LOG=0
+			else
+				debugn "info" "OK" "" "" "${_ARG_CRON}"
 			fi
+		fi
+		# If logging is still OK (dir exists), check if the file can be created
+		if [ "${LOG}" = "1" ]; then
+			debug  "warn" "(RUN): Logfile does not exist in ${LOGFILE}" "" "" "${_ARG_CRON}"
+			debugi "info" "(RUN): Trying to create..." "" "" "${_ARG_CRON}"
 
-			# If logging is still OK (dir exists), check if the file can be created
-			if [ "${LOG}" = "1" ]; then
-				debug  "warn" "Logfile does not exist in ${LOGFILE}" "" "" "${_ARG_CRON}"
-				debugi "info" "Trying to create..." "" "" "${_ARG_CRON}"
-
-				if ! touch "${LOGFILE}" > /dev/null 2>&1 ; then
-					debugn "err"  "Failed" "" "" "${_ARG_CRON}"
-					debug  "err"  "Failed to create file ${LOGFILE}" "" "" "${_ARG_CRON}"
-					debug  "warn" "(OPT) Logging disabled" "" "" "${_ARG_CRON}"
-					LOG=0
-				else
-					debugn "info" "OK" "" "" "${_ARG_CRON}"
-				fi
+			if ! touch "${LOGFILE}" > /dev/null 2>&1 ; then
+				debugn "err"  "Failed" "" "" "${_ARG_CRON}"
+				debug  "err"  "(RUN): Failed to create file: ${LOGFILE}" "" "" "${_ARG_CRON}"
+				debug  "warn" "(OPT): Logging disabled" "" "" "${_ARG_CRON}"
+				LOG=0
+			else
+				debugn "info" "OK" "" "" "${_ARG_CRON}"
 			fi
 		fi
 	fi
@@ -1000,13 +1043,13 @@ elif [ "${LOG}" = "1" ]; then
 	# Check for permissions
 	if [ "${LOG}" = "1" ]; then
 		if ! compare_chmod "$(permission "${LOGFILE}")" "${LOG_CHMOD}" > /dev/null 2>&1 ; then
-			debug  "warn" "Logfile has wrong permissions: $(permission "${LOGFILE}"), should be: ${LOG_CHMOD}" "" "" "${_ARG_CRON}"
-			debugi "info" "Trying to chmod to ${LOG_CHMOD}..." "" "" "${_ARG_CRON}"
+			debug  "warn" "(RUN): Logfile has wrong permissions: $(permission "${LOGFILE}"), should be: ${LOG_CHMOD}" "" "" "${_ARG_CRON}"
+			debugi "info" "(RUN): Trying to chmod to ${LOG_CHMOD}..." "" "" "${_ARG_CRON}"
 
 			if ! chmod ${LOG_CHMOD} "${LOGFILE}" > /dev/null 2>&1 ; then
 				debugn "err"  "Failed" "" "" "${_ARG_CRON}"
-				debug  "err"  "Failed to chmod ${LOG_CHMOD} ${LOGFILE}" "" "" "${_ARG_CRON}"
-				debug  "warn" "(OPT) Logging disabled" "" "" "${_ARG_CRON}"
+				debug  "err"  "(RUN): Failed to chmod ${LOG_CHMOD} ${LOGFILE}" "" "" "${_ARG_CRON}"
+				debug  "warn" "(OPT): Logging disabled" "" "" "${_ARG_CRON}"
 				LOG=0
 			else
 				debugn "info" "OK" "" "" "${_ARG_CRON}"
@@ -1020,14 +1063,16 @@ elif [ "${LOG}" = "1" ]; then
 
 		# Logfile not writeable
 		if [ ! -w "${LOGFILE}" ]; then
-			debug  "err"  "Logfile ${LOGFILE} not writeable. Check \$LOG_CHMOD value inf config." "" "" "${_ARG_CRON}"
-			debug  "warn" "(OPT) Logging disabled" "" "" "${_ARG_CRON}"
+			debug  "err"  "(RUN): Logfile ${LOGFILE} not writeable. Check \$LOG_CHMOD value inf config." "" "" "${_ARG_CRON}"
+			debug  "warn" "(OPT): Logging disabled" "" "" "${_ARG_CRON}"
 			LOG=0
 		fi
 	fi
-
+elif [ "${LOG}" = "0" ]; then
+	debug "info" "(OPT): Logging disabled" "" "" "${_ARG_CRON}"
 else
-	debug "info" "(OPT) Logging disabled" "" "" "${_ARG_CRON}"
+	debug "err"  "(CFG): Invalid value for \$LOG: ${LOG}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "(OPT): Logging disabled" "" "" "${_ARG_CRON}"
 	LOG=0
 fi
 
@@ -1039,10 +1084,10 @@ if [ "${LOG}" = "1" ]; then
 		echo "--------------------------------------------------------------------------------";
 		echo "$(date '+%Y-%m-%d') $(date '+%H:%M:%S') Starting";
 	} >> "${LOGFILE}"
-	debug "info" "Using config: ${CONFIG_FILE}" ${LOG} "${LOGFILE}" "${_ARG_CRON}"
-	debug "info" "(OPT) Logging enabled: ${LOGFILE}" ${LOG} "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(CFG): Using config: ${CONFIG_FILE}" ${LOG} "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(OPT): Logging enabled: ${LOGFILE}" ${LOG} "${LOGFILE}" "${_ARG_CRON}"
 else
-	debug "info" "Using config: ${CONFIG_FILE}" ${LOG} "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(CFG): Using config: ${CONFIG_FILE}" ${LOG} "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 
@@ -1051,10 +1096,13 @@ fi
 # Command line arguments
 ############################################################
 if [ "${_ARG_CRON}" = "1" ]; then
-	debug "info" "Running in cron mode (--cron)." ${LOG} "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(ARG): Running in cron mode (--cron)." ${LOG} "${LOGFILE}" "${_ARG_CRON}"
 fi
 if [ "${_ARG_TEST}" = "1" ]; then
-	debug "info" "Running tests only (--test)." ${LOG} "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(ARG): Running tests only (--test)." ${LOG} "${LOGFILE}" "${_ARG_CRON}"
+fi
+if [ "${_ARG_VERB}" = "1" ]; then
+	debug "info" "(ARG): Running in verbose mode (--verbose)." ${LOG} "${LOGFILE}" "${_ARG_CRON}"
 fi
 #if [ "${_ARG_INFO}" = "1" ]; then
 #	debug "info" "Showing information only (--info)."  ${LOG} "${LOGFILE}" "${_ARG_CRON}"
@@ -1065,51 +1113,82 @@ fi
 # Destination Directory and Prefix
 ############################################################
 
-# Check if CHMOD exists, otherwise use default values
-if [ -z "${DUMP_DIR_CHMOD-}" ]; then
-	debug "warn" "\$DUMP_DIR_CHMOD is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "warn" "Setting \$DUMP_DIR_CHMOD to ${_DEFAULT_DUMP_DIR_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+# Check $DUMP_DIR_CHMOD
+if ! set | grep '^DUMP_DIR_CHMOD=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$DUMP_DIR_CHMOD variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_DIR_CHMOD}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	DUMP_DIR_CHMOD=${_DEFAULT_DUMP_DIR_CHMOD}
-fi
-if [ -z "${DUMP_FILE_CHMOD-}" ]; then
-	debug "warn" "\$DUMP_FILE_CHMOD is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "warn" "Setting \$DUMP_FILE_CHMOD to ${_DEFAULT_DUMP_FILE_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	DUMP_FILE_CHMOD=${_DEFAULT_DUMP_FILE_CHMOD}
-fi
-if ! valid_chmod "${DUMP_DIR_CHMOD}" > /dev/null 2>&1; then
-	debug "err"  "Invalid chmod value for \$DUMP_DIR_CHMOD: ${DUMP_DIR_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "info" "Setting \$DUMP_DIR_CHMOD to ${_DEFAULT_DUMP_DIR_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+elif [ -z "${DUMP_DIR_CHMOD}" ]; then
+	debug "warn" "(CFG): \$DUMP_DIR_CHMOD variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_DIR_CHMOD}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	DUMP_DIR_CHMOD=${_DEFAULT_DUMP_DIR_CHMOD}
-fi
-if ! valid_chmod "${DUMP_FILE_CHMOD}" > /dev/null 2>&1; then
-	debug "err"  "Invalid chmod value for \$DUMP_FILE_CHMOD: ${DUMP_FILE_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "info" "Setting \$DUMP_FILE_CHMOD to ${_DEFAULT_DUMP_FILE_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	DUMP_FILE_CHMOD=${_DEFAULT_DUMP_FILE_CHMOD}
+elif ! valid_chmod "${DUMP_DIR_CHMOD}" > /dev/null 2>&1; then
+	debug "err"  "(CFG): Invalid value for \$DUMP_DIR_CHMOD: ${DUMP_DIR_CHMOD}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "(CFG): Setting default to: ${_DEFAULT_DUMP_DIR_CHMOD}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	DUMP_DIR_CHMOD="${_DEFAULT_DUMP_DIR_CHMOD}"
 fi
 
-# Check if destination dir exists
-if [ -z "${DUMP_PATH-}" ]; then
-	debug "err" "\$DUMP_PATH variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err" "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	exit 1
-elif [ ! -d "${DUMP_PATH}" ]; then
-	debug  "warn" "Destination dir ${DUMP_PATH} does not exist" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debugi "info" "Trying to create... " $LOG "${LOGFILE}" "${_ARG_CRON}"
+# Check $DUMP_FILE_CHMOD
+if ! set | grep '^DUMP_FILE_CHMOD=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$DUMP_FILE_CHMOD variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_FILE_CHMOD}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	DUMP_FILE_CHMOD=${_DEFAULT_DUMP_DIR_CHMOD}
+elif [ -z "${DUMP_FILE_CHMOD}" ]; then
+	debug "warn" "(CFG): \$DUMP_FILE_CHMOD variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_FILE_CHMOD}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	DUMP_FILE_CHMOD=${_DEFAULT_DUMP_DIR_CHMOD}
+elif ! valid_chmod "${DUMP_FILE_CHMOD}" > /dev/null 2>&1; then
+	debug "err"  "(CFG): Invalid value for \$DUMP_FILE_CHMOD: ${DUMP_FILE_CHMOD}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "(CFG): Setting default to: ${_DEFAULT_DUMP_FILE_CHMOD}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	DUMP_FILE_CHMOD="${_DEFAULT_DUMP_DIR_CHMOD}"
+fi
+
+# Check $DUMP_PATH
+if ! set | grep '^DUMP_PATH=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$DUMP_PATH variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_PATH}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	DUMP_PATH=${_DEFAULT_DUMP_PATH}
+elif [ -z "${DUMP_PATH}" ]; then
+	debug "warn" "(CFG): \$DUMP_PATH variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_PATH}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	DUMP_PATH=${_DEFAULT_DUMP_PATH}
+fi
+
+# Resolve symlink?
+if [ -L "${DUMP_PATH}" ]; then
+	if _TMP="$(_realpath "${DUMP_PATH}")" >/dev/null 2>&1; then
+		debug "verbose" "(RUN): \$DUMP_PATH is a symlink. Setting target to: ${_TMP}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		DUMP_PATH="${_TMP}"
+	else
+		debug "err"    "(RUN): Cannot resolve symlink of: $DUMP_PATH" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err"    "Aborting"
+		exit 1
+	fi
+fi
+
+if [ ! -d "${DUMP_PATH}" ]; then
+	debug  "warn" "(RUN): Destination dir does not exist: ${DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debugi "info" "(RUN): Trying to create... " $LOG "${LOGFILE}" "${_ARG_CRON}"
 	if ! mkdir -p "${DUMP_PATH}" > /dev/null 2>&1 ; then
 		debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 1
 	else
 		debugn "info" "Done" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug  "info" "Adjusting file permissions to ${DUMP_DIR_CHMOD} on ${DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		chmod ${DUMP_DIR_CHMOD} "${DUMP_PATH}"
+		debugi  "info" "(RUN): Trying to chmod to: ${DUMP_DIR_CHMOD}..." $LOG "${LOGFILE}" "${_ARG_CRON}"
+		if ! chmod ${DUMP_DIR_CHMOD} "${DUMP_PATH}" >/dev/null 2>&1; then
+			debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			exit 1
+		else
+			debugn "info" "Done" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		fi
 	fi
 fi
-
 # Check correct permissions of destination dir
 if ! compare_chmod "$(permission "${DUMP_PATH}")" "${DUMP_DIR_CHMOD}" > /dev/null 2>&1 ; then
-	debug  "err"  "Target directory has wrong permissions: $(permission "${DUMP_PATH}"), but should ${DUMP_DIR_CHMOD}." $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debugi "info" "Trying to chmod to ${DUMP_DIR_CHMOD}... " $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug  "err"  "(RUN): Target directory has wrong permissions: $(permission "${DUMP_PATH}"), but should ${DUMP_DIR_CHMOD}." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debugi "info" "(RUN): Trying to chmod to ${DUMP_DIR_CHMOD}... " $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 	if ! chmod "${DUMP_DIR_CHMOD}" "${DUMP_PATH}" > /dev/null 2>&1 ; then
 		debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}"
@@ -1119,20 +1198,23 @@ if ! compare_chmod "$(permission "${DUMP_PATH}")" "${DUMP_DIR_CHMOD}" > /dev/nul
 		debugn "info" "Done" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	fi
 fi
-
 # Check if destination dir is writeable
 if [ ! -w "${DUMP_PATH}" ]; then
-	debug  "err"  "Destination dir ${DUMP_PATH} is not writeable" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debugi "err"  "Fix your configured permissions" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug  "err"  "(RUN): Destination dir ${DUMP_PATH} is not writeable" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debugi "err"  "(HLP): Fix your configured permissions" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
 fi
 
-# Check output Prefix
-if [ -z "${DUMP_FILE_PRE-}" ]; then
-	debug "warn" "\$DUMP_FILE_PRE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "warn" "Using default 'date-time' prefix: ${_DEFAULT_DUMP_FILE_PRE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	DUMP_FILE_PRE="${_DEFAULT_DUMP_FILE_PRE}"
+# Check $DUMP_FILE_PRE
+if ! set | grep '^DUMP_FILE_PRE=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$DUMP_FILE_PRE variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_FILE_PRE}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	DUMP_FILE_PRE=${_DEFAULT_DUMP_FILE_PRE}
+elif [ -z "${DUMP_FILE_PRE}" ]; then
+	debug "warn" "(CFG): \$DUMP_FILE_PRE variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_FILE_PRE}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	DUMP_FILE_PRE=${_DEFAULT_DUMP_FILE_PRE}
 fi
 
 
@@ -1141,117 +1223,145 @@ fi
 # MySQL
 ############################################################
 
-# Binaries do exist?
+# Check Binaries
 if ! command -v mysql > /dev/null 2>&1 ; then
-	debug "err"  "'mysql' not found" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "(RUN): 'mysql' not found" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 2
 fi
 if ! command -v mysqldump > /dev/null 2>&1 ; then
-	debug "err"  "'mysqldump' not found" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "(RUN): 'mysqldump' not found" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 2
 fi
 
-# Credentials file
-if [ -z "${MYSQL_CNF_FILE-}" ]; then
-	debug "err"  "\$MYSQL_CNF_FILE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	exit 1
+# Check $MYSQL_CNF_FILE
+if ! set | grep '^MYSQL_CNF_FILE=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$MYSQL_CNF_FILE variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_MYSQL_CNF_FILE}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	MYSQL_CNF_FILE=${_DEFAULT_MYSQL_CNF_FILE}
+elif [ -z "${MYSQL_CNF_FILE}" ]; then
+	debug "warn" "(CFG): \$MYSQL_CNF_FILE variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_MYSQL_CNF_FILE}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	MYSQL_CNF_FILE=${_DEFAULT_DUMP_FILE_PRE}
 fi
+
+# Resolve symlink?
+if [ -L "${MYSQL_CNF_FILE}" ]; then
+	if _TMP="$(_realpath "${MYSQL_CNF_FILE}")" >/dev/null 2>&1; then
+		debug "verbose" "(RUN): \$MYSQL_CNF_FILE is a symlink. Setting target to: ${_TMP}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		MYSQL_CNF_FILE="${_TMP}"
+	else
+		debug "err"    "(RUN): Cannot resolve symlink of: $MYSQL_CNF_FILE" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err"    "Aborting"
+		exit 1
+	fi
+fi
+
 if [ ! -f "${MYSQL_CNF_FILE}" ]; then
-	debug "err"  "MySQL CNF file not found in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "(RUN): MySQL CNF file not found: ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
-fi
-if [ ! -r "${MYSQL_CNF_FILE}" ]; then
-	debug "err"  "MySQL CNF file is not readable in ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+elif [ ! -r "${MYSQL_CNF_FILE}" ]; then
+	debug "err"  "(RUN): MySQL CNF file is not readable: ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
-fi
-if ! compare_chmod "$(permission "${MYSQL_CNF_FILE}")" "${_DEFAULT_MYSQL_CNF_CHMOD}" > /dev/null 2>&1 ; then
-	debug "err"  "MySQL CNF file ${MYSQL_CNF_FILE} has dangerous permissions: $(permission "${MYSQL_CNF_FILE}")." $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "Fix it to ${_DEFAULT_MYSQL_CNF_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "Note: If you are not alone on the machine, the password inside could have been compromised by now." $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "If so, change your database password." $LOG "${LOGFILE}" "${_ARG_CRON}"
+elif ! compare_chmod "$(permission "${MYSQL_CNF_FILE}")" "${_DEFAULT_MYSQL_CNF_CHMOD}" > /dev/null 2>&1 ; then
+	debug "err"  "(RUN): MySQL CNF file has dangerous permissions: $(permission "${MYSQL_CNF_FILE}")." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "(HLP): Fix it to ${_DEFAULT_MYSQL_CNF_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "(HLP): If you are not alone on the machine, the password inside could have been compromised by now." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "(HLP): If so, change your database password." $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
 fi
 
-# SSL
-if [ -z "${MYSQL_SSL_ENABLE-}" ]; then
-	debug "err"  "\$MYSQL_SSL_ENABLE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "Aborting, as it is not clear whether or not you only allow secure connections." $LOG "${LOGFILE}" "${_ARG_CRON}"
+# Check MYSQL_SSL_ENABLE
+if ! set | grep '^MYSQL_SSL_ENABLE=' >/dev/null 2>&1; then
+	debug "err" "(CFG): \$MYSQL_SSL_ENABLE variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(HLP): It is not clear whether or not you only allow secure connections." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
-fi
-if [ "${MYSQL_SSL_ENABLE}" = "1" ]; then
-	if [ -z "${MYSQL_SSL_CA_PEM-}" ]; then
-		debug "err"  "\$MYSQL_SSL_CA_PEM variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "err"  "Aborting, as you don't want clear-text connections." $LOG "${LOGFILE}" "${_ARG_CRON}"
+elif [ -z "${MYSQL_SSL_ENABLE}" ]; then
+	debug "err" "(CFG): \$MYSQL_SSL_ENABLE variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(HLP): It is not clear whether or not you only allow secure connections." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	exit 1
+elif [ "${MYSQL_SSL_ENABLE}" = "1" ]; then
+	if ! set | grep '^MYSQL_SSL_CA_PEM=' >/dev/null 2>&1; then
+		debug "err" "(CFG): \$MYSQL_SSL_CA_PEM variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "(HLP): It is required for SSL connections" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err"  "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 1
-	fi
-	if [ ! -f "${MYSQL_SSL_CA_PEM}" ]; then
-		debug "err"  "\$MYSQL_SSL_CA_PEM=\"$MYSQL_SSL_CA_PEM\" does not exist" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "err"  "Aborting, as you don't want clear-text connections." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	elif [ -z "${MYSQL_SSL_CA_PEM}" ]; then
+		debug "err" "(CFG): \$MYSQL_SSL_CA_PEM variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "(HLP): It is required for SSL connections" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
+		exit 1
+	elif [ ! -f "${MYSQL_SSL_CA_PEM}" ]; then
+		debug "err" "(RUN): \$MYSQL_SSL_CA_PEM=\"$MYSQL_SSL_CA_PEM\" does not exist" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err" "(HLP): It is required for SSL connections" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 1
 	fi
 
 	MYSQL_SSL_ARGS="--ssl-ca=${MYSQL_SSL_CA_PEM}"
 
+	# MYSQL_SSL_CLIENT_CERT_PEM
 	if [ -n "${MYSQL_SSL_CLIENT_CERT_PEM-}" ]; then
 		if [ ! -f "${MYSQL_SSL_CLIENT_CERT_PEM}" ]; then
-			debug "err"  "\$MYSQL_SSL_CLIENT_CERT_PEM=\"$MYSQL_SSL_CLIENT_CERT_PEM\" does not exist" $LOG "${LOGFILE}" "${_ARG_CRON}"
-			debug "err"  "Comment it out or specify the correct path." $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "(RUN): \$MYSQL_SSL_CLIENT_CERT_PEM=\"$MYSQL_SSL_CLIENT_CERT_PEM\" does not exist" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "(HLP): Comment it out or specify the correct path." $LOG "${LOGFILE}" "${_ARG_CRON}"
 			debug "err"  "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
 			exit 1
 		fi
 		MYSQL_SSL_ARGS="${MYSQL_SSL_ARGS} --ssl-cert=${MYSQL_SSL_CLIENT_CERT_PEM}"
 	fi
+	# MYSQL_SSL_CLIENT_KEY_PEM
 	if [ -n "${MYSQL_SSL_CLIENT_KEY_PEM-}" ]; then
 		if [ ! -f "${MYSQL_SSL_CLIENT_KEY_PEM}" ]; then
-			debug "err"  "\$MYSQL_SSL_CLIENT_KEY_PEM=\"$MYSQL_SSL_CLIENT_KEY_PEM\" does not exist" $LOG "${LOGFILE}" "${_ARG_CRON}"
-			debug "err"  "Comment it out or specify the correct path." $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "(RUN): \$MYSQL_SSL_CLIENT_KEY_PEM=\"$MYSQL_SSL_CLIENT_KEY_PEM\" does not exist" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "(HLP): Comment it out or specify the correct path." $LOG "${LOGFILE}" "${_ARG_CRON}"
 			debug "err"  "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
 			exit 1
 		fi
 		MYSQL_SSL_ARGS="${MYSQL_SSL_ARGS} --ssl-key=${MYSQL_SSL_CLIENT_KEY_PEM}"
 	fi
 
-	debug "info" "(OPT) MySQL SSL connection enabled: ${MYSQL_SSL_ARGS}." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(OPT): MySQL SSL connection enabled: ${MYSQL_SSL_ARGS}." $LOG "${LOGFILE}" "${_ARG_CRON}"
 elif [ "${MYSQL_SSL_ENABLE}" = "0" ]; then
 	MYSQL_SSL_ENABLE=0
 	MYSQL_SSL_ARGS=""
-	debug "info" "(OPT) MySQL SSL connection disabled." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(OPT): MySQL SSL connection disabled." $LOG "${LOGFILE}" "${_ARG_CRON}"
 else
-	debug "err"  "Wrong value for \$MYSQL_SSL_ENABLE: $MYSQL_SSL_ENABLE" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "Aborting, as it is not clear whether or not you only allow secure connections." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "(CFG): Wrong value for \$MYSQL_SSL_ENABLE: $MYSQL_SSL_ENABLE" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "(HLP): It is not clear whether or not you only allow secure connections." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 1
 fi
 
 
 # Testing MySQL connection
-_CONN_ERR="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e exit 2>&1)"
-if [ "$?" != "0" ]; then
-	debug  "err"  "Cannot connect to mysql database." $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debugr "err"  "CMD: $(which mysql) --defaults-file=${MYSQL_CNF_FILE} ${MYSQL_SSL_ARGS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debugr "err"  "SQL: ${_CONN_ERR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+if ! _CONN_ERR="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e exit 2>&1)"; then
+	debug  "err"  "(RUN): Cannot connect to mysql database." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debugr "err"  "(RUN): Via: $(which mysql) --defaults-file=${MYSQL_CNF_FILE} ${MYSQL_SSL_ARGS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debugr "err"  "(RUN): SQL: ${_CONN_ERR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	exit 3
 else
-	debug "info" "MySQL connection test successful." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(RUN): MySQL connection test successful." $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 # Testing MySQL for SSL connection
 MYSQL_SSL_STATUS="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e 'status;' 2>&1 | grep -E '^SSL:.*' | sed 's/SSL:\s*//g')"
 if [ "${MYSQL_SSL_STATUS}" = "Not in use" ]; then
 	if [ "${MYSQL_SSL_ENABLE}" = "1" ]; then
-		debug "err"  "MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err"  "(RUN): MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}"
 		exit 1
 	else
-		debug "info"  "MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "info"  "(RUN): MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}"
 	fi
 else
-	debug "info" "MySQL connection is using SSL: ${MYSQL_SSL_STATUS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(RUN): MySQL connection is using SSL: ${MYSQL_SSL_STATUS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 fi
 
 
@@ -1260,40 +1370,55 @@ fi
 ############################################################
 # MySQL Dump Opts
 ############################################################
-if [ -z "${MYSQL_OPTS-}" ]; then
-	debug "info" "\$MYSQL_OPTS variable is not set or empty" $LOG "${LOGFILE}" "${_ARG_CRON}"
+
+if ! set | grep '^MYSQL_OPTS=' >/dev/null 2>&1; then
+	debug "info" "(CFG): \$MYSQL_OPTS variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	MYSQL_OPTS=""
+elif [ -z "${MYSQL_SSL_ENABLE}" ]; then
+	debug "info" "(CFG): \$MYSQL_OPTS is empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	MYSQL_OPTS=""
 fi
-debug "info"  "mysqldump options: ${MYSQL_OPTS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+
+debug "info"  "(CFG): mysqldump options: ${MYSQL_OPTS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
 
 
-if [ -z "${IGNORE_CONSISTENT_DUMP_WARNINGS-}" ]; then
-	debug "err"  "\$IGNORE_CONSISTENT_DUMP_WARNINGS variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "Aborting"
-	exit 1
+# Warnings about inconsistent dumps? (IGNORE_CONSISTENT_DUMP_WARNINGS)
+if ! set | grep '^IGNORE_CONSISTENT_DUMP_WARNINGS=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$IGNORE_CONSISTENT_DUMP_WARNINGS variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(RUN): Will warn you about inconsistent dumps." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	IGNORE_CONSISTENT_DUMP_WARNINGS=0
+elif [ -z "${IGNORE_CONSISTENT_DUMP_WARNINGS}" ]; then
+	debug "warn" "(CFG): \$IGNORE_CONSISTENT_DUMP_WARNINGS variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(RUN): Will warn you about inconsistent dumps." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	IGNORE_CONSISTENT_DUMP_WARNINGS=0
 elif [ "${IGNORE_CONSISTENT_DUMP_WARNINGS}" = "1" ]; then
-	debug "verbose" "Consistent Dumps: Warnings disabled (unsafe)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(CFG): Will not warn you about inconsistent dumps (unsafe)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(HLP): It is recommended to turn off \$IGNORE_CONSISTENT_DUMP_WARNINGS" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 elif [ "${IGNORE_CONSISTENT_DUMP_WARNINGS}" = "0" ]; then
-	debug "verbose" "Consistent Dumps: Warning enabled (safe)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(CFG): Will warn you about inconsistent dumps (safe)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "err"  "\$IGNORE_CONSISTENT_DUMP_WARNINGS variable has an invalid value: ${IGNORE_CONSISTENT_DUMP_WARNINGS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "Aborting"
-	exit 1
+	debug "err"  "(CFG): \$IGNORE_CONSISTENT_DUMP_WARNINGS variable has an invalid value: ${IGNORE_CONSISTENT_DUMP_WARNINGS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "(RUN): Will warn you about inconsistent dumps." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	IGNORE_CONSISTENT_DUMP_WARNINGS=0
 fi
 
-
-if [ -z "${CONSISTENT_DUMP-}" ]; then
-	debug "warn"  "\$CONSISTENT_DUMP variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "warn"  "Intentionally disabling consistent dumps (no '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}"
+# Dump consistent?
+if ! set | grep '^CONSISTENT_DUMP=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$CONSISTENT_DUMP variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(RUN): Intentionally disabling consistent dumps (no '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	CONSISTENT_DUMP=0
+elif [ -z "${IGNORE_CONSISTENT_DUMP_WARNINGS}" ]; then
+	debug "warn" "(CFG): \$CONSISTENT_DUMP variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(RUN): Intentionally disabling consistent dumps (no '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	CONSISTENT_DUMP=0
 elif [ "${CONSISTENT_DUMP}" = "1" ]; then
-	debug "info"  "Dumping consistently across tables (using '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(CFG): Dumping consistently across tables (using '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}"
 elif [ "${CONSISTENT_DUMP}" = "0" ]; then
-	debug "info"  "Not dumping consistently across tables (unsafe)" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(CFG): Not dumping consistently across tables (unsafe)" $LOG "${LOGFILE}" "${_ARG_CRON}"
 else
-	debug "err"   "Wrong value fuer \$CONSISTENT_DUMP in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"   "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
-	exit 1
+	debug "err"  "(CFG): \$CONSISTENT_DUMP variable has an invalid value: ${CONSISTENT_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "(RUN): Intentionally disabling consistent dumps (no '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	CONSISTENT_DUMP=0
 fi
 
 
@@ -1305,16 +1430,16 @@ for opt in ${MYSQL_OPTS}; do
 	for evil in ${MYSQL_EVIL_OPTS}; do
 		if echo "${opt}" | grep -e "^${evil}" > /dev/null 2>&1; then
 			echo "opt: ${opt}   | evil: ${evil}"
-			debug "err"  "Insecure mysqldump option found in MYSQL_OPTS: '${opt}'" $LOG "${LOGFILE}" "${_ARG_CRON}"
-			debug "err"  "Remove it. This option is handled by the tool itself." $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "(CFG): Insecure mysqldump option found in MYSQL_OPTS: '${opt}'" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "(HLP): Remove it. This option is handled by the tool itself." $LOG "${LOGFILE}" "${_ARG_CRON}"
 			debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			exit 3
 		fi
 	done
 	for bad in ${MYSQL_BAD_OPTS}; do
 		if echo "${opt}" | grep -e "^${bad}" > /dev/null 2>&1; then
-			debug "err"  "Disallowed mysqldump option found in MYSQL_OPTS: '${opt}'" $LOG "${LOGFILE}" "${_ARG_CRON}"
-			debug "err"  "Remove it. This option can be controlled via the configuration file itself." $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "(CFG): Disallowed mysqldump option found in MYSQL_OPTS: '${opt}'" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "(HLP): Remove it. This option can be controlled via the configuration file itself." $LOG "${LOGFILE}" "${_ARG_CRON}"
 			debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
 			exit 3
 		fi

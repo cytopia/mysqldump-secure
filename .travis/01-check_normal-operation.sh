@@ -50,13 +50,8 @@ echo " 1.1.3 Test mode Variable test"
 echo "----------------------------------------"
 echo "Unbound variable test"
 unbound="$(sudo mysqldump-secure --test --verbose 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
-if [ "$unbound" != "" ]; then
-	ERROR=1;
-	echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";
-	echo "${txtpur}${unbound}{txtrst}"
-else
-	echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}";
-fi
+[ "$unbound" != "" ] && { echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}{txtrst}" ERROR=1; } ||  echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}"
+
 
 
 
@@ -100,23 +95,17 @@ sudo mysqldump-secure --verbose && echo "${txtgrn}===> [OK] Success${txtrst}" ||
 
 echo
 echo "----------------------------------------"
-echo " 1.2.4 Normal mode variable test"
+echo " 1.2.4 Normal mode unbound variable test"
 echo "----------------------------------------"
 echo "Unbound variable test"
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 unbound="$(sudo mysqldump-secure --verbose 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
-if [ "$unbound" != "" ]; then
-	ERROR=1;
-	echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";
-	echo "${txtpur}${unbound}{txtrst}"
-else
-	echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}";
-fi
+[ "$unbound" != "" ] && { echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}{txtrst}" ERROR=1; } ||  echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}"
 
 
 echo
 echo "----------------------------------------"
-echo " 1.2.4 Normal mode (del files)variable test"
+echo " 1.2.4 Normal mode (del files) unbound variable test"
 echo "----------------------------------------"
 echo "Unbound variable test"
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
@@ -125,13 +114,8 @@ sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-2.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
 unbound="$(sudo mysqldump-secure --verbose 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
-if [ "$unbound" != "" ]; then
-	ERROR=1;
-	echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";
-	echo "${txtpur}${unbound}{txtrst}"
-else
-	echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}";
-fi
+[ "$unbound" != "" ] && { echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}{txtrst}" ERROR=1; } ||  echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}"
+
 
 
 
@@ -180,15 +164,9 @@ echo " 1.3.4 Cron mode variable test"
 echo "----------------------------------------"
 echo
 echo "Unbound variable test"
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 unbound="$(sudo mysqldump-secure --cron 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
-if [ "$unbound" != "" ]; then
-	ERROR=1;
-	echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";
-	echo "${txtpur}${unbound}{txtrst}"
-else
-	echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}";
-fi
+[ "$unbound" != "" ] && { echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}{txtrst}" ERROR=1; } ||  echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}"
+
 
 
 
@@ -211,13 +189,8 @@ sudo mysqldump-secure --help && echo "${txtgrn}===> [OK] Success${txtrst}" || { 
 echo
 echo "Unbound variable test"
 unbound="$(sudo mysqldump-secure --help 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
-if [ "$unbound" != "" ]; then
-	ERROR=1;
-	echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";
-	echo "${txtpur}${unbound}{txtrst}"
-else
-	echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}";
-fi
+[ "$unbound" != "" ] && { echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}{txtrst}" ERROR=1; } ||  echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}"
+
 
 
 
@@ -230,14 +203,10 @@ sudo mysqldump-secure --verbose --conf=/etc/nothere && { echo "${txtpur}===> [FA
 
 echo
 echo "Unbound variable test"
-unbound="$(sudo mysqldump-secure --verbose --conf=/etc/nothere 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
-if [ "$unbound" != "" ]; then
-	ERROR=1;
-	echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";
-	echo "${txtpur}${unbound}{txtrst}"
-else
-	echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}";
-fi
+unbound="$(sudo mysqldump-secure--verbose --conf=/etc/nothere 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
+[ "$unbound" != "" ] && { echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}{txtrst}" ERROR=1; } ||  echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}"
+
+
 
 
 
@@ -250,14 +219,9 @@ sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf && { echo "${tx
 
 echo
 echo "Unbound variable test"
-unbound="$(sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
-if [ "$unbound" != "" ]; then
-	ERROR=1;
-	echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";
-	echo "${txtpur}${unbound}{txtrst}"
-else
-	echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}";
-fi
+unbound="$(sudo mysqldump-secure--verbose --conf=/etc/mysqldump-secure.cnf 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
+[ "$unbound" != "" ] && { echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}{txtrst}" ERROR=1; } ||  echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}"
+
 
 
 
@@ -271,13 +235,9 @@ sudo mysqldump-secure --wrong && { echo "${txtpur}===> [FAIL] Unexpected OK${txt
 echo
 echo "Unbound variable test"
 unbound="$(sudo mysqldump-secure --wrong 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
-if [ "$unbound" != "" ]; then
-	ERROR=1;
-	echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";
-	echo "${txtpur}${unbound}{txtrst}"
-else
-	echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}";
-fi
+[ "$unbound" != "" ] && { echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}{txtrst}" ERROR=1; } ||  echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}"
+
+
 
 
 
