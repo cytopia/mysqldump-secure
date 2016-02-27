@@ -230,17 +230,21 @@ echo
 
 unbound_test() {
 	cmd="$@"
+
+
+	echo "\$ ${cmd}"
 	eval "${cmd} 2> __tmp.txt"
 
-	echo "${cmd}"
 
-	found="$(sudo cat "__tmp.txt" | grep 'unbound variable' 2>&1)"
-	sudo rm "__tmp.txt"
-	if [ "${found}" != "" ]; then
+	sudo cat "__tmp.txt" | grep 'unbound variable'
+	code="${?}"
+	if [ "${code}" != "0" ]; then
+		sudo rm "__tmp.txt"
 		echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}"
 		echo "${txtpur}${found}${txtrst}"
 		return 1
 	else
+		sudo rm "__tmp.txt"
 		echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"
 		return 0
 	fi
