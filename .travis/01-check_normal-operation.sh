@@ -219,8 +219,17 @@ sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf && { echo "${tx
 
 echo
 echo "Unbound variable test"
+sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf
+sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1
+sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1 | grep 'unbound variable'
 unbound="$(sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1 | grep 'unbound variable')"
-if [ "${unbound}" != "" ]; then echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}${txtrst}"; ERROR=1; else  echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"; fi
+echo "unbound: ${unbound}"
+if [ "${unbound}" != "" ]; then
+	echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}"
+	echo "${txtpur}${unbound}${txtrst}"; ERROR=1
+else
+	echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"
+fi
 
 
 
