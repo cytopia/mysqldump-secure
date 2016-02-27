@@ -11,10 +11,10 @@ txtcyn=$(tput setaf 6) # Cyan
 txtwht=$(tput setaf 7) # White
 txtrst=$(tput sgr0) # Text reset.
 
-
 #
 # @param  string  PASS|FAIL what is expected?
 # @param  string  Command
+# @return integer 0:OK | 1:FAI:
 run_test() {
 	mod="${1}"
 	cmd="${@:2}"
@@ -28,12 +28,17 @@ run_test() {
 	if [ "${mod}" = "PASS" ]; then
 
 		if [ "${exit}" != "0" ]; then
+			echo "${txtpur}===> [FAIL]${txtrst}"
 			echo "${txtpur}===> [FAIL] Unexpected exit code: ${exit}${txtrst}"
+			echo "${txtpur}===> [FAIL]${txtrst}"
 			echo
 			return 1
 		else
+			echo "${txtgrn}===> [OK]${txtrst}"
 			echo "${txtgrn}===> [OK] Success${txtrst}"
+			echo "${txtgrn}===> [OK]${txtrst}"
 			echo
+		echo
 			return 0
 		fi
 
@@ -41,26 +46,36 @@ run_test() {
 	elif [ "${mod}" = "FAIL" ]; then
 
 		if [ "${exit}" = "0" ]; then
+			echo "${txtpur}===> [FAIL]${txtrst}"
 			echo "${txtpur}===> [FAIL] Unexpected OK${txtrst}"
+			echo "${txtpur}===> [FAIL]${txtrst}"
 			echo
 			return 1
 		else
+			echo "${txtgrn}===> [OK]${txtrst}"
 			echo "${txtgrn}===> [OK] Expected Error. Exit code: ${exit}${txtrst}"
+			echo "${txtgrn}===> [OK]${txtrst}"
 			echo
+		echo
 			return 0
 		fi
 
 	# Something went wrong
 	else
 
+		echo "${txtpur}===> [FAIL]${txtrst}"
 		echo "${txtgrn}===> [FAIL] Invalid usage of 'run_test'${txtrst}"
+		echo "${txtpur}===> [FAIL]${txtrst}"
 		return 1
 
 	fi
 
 }
 
-# Test against unset variables
+#
+## Test against unset variables
+# @param  string  Command
+# @return integer 0:OK | 1:FAI:
 var_test() {
 	cmd="$@"
 
@@ -69,37 +84,50 @@ var_test() {
 	unbound="$(eval "${cmd} 3>&2 2>&1 1>&3 > /dev/null | grep 'parameter not set'")"
 
 	if [ "${unbound}" != "" ]; then
+		echo "${txtpur}===> [FAIL]${txtrst}"
 		echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}"
+		echo "${txtpur}===> [FAIL]${txtrst}"
 		echo "${txtpur}${unbound}${txtrst}"
 		echo
 		return 1
 	else
+		echo "${txtgrn}===> [OK]${txtrst}"
 		echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"
+		echo "${txtgrn}===> [OK]${txtrst}"
 		echo
 		return 0
 	fi
 }
 
-
-# Test against syntax errors
+#
+## Test against syntax errors
+# @param  string  Command
+# @return integer 0:OK | 1:FAI:
 syn_test() {
 	cmd="$@"
 
-	echo "${txtblu}-->Syntax error test:${txtrst}"
+	echo "${txtblu}--> Syntax error test:${txtrst}"
 	echo "\$ ${txtblu}${cmd} | grep -E '.*[0-9]*:.*: not found.*'${txtrst}"
 	syntax="$(eval "${cmd} 3>&2 2>&1 1>&3 > /dev/null | grep -E '.*[0-9]*:.*: not found.*'")"
 
 	if [ "${syntax}" != "" ]; then
+		echo "${txtpur}===> [FAIL]${txtrst}"
 		echo "${txtpur}===> [FAIL] Syntax error found.${txtrst}"
+		echo "${txtpur}===> [FAIL]${txtrst}"
 		echo "${txtpur}${syntax}${txtrst}"
 		echo
 		return 1
 	else
+		echo "${txtgrn}===> [OK]${txtrst}"
 		echo "${txtgrn}===> [OK] No Syntax error found.${txtrst}"
+		echo "${txtgrn}===> [OK]${txtrst}"
 		echo
 		return 0
 	fi
 }
+
+
+
 
 
 echo "##########################################################################################"
@@ -273,60 +301,40 @@ echo
 echo "----------------------------------------"
 echo " 1.4.1 --help"
 echo "----------------------------------------"
-echo "\$ mysqldump-secure --help"
-sudo mysqldump-secure --help && echo "${txtgrn}===> [OK] Success${txtrst}" || { echo "${txtpur}===> [FAIL] Unexpected exit code: $?${txtrst}"; ERROR=1; }
-
-echo
-echo "Unbound variable test"
-unbound="$(sudo mysqldump-secure --help 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
-if [ "${unbound}" != "" ]; then echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}${txtrst}"; ERROR=1; else  echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"; fi
-
-
+CMD="sudo mysqldump-secure --help"
+if ! run_test "PASS" "${CMD}"; then ERROR=1; fi
+if ! var_test "${CMD}"; then ERROR=1; fi
+if ! syn_test "${CMD}"; then ERROR=1; fi
 
 
 echo
 echo "----------------------------------------"
 echo " 1.4.2 --conf (does not exist)"
 echo "----------------------------------------"
-echo "\$ mysqldump-secure --verbose --conf=/etc/nothere"
-sudo mysqldump-secure --verbose --conf=/etc/nothere && { echo "${txtpur}===> [FAIL] Unexpected OK${txtrst}"; ERROR=1; } || echo "${txtgrn}===> [OK] Expected Error. Exit code: $?${txtrst}"
-
-echo
-if ! var_test sudo --verbose --conf=/etc/nothere; then ERROR=1; fi
-
-
-
-
+CMD="sudo mysqldump-secure --verbose --conf=/etc/nothere"
+if ! run_test "FAIL" "${CMD}"; then ERROR=1; fi
+if ! var_test "${CMD}"; then ERROR=1; fi
+if ! syn_test "${CMD}"; then ERROR=1; fi
 
 
 echo
 echo "----------------------------------------"
 echo " 1.4.3 --conf (random file)"
 echo "----------------------------------------"
-echo "\$ mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf"
-sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf && { echo "${txtpur}===> [FAIL] Unexpected OK${txtrst}"; ERROR=1; } || echo "${txtgrn}===> [OK] Expected Error. Exit code: $?${txtrst}"
-
 CMD="sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf"
 if ! run_test "FAIL" "${CMD}"; then ERROR=1; fi
 if ! var_test "${CMD}"; then ERROR=1; fi
 if ! syn_test "${CMD}"; then ERROR=1; fi
 
 
-
-
-
-
-
-
 echo
 echo "----------------------------------------"
 echo " 1.4.4 wrong argument"
 echo "----------------------------------------"
-echo "\$ mysqldump-secure --wrong"
-sudo mysqldump-secure --wrong && { echo "${txtpur}===> [FAIL] Unexpected OK${txtrst}"; ERROR=1; } || echo "${txtgrn}===> [OK] Expected Error. Exit code: $?${txtrst}"
-
-echo
-if ! unbound_test sudo mysqldump-secure --wrong; then ERROR=1; fi
+CMD="sudo mysqldump-secure --wrong"
+if ! run_test "FAIL" "${CMD}"; then ERROR=1; fi
+if ! var_test "${CMD}"; then ERROR=1; fi
+if ! syn_test "${CMD}"; then ERROR=1; fi
 
 
 
