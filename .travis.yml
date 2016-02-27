@@ -23,7 +23,7 @@ services:
 
 before_install:
   # Install 'shellcheck' and 'tmpreaper'
-  #- sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu/ trusty-backports restricted main universe"
+  - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu/ trusty-backports restricted main universe"
   - sudo apt-get update -qq
   - sudo apt-get install -qq shellcheck tmpreaper
   #gnutls-bin bash
