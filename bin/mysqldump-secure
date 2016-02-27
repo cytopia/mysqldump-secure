@@ -2031,13 +2031,15 @@ for db in ${DATABASES}; do
 
 					# POSIX pipefail emulation
 					exec 4>&1
+					# Ignore ${COMPRESS_ARG} to be quoted
+					# shellcheck disable=SC2086
 					error_statuses="$( (
 						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
 						else
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
 						fi) |
-						(if ${COMPRESS_BIN} "${COMPRESS_ARG}" 2> "${MY_TMP_FILE_COMP}"; then
+						(if ${COMPRESS_BIN} ${COMPRESS_ARG} 2> "${MY_TMP_FILE_COMP}"; then
 							echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3;
 						else
 							echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3
@@ -2061,13 +2063,15 @@ for db in ${DATABASES}; do
 
 					# POSIX pipefail emulation
 					exec 4>&1
+					# Ignore ${COMPRESS_ARG} to be quoted
+					# shellcheck disable=SC2086
 					error_statuses="$( (
 						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
 						else
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
 						fi) |
-						(if ${COMPRESS_BIN} "${COMPRESS_ARG}" 2> "${MY_TMP_FILE_COMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}"; then
+						(if ${COMPRESS_BIN} ${COMPRESS_ARG} 2> "${MY_TMP_FILE_COMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}"; then
 							echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3;
 						else
 							echo "1:$?:$(cat "${MY_TMP_FILE_COMP}")" >&3
