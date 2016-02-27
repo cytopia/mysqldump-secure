@@ -1080,10 +1080,22 @@ elif [ "${LOG}" = "1" ]; then
 	fi
 elif [ "${LOG}" = "0" ]; then
 	debug "info" "(OPT): Logging disabled" "" "" "${_ARG_CRON}"
+
+	# In case it is not set
+	if ! set | grep '^LOGFILE=' >/dev/null 2>&1; then
+		LOGFILE="${_DEFAULT_LOGFILE}"
+	fi
+
 else
 	debug "err"  "(CFG): Invalid value for \$LOG: ${LOG}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err"  "(OPT): Logging disabled" "" "" "${_ARG_CRON}"
 	LOG=0
+
+	# In case it is not set
+	if ! set | grep '^LOGFILE=' >/dev/null 2>&1; then
+		LOGFILE="${_DEFAULT_LOGFILE}"
+	fi
+
 fi
 
 # Is logging still enabled after all checks?
