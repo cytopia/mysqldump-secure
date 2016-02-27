@@ -1243,7 +1243,7 @@ if ! set | grep '^MYSQL_CNF_FILE=' >/dev/null 2>&1; then
 elif [ -z "${MYSQL_CNF_FILE}" ]; then
 	debug "warn" "(CFG): \$MYSQL_CNF_FILE variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(CFG): Setting default to: ${_DEFAULT_MYSQL_CNF_FILE}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	MYSQL_CNF_FILE=${_DEFAULT_DUMP_FILE_PRE}
+	MYSQL_CNF_FILE=${_DEFAULT_MYSQL_CNF_FILE}
 fi
 
 # Resolve symlink?
@@ -1451,54 +1451,119 @@ done
 ############################################################
 # IGNORE/REQUIRE
 ############################################################
-if [ -z "${IGNORE-}" ]; then
-	debug "info" "\$IGNORE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "info" "No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}"
+
+# Ignored databases
+if ! set | grep '^IGNORE=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$IGNORE variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(RUN): No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	IGNORE=""
+elif [ -z "${IGNORE}" ]; then
+	debug "info" "(CFG): \$IGNORE variable is empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(RUN): No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	IGNORE=""
+else
+	debug "info" "(CFG): Ignored DB's: ${IGNORE}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
-if [ -z "${REQUIRE-}" ]; then
-	debug "info" "\$REQUIRE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "info" "No database will explicitly be required" $LOG "${LOGFILE}" "${_ARG_CRON}"
+
+# Required databases
+if ! set | grep '^REQUIRE=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$REQUIRE variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(RUN): No database will be required" $LOG "${LOGFILE}" "${_ARG_CRON}"
 	REQUIRE=""
+elif [ -z "${REQUIRE}" ]; then
+	debug "info" "(CFG): \$REQUIRE variable is empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(RUN): No database will explicitly be required" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	IGNORE=""
+else
+	debug "info" "(CFG): Required DB's: ${REQUIRE}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
+
+
 
 
 
 ############################################################
 # Compression
 ############################################################
-if [ -z "${COMPRESS-}" ]; then
-	debug "warn" "\$COMPRESS variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "warn" "(OPT) Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+# Check $DUMP_FILE_PRE
+if ! set | grep '^COMPRESS=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$COMPRESS variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(OPT): Compression disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	COMPRESS=0
-fi
-if [ "${COMPRESS}" = "1" ]; then
-	if [ -z "${COMPRESS_BIN-}" ]; then
-		debug "err"  "\$COMPRESS_BIN variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		exit 2
-	fi
-	if [ -z "${COMPRESS_ARG-}" ]; then
-		debug "info"  "\$COMPRESS_ARG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		COMPRESS_ARG=""
-	fi
-	if [ -z "${COMPRESS_EXT-}" ]; then
-		debug "info"  "\$COMPRESS_EXT variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "info"  "Using 'compressed' as file extension." $LOG "${LOGFILE}" "${_ARG_CRON}"
-		COMPRESS_EXT="compressed"
+elif [ -z "${COMPRESS}" ]; then
+	debug "warn" "(CFG): \$COMPRESS variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(OPT): Compression disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	COMPRESS=0
+elif [ "${COMPRESS}" = "1" ]; then
+
+	# COMPRESS_BIN
+	if ! set | grep '^COMPRESS_BIN=' >/dev/null 2>&1; then
+		debug "err" "(CFG): \$COMPRESS_BIN variable is not defined, but required" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "(OPT): Compression disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		COMPRESS=0
+	elif [ -z "${COMPRESS_BIN}" ]; then
+		debug "err" "(CFG): \$COMPRESS_BIN variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "(OPT): Compression disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		COMPRESS=0
+	elif ! command -v "${COMPRESS_BIN}" > /dev/null 2>&1 ; then
+		debug "err" "(CFG): ${COMPRESS_BIN} not found. Fix \$COMPRESS_BIN" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err" "(HLP): Fix \$COMPRESS_BIN" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err" "(OPT): Compression disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		COMPRESS=0
 	fi
 
-	if ! command -v "${COMPRESS_BIN}" > /dev/null 2>&1 ; then
-		debug "warn" "${COMPRESS_BIN} not found. Fix \$COMPRESS_BIN" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		exit 2
-	else
-		debug "info" "(OPT) Compression enabled: Using ${COMPRESS_BIN} ${COMPRESS_ARG}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	# If compression is still enabled
+	if [ "${COMPRESS}" = "1" ]; then
+		# COMPRESS_ARG
+		if ! set | grep '^COMPRESS_ARG=' >/dev/null 2>&1; then
+			debug "err" "(CFG): \$COMPRESS_ARG variable is not defined, but required" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err" "(OPT): Compression disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			COMPRESS=0
+		elif [ -z "${COMPRESS_ARG}" ]; then
+			debug "err" "(CFG): \$COMPRESS_ARG variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err" "(OPT): Compression disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			COMPRESS=0
+		fi
 	fi
+
+	# If compression is still enabled
+	if [ "${COMPRESS}" = "1" ]; then
+		# COMPRESS_ARG
+		if ! set | grep '^COMPRESS_EXT=' >/dev/null 2>&1; then
+			debug "warn" "(CFG): \$COMPRESS_EXT variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(RUN): Using 'compressed' as file extension." $LOG "${LOGFILE}" "${_ARG_CRON}"
+			COMPRESS_EXT="compressed"
+		elif [ -z "${COMPRESS_EXT}" ]; then
+			debug "warn" "(CFG): \$COMPRESS_EXT variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(RUN): Using 'compressed' as file extension." $LOG "${LOGFILE}" "${_ARG_CRON}"
+			COMPRESS_EXT="compressed"
+		fi
+	fi
+
+	# If compression is still enabled
+	if [ "${COMPRESS}" = "1" ]; then
+		debug "info" "(OPT): Compression enabled: Using ${COMPRESS_BIN} ${COMPRESS_ARG}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	fi
+
+elif [ "${COMPRESS}" = "0" ]; then
+	debug "info" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
 else
-	debug "info" "(OPT) Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	COMPRESS="0"
+	debug "err" "(CFG): Invalid value for \$COMPRESS: ${COMPRESS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err" "(OPT): Compression disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	COMPRESS=0
 fi
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
