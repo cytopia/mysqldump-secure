@@ -237,6 +237,10 @@ else
 fi
 
 
+echo "outputting to stderr" > /dev/stderr
+echo "outputting to stderr" > /dev/stderr | grep out
+
+echo "outputting to stderr" 2>&1 > /dev/stderr | grep out
 
 
 echo
