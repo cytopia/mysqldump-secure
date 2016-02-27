@@ -203,7 +203,7 @@ sudo mysqldump-secure --verbose --conf=/etc/nothere && { echo "${txtpur}===> [FA
 
 echo
 echo "Unbound variable test"
-unbound="$(sudo mysqldump-secure--verbose --conf=/etc/nothere 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
+unbound="$(sudo mysqldump-secure --verbose --conf=/etc/nothere 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
 [ "$unbound" != "" ] && { echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}{txtrst}" ERROR=1; } ||  echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}"
 
 
@@ -219,7 +219,7 @@ sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf && { echo "${tx
 
 echo
 echo "Unbound variable test"
-unbound="$(sudo mysqldump-secure--verbose --conf=/etc/mysqldump-secure.cnf 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
+unbound="$(sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
 [ "$unbound" != "" ] && { echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}{txtrst}" ERROR=1; } ||  echo "${txtgrn}===> [OK] No Unbound variables found$.${txtrst}"
 
 
