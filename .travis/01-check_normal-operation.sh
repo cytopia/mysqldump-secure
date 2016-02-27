@@ -232,6 +232,8 @@ unbound_test() {
 	cmd="$@"
 	eval "${cmd} 2> __tmp.txt"
 
+	echo "${cmd}"
+
 	sudo cat "__tmp.txt" | grep 'unbound variable'
 	if [ "$?" != "0" ]; then
 		sudo rm "__tmp.txt"
@@ -243,10 +245,10 @@ unbound_test() {
 		return 0
 	fi
 }
-echo "catting:"
-sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf &> unbound
-sudo cat unbound
-echo "catting end"
+#echo "catting:"
+#sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf &> unbound
+#sudo cat unbound
+#echo "catting end"
 
 echo "func catting:"
 unbound_test sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf
