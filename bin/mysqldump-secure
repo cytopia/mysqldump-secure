@@ -70,7 +70,7 @@ _DEFAULT_OPENSSL_ALGO_ARG="-aes256"
 
 # Logging defaults
 _DEFAULT_LOG_CHMOD="0600"
-_DEFAULT_LOGFILE="${_PREFIX_ETC}/var/log/mysqldump-secure.log"
+#_DEFAULT_LOGFILE="${_PREFIX_ETC}/var/log/mysqldump-secure.log"
 
 # Default nagios variables
 _DEFAULT_NAGIOS_LOG_CHMOD="0644"
@@ -975,10 +975,12 @@ if ! set | grep '^LOG=' >/dev/null 2>&1; then
 	debug "warn" "(CFG): \$LOG variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(OPT): Logging disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	LOG=0
+	LOGFILE=""
 elif [ -z "${LOG}" ]; then
 	debug "warn" "(CFG): \$LOG variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(OPT): Logging disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	LOG=0
+	LOGFILE=""
 elif [ "${LOG}" = "1" ]; then
 	# Check chmod variable
 	if ! set | grep '^LOG_CHMOD=' >/dev/null 2>&1; then
@@ -998,12 +1000,14 @@ elif [ "${LOG}" = "1" ]; then
 	# Check logfile variable
 	if ! set | grep '^LOGFILE=' >/dev/null 2>&1; then
 		debug "warn" "(CFG): \$LOGFILE variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "(CFG): Setting default to: ${_DEFAULT_LOGFILE}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		LOGFILE="${_DEFAULT_LOGFILE}"
+		debug "warn" "(OPT): Logging disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		LOG=0
+		LOGFILE=""
 	elif [ -z "${LOGFILE}" ]; then
 		debug "warn" "(CFG): \$LOGFILE variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "(CFG): Setting default to: ${_DEFAULT_LOGFILE}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		LOGFILE="${_DEFAULT_LOGFILE}"
+		debug "warn" "(OPT): Logging disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		LOG=0
+		LOGFILE=""
 	fi
 
 	# Resolve symlink?
@@ -1080,21 +1084,12 @@ elif [ "${LOG}" = "1" ]; then
 	fi
 elif [ "${LOG}" = "0" ]; then
 	debug "info" "(OPT): Logging disabled" "" "" "${_ARG_CRON}"
-
-	# In case it is not set
-	if ! set | grep '^LOGFILE=' >/dev/null 2>&1; then
-		LOGFILE="${_DEFAULT_LOGFILE}"
-	fi
-
+	LOGFILE=""
 else
 	debug "err"  "(CFG): Invalid value for \$LOG: ${LOG}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err"  "(OPT): Logging disabled" "" "" "${_ARG_CRON}"
 	LOG=0
-
-	# In case it is not set
-	if ! set | grep '^LOGFILE=' >/dev/null 2>&1; then
-		LOGFILE="${_DEFAULT_LOGFILE}"
-	fi
+	LOGFILE=""
 fi
 
 # Is logging still enabled after all checks?
