@@ -571,8 +571,18 @@ chmod_2_umask() {
 # @param  string	path (file, folder or symlink)
 # @return integer	Success
 _realpath() {
-	echo "$(realpath "${1}")"
-	return $?
+	_path="$(realpath "${1}" 2>/dev/null)"
+	_code="$?"
+
+	# Return found path
+	if [ "${_code}" = "0" ]; then
+		echo "${_path}"
+		return 0
+	# Return original path (with error code)
+	else
+		echo "${_path}"
+		return "${_code}"
+	fi
 }
 
 ############################################################
