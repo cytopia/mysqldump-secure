@@ -154,17 +154,17 @@ CMD="sudo mysqldump-secure --test --verbose"
 sudo rm /var/log/mysqldump-secure.log 2>/dev/null
 sudo rm /var/log/mysqldump-secure.nagios.log 2>/dev/null
 sudo rm -rf /var/mysqldump-secure/ 2>/dev/null
-if ! run_test "PASS" "${CMD}"; then ERROR=1; fi
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sudo rm /var/log/mysqldump-secure.log 2>/dev/null
 sudo rm /var/log/mysqldump-secure.nagios.log 2>/dev/null
 sudo rm -rf /var/mysqldump-secure/ 2>/dev/null
-if ! var_test "${CMD}"; then ERROR=1; fi
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sudo rm /var/log/mysqldump-secure.log 2>/dev/null
 sudo rm /var/log/mysqldump-secure.nagios.log 2>/dev/null
 sudo rm -rf /var/mysqldump-secure/ 2>/dev/null
-if ! syn_test "${CMD}"; then ERROR=1; fi
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 
@@ -174,13 +174,13 @@ echo "----------------------------------------"
 CMD="sudo mysqldump-secure --test --verbose"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! run_test "PASS" "${CMD}"; then ERROR=1; fi
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! var_test "${CMD}"; then ERROR=1; fi
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! syn_test "${CMD}"; then ERROR=1; fi
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 
@@ -202,17 +202,17 @@ CMD="sudo mysqldump-secure --verbose"
 sudo rm /var/log/mysqldump-secure.log 2>/dev/null
 sudo rm /var/log/mysqldump-secure.nagios.log 2>/dev/null
 sudo rm -rf /var/mysqldump-secure/ 2>/dev/null
-if ! run_test "PASS" "${CMD}"; then ERROR=1; fi
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sudo rm /var/log/mysqldump-secure.log 2>/dev/null
 sudo rm /var/log/mysqldump-secure.nagios.log 2>/dev/null
 sudo rm -rf /var/mysqldump-secure/ 2>/dev/null
-if ! var_test "${CMD}"; then ERROR=1; fi
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sudo rm /var/log/mysqldump-secure.log 2>/dev/null
 sudo rm /var/log/mysqldump-secure.nagios.log 2>/dev/null
 sudo rm -rf /var/mysqldump-secure/ 2>/dev/null
-if ! syn_test "${CMD}"; then ERROR=1; fi
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 
@@ -222,13 +222,13 @@ echo "----------------------------------------"
 CMD="sudo mysqldump-secure --verbose"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! run_test "PASS" "${CMD}"; then ERROR=1; fi
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! var_test "${CMD}"; then ERROR=1; fi
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! syn_test "${CMD}"; then ERROR=1; fi
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 
@@ -241,7 +241,7 @@ sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-2.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
 echo "\$ mysqldump-secure --verbose"
-sudo mysqldump-secure --verbose && echo "${txtgrn}===> [OK] Success${txtrst}" || { echo "${txtpur}===> [FAIL] Unexpected exit code: $?${txtrst}"; ERROR=1; }
+sudo mysqldump-secure --verbose && echo "${txtgrn}===> [OK] Success${txtrst}" || { echo "${txtpur}===> [FAIL] Unexpected exit code: $?${txtrst}"; ERROR=$((ERROR+1)); }
 
 
 
@@ -251,7 +251,7 @@ echo "----------------------------------------"
 echo "Unbound variable test"
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 unbound="$(sudo mysqldump-secure --verbose 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
-if [ "${unbound}" != "" ]; then echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}${txtrst}"; ERROR=1; else  echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"; fi
+if [ "${unbound}" != "" ]; then echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}${txtrst}"; ERROR=$((ERROR+1)); else  echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"; fi
 
 
 
@@ -265,7 +265,7 @@ sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-2.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
 unbound="$(sudo mysqldump-secure --verbose 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
-if [ "${unbound}" != "" ]; then echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}${txtrst}"; ERROR=1; else  echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"; fi
+if [ "${unbound}" != "" ]; then echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}${txtrst}"; ERROR=$((ERROR+1)); else  echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"; fi
 
 
 
@@ -287,17 +287,17 @@ CMD="sudo mysqldump-secure --cron"
 sudo rm /var/log/mysqldump-secure.log 2>/dev/null
 sudo rm /var/log/mysqldump-secure.nagios.log 2>/dev/null
 sudo rm -rf /var/mysqldump-secure/ 2>/dev/null
-if ! run_test "PASS" "${CMD}"; then ERROR=1; fi
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sudo rm /var/log/mysqldump-secure.log 2>/dev/null
 sudo rm /var/log/mysqldump-secure.nagios.log 2>/dev/null
 sudo rm -rf /var/mysqldump-secure/ 2>/dev/null
-if ! var_test "${CMD}"; then ERROR=1; fi
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sudo rm /var/log/mysqldump-secure.log 2>/dev/null
 sudo rm /var/log/mysqldump-secure.nagios.log 2>/dev/null
 sudo rm -rf /var/mysqldump-secure/ 2>/dev/null
-if ! syn_test "${CMD}"; then ERROR=1; fi
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 
@@ -307,13 +307,13 @@ echo "----------------------------------------"
 CMD="sudo mysqldump-secure --cron"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! run_test "PASS" "${CMD}"; then ERROR=1; fi
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! var_test "${CMD}"; then ERROR=1; fi
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! syn_test "${CMD}"; then ERROR=1; fi
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 
@@ -327,21 +327,21 @@ sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-1.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-2.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
-if ! run_test "PASS" "${CMD}"; then ERROR=1; fi
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-1.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-2.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
-if ! var_test "${CMD}"; then ERROR=1; fi
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-1.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-2.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
-if ! syn_test "${CMD}"; then ERROR=1; fi
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 
@@ -359,9 +359,9 @@ echo "----------------------------------------"
 echo " 1.4.1 --help"
 echo "----------------------------------------"
 CMD="sudo mysqldump-secure --help"
-if ! run_test "PASS" "${CMD}"; then ERROR=1; fi
-if ! var_test "${CMD}"; then ERROR=1; fi
-if ! syn_test "${CMD}"; then ERROR=1; fi
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 
@@ -369,9 +369,9 @@ echo "----------------------------------------"
 echo " 1.4.2 --conf (does not exist)"
 echo "----------------------------------------"
 CMD="sudo mysqldump-secure --verbose --conf=/etc/nothere"
-if ! run_test "FAIL" "${CMD}"; then ERROR=1; fi
-if ! var_test "${CMD}"; then ERROR=1; fi
-if ! syn_test "${CMD}"; then ERROR=1; fi
+if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 
@@ -379,9 +379,9 @@ echo "----------------------------------------"
 echo " 1.4.3 --conf (random file)"
 echo "----------------------------------------"
 CMD="sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf"
-if ! run_test "FAIL" "${CMD}"; then ERROR=1; fi
-if ! var_test "${CMD}"; then ERROR=1; fi
-if ! syn_test "${CMD}"; then ERROR=1; fi
+if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 
@@ -389,9 +389,9 @@ echo "----------------------------------------"
 echo " 1.4.4 wrong argument"
 echo "----------------------------------------"
 CMD="sudo mysqldump-secure --wrong"
-if ! run_test "FAIL" "${CMD}"; then ERROR=1; fi
-if ! var_test "${CMD}"; then ERROR=1; fi
-if ! syn_test "${CMD}"; then ERROR=1; fi
+if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 
@@ -404,7 +404,7 @@ if [ "$ERROR" = "0" ]; then
 	echo "${txtgrn}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
 else
 	echo "${txtpur}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
-	echo "${txtpur}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  [01] FAILED   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
+	echo "${txtpur}@@@@@@@@@@@@@@@@@@@@@@@@  [01] FAILED: ${ERROR} Errors   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
 	echo "${txtpur}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
 fi
 exit $ERROR
