@@ -227,6 +227,9 @@ sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>/dev/stderr |
 sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf &> unbound
 echo "catting:"
 sudo cat unbound
+
+
+echo "catting end"
 unbound="$(sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1 | grep 'unbound variable')"
 echo "unbound: ${unbound}"
 if [ "${unbound}" != "" ]; then
