@@ -1,4 +1,4 @@
-#!/bin/sh -u
+#!/bin/sh -ue
 #
 # -u: nounset (enable: set -u | disable: set +u)
 # -e: errexit
