@@ -1082,10 +1082,9 @@ elif [ "${LOG}" = "0" ]; then
 	debug "info" "(OPT): Logging disabled" "" "" "${_ARG_CRON}"
 
 	# In case it is not set
-	# TODO: forcing unbound variable
-	#if ! set | grep '^LOGFILE=' >/dev/null 2>&1; then
-	#	LOGFILE="${_DEFAULT_LOGFILE}"
-	#fi
+	if ! set | grep '^LOGFILE=' >/dev/null 2>&1; then
+		LOGFILE="${_DEFAULT_LOGFILE}"
+	fi
 
 else
 	debug "err"  "(CFG): Invalid value for \$LOG: ${LOG}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1093,10 +1092,9 @@ else
 	LOG=0
 
 	# In case it is not set
-	# TODO: forcing unbound variable
-	#if ! set | grep '^LOGFILE=' >/dev/null 2>&1; then
-	#	LOGFILE="${_DEFAULT_LOGFILE}"
-	#fi
+	if ! set | grep '^LOGFILE=' >/dev/null 2>&1; then
+		LOGFILE="${_DEFAULT_LOGFILE}"
+	fi
 fi
 
 # Is logging still enabled after all checks?
