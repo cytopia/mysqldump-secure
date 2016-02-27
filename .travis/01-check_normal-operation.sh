@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 ERROR=0
 
@@ -219,17 +219,27 @@ sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf && { echo "${tx
 
 echo
 echo "Unbound variable test"
-sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf
-sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1
-sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1 | grep 'unbound variable'
-sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>/dev/stderr
-sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>/dev/stderr | grep 'unbound variable'
+#sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf
+#sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1
+#sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1 | grep 'unbound variable'
+#sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>/dev/stderr
+
+echo 'stdout check'
+sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>/dev/stdout | grep 'unbound variable'
+
+
+#unbound_test() {
+#	cmd="${@}"
+#	$(${cmd})
+#	exit="$?"
+#}
+echo 'filet check'
 sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf &> unbound
 echo "catting:"
 sudo cat unbound
-
-
 echo "catting end"
+
+
 unbound="$(sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1 | grep 'unbound variable')"
 echo "unbound: ${unbound}"
 if [ "${unbound}" != "" ]; then
