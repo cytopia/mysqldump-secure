@@ -13,7 +13,7 @@ txtrst=$(tput sgr0) # Text reset.
 
 
 #
-# @param  string  SUCC|FAIL what is expected?
+# @param  string  PASS|FAIL what is expected?
 # @param  string  Command
 run_test() {
 	mod="${1}"
@@ -24,7 +24,7 @@ run_test() {
 	exit="$?"
 
 	# Test must succeed
-	if [ "${mod}" = "SUCC" ]; then
+	if [ "${mod}" = "PASS" ]; then
 
 		if [ "${exit}" != "0" ]; then
 			echo "${txtpur}===> [FAIL] Unexpected exit code: ${exit}${txtrst}"
@@ -279,10 +279,10 @@ echo "----------------------------------------"
 echo "\$ mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf"
 sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf && { echo "${txtpur}===> [FAIL] Unexpected OK${txtrst}"; ERROR=1; } || echo "${txtgrn}===> [OK] Expected Error. Exit code: $?${txtrst}"
 
-if ! run_test "FAIL" mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf; then ERROR=1; fi
-
+CMD="sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf"
+if ! run_test "FAIL" "${CMD}"; then ERROR=1; fi
 echo
-if ! unbound_test sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf; then ERROR=1; fi
+if ! unbound_test "${CMD}"; then ERROR=1; fi
 
 
 
