@@ -234,14 +234,14 @@ unbound_test() {
 
 	echo "${cmd}"
 
-	sudo cat "__tmp.txt" | grep 'unbound variable'
-	if [ "$?" != "0" ]; then
-		sudo rm "__tmp.txt"
-		echo 'unbound'
+	found="$(sudo cat "__tmp.txt" | grep 'unbound variable' 2>&1)"
+	sudo rm "__tmp.txt"
+	if [ "${found}" != "" ]; then
+		echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}"
+		echo "${txtpur}${found}${txtrst}"
 		return 1
 	else
-		sudo rm "__tmp.txt"
-		echo 'not found'
+		echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"
 		return 0
 	fi
 }
@@ -252,25 +252,23 @@ unbound_test() {
 
 echo "func catting:"
 unbound_test sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf
-sudo cat unbound
 echo "func catting end"
 
 echo "func catting 2:"
 unbound_test "sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf"
-sudo cat unbound
 echo "func catting2 end"
 
 
 
 
-unbound="$(sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1 | grep 'unbound variable')"
-echo "unbound: ${unbound}"
-if [ "${unbound}" != "" ]; then
-	echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}"
-	echo "${txtpur}${unbound}${txtrst}"; ERROR=1
-else
-	echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"
-fi
+#unbound="$(sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1 | grep 'unbound variable')"
+#echo "unbound: ${unbound}"
+#if [ "${unbound}" != "" ]; then
+#	echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}"
+#	echo "${txtpur}${unbound}${txtrst}"; ERROR=1
+#else
+#	echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"
+#fi
 
 
 echo "outputting to stderr" > /dev/stderr
