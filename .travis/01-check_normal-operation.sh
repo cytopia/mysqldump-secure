@@ -218,26 +218,47 @@ echo "\$ mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf"
 sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf && { echo "${txtpur}===> [FAIL] Unexpected OK${txtrst}"; ERROR=1; } || echo "${txtgrn}===> [OK] Expected Error. Exit code: $?${txtrst}"
 
 echo
-echo "Unbound variable test"
+#echo "Unbound variable test"
 #sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf
 #sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1
 #sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1 | grep 'unbound variable'
 #sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>/dev/stderr
 
-echo 'stdout check'
+#echo 'stdout check'
 #sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>/dev/stdout | grep 'unbound variable'
 
 
-#unbound_test() {
-#	cmd="${@}"
-#	$(${cmd})
-#	exit="$?"
-#}
-echo 'filet check'
-sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf &> unbound
+unbound_test() {
+	cmd="$@"
+	eval "${cmd} 2> __tmp.txt"
+
+	sudo cat "__tmp.txt" | grep 'unbound variable'
+	if $? ; then
+		sudo rm "__tmp.txt"
+		echo 'unbound'
+		return 1
+	else
+		sudo rm "__tmp.txt"
+		echo 'not found'
+		return 0
+	fi
+}
 echo "catting:"
+sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf &> unbound
 sudo cat unbound
 echo "catting end"
+
+echo "func catting:"
+unbound_test sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf
+sudo cat unbound
+echo "func catting end"
+
+echo "func catting 2:"
+unbound_test "sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf"
+sudo cat unbound
+echo "func catting2 end"
+
+
 
 
 unbound="$(sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1 | grep 'unbound variable')"
