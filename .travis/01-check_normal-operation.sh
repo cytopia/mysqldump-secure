@@ -224,20 +224,12 @@ if [ "${unbound}" != "" ]; then echo "${txtpur}===> [FAIL] Unbound variable foun
 
 
 
-echo
-#echo "Unbound variable test"
-#sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf
-#sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1
-#sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1 | grep 'unbound variable'
-#sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>/dev/stderr
-
-#echo 'stdout check'
-#sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>/dev/stdout | grep 'unbound variable'
 
 
 unbound_test() {
 	cmd="$@"
 
+	echo "Unbound variable test:"
 	echo "\$ ${cmd}"
 	unbound="$(eval "${cmd} 3>&2 2>&1 1>&3 > /dev/null | grep 'parameter not set'")"
 
@@ -250,36 +242,19 @@ unbound_test() {
 		return 0
 	fi
 }
-#echo "catting:"
-#sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf &> unbound
-#sudo cat unbound
-#echo "catting end"
 
 echo "func catting:"
-unbound_test sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf
-echo "func catting end"
+if ! unbound_test sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf; then
+	echo "no"
+fi
 
-echo "func catting 2:"
-unbound_test "sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf"
-echo "func catting2 end"
-
-
-
-
-#unbound="$(sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1 | grep 'unbound variable')"
-#echo "unbound: ${unbound}"
-#if [ "${unbound}" != "" ]; then
-#	echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}"
-#	echo "${txtpur}${unbound}${txtrst}"; ERROR=1
-#else
-#	echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"
-#fi
+if ! unbound_test "sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf"; then
+	echo "no"
+fi
 
 
-echo "outputting to stderr" > /dev/stderr
-echo "outputting to stderr" > /dev/stderr | grep out
 
-echo "outputting to stderr" 2>&1 > /dev/stderr | grep out
+
 
 
 echo
