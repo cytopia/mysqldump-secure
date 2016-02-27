@@ -233,7 +233,7 @@ unbound_test() {
 	eval "${cmd} 2> __tmp.txt"
 
 	sudo cat "__tmp.txt" | grep 'unbound variable'
-	if $? ; then
+	if [ "$?" != "0" ]; then
 		sudo rm "__tmp.txt"
 		echo 'unbound'
 		return 1
