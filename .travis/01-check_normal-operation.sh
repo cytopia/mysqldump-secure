@@ -2,7 +2,7 @@
 
 ERROR=0
 
-. "functions.bash"
+. "${HOME}/cytopia/mysqldump-secure/.travis/functions.bash"
 
 
 echo "##########################################################################################"
@@ -110,37 +110,28 @@ if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 echo "----------------------------------------"
 echo " 1.2.3 Normal mode third run (del files)"
 echo "----------------------------------------"
+CMD="sudo mysqldump-secure --verbose"
+
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-1.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-2.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
-echo "\$ mysqldump-secure --verbose"
-sudo mysqldump-secure --verbose && echo "${txtgrn}===> [OK] Success${txtrst}" || { echo "${txtpur}===> [FAIL] Unexpected exit code: $?${txtrst}"; ERROR=$((ERROR+1)); }
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-
-
-echo "----------------------------------------"
-echo " 1.2.4 Normal mode unbound variable test"
-echo "----------------------------------------"
-echo "Unbound variable test"
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-unbound="$(sudo mysqldump-secure --verbose 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
-if [ "${unbound}" != "" ]; then echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}${txtrst}"; ERROR=$((ERROR+1)); else  echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"; fi
-
-
-
-echo "----------------------------------------"
-echo " 1.2.4 Normal mode (del files) unbound variable test"
-echo "----------------------------------------"
-echo "Unbound variable test"
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-1.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-2.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
-unbound="$(sudo mysqldump-secure --verbose 3>&2 2>&1 1>&3 > /dev/null | grep 'unbound variable')"
-if [ "${unbound}" != "" ]; then echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}${txtrst}"; ERROR=$((ERROR+1)); else  echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"; fi
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-1.txt
+sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-2.txt
+sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt
+sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 
