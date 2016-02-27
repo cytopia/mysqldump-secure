@@ -28,9 +28,11 @@ run_test() {
 
 		if [ "${exit}" != "0" ]; then
 			echo "${txtpur}===> [FAIL] Unexpected exit code: ${exit}${txtrst}"
+			echo
 			return 1
 		else
 			echo "${txtgrn}===> [OK] Success${txtrst}"
+			echo
 			return 0
 		fi
 
@@ -39,9 +41,11 @@ run_test() {
 
 		if [ "${exit}" = "0" ]; then
 			echo "${txtpur}===> [FAIL] Unexpected OK${txtrst}"
+			echo
 			return 1
 		else
 			echo "${txtgrn}===> [OK] Expected Error. Exit code: ${exit}${txtrst}"
+			echo
 			return 0
 		fi
 
@@ -55,24 +59,46 @@ run_test() {
 
 }
 
-
-unbound_test() {
+# Test against unset variables
+var_test() {
 	cmd="$@"
 
 	echo "Unbound variable test:"
-	echo "\$ ${cmd}"
+	echo "\$ ${cmd} | grep 'parameter not set'"
 	unbound="$(eval "${cmd} 3>&2 2>&1 1>&3 > /dev/null | grep 'parameter not set'")"
 
 	if [ "${unbound}" != "" ]; then
 		echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}"
 		echo "${txtpur}${unbound}${txtrst}"
+		echo
 		return 1
 	else
 		echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"
+		echo
 		return 0
 	fi
 }
 
+
+# Test against syntax errors
+syn_test() {
+	cmd="$@"
+
+	echo "Syntax error test:"
+	echo "\$ ${cmd} |  grep -E '.*line [0-9]*.*command not found.*'"
+	syntax="$(eval "${cmd} 3>&2 2>&1 1>&3 > /dev/null |  grep -E '.*line [0-9]*.*command not found.*'")"
+
+	if [ "${syntax}" != "" ]; then
+		echo "${txtpur}===> [FAIL] Syntax error found.${txtrst}"
+		echo "${txtpur}${syntax}${txtrst}"
+		echo
+		return 1
+	else
+		echo "${txtgrn}===> [OK] No Syntax error found.${txtrst}"
+		echo
+		return 0
+	fi
+}
 
 
 echo "##########################################################################################"
@@ -281,8 +307,8 @@ sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf && { echo "${tx
 
 CMD="sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf"
 if ! run_test "FAIL" "${CMD}"; then ERROR=1; fi
-echo
-if ! unbound_test "${CMD}"; then ERROR=1; fi
+if ! var_test "${CMD}"; then ERROR=1; fi
+if ! syn_test "${CMD}"; then ERROR=1; fi
 
 
 
