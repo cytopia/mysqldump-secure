@@ -222,6 +222,8 @@ echo "Unbound variable test"
 sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf
 sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1
 sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1 | grep 'unbound variable'
+sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>/dev/stderr
+sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>/dev/stderr | grep 'unbound variable'
 sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf &> unbound
 echo "catting:"
 sudo cat unbound
