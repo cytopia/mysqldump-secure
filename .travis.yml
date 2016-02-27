@@ -2,8 +2,21 @@ dist: trusty
 sudo: required
 language: bash
 
+
+addons:
+  apt:
+    packages:
+    - mysql-server-5.6
+    - mysql-client-core-5.6
+    - mysql-client-5.6
+
+
 services:
   - mysql
+
+
+
+
 
 before_install:
   # Install 'shellcheck' and 'tmpreaper'
