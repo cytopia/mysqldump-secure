@@ -218,6 +218,13 @@ echo "\$ mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf"
 sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf && { echo "${txtpur}===> [FAIL] Unexpected OK${txtrst}"; ERROR=1; } || echo "${txtgrn}===> [OK] Expected Error. Exit code: $?${txtrst}"
 
 echo
+echo "Unbound variable test"
+unbound="$(sudo mysqldump-secure --verbose --conf=/etc/nothere 3>&2 2>&1 1>&3 > /dev/null | grep 'parameter not set')"
+if [ "${unbound}" != "" ]; then echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}";  echo "${txtpur}${unbound}${txtrst}"; ERROR=1; else  echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"; fi
+
+
+
+echo
 #echo "Unbound variable test"
 #sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf
 #sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>&1
@@ -231,20 +238,14 @@ echo
 unbound_test() {
 	cmd="$@"
 
-
 	echo "\$ ${cmd}"
-	eval "${cmd} 2> __tmp.txt"
+	unbound="$(eval "${cmd} 3>&2 2>&1 1>&3 > /dev/null | grep 'parameter not set'")"
 
-
-	sudo cat "__tmp.txt" | grep 'unbound variable'
-	code="${?}"
-	if [ "${code}" != "0" ]; then
-		sudo rm "__tmp.txt"
+	if [ "${unbound}" != "" ]; then
 		echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}"
-		echo "${txtpur}${found}${txtrst}"
+		echo "${txtpur}${unbound}${txtrst}"
 		return 1
 	else
-		sudo rm "__tmp.txt"
 		echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"
 		return 0
 	fi
