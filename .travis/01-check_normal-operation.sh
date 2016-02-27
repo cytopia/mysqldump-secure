@@ -225,7 +225,7 @@ echo "Unbound variable test"
 #sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>/dev/stderr
 
 echo 'stdout check'
-sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>/dev/stdout | grep 'unbound variable'
+#sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf 2>/dev/stdout | grep 'unbound variable'
 
 
 #unbound_test() {
