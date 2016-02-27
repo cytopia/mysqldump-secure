@@ -104,15 +104,15 @@ script:
   #
   # --------------------------------------------------------------------------------
 
-  - /bin/sh ./.travis/01-check_normal-operation.sh
+  - ./.travis/01-check_normal-operation.sh
 
-  - /bin/sh ./.travis/02-check_output_dirs.sh
+  - ./.travis/02-check_output_dirs.sh
 
-  - /bin/sh ./.travis/03-check_connection_settings.sh
+  - ./.travis/03-check_connection_settings.sh
 
-  - /bin/sh ./.travis/04-check_mysqldump_settings.sh
+  - ./.travis/04-check_mysqldump_settings.sh
 
-  - /bin/sh ./.travis/05-check_logging.sh
+  - ./.travis/05-check_logging.sh
 
 
 #
