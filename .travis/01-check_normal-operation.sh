@@ -19,7 +19,8 @@ run_test() {
 	mod="${1}"
 	cmd="${@:2}"
 
-	echo "\$ ${cmd}"
+	echo "${txtblu}--> Run test:${txtrst}"
+	echo "\$ ${txtblu}${cmd}${txtrst}"
 	eval "${cmd}"
 	exit="$?"
 
@@ -63,8 +64,8 @@ run_test() {
 var_test() {
 	cmd="$@"
 
-	echo "Unbound variable test:"
-	echo "\$ ${cmd} | grep 'parameter not set'"
+	echo "${txtblu}--> Unbound variable test:${txtrst}"
+	echo "\$ ${txtblu}${cmd} | grep 'parameter not set'${txtrst}"
 	unbound="$(eval "${cmd} 3>&2 2>&1 1>&3 > /dev/null | grep 'parameter not set'")"
 
 	if [ "${unbound}" != "" ]; then
@@ -84,9 +85,9 @@ var_test() {
 syn_test() {
 	cmd="$@"
 
-	echo "Syntax error test:"
-	echo "\$ ${cmd} |  grep -E '.*line [0-9]*.*command not found.*'"
-	syntax="$(eval "${cmd} 3>&2 2>&1 1>&3 > /dev/null |  grep -E '.*line [0-9]*.*command not found.*'")"
+	echo "${txtblu}-->Syntax error test:${txtrst}"
+	echo "\$ ${txtblu}${cmd} | grep -E '.*[0-9]*:.*: not found.*'${txtrst}"
+	syntax="$(eval "${cmd} 3>&2 2>&1 1>&3 > /dev/null | grep -E '.*[0-9]*:.*: not found.*'")"
 
 	if [ "${syntax}" != "" ]; then
 		echo "${txtpur}===> [FAIL] Syntax error found.${txtrst}"
@@ -291,7 +292,7 @@ echo "\$ mysqldump-secure --verbose --conf=/etc/nothere"
 sudo mysqldump-secure --verbose --conf=/etc/nothere && { echo "${txtpur}===> [FAIL] Unexpected OK${txtrst}"; ERROR=1; } || echo "${txtgrn}===> [OK] Expected Error. Exit code: $?${txtrst}"
 
 echo
-if ! unbound_test sudo --verbose --conf=/etc/nothere; then ERROR=1; fi
+if ! var_test sudo --verbose --conf=/etc/nothere; then ERROR=1; fi
 
 
 
