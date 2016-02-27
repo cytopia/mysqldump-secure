@@ -34,10 +34,14 @@ echo "----------------------------------------"
 sudo sed -i'' 's/DUMP_PATH/#DUMP_PATH/' /etc/mysqldump-secure.conf
 
 echo "---------- CRON MODE ----------"
+echo 1
 CMD="sudo mysqldump-secure --cron"
+echo 2
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+echo 3
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+echo 4
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -287,11 +291,11 @@ echo
 echo
 if [ "$ERROR" = "0" ]; then
   echo "${txtgrn}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
-  echo "${txtgrn}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ [02] SUCESS   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
+  echo "${txtgrn}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ [01] SUCESS @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
   echo "${txtgrn}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
 else
   echo "${txtpur}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
-  echo "${txtpur}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  [02] FAILED   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
+  echo "${txtpur}@@@@@@@@@@@@@@@@@@@@@@@@  [01] FAILED: ${ERROR} Errors   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
   echo "${txtpur}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
 fi
 exit $ERROR
