@@ -2,6 +2,7 @@
 
 ERROR=0
 
+pwd
 . "${HOME}/cytopia/mysqldump-secure/.travis/functions.bash"
 
 
