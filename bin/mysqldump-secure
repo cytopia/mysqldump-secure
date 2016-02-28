@@ -1807,14 +1807,10 @@ elif [ "${DELETE}" = "1"  ]; then
 			debug "info" "(CFG): ${DELETE_METHOD}: Not forcing (--force) deletion on read-only files for ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		else
 			debug "err" "(CFG): Invalid value for \$DELETE_FORCE: ${DELETE_FORCE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug "warn" "(RUN): Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err" "(RUN): Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			DELETE_FORCE=0
 		fi
-	else
-		debug "info" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	fi
-
-
 
 elif [ "${DELETE}" = "0"  ]; then
 	debug "info" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
