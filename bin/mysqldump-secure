@@ -1901,24 +1901,32 @@ if MY_TMP_DIR="$( mktemp -d /tmp/mysqldump-secure.XXXXXXXXXX 2>/dev/null)"; then
 	debug "verbose"  "Creating tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "Cannot create tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "Aborting" $LOG "" "${_ARG_CRON}" "${_ARG_VERB}"
+	exit 1
 fi
 
 if MY_TMP_FILE_DUMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
 	debug "verbose"  "Creating tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "Cannot create tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "Aborting" $LOG "" "${_ARG_CRON}" "${_ARG_VERB}"
+	exit 1
 fi
 
 if MY_TMP_FILE_COMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
 	debug "verbose"  "Creating tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "Cannot create tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "Aborting" $LOG "" "${_ARG_CRON}" "${_ARG_VERB}"
+	exit 1
 fi
 
 if MY_TMP_FILE_ENCR="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
 	debug "verbose"  "Creating tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "Cannot create tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "Aborting" $LOG "" "${_ARG_CRON}" "${_ARG_VERB}"
+	exit 1
 fi
 
 
