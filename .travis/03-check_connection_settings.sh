@@ -368,6 +368,62 @@ sudo sed -i'' 's/MYSQL_SSL_ENABLE=/MYSQL_SSL_ENABLE=1/' /etc/mysqldump-secure.co
 
 
 
+echo
+echo "----------------------------------------"
+echo " 3.2.4 MYSQL_SSL_ENABLE=0"
+echo "----------------------------------------"
+sudo sed -i'' 's/MYSQL_SSL_ENABLE=1/MYSQL_SSL_ENABLE=/' /etc/mysqldump-secure.conf
+
+echo "---------- CRON MODE ----------"
+CMD="sudo mysqldump-secure --cron"
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+
+echo "---------- NORMAL MODE ----------"
+CMD="sudo mysqldump-secure"
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+
+echo "---------- NORMAL MODE VERBOSE ----------"
+CMD="sudo mysqldump-secure --verbose"
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+
+sudo sed -i'' 's/MYSQL_SSL_ENABLE=/MYSQL_SSL_ENABLE=1/' /etc/mysqldump-secure.conf
+
+
+
+
 
 
 echo
@@ -528,7 +584,7 @@ echo
 echo
 if [ "$ERROR" = "0" ]; then
   echo "${txtgrn}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
-  echo "${txtgrn}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ [03] SUCESS @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
+  echo "${txtgrn}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ [03] SUCCESS @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
   echo "${txtgrn}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
 else
   echo "${txtpur}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"

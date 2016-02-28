@@ -1584,7 +1584,7 @@ fi
 ############################################################
 # Compression
 ############################################################
-# Check $DUMP_FILE_PRE
+# Check $COMPRESS
 if ! set | grep '^COMPRESS=' >/dev/null 2>&1; then
 	debug "warn" "(CFG): \$COMPRESS variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1731,42 +1731,70 @@ fi
 ############################################################
 # Deletion
 ############################################################
-if [ -z "${DELETE-}" ]; then
-	debug "warn" "\$DELETE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+if ! set | grep '^DELETE=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$DELETE variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	DELETE=0
-fi
-if [ "${DELETE}" = "1"  ]; then
-	if [ -z "${DELETE_METHOD-}" ]; then
-		debug "warn" "\$DELETE_METHOD variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "(OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+elif [ -z "${DELETE}" ]; then
+	debug "warn" "(CFG): \$DELETE variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	DELETE=0
+elif [ "${DELETE}" = "1"  ]; then
+
+	# DELETE_METHOD
+	if ! set | grep '^DELETE_METHOD=' >/dev/null 2>&1; then
+		debug "warn" "(CFG): \$DELETE_METHOD variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		DELETE=0
-	elif [ "${DELETE_METHOD}" = "tmpwatch" ] &&  ! command -v tmpwatch > /dev/null 2>&1 ; then
-		debug "warn" "'tmpwatch' not found" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "(OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	elif [ -z "${DELETE_METHOD}" ]; then
+		debug "warn" "(CFG): \$DELETE_METHOD variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		DELETE=0
+	elif [ "${DELETE_METHOD}" = "tmpwatch" ] && ! command -v tmpwatch > /dev/null 2>&1 ; then
+		debug "warn" "(RUN): 'tmpwatch' not found" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		DELETE=0
 	elif [ "${DELETE_METHOD}" = "tmpreaper" ] && ! command -v tmpreaper > /dev/null 2>&1 ; then
-		debug "warn" "'tmpreaper' not found" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "(OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(RUN): 'tmpreaper' not found" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		DELETE=0
 	elif [ "${DELETE_METHOD}" != "tmpwatch" ] && [ "${DELETE_METHOD}" != 'tmpreaper' ]; then
-		debug "warn" "\$DELETE_METHOD must be either 'tmpwatch' or 'tmpreaper' in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "(OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(CFG): \$DELETE_METHOD must be either 'tmpwatch' or 'tmpreaper' in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		DELETE=0
-	elif [ -z "${DELETE_IF_OLDER-}" ]; then
-		debug "warn" "\$DELETE_IF_OLDER variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "(OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		DELETE=0
-	elif ! valid_tmpwatch "${DELETE_IF_OLDER}" > /dev/null 2>&1 ; then
-		debug "warn" "\$DELETE_IF_OLDER does not have a valid ${DELETE_METHOD} value: ${DELETE_IF_OLDER} (See: man ${DELETE_METHOD})" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "(OPT) Deletion of old files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		DELETE=0
-	else
-		debug "info" "(OPT) Deletion enabled. Deleting files older than $(get_tmpwatch_value "${DELETE_IF_OLDER}") $(get_tmpwatch_unit_name "${DELETE_IF_OLDER}"). Using: ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	fi
+
+	# If deletion is still enabled
+	if [ "${DELETE}" = "1"  ]; then
+		# DELETE_IF_OLDER
+		if ! set | grep '^DELETE_IF_OLDER=' >/dev/null 2>&1; then
+			debug "warn" "(CFG): \$DELETE_IF_OLDER variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			DELETE=0
+		elif [ -z "${DELETE_IF_OLDER}" ]; then
+			debug "warn" "(CFG): \$DELETE_IF_OLDER variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			DELETE=0
+		elif ! valid_tmpwatch "${DELETE_IF_OLDER}" > /dev/null 2>&1 ; then
+			debug "warn" "(CFG): \$DELETE_IF_OLDER does not have a valid ${DELETE_METHOD} value: ${DELETE_IF_OLDER} (See: man ${DELETE_METHOD})" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			DELETE=0
+		else
+			debug "info" "(OPT): Deletion enabled. Deleting files older than $(get_tmpwatch_value "${DELETE_IF_OLDER}") $(get_tmpwatch_unit_name "${DELETE_IF_OLDER}"). Using: ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		fi
+	fi
+elif [ "${DELETE}" = "0"  ]; then
+	debug "info" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "info" "(OPT) Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(CFG): Invalid value for \$DELETE: ${DELETE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	DELETE=0
 fi
+
+
+
+
+
 
 # Check for forced deletion
 if [ "${DELETE}" = "1" ]; then
