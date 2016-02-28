@@ -603,7 +603,7 @@ echo
 echo "----------------------------------------"
 echo " 4.3.1 #REQUIRE=\"mysql\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^REQUIRE/#REQUIRE/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^REQUIRE="mysql"/#REQUIRE="mysql"/' /etc/mysqldump-secure.conf
 
 echo "---------- CRON MODE ----------"
 CMD="sudo mysqldump-secure --cron"
@@ -650,7 +650,7 @@ sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && su
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' 's/^#REQUIRE/REQUIRE/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^#REQUIRE="mysql"/REQUIRE="mysql"/' /etc/mysqldump-secure.conf
 
 
 
