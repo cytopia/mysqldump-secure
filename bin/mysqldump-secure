@@ -127,12 +127,12 @@ fi
 # @param  string  _debug  (0|1) 1: Show debug output | 0: do not show debug output
 # @return integer 0
 debug() {
-	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
+	_lvl="${1}"		# Loglevel: "verbose", "info", "warn" or "err"
 	_msg="${2}"		# message to output
-	_log="${3}"		# log to file?
+	_log="${3}"		# (0|1) log to file?
 	_file="${4}"	# full path to logfile
-	_cron="${5}"	# run for cron?
-	_debug="${6}"	# run in debug mode?
+	_cron="${5}"	# (0|1) run for cron?
+	_debug="${6}"	# (0|1) run in debug mode?
 
 	# Hide info/debug output when in cron-mode
 	if [ "${_cron}" = "0" ]; then
@@ -188,12 +188,12 @@ debug() {
 # @param  string  _debug  (0|1) 1: Show debug output | 0: do not show debug output
 # @return integer 0
 debugr() {
-	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
+	_lvl="${1}"		# Loglevel: "verbose", "info", "warn" or "err"
 	_msg="${2}"		# message to output
-	_log="${3}"		# log to file?
+	_log="${3}"		# (0|1) log to file?
 	_file="${4}"	# full path to logfile
-	_cron="${5}"	# run for cron?
-	_debug="${6}"	# run in debug mode?
+	_cron="${5}"	# (0|1) run for cron?
+	_debug="${6}"	# (0|1) run in debug mode?
 
 	# [INFO]/[DEBUG] Hide info/debug output when in cron-mode
 	if [ "${_cron}" = "0" ]; then
@@ -287,12 +287,12 @@ debugr() {
 # @param  string  _debug  (0|1) 1: Show debug output | 0: do not show debug output
 # @return integer 0
 debugi() {
-	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
+	_lvl="${1}"		# Loglevel: "verbose", "info", "warn" or "err"
 	_msg="${2}"		# message to output
-	_log="${3}"		# log to file?
+	_log="${3}"		# (0|1) log to file?
 	_file="${4}"	# full path to logfile
-	_cron="${5}"	# run for cron?
-	_debug="${6}"	# run in debug mode?
+	_cron="${5}"	# (0|1) run for cron?
+	_debug="${6}"	# (0|1) run in debug mode?
 
 	# Hide info/debug output when in cron-mode
 	if [ "${_cron}" = "0" ]; then
@@ -402,11 +402,10 @@ debugn() {
 # @return integer 0
 debug_nl() {
 	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
-	_msg="${2}"		# message to output
-	_log="${3}"		# log to file?
-	_file="${4}"	# full path to logfile
-	_cron="${5}"	# run for cron?
-	_debug="${6}"	# run in debug mode?
+	_log="${2}"		# log to file?
+	_file="${3}"	# full path to logfile
+	_cron="${4}"	# run for cron?
+	_debug="${5}"	# run in debug mode?
 
 	# Hide info output when in cron-mode
 	if [ "${_cron}" = "0" ]; then
@@ -416,13 +415,11 @@ debug_nl() {
 		if [ "${_debug}" = "1" ]; then
 			[ "${_lvl}" = "verbose" ] && printf "\n"
 		elif [ "${_debug}" != "0" ]; then
-			echo "${_msg}"
-			echo "Internal Error: Invalid value for \$_debug: '${_debu}'"
+			echo "Internal Error: Invalid value for \$_debug: '${_debug}'"
 			echo "Please report this at github"
 			exit 1
 		fi
 	elif [ "${_cron}" != "0" ] && [ "${_cron}" != "1" ]; then
-		echo "${_msg}"
 		echo "Internal Error: Invalid value for \$_cron: '${_cron}'"
 		echo "Please report this at github"
 		exit 1
@@ -436,7 +433,6 @@ debug_nl() {
 	if [ "${_log}" = "1" ]; then
 		printf "\n" >> "${_file}"
 	elif [ "${_log}" != "0" ]; then
-		echo "${_msg}"
 		echo "Internal Error: Invalid value for \$_log: '${_log}'"
 		echo "Please report this at github"
 		exit 1
@@ -1116,7 +1112,7 @@ elif [ "${LOG}" = "1" ]; then
 			debug  "warn" "(RUN): Logfile directory does not exist in $(dirname "${LOGFILE}")" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			debugi "info" "(RUN): Trying to create..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			if ! mkdir -p "$(dirname "${LOGFILE}")" > /dev/null 2>&1 ; then
-				debugn "err"  "Failed" "" "" "${_ARG_CRON}"
+				debugn "err"  "Failed" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				debug  "err"  "(RUN): Failed to create directoy: $(dirname "${LOGFILE}")" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				debug  "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				LOG=0
@@ -1809,12 +1805,12 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 		debugi "info" "Trying to create..." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 		if ! touch "${NAGIOS_LOGFILE}" > /dev/null 2>&1 ; then
-			debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug  "err"  "Failed to create file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug  "warn" "(OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			NAGIOS_LOG=0
 		else
-			debugn "info" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debugn "info" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug  "info" "Created file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debugi "info" "Trying to chmod to ${NAGIOS_LOG_CHMOD}..." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
@@ -2276,7 +2272,7 @@ for db in ${DATABASES}; do
 			if [ "${MY_ERRORS}" != "" ]; then
 				TOTAL_ERR=$((TOTAL_ERR + 1))
 
-				debug_nl "info" $LOG "${LOGFILE}" "${_ARG_CRON}"
+				debug_nl "info" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 				debug    "err"  "Error dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 				debugr   "err"  "${MY_ERRORS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
