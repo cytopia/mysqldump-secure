@@ -1781,7 +1781,8 @@ elif [ "${DELETE}" = "1"  ]; then
 			debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			DELETE=0
 		elif ! valid_tmpwatch "${DELETE_IF_OLDER}" > /dev/null 2>&1 ; then
-			debug "warn" "(CFG): \$DELETE_IF_OLDER does not have a valid ${DELETE_METHOD} value: ${DELETE_IF_OLDER} (See: man ${DELETE_METHOD})" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(CFG): \$DELETE_IF_OLDER does not have a valid ${DELETE_METHOD} value: ${DELETE_IF_OLDER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(HLP): See: man ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			DELETE=0
 		fi
@@ -1802,9 +1803,9 @@ elif [ "${DELETE}" = "1"  ]; then
 			debug "warn" "(RUN): Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			DELETE_FORCE=0
 		elif [ "${DELETE_FORCE}" = "1"  ]; then
-			debug "info" "(CFG): ${DELETE_METHOD}: Using '--force' option for ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "info" "(CFG): ${DELETE_METHOD}: Using '--force' option (deleting read-only files)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		elif [ "${DELETE_FORCE}" = "0"  ]; then
-			debug "info" "(CFG): ${DELETE_METHOD}: Not forcing (--force) deletion on read-only files for ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "info" "(CFG): ${DELETE_METHOD}: Not forcing (--force) deletion for read-only files" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		else
 			debug "err" "(CFG): Invalid value for \$DELETE_FORCE: ${DELETE_FORCE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "err" "(RUN): Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
