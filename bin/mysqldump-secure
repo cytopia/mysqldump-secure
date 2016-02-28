@@ -1005,7 +1005,7 @@ fi
 
 if [ ! -f "${CONFIG_FILE}" ]; then
 	debug "err" "(RUN): Configuration file not found in ${CONFIG_FILE}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "err" "Aborting" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "Aborting" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 fi
 if [ -L "${CONFIG_FILE}" ]; then
@@ -1014,7 +1014,7 @@ if [ -L "${CONFIG_FILE}" ]; then
 		CONFIG_FILE="${_TMP}"
 	else
 		debug "err"    "(RUN): Cannot resolve symlink of: $CONFIG_FILE" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "err"    "Aborting"
+		debug "err"    "Aborting" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit 1
 	fi
 fi
@@ -1104,7 +1104,7 @@ elif [ "${LOG}" = "1" ]; then
 			LOGFILE="${_TMP}"
 		else
 			debug "err"    "(RUN): Cannot resolve symlink of: $LOGFILE" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug "err"    "Aborting"
+			debug "err"    "Aborting" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			exit 1
 		fi
 	fi
@@ -1264,7 +1264,7 @@ if [ -L "${DUMP_PATH}" ]; then
 		DUMP_PATH="${_TMP}"
 	else
 		debug "err"    "(RUN): Cannot resolve symlink of: $DUMP_PATH" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "err"    "Aborting"
+		debug "err"    "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit 1
 	fi
 fi
@@ -1356,7 +1356,7 @@ if [ -L "${MYSQL_CNF_FILE}" ]; then
 		MYSQL_CNF_FILE="${_TMP}"
 	else
 		debug "err"    "(RUN): Cannot resolve symlink of: $MYSQL_CNF_FILE" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "err"    "Aborting"
+		debug "err"    "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit 1
 	fi
 fi
