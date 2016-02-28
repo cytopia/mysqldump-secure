@@ -577,9 +577,6 @@ if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
 
 echo "---------- NORMAL MODE ----------"
 CMD="sudo mysqldump-secure"
