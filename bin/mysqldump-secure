@@ -1746,22 +1746,27 @@ elif [ "${DELETE}" = "1"  ]; then
 		debug "warn" "(CFG): \$DELETE_METHOD variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		DELETE=0
+		DELETE_METHOD=""
 	elif [ -z "${DELETE_METHOD}" ]; then
 		debug "warn" "(CFG): \$DELETE_METHOD variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		DELETE=0
+		DELETE_METHOD=""
 	elif [ "${DELETE_METHOD}" = "tmpwatch" ] && ! command -v tmpwatch > /dev/null 2>&1 ; then
 		debug "warn" "(RUN): 'tmpwatch' not found" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		DELETE=0
+		DELETE_METHOD=""
 	elif [ "${DELETE_METHOD}" = "tmpreaper" ] && ! command -v tmpreaper > /dev/null 2>&1 ; then
 		debug "warn" "(RUN): 'tmpreaper' not found" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		DELETE=0
+		DELETE_METHOD=""
 	elif [ "${DELETE_METHOD}" != "tmpwatch" ] && [ "${DELETE_METHOD}" != 'tmpreaper' ]; then
 		debug "warn" "(CFG): \$DELETE_METHOD must be either 'tmpwatch' or 'tmpreaper' in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		DELETE=0
+		DELETE_METHOD=""
 	fi
 
 	# If deletion is still enabled
@@ -1779,10 +1784,38 @@ elif [ "${DELETE}" = "1"  ]; then
 			debug "warn" "(CFG): \$DELETE_IF_OLDER does not have a valid ${DELETE_METHOD} value: ${DELETE_IF_OLDER} (See: man ${DELETE_METHOD})" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			DELETE=0
-		else
-			debug "info" "(OPT): Deletion enabled. Deleting files older than $(get_tmpwatch_value "${DELETE_IF_OLDER}") $(get_tmpwatch_unit_name "${DELETE_IF_OLDER}"). Using: ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		fi
 	fi
+
+	# If deletion is still enabled
+	if [ "${DELETE}" = "1"  ]; then
+
+		debug "info" "(OPT): Deletion enabled. Deleting files older than $(get_tmpwatch_value "${DELETE_IF_OLDER}") $(get_tmpwatch_unit_name "${DELETE_IF_OLDER}"). Using: ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
+		# DELETE_FORCE
+		if ! set | grep '^DELETE_FORCE=' >/dev/null 2>&1; then
+			debug "warn" "(CFG): \$DELETE_FORCE variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(RUN): Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			DELETE_FORCE=0
+		elif [ -z "${DELETE}" ]; then
+			debug "warn" "(CFG): \$DELETE_FORCE variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(RUN): Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			DELETE_FORCE=0
+		elif [ "${DELETE_FORCE}" = "1"  ]; then
+			debug "info" "(CFG): ${DELETE_METHOD}: Using '--force' option for ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		elif [ "${DELETE_FORCE}" = "0"  ]; then
+			debug "info" "(CFG): ${DELETE_METHOD}: Not forcing (--force) deletion on read-only files for ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		else
+			debug "err" "(CFG): Invalid value for \$DELETE_FORCE: ${DELETE_FORCE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(RUN): Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			DELETE_FORCE=0
+		fi
+	else
+		debug "info" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	fi
+
+
+
 elif [ "${DELETE}" = "0"  ]; then
 	debug "info" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
@@ -1792,35 +1825,6 @@ else
 fi
 
 
-
-
-
-
-# Check for forced deletion
-if [ "${DELETE}" = "1" ]; then
-	if [ -z "${DELETE_FORCE-}" ]; then
-		debug "warn" "\$DELETE_FORCE variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		DELETE_FORCE=0
-	elif ! isint "${DELETE_FORCE}" > /dev/null 2>&1 ; then
-		debug "warn" "\$DELETE_FORCE variable is not a valid integer" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		DELETE_FORCE=0
-	elif [ "${DELETE_FORCE}" != "0" ] && [ "${DELETE_FORCE}" != "1" ]; then
-		debug "warn" "\$DELETE_FORCE variable invalid. Must be either 0 or 1." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		DELETE_FORCE=0
-	fi
-
-
-	if [ "${DELETE_FORCE}" = 1 ]; then
-		debug "info" "${DELETE_METHOD}: Using '--force' option for ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	else
-		debug "info" "${DELETE_METHOD}: Not forcing (--force) deletion on read-only files for ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	fi
-else
-	DELETE="0"
-fi
 
 
 
