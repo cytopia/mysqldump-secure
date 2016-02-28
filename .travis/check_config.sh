@@ -3,6 +3,14 @@
 ERROR=0
 
 
+#
+#
+# TODO: Duplicate files testing!!!
+#
+#
+
+
+
 echo "##########################################################################################"
 echo "#"
 echo "#  2.  C H E C K I N G   C O N F I G U R A T I O N   F I L E"
