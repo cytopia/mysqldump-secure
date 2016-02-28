@@ -119,12 +119,12 @@ fi
 
 # Output to stdout/stderr and to file (with newline).
 #
-# @param  string  _lvl	Debug Level
-# @param  string  _msg	Output message
-# @param  string  _log	'1': log to file | else: do not log to file
-# @param  string  _file	Full path to logfile
-# @param  string  _cron '1': Cron usage - do not print 'info' | else: print all
-# @param  string  _debug '1': Show debug output | else: do not show debug output
+# @param  string  _lvl	  Debug Level
+# @param  string  _msg	  Output message
+# @param  integer _log	  (0|1) 1: log to file | 0: do not log to file
+# @param  string  _file	  Full path to logfile
+# @param  integer _cron   (0|1) 1: Cron usage - do not print 'info' | 0: print all
+# @param  string  _debug  (0|1) 1: Show debug output | 0: do not show debug output
 # @return integer 0
 debug() {
 	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
@@ -174,12 +174,12 @@ debug() {
 
 # Output to stdout/stderr and to file (with multiple lines).
 #
-# @param  string  _lvl	Debug Level
-# @param  string  _msg	Output message
-# @param  string  _log	'1': log to file | else: do not log to file
-# @param  string  _file	Full path to logfile
-# @param  string  _cron '1': Cron usage - do not print 'info' | else: print all
-# @param  string  _debug '1': Show debug output | else: do not show debug output
+# @param  string  _lvl	  Debug Level
+# @param  string  _msg	  Output message
+# @param  integer _log	  (0|1) 1: log to file | 0: do not log to file
+# @param  string  _file	  Full path to logfile
+# @param  integer _cron   (0|1) 1: Cron usage - do not print 'info' | 0: print all
+# @param  string  _debug  (0|1) 1: Show debug output | 0: do not show debug output
 # @return integer 0
 debugr() {
 	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
@@ -267,12 +267,12 @@ debugr() {
 
 # Inline Output to stdout/stderr and to file (no newline).
 #
-# @param  string  _lvl	Debug Level
-# @param  string  _msg	Output message
-# @param  string  _log	'1': log to file | else: do not log to file
-# @param  string  _file	Full path to logfile
-# @param  string  _cron '1': Cron usage - do not print 'info' | else: print all
-# @param  string  _debug '1': Show debug output | else: do not show debug output
+# @param  string  _lvl	  Debug Level
+# @param  string  _msg	  Output message
+# @param  integer _log	  (0|1) 1: log to file | 0: do not log to file
+# @param  string  _file	  Full path to logfile
+# @param  integer _cron   (0|1) 1: Cron usage - do not print 'info' | 0: print all
+# @param  string  _debug  (0|1) 1: Show debug output | 0: do not show debug output
 # @return integer 0
 debugi() {
 	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
@@ -320,12 +320,12 @@ debugi() {
 
 # Output to stdout/stderr and to file (No date output).
 #
-# @param  string  _lvl	Debug Level
-# @param  string  _msg	Output message
-# @param  string  _log	'1': log to file | else: do not log to file
-# @param  string  _file	Full path to logfile
-# @param  string  _cron '1': Cron usage - do not print 'info' | else: print all
-# @param  string  _debug '1': Show debug output | else: do not show debug output
+# @param  string  _lvl	  Debug Level
+# @param  string  _msg	  Output message
+# @param  integer _log	  (0|1) 1: log to file | 0: do not log to file
+# @param  string  _file	  Full path to logfile
+# @param  integer _cron   (0|1) 1: Cron usage - do not print 'info' | 0: print all
+# @param  string  _debug  (0|1) 1: Show debug output | 0: do not show debug output
 # @return integer 0
 debugn() {
 	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
@@ -369,16 +369,20 @@ debugn() {
 
 # Output to stdout/stderr and to file (simply output a newline).
 #
-# @param  string  _lvl	Debug Level
-# @param  string  _log	'1': log to file | 0: do not log to file
-# @param  string  _file	Full path to logfile
-# @param  string  _cron '1': Cron usage - do not print 'info' | else: print all
+# @param  string  _lvl	  Debug Level
+# @param  string  _msg	  Output message
+# @param  integer _log	  (0|1) 1: log to file | 0: do not log to file
+# @param  string  _file	  Full path to logfile
+# @param  integer _cron   (0|1) 1: Cron usage - do not print 'info' | 0: print all
+# @param  string  _debug  (0|1) 1: Show debug output | 0: do not show debug output
 # @return integer 0
 debug_nl() {
 	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
-	_log="${2}"		# log to file?
-	_file="${3}"	# full path to logfile
-	_cron="${4}"	# run for cron?
+	_msg="${2}"		# message to output
+	_log="${3}"		# log to file?
+	_file="${4}"	# full path to logfile
+	_cron="${5}"	# run for cron?
+	_debug="${6}"	# run in debug mode?
 
 	# Hide info output when in cron-mode
 	if [ "${_cron}" != "1" ]; then
@@ -970,37 +974,37 @@ fi
 ############################################################
 
 if [ ! -f "${CONFIG_FILE}" ]; then
-	debug "err" "(RUN): Configuration file not found in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
-	debug "err" "Aborting" "" "" "${_ARG_CRON}"
+	debug "err" "(RUN): Configuration file not found in ${CONFIG_FILE}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "Aborting" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 fi
 if [ -L "${CONFIG_FILE}" ]; then
 	if _TMP="$(_realpath "${CONFIG_FILE}")" >/dev/null 2>&1; then
-		debug "verbose" "(RUN): \$CONFIG_FILE is a symlink. Setting target to: ${_TMP}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "verbose" "(RUN): \$CONFIG_FILE is a symlink. Setting target to: ${_TMP}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		CONFIG_FILE="${_TMP}"
 	else
-		debug "err"    "(RUN): Cannot resolve symlink of: $CONFIG_FILE" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err"    "(RUN): Cannot resolve symlink of: $CONFIG_FILE" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "err"    "Aborting"
 		exit 1
 	fi
 fi
 if [ ! -r "${CONFIG_FILE}" ]; then
-	debug "err" "(RUN): Configuration file is not readable in ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
-	debug "err" "Aborting" "" "" "${_ARG_CRON}"
+	debug "err" "(RUN): Configuration file is not readable in ${CONFIG_FILE}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "Aborting" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 fi
 if ! compare_chmod "$(permission "${CONFIG_FILE}")" "${_DEFAULT_CONFIG_CHMOD}" > /dev/null 2>&1 ; then
-	debug  "warn" "(RUN): Configuration file ${CONFIG_FILE} has dangerous permissions: $(permission "${CONFIG_FILE}"), should be: ${_DEFAULT_CONFIG_CHMOD}" "" "" "${_ARG_CRON}"
-	debugi "info" "(RUN): Trying to chmod to ${_DEFAULT_CONFIG_CHMOD}..." "" "" "${_ARG_CRON}"
+	debug  "warn" "(RUN): Configuration file ${CONFIG_FILE} has dangerous permissions: $(permission "${CONFIG_FILE}"), should be: ${_DEFAULT_CONFIG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debugi "info" "(RUN): Trying to chmod to ${_DEFAULT_CONFIG_CHMOD}..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 
 	if ! chmod ${_DEFAULT_CONFIG_CHMOD} "${CONFIG_FILE}" > /dev/null 2>&1 ; then
-		debugn "err" "Failed" "" "" "${_ARG_CRON}"
-		debug  "err" "Failed to chmod ${CONFIG_FILE}" "" "" "${_ARG_CRON}"
-		debug  "err" "Fix it manually to ${_DEFAULT_CONFIG_CHMOD}" "" "" "${_ARG_CRON}"
-		debug  "err" "Aborting" "" "" "${_ARG_CRON}"
+		debugn "err" "Failed" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug  "err" "Failed to chmod ${CONFIG_FILE}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug  "err" "Fix it manually to ${_DEFAULT_CONFIG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug  "err" "Aborting" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit 1
 	else
-		debugn "info" "OK" "" "" "${_ARG_CRON}"
+		debugn "info" "OK" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	fi
 fi
 
@@ -1025,40 +1029,40 @@ fi
 # or not. Also make sure that the logfile is writeable and
 # that no other has read permissions to the file.
 if ! set | grep '^LOG=' >/dev/null 2>&1; then
-	debug "warn" "(CFG): \$LOG variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(OPT): Logging disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): \$LOG variable is not defined" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	LOG=0
 	LOGFILE=""
 elif [ -z "${LOG}" ]; then
-	debug "warn" "(CFG): \$LOG variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(OPT): Logging disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): \$LOG variable should not be empty" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	LOG=0
 	LOGFILE=""
 elif [ "${LOG}" = "1" ]; then
 	# Check chmod variable
 	if ! set | grep '^LOG_CHMOD=' >/dev/null 2>&1; then
-		debug "warn" "(CFG): \$LOG_CHMOD variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "(CFG): Setting default to: ${_DEFAULT_LOG_CHMOD}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(CFG): \$LOG_CHMOD variable is not defined" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(CFG): Setting default to: ${_DEFAULT_LOG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		LOG_CHMOD="${_DEFAULT_LOG_CHMOD}"
 	elif [ -z "${LOG_CHMOD}" ]; then
-		debug "warn" "(CFG): \$LOG_CHMOD variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "(CFG): Setting default to: ${_DEFAULT_LOG_CHMOD}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(CFG): \$LOG_CHMOD variable should not be empty" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(CFG): Setting default to: ${_DEFAULT_LOG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		LOG_CHMOD="${_DEFAULT_LOG_CHMOD}"
 	elif ! valid_chmod "${LOG_CHMOD}" > /dev/null 2>&1; then
-		debug "err"  "(CFG): Invalid value for \$LOG_CHMOD: ${LOG_CHMOD}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "err"  "(CFG): Setting default to: ${_DEFAULT_LOG_CHMOD}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err"  "(CFG): Invalid value for \$LOG_CHMOD: ${LOG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err"  "(CFG): Setting default to: ${_DEFAULT_LOG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		LOG_CHMOD="${_DEFAULT_LOG_CHMOD}"
 	fi
 
 	# Check logfile variable
 	if ! set | grep '^LOGFILE=' >/dev/null 2>&1; then
-		debug "warn" "(CFG): \$LOGFILE variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "(OPT): Logging disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(CFG): \$LOGFILE variable is not defined" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		LOG=0
 		LOGFILE=""
 	elif [ -z "${LOGFILE}" ]; then
-		debug "warn" "(CFG): \$LOGFILE variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "(OPT): Logging disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(CFG): \$LOGFILE variable should not be empty" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		LOG=0
 		LOGFILE=""
 	fi
@@ -1066,10 +1070,10 @@ elif [ "${LOG}" = "1" ]; then
 	# Resolve symlink?
 	if [ -L "${LOGFILE}" ]; then
 		if _TMP="$(_realpath "${LOGFILE}")" >/dev/null 2>&1; then
-			debug "verbose" "(RUN): \$LOGFILE is a symlink. Setting target to: ${_TMP}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "verbose" "(RUN): \$LOGFILE is a symlink. Setting target to: ${_TMP}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			LOGFILE="${_TMP}"
 		else
-			debug "err"    "(RUN): Cannot resolve symlink of: $LOGFILE" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err"    "(RUN): Cannot resolve symlink of: $LOGFILE" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "err"    "Aborting"
 			exit 1
 		fi
@@ -1079,29 +1083,29 @@ elif [ "${LOG}" = "1" ]; then
 	if [ ! -f "${LOGFILE}" ]; then
 		# Check if logging directory exists
 		if [ ! -d "$(dirname "${LOGFILE}")" ]; then
-			debug  "warn" "(RUN): Logfile directory does not exist in $(dirname "${LOGFILE}")" "" "" "${_ARG_CRON}"
-			debugi "info" "(RUN): Trying to create..." "" "" "${_ARG_CRON}"
+			debug  "warn" "(RUN): Logfile directory does not exist in $(dirname "${LOGFILE}")" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debugi "info" "(RUN): Trying to create..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			if ! mkdir -p "$(dirname "${LOGFILE}")" > /dev/null 2>&1 ; then
 				debugn "err"  "Failed" "" "" "${_ARG_CRON}"
-				debug  "err"  "(RUN): Failed to create directoy: $(dirname "${LOGFILE}")" "" "" "${_ARG_CRON}"
-				debug  "warn" "(OPT): Logging disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug  "err"  "(RUN): Failed to create directoy: $(dirname "${LOGFILE}")" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug  "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				LOG=0
 			else
-				debugn "info" "OK" "" "" "${_ARG_CRON}"
+				debugn "info" "OK" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			fi
 		fi
 		# If logging is still OK (dir exists), check if the file can be created
 		if [ "${LOG}" = "1" ]; then
-			debug  "warn" "(RUN): Logfile does not exist in ${LOGFILE}" "" "" "${_ARG_CRON}"
-			debugi "info" "(RUN): Trying to create..." "" "" "${_ARG_CRON}"
+			debug  "warn" "(RUN): Logfile does not exist in ${LOGFILE}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debugi "info" "(RUN): Trying to create..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 
 			if ! touch "${LOGFILE}" > /dev/null 2>&1 ; then
-				debugn "err"  "Failed" "" "" "${_ARG_CRON}"
-				debug  "err"  "(RUN): Failed to create file: ${LOGFILE}" "" "" "${_ARG_CRON}"
-				debug  "warn" "(OPT): Logging disabled" "" "" "${_ARG_CRON}"
+				debugn "err"  "Failed" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug  "err"  "(RUN): Failed to create file: ${LOGFILE}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug  "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				LOG=0
 			else
-				debugn "info" "OK" "" "" "${_ARG_CRON}"
+				debugn "info" "OK" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			fi
 		fi
 	fi
@@ -1110,16 +1114,16 @@ elif [ "${LOG}" = "1" ]; then
 	# Check for permissions
 	if [ "${LOG}" = "1" ]; then
 		if ! compare_chmod "$(permission "${LOGFILE}")" "${LOG_CHMOD}" > /dev/null 2>&1 ; then
-			debug  "warn" "(RUN): Logfile has wrong permissions: $(permission "${LOGFILE}"), should be: ${LOG_CHMOD}" "" "" "${_ARG_CRON}"
-			debugi "info" "(RUN): Trying to chmod to ${LOG_CHMOD}..." "" "" "${_ARG_CRON}"
+			debug  "warn" "(RUN): Logfile has wrong permissions: $(permission "${LOGFILE}"), should be: ${LOG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debugi "info" "(RUN): Trying to chmod to ${LOG_CHMOD}..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 
 			if ! chmod ${LOG_CHMOD} "${LOGFILE}" > /dev/null 2>&1 ; then
-				debugn "err"  "Failed" "" "" "${_ARG_CRON}"
-				debug  "err"  "(RUN): Failed to chmod ${LOG_CHMOD} ${LOGFILE}" "" "" "${_ARG_CRON}"
-				debug  "warn" "(OPT): Logging disabled" "" "" "${_ARG_CRON}"
+				debugn "err"  "Failed" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug  "err"  "(RUN): Failed to chmod ${LOG_CHMOD} ${LOGFILE}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug  "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				LOG=0
 			else
-				debugn "info" "OK" "" "" "${_ARG_CRON}"
+				debugn "info" "OK" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			fi
 		fi
 	fi
@@ -1130,17 +1134,17 @@ elif [ "${LOG}" = "1" ]; then
 
 		# Logfile not writeable
 		if [ ! -w "${LOGFILE}" ]; then
-			debug  "err"  "(RUN): Logfile ${LOGFILE} not writeable. Check \$LOG_CHMOD value inf config." "" "" "${_ARG_CRON}"
-			debug  "warn" "(OPT): Logging disabled" "" "" "${_ARG_CRON}"
+			debug  "err"  "(RUN): Logfile ${LOGFILE} not writeable. Check \$LOG_CHMOD value inf config." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug  "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			LOG=0
 		fi
 	fi
 elif [ "${LOG}" = "0" ]; then
-	debug "info" "(OPT): Logging disabled" "" "" "${_ARG_CRON}"
+	debug "info" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	LOGFILE=""
 else
-	debug "err"  "(CFG): Invalid value for \$LOG: ${LOG}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "err"  "(OPT): Logging disabled" "" "" "${_ARG_CRON}"
+	debug "err"  "(CFG): Invalid value for \$LOG: ${LOG}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	LOG=0
 	LOGFILE=""
 fi
