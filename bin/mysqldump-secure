@@ -132,7 +132,7 @@ debug() {
 	_log="${3}"		# log to file?
 	_file="${4}"	# full path to logfile
 	_cron="${5}"	# run for cron?
-	_debug="${6-0}"	# run in debug mode?
+	_debug="${6}"	# run in debug mode?
 
 	# Hide info/debug output when in cron-mode
 	if [ "${_cron}" != "1" ]; then
@@ -187,7 +187,7 @@ debugr() {
 	_log="${3}"		# log to file?
 	_file="${4}"	# full path to logfile
 	_cron="${5}"	# run for cron?
-	_debug="${6-0}"	# run in debug mode?
+	_debug="${6}"	# run in debug mode?
 
 	# [INFO]/[DEBUG] Hide info/debug output when in cron-mode
 	if [ "${_cron}" != "1" ]; then
@@ -280,7 +280,7 @@ debugi() {
 	_log="${3}"		# log to file?
 	_file="${4}"	# full path to logfile
 	_cron="${5}"	# run for cron?
-	_debug="${6-0}"	# run in debug mode?
+	_debug="${6}"	# run in debug mode?
 
 	# Hide info/debug output when in cron-mode
 	if [ "${_cron}" != "1" ]; then
@@ -333,7 +333,7 @@ debugn() {
 	_log="${3}"		# log to file?
 	_file="${4}"	# full path to logfile
 	_cron="${5}"	# run for cron?
-	_debug="${6-0}"	# run in debug mode?
+	_debug="${6}"	# run in debug mode?
 
 	# Hide info/debug output when in cron-mode
 	if [ "${_cron}" != "1" ]; then
