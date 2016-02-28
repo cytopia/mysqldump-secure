@@ -1716,7 +1716,7 @@ elif [ "${ENCRYPT}" = "0" ]; then
 	debug "info" "(OPT): Encryption disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	ENCRYPT="0"
 else
-	debug "err" "(CFG): Invalid value for \$ENCRYPT: ${COMPRESS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(CFG): Invalid value for \$ENCRYPT: ${ENCRYPT}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err" "(HLP): It is not clear whether or not you only allow encrypted dumps." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1

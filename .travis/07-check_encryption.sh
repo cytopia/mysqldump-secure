@@ -81,7 +81,7 @@ sudo sed -i'' 's/^#ENCRYPT=1/ENCRYPT=1/' /etc/mysqldump-secure.conf
 
 echo
 echo "----------------------------------------"
-echo " 6.1.2 ENCRYPT=2"
+echo " 7.1.2 ENCRYPT=2"
 echo "----------------------------------------"
 sudo sed -i'' 's/^ENCRYPT=1/ENCRYPT=2/' /etc/mysqldump-secure.conf
 
@@ -368,7 +368,7 @@ sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && su
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' 's/OPENSSL_PUBKEY_PEM=""/OPENSSL_PUBKEY_PEM="\${_INSTALL_PREFIX}\/etc\/mysqldump-secure.pem"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/OPENSSL_PUBKEY_PEM=""/OPENSSL_PUBKEY_PEM="\${_INSTALL_PREFIX}\/etc\/mysqldump-secure.pub.pem"/' /etc/mysqldump-secure.conf
 
 
 
@@ -377,10 +377,10 @@ sudo sed -i'' 's/OPENSSL_PUBKEY_PEM=""/OPENSSL_PUBKEY_PEM="\${_INSTALL_PREFIX}\/
 
 echo
 echo "----------------------------------------"
-echo " 7.2.3 OPENSSL_PUBKEY_PEM=\"\${_INSTALL_PREFIX}/etc/mysqldump-secure.pem.notfound\""
+echo " 7.2.3 OPENSSL_PUBKEY_PEM=\"\${_INSTALL_PREFIX}/etc/mysqldump-secure.pub.pem.notfound\""
 echo "----------------------------------------"
 
-sudo sed -i'' 's/mysqldump-secure.pem/mysqldump-secure.pem.notfound/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/mysqldump-secure.pub.pem/mysqldump-secure.pub.pem.notfound/' /etc/mysqldump-secure.conf
 
 
 echo "---------- CRON MODE ----------"
@@ -428,7 +428,7 @@ sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && su
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' 's/mysqldump-secure.pem.notfound/mysqldump-secure.pem/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/mysqldump-secure.pub.pem.notfound/mysqldump-secure.pub.pem/' /etc/mysqldump-secure.conf
 
 
 
