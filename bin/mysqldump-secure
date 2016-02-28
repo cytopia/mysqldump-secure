@@ -1724,10 +1724,6 @@ fi
 
 
 
-
-
-
-
 ############################################################
 # Deletion
 ############################################################
@@ -1767,10 +1763,8 @@ elif [ "${DELETE}" = "1"  ]; then
 		debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		DELETE=0
 		DELETE_METHOD=""
-	fi
+	else
 
-	# If deletion is still enabled
-	if [ "${DELETE}" = "1"  ]; then
 		# DELETE_IF_OLDER
 		if ! set | grep '^DELETE_IF_OLDER=' >/dev/null 2>&1; then
 			debug "warn" "(CFG): \$DELETE_IF_OLDER variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1828,47 +1822,59 @@ fi
 ############################################################
 # Nagios
 ############################################################
-if [ -z "${NAGIOS_LOG-}" ]; then
-	debug "warn" "\$NAGIOS_LOG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+# NAGIOS_LOG
+if ! set | grep '^NAGIOS_LOG=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$NAGIOS_LOG variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	NAGIOS_LOG=0
+elif [ -z "${NAGIOS_LOG}" ]; then
+	debug "warn" "(CFG): \$NAGIOS_LOG variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	NAGIOS_LOG=0
 elif [ "${NAGIOS_LOG}" = "1"  ]; then
 
-	# Checking chmod variable
-	if [ -z "${NAGIOS_LOG_CHMOD-}" ]; then
-		debug "warn" "\$NAGIOS_LOG_CHMOD variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "Setting default to ${_DEFAULT_NAGIOS_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	# NAGIOS_LOG_CHMOD
+	if ! set | grep '^NAGIOS_LOG_CHMOD=' >/dev/null 2>&1; then
+		debug "warn" "(CFG): \$NAGIOS_LOG_CHMOD variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(RUN): Setting default to ${_DEFAULT_NAGIOS_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		NAGIOS_LOG_CHMOD="${_DEFAULT_NAGIOS_LOG_CHMOD}"
+	elif [ -z "${NAGIOS_LOG_CHMOD}" ]; then
+		debug "warn" "(CFG): \$NAGIOS_LOG_CHMOD variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(RUN): Setting default to ${_DEFAULT_NAGIOS_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		NAGIOS_LOG_CHMOD="${_DEFAULT_NAGIOS_LOG_CHMOD}"
 	elif ! valid_chmod "${NAGIOS_LOG_CHMOD}" > /dev/null 2>&1; then
-		debug "err"  "Invalid chmod value for \$NAGIOS_LOG_CHMOD: ${NAGIOS_LOG_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "info" "Setting default to ${_DEFAULT_NAGIOS_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err"  "(CFG): Invalid chmod value for \$NAGIOS_LOG_CHMOD: ${NAGIOS_LOG_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err"  "(RUN): Setting default to ${_DEFAULT_NAGIOS_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		NAGIOS_LOG_CHMOD="${_DEFAULT_NAGIOS_LOG_CHMOD}"
 	fi
 
-	# Checking logfile variable
-	if [ -z "${NAGIOS_LOGFILE-}" ]; then
-		debug "warn" "\$NAGIOS_LOG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "(OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	# NAGIOS_LOGFILE
+	if ! set | grep '^NAGIOS_LOGFILE=' >/dev/null 2>&1; then
+		debug "warn" "(CFG): \$NAGIOS_LOGFILE variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		NAGIOS_LOG=0
-	# Check if file exists
+	elif [ -z "${NAGIOS_LOGFILE}" ]; then
+		debug "warn" "(CFG): \$NAGIOS_LOGFILE variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		NAGIOS_LOG=0
 	elif [ ! -f "${NAGIOS_LOGFILE}" ]; then
-		debug  "warn" "${NAGIOS_LOGFILE} not found" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debugi "info" "Trying to create..." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug  "warn" "(RUN): ${NAGIOS_LOGFILE} not found" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debugi "info" "(RUN): Trying to create..." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 		if ! touch "${NAGIOS_LOGFILE}" > /dev/null 2>&1 ; then
 			debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug  "err"  "Failed to create file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug  "warn" "(OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug  "err"  "(RUN): Failed to create file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug  "warn" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			NAGIOS_LOG=0
 		else
 			debugn "info" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug  "info" "Created file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-			debugi "info" "Trying to chmod to ${NAGIOS_LOG_CHMOD}..." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug  "info" "(RUN): Created file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debugi "info" "(RUN): Trying to chmod to ${NAGIOS_LOG_CHMOD}..." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 			if ! chmod ${NAGIOS_LOG_CHMOD} "${NAGIOS_LOGFILE}" > /dev/null 2>&1 ; then
 				debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-				debug  "err"  "Failed to chmod ${NAGIOS_LOG_CHMOD} ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-				debug  "warn" "(OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug  "err"  "(RUN): Failed to chmod ${NAGIOS_LOG_CHMOD} ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug  "warn" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 				NAGIOS_LOG=0
 			else
 				debugn "info" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1876,12 +1882,12 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 		fi
 	# Check if it has wrong permissions
 	elif ! compare_chmod "$(permission "${NAGIOS_LOGFILE}")" "${NAGIOS_LOG_CHMOD}" > /dev/null 2>&1 ; then
-		debug  "warn" "Nagios logfile has wrong permissions: $(permission "${NAGIOS_LOGFILE}"), but should be: ${NAGIOS_LOG_CHMOD} " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debugi "info" "Trying to chmod to ${NAGIOS_LOG_CHMOD}... " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug  "warn" "(RUN): Nagios logfile has wrong permissions: $(permission "${NAGIOS_LOGFILE}"), but should be: ${NAGIOS_LOG_CHMOD} " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debugi "info" "(RUN): Trying to chmod to ${NAGIOS_LOG_CHMOD}... " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		if ! chmod "${NAGIOS_LOG_CHMOD}" "${NAGIOS_LOGFILE}" > /dev/null 2>&1 ; then
 			debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug  "err"  "Failed to chmod ${NAGIOS_LOG_CHMOD} ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug  "warn" "(OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug  "err"  "(RUN): Failed to chmod ${NAGIOS_LOG_CHMOD} ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug  "warn" "(OPT): Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			NAGIOS_LOG=0
 		else
 			debugn "info" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1891,21 +1897,27 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 	# Still enabled?
 	if [ "${NAGIOS_LOG}" = "1"  ]; then
 		if [ ! -r "${NAGIOS_LOGFILE}" ]; then
-			debug "warn" "${NAGIOS_LOGFILE} not readable. Fix CHMOD permissions in config." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug "warn" "(OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(RUN): ${NAGIOS_LOGFILE} not readable" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(HLP): FIX \NAGIOS_LOG_CHMOD value in config" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			NAGIOS_LOG=0
 		elif [ ! -w "${NAGIOS_LOGFILE}" ]; then
-			debug "warn" "${NAGIOS_LOGFILE} not writeable. Fix CHMOD permissions in config." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug "warn" "(OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(RUN): ${NAGIOS_LOGFILE} not writeable" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(HLP): FIX \NAGIOS_LOG_CHMOD value in config" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			NAGIOS_LOG=0
 		else
-			debug "info" "(OPT) Nagios plugin log enabled: ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "info" "(OPT): Nagios log enabled: ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		fi
 	fi
 
-else
-	debug "info" "(OPT) Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+elif [ "${NAGIOS_LOG}" = "0"  ]; then
+	debug "info" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	NAGIOS_LOG="0"
+else
+	debug "err" "(CFG): Invalid value for \$NAGIOS_LOG: ${NAGIOS_LOG}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	DELETE=0
 fi
 
 
