@@ -5,7 +5,6 @@ ERROR=0
 . "./.travis/functions.bash"
 
 
-# TODO: combined opts: without encryption, without compression
 
 
 echo "##########################################################################################"

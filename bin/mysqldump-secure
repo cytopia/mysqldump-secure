@@ -1653,55 +1653,78 @@ fi
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 ############################################################
 # Encryption
 ############################################################
-if [ -z "${ENCRYPT-}" ]; then
-	debug "warn" "\$ENCRYPT variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(OPT) Encryption disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	ENCRYPT=0
-fi
-if [ "${ENCRYPT}" = "1" ]; then
-	if ! command -v openssl > /dev/null 2>&1 ; then
-		debug "err"  "'openssl' not found" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+if ! set | grep '^ENCRYPT=' >/dev/null 2>&1; then
+	debug "err" "(CFG): \$ENCRYPT variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(HLP): It is not clear whether or not you only allow encrypted dumps." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	exit 1
+elif [ -z "${ENCRYPT}" ]; then
+	debug "err" "(CFG): \$ENCRYPT variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(HLP): It is not clear whether or not you only allow encrypted dumps." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	exit 1
+elif [ "${ENCRYPT}" = "1" ]; then
+
+	# OPENSSL_PUBKEY_PEM
+	if ! set | grep '^OPENSSL_PUBKEY_PEM=' >/dev/null 2>&1; then
+		debug "err" "(CFG): \$OPENSSL_PUBKEY_PEM variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		exit 1
+	elif [ -z "${OPENSSL_PUBKEY_PEM}" ]; then
+		debug "err" "(CFG): \$OPENSSL_PUBKEY_PEM variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		exit 1
+	elif [ ! -f "${OPENSSL_PUBKEY_PEM}" ]; then
+		debug "err"  "(RUN): OpenSSL pubkey not found in ${OPENSSL_PUBKEY_PEM}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		exit 2
+	elif [ ! -r "${OPENSSL_PUBKEY_PEM}" ]; then
+		debug "err"  "(RUN): OpenSSL pubkey not readable" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit 2
 	fi
-	if [ ! -f "${OPENSSL_PUBKEY_PEM}" ]; then
-		debug "err"  "OpenSSL pubkey not found in ${OPENSSL_PUBKEY_PEM}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		exit 2
-	fi
-	if [ -z "${OPENSSL_ALGO_ARG-}" ]; then
-		debug "warn" "\$OPENSSL_ALGO_ARG variable is not set or empty in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "Encryption defaults to: ${OPENSSL_ALGO_ARG}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
+	# OpenSSL Algorithm argument
+	if ! set | grep '^OPENSSL_ALGO_ARG=' >/dev/null 2>&1; then
+		debug "warn" "(CFG): \$OPENSSL_ALGO_ARG variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(RUN): Encryption defaults to: ${_DEFAULT_OPENSSL_ALGO_ARG}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		OPENSSL_ALGO_ARG="${_DEFAULT_OPENSSL_ALGO_ARG}"
+	elif [ -z "${OPENSSL_ALGO_ARG}" ]; then
+		debug "warn" "(CFG): \$OPENSSL_ALGO_ARG variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(RUN): Encryption defaults to: ${_DEFAULT_OPENSSL_ALGO_ARG}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		OPENSSL_ALGO_ARG="${_DEFAULT_OPENSSL_ALGO_ARG}"
 	fi
-	# Test openssl Algo
+
+	# Test OpenSSL
+	if ! command -v openssl > /dev/null 2>&1 ; then
+		debug "err"  "(RUN): 'openssl' not found" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		exit 2
+	fi
 	if ! echo "test" | $(which openssl) smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} "${OPENSSL_PUBKEY_PEM}" > /dev/null 2>&1 ; then
-		debug "err"  "openssl encryption test failed. Validate \$OPENSSL_ALGO_ARG" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err"  "(RUN): openssl encryption test failed. Validate \$OPENSSL_ALGO_ARG" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit 2
 	fi
 
-	debug "info" "(OPT) Encryption enabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(OPT): Encryption enabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
-else
-	debug "info" "(OPT) Encryption disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+elif [ "${ENCRYPT}" = "0" ]; then
+	debug "info" "(OPT): Encryption disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	ENCRYPT="0"
+else
+	debug "err" "(CFG): Invalid value for \$ENCRYPT: ${COMPRESS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(HLP): It is not clear whether or not you only allow encrypted dumps." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	exit 1
 fi
+
+
+
+
 
 
 

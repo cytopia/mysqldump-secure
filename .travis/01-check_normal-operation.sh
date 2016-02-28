@@ -5,6 +5,8 @@ ERROR=0
 . "./.travis/functions.bash"
 
 
+
+
 echo "##########################################################################################"
 echo "#"
 echo "#  1.  C H E C K I N G   N O R M A L   O P E R A T I O N"
