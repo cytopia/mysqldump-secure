@@ -2084,7 +2084,7 @@ for db in ${DATABASES}; do
 					fi
 				fi
 			else
-				debug "warn" "Not dumping consistently with '--lock-tables' or '--single-transaction'. Turn on via \$CONSISTENT_DUMP" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+				debug "warn" "\"${db}\": Not dumping consistently with '--lock-tables' or '--single-transaction'. Turn on via \$CONSISTENT_DUMP" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 			fi
 
 
