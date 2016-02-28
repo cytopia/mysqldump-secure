@@ -1572,7 +1572,7 @@ if ! set | grep '^REQUIRE=' >/dev/null 2>&1; then
 elif [ -z "${REQUIRE}" ]; then
 	debug "info" "(CFG): \$REQUIRE variable is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "info" "(RUN): No database will explicitly be required" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	IGNORE=""
+	REQUIRE=""
 else
 	debug "info" "(CFG): Required DB's: ${REQUIRE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
