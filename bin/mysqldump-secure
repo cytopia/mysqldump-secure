@@ -1618,10 +1618,9 @@ elif [ "${COMPRESS}" = "1" ]; then
 			debug "err" "(CFG): \$COMPRESS_ARG variable is not defined, but required" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "err" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			COMPRESS=0
+		# Can be empty
 		elif [ -z "${COMPRESS_ARG}" ]; then
-			debug "err" "(CFG): \$COMPRESS_ARG variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug "err" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-			COMPRESS=0
+			debug "verbose" "(CFG): No compression arguments specified" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		fi
 	fi
 

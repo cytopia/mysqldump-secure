@@ -569,7 +569,7 @@ echo "---------- CRON MODE ----------"
 CMD="sudo mysqldump-secure --cron"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -582,7 +582,7 @@ echo "---------- NORMAL MODE ----------"
 CMD="sudo mysqldump-secure"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -598,7 +598,7 @@ echo "---------- NORMAL MODE VERBOSE ----------"
 CMD="sudo mysqldump-secure --verbose"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
