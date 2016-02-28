@@ -129,12 +129,12 @@ script:
 
   - ./.travis/04-check_mysqldump_settings.sh
 
-  - ./.travis/05-check_logging.sh
+ # - ./.travis/05-check_logging.sh
 
 
 #
 
-  - /bin/sh ./.travis/check_config.sh
+ # - /bin/sh ./.travis/check_config.sh
 
 
 
