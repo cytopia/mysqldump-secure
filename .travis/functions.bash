@@ -124,4 +124,31 @@ syn_test() {
 }
 
 
+#
+## Test if the program runs till the end and does not stop before
+# @param  string  Command
+# @return integer 0:OK | 1:FAI:
+end_test() {
+	cmd="$@"
+
+	echo "${txtblu}--> Finish test test (does not abort unwantedly):${txtrst}"
+	echo "\$ ${txtblu}${cmd} | grep -E 'Aborting|Finished successfully|Finished with errors'${txtrst}"
+	found="$(eval "${cmd} 2>&1 | grep -E '(\[ERR\]\s*\[FAIL\]\s* Finished with errors)|(\[INFO\]\s*\[OK\]\s* Finished successfully)|(\[ERR\]\s*Aborting)'")"
+
+	if [ "${found}" = "" ]; then
+		echo "${txtpur}===> [FAIL]${txtrst}"
+		echo "${txtpur}===> [FAIL] Program Terminated abnormally.${txtrst}"
+		echo "${txtpur}===> [FAIL]${txtrst}"
+		echo "${txtpur}${syntax}${txtrst}"
+		echo
+		return 1
+	else
+		echo "${txtgrn}===> [OK]${txtrst}"
+		echo "${txtgrn}===> [OK] Program exited as expected.${txtrst}"
+		echo "${txtgrn}===> [OK]${txtrst}"
+		echo
+		return 0
+	fi
+}
+
 

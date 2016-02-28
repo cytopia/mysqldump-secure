@@ -89,6 +89,11 @@ sudo rm /var/log/mysqldump-secure.nagios.log 2>/dev/null
 sudo rm -rf /var/mysqldump-secure/ 2>/dev/null
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
+sudo rm /var/log/mysqldump-secure.log 2>/dev/null
+sudo rm /var/log/mysqldump-secure.nagios.log 2>/dev/null
+sudo rm -rf /var/mysqldump-secure/ 2>/dev/null
+if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
 
 
 echo "----------------------------------------"
@@ -104,6 +109,9 @@ if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 
@@ -132,6 +140,13 @@ sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-2.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt
 sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-1.txt
+sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-2.txt
+sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-3.txt
+sudo touch -a -m -t 201512180130.09 /var/mysqldump-secure/delete-me-4.txt
+if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 
@@ -238,6 +253,7 @@ CMD="sudo mysqldump-secure --verbose --conf=/etc/nothere"
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 
@@ -247,9 +263,9 @@ echo "----------------------------------------"
 CMD="sudo mysqldump-secure --verbose --conf=/etc/mysqldump-secure.cnf"
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
 # TODO: Ignore until config parsing has been fixed
 # if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 
@@ -260,6 +276,7 @@ CMD="sudo mysqldump-secure --wrong"
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 
