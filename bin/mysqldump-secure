@@ -2089,6 +2089,19 @@ for db in ${DATABASES}; do
 
 
 			#
+			# VIRTUAL DATABASES
+			#
+			MYSQL_SPECIAL_OPTS=""
+
+			# Performance schema does not allow to dump events
+			# mysqldump: mysqldump  Couldn't execute 'show events'  Access denied for user 'root'@'localhost' to database 'performance_schema' (1044)
+			if [ "${db}" = "performance_schema" ]; then
+				debug "verbose" "\"${db}\" cannot be dumped with --events. Adding --skip-events" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+				MYSQL_SPECIAL_OPTS="--skip-events"
+			fi
+
+
+			#
 			# DATABASE SIZE
 			#
 			DB_SIZE="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} --batch \
@@ -2120,7 +2133,7 @@ for db in ${DATABASES}; do
 				#
 				if [ ${ENCRYPT} -eq 1 ]; then
 					ext=".sql.${COMPRESS_EXT}.enc"
-					debugi "info"  "Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) " )" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugi "info"  "Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS})" ) $( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 					# Set umask prior writing
@@ -2153,7 +2166,7 @@ for db in ${DATABASES}; do
 				#
 				else
 					ext=".sql.${COMPRESS_EXT}"
-					debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (compressed) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) " )" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (compressed) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ") $( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")"
@@ -2183,7 +2196,7 @@ for db in ${DATABASES}; do
 				#
 				if [ ${ENCRYPT} -eq 1 ]; then
 					ext=".sql.enc"
-					debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) " )" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ") $( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
@@ -2208,7 +2221,7 @@ for db in ${DATABASES}; do
 				#
 				else
 					ext=".sql"
-					debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) " )" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ") $( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
