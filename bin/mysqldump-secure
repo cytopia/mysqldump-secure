@@ -135,7 +135,7 @@ debug() {
 	_debug="${6}"	# run in debug mode?
 
 	# Hide info/debug output when in cron-mode
-	if [ "${_cron}" != "1" ]; then
+	if [ "${_cron}" = "0" ]; then
 		[ "${_lvl}" = "info" ] && printf "[INFO]  %s\n" "${_msg}"
 
 		# Show debug output?
@@ -143,13 +143,13 @@ debug() {
 			[ "${_lvl}" = "verbose" ] && printf "${CLR_DEBUG}[DEBUG] %s\n${CLR_RESET}" "${_msg}"
 		elif [ "${_debug}" != "0" ]; then
 			echo "${_msg}"
-			echo "Internal Error: Invalid value for \$_debug"
+			echo "Internal Error: Invalid value for \$_debug: '${_debug}'"
 			echo "Please report this at github"
 			exit 1
 		fi
-	elif [ "${_cron}" != "0" ]; then
+	elif [ "${_cron}" != "0" ] && [ "${_cron}" != "1" ]; then
 		echo "${_msg}"
-		echo "Internal Error: Invalid value for \$_cron"
+		echo "Internal Error: Invalid value for \$_cron: '${_cron}'"
 		echo "Please report this at github"
 		exit 1
 	fi
@@ -160,16 +160,16 @@ debug() {
 	[ "${_lvl}" = "err"  ] && printf "${CLR_ERROR}[ERR]   %s\n${CLR_RESET}" "${_msg}" 1>&2	# stdout -> stderr
 
 	# Log to file
-	if [ "${_log}" = "1"    ]; then
+	if [ "${_log}" = "1" ]; then
 		_pre=""
 		[ "${_lvl}" = "verbose" ] && _pre="[DEBUG]"
-		[ "${_lvl}" = "info" ]  && _pre="[INFO] "
-		[ "${_lvl}" = "warn" ]  && _pre="[WARN] "
-		[ "${_lvl}" = "err" ]   && _pre="[ERR]  "
+		[ "${_lvl}" = "info" ]    && _pre="[INFO] "
+		[ "${_lvl}" = "warn" ]    && _pre="[WARN] "
+		[ "${_lvl}" = "err" ]     && _pre="[ERR]  "
 		printf "%s %s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${_msg}" >> "${_file}"
 	elif [ "${_log}" != "0" ]; then
 		echo "${_msg}"
-		echo "Internal Error: Invalid value for \$_log"
+		echo "Internal Error: Invalid value for \$_log: '${_log}'"
 		echo "Please report this at github"
 		exit 1
 	fi
@@ -196,7 +196,7 @@ debugr() {
 	_debug="${6}"	# run in debug mode?
 
 	# [INFO]/[DEBUG] Hide info/debug output when in cron-mode
-	if [ "${_cron}" != "1" ]; then
+	if [ "${_cron}" = "0" ]; then
 		# [INFO]
 		if [ "${_lvl}" = "info" ]; then
 			IFS='
@@ -219,13 +219,13 @@ debugr() {
 			fi
 		elif [ "${_debug}" != "0" ]; then
 			echo "${_msg}"
-			echo "Internal Error: Invalid value for \$_debug"
+			echo "Internal Error: Invalid value for \$_debug: '${_debug}'"
 			echo "Please report this at github"
 			exit 1
 		fi
-	elif [ "${_cron}" != "0" ]; then
+	elif [ "${_cron}" != "0" ] && [ "${_cron}" != "1" ]; then
 		echo "${_msg}"
-		echo "Internal Error: Invalid value for \$_cron"
+		echo "Internal Error: Invalid value for \$_cron: '${_cron}'"
 		echo "Please report this at github"
 		exit 1
 	fi
@@ -268,7 +268,7 @@ debugr() {
 		unset IFS
 	elif [ "${_log}" != "0" ]; then
 		echo "${_msg}"
-		echo "Internal Error: Invalid value for \$_log"
+		echo "Internal Error: Invalid value for \$_log: '${_log}'"
 		echo "Please report this at github"
 		exit 1
 	fi
@@ -295,7 +295,7 @@ debugi() {
 	_debug="${6}"	# run in debug mode?
 
 	# Hide info/debug output when in cron-mode
-	if [ "${_cron}" != "1" ]; then
+	if [ "${_cron}" = "0" ]; then
 		[ "${_lvl}" = "info" ] && printf "[INFO]  %s" "${_msg}"
 
 		# Show debug output?
@@ -303,13 +303,13 @@ debugi() {
 			[ "${_lvl}" = "verbose" ] && printf "${CLR_DEBUG}[DEBUG] %s${CLR_RESET}" "${_msg}"
 		elif [ "${_debug}" != "0" ]; then
 			echo "${_msg}"
-			echo "Internal Error: Invalid value for \$_debug"
+			echo "Internal Error: Invalid value for \$_debug: '${_debug}'"
 			echo "Please report this at github"
 			exit 1
 		fi
-	elif [ "${_cron}" != "0" ]; then
+	elif [ "${_cron}" != "0" ] && [ "${_cron}" != "1" ]; then
 		echo "${_msg}"
-		echo "Internal Error: Invalid value for \$_cron"
+		echo "Internal Error: Invalid value for \$_cron: '${_cron}'"
 		echo "Please report this at github"
 		exit 1
 	fi
@@ -329,7 +329,7 @@ debugi() {
 		printf "%s %s %s %s" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${_msg}" >> "${_file}"
 	elif [ "${_log}" != "0" ]; then
 		echo "${_msg}"
-		echo "Internal Error: Invalid value for \$_log"
+		echo "Internal Error: Invalid value for \$_log: '${_log}'"
 		echo "Please report this at github"
 		exit 1
 	fi
@@ -354,7 +354,7 @@ debugn() {
 	_debug="${6}"	# run in debug mode?
 
 	# Hide info/debug output when in cron-mode
-	if [ "${_cron}" != "1" ]; then
+	if [ "${_cron}" = "0" ]; then
 		[ "${_lvl}" = "info" ] && printf "%s\n" "${_msg}"
 
 		# Show debug output?
@@ -362,13 +362,13 @@ debugn() {
 			[ "${_lvl}" = "verbose" ] && printf "${CLR_DEBUG}%s\n${CLR_RESET}" "${_msg}"
 		elif [ "${_debug}" != "0" ]; then
 			echo "${_msg}"
-			echo "Internal Error: Invalid value for \$_debug"
+			echo "Internal Error: Invalid value for \$_debug: '${_debug}'"
 			echo "Please report this at github"
 			exit 1
 		fi
-	elif [ "${_cron}" != "0" ]; then
+	elif [ "${_cron}" != "0" ] && [ "${_cron}" != "1" ]; then
 		echo "${_msg}"
-		echo "Internal Error: Invalid value for \$_cron"
+		echo "Internal Error: Invalid value for \$_cron: '${_cron}'"
 		echo "Please report this at github"
 		exit 1
 	fi
@@ -383,7 +383,7 @@ debugn() {
 		printf "%s\n" "${_msg}" >> "${_file}"
 	elif [ "${_log}" != "0" ]; then
 		echo "${_msg}"
-		echo "Internal Error: Invalid value for \$_log"
+		echo "Internal Error: Invalid value for \$_log: '${_log}'"
 		echo "Please report this at github"
 		exit 1
 	fi
@@ -409,7 +409,7 @@ debug_nl() {
 	_debug="${6}"	# run in debug mode?
 
 	# Hide info output when in cron-mode
-	if [ "${_cron}" != "1" ]; then
+	if [ "${_cron}" = "0" ]; then
 		[ "${_lvl}" = "info" ] && printf "\n"
 
 		# Show debug output?
@@ -417,13 +417,13 @@ debug_nl() {
 			[ "${_lvl}" = "verbose" ] && printf "\n"
 		elif [ "${_debug}" != "0" ]; then
 			echo "${_msg}"
-			echo "Internal Error: Invalid value for \$_debug"
+			echo "Internal Error: Invalid value for \$_debug: '${_debu}'"
 			echo "Please report this at github"
 			exit 1
 		fi
-	elif [ "${_cron}" != "0" ]; then
+	elif [ "${_cron}" != "0" ] && [ "${_cron}" != "1" ]; then
 		echo "${_msg}"
-		echo "Internal Error: Invalid value for \$_cron"
+		echo "Internal Error: Invalid value for \$_cron: '${_cron}'"
 		echo "Please report this at github"
 		exit 1
 	fi
@@ -437,7 +437,7 @@ debug_nl() {
 		printf "\n" >> "${_file}"
 	elif [ "${_log}" != "0" ]; then
 		echo "${_msg}"
-		echo "Internal Error: Invalid value for \$_log"
+		echo "Internal Error: Invalid value for \$_log: '${_log}'"
 		echo "Please report this at github"
 		exit 1
 	fi
