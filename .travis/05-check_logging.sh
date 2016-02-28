@@ -309,7 +309,7 @@ sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && su
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' 's/^#LOG_CHMOD="0600a"/LOG_CHMOD="0600"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^LOG_CHMOD="0600a"/LOG_CHMOD="0600"/' /etc/mysqldump-secure.conf
 
 
 
