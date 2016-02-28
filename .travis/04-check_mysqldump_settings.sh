@@ -2,14 +2,9 @@
 
 ERROR=0
 
+. "./.travis/functions.bash"
 
-txtgrn=$(tput setaf 2) # Green
-txtylw=$(tput setaf 3) # Yellow
-txtblu=$(tput setaf 4) # Blue
-txtpur=$(tput setaf 5) # Purple
-txtcyn=$(tput setaf 6) # Cyan
-txtwht=$(tput setaf 7) # White
-txtrst=$(tput sgr0) # Text reset.
+
 
 
 echo "##########################################################################################"
@@ -470,11 +465,11 @@ echo
 echo
 if [ "$ERROR" = "0" ]; then
   echo "${txtgrn}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
-  echo "${txtgrn}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ [04] SUCESS   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
+  echo "${txtgrn}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ [04] SUCESS @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
   echo "${txtgrn}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
 else
   echo "${txtpur}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
-  echo "${txtpur}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@  [04] FAILED   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
+  echo "${txtpur}@@@@@@@@@@@@@@@@@@@@@@@@  [04] FAILED: ${ERROR} Errors   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
   echo "${txtpur}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
 fi
 exit $ERROR

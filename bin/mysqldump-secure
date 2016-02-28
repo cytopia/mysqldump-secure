@@ -1381,7 +1381,7 @@ if ! set | grep '^MYSQL_SSL_ENABLE=' >/dev/null 2>&1; then
 	debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 elif [ -z "${MYSQL_SSL_ENABLE}" ]; then
-	debug "err" "(CFG): \$MYSQL_SSL_ENABLE variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(CFG): \$MYSQL_SSL_ENABLE variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err" "(HLP): It is not clear whether or not you only allow secure connections." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
