@@ -133,7 +133,7 @@ end_test() {
 
 	echo "${txtblu}--> Finish test test (does not abort unwantedly):${txtrst}"
 	echo "\$ ${txtblu}${cmd} | grep -E 'Aborting|Finished successfully|Finished with errors|invalid argument:'${txtrst}"
-	found="$(eval "${cmd} 2>&1 | tail -n1 | grep -E '(\[ERR\]\s*\[FAIL\]\s* Finished with errors)|(\[INFO\]\s*\[OK\]\s* Finished successfully)|(\[ERR\]\s*Aborting)|(Invalid argument:\s)'")"
+	found="$(eval "${cmd} 2>&1 | tail -n1 | grep -E '(\[ERR\]\s*\[FAIL\]\s* Finished with errors)|(\[INFO\]\s*\[OK\]\s* Finished successfully)|(\[ERR\]\s*Aborting)|(\sfor available options.)'")"
 
 	if [ "${found}" = "" ]; then
 		echo "${txtpur}===> [FAIL]${txtrst}"
