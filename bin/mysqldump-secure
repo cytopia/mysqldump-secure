@@ -1332,48 +1332,48 @@ if [ -L "${MYSQL_CNF_FILE}" ]; then
 fi
 
 if [ ! -f "${MYSQL_CNF_FILE}" ]; then
-	debug "err"  "(RUN): MySQL CNF file not found: ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "(RUN): MySQL CNF file not found: ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 elif [ ! -r "${MYSQL_CNF_FILE}" ]; then
-	debug "err"  "(RUN): MySQL CNF file is not readable: ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "(RUN): MySQL CNF file is not readable: ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 elif ! compare_chmod "$(permission "${MYSQL_CNF_FILE}")" "${_DEFAULT_MYSQL_CNF_CHMOD}" > /dev/null 2>&1 ; then
-	debug "err"  "(RUN): MySQL CNF file has dangerous permissions: $(permission "${MYSQL_CNF_FILE}")." $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "(HLP): Fix it to ${_DEFAULT_MYSQL_CNF_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "(HLP): If you are not alone on the machine, the password inside could have been compromised by now." $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "(HLP): If so, change your database password." $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "(RUN): MySQL CNF file has dangerous permissions: $(permission "${MYSQL_CNF_FILE}")." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "(HLP): Fix it to ${_DEFAULT_MYSQL_CNF_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "(HLP): If you are not alone on the machine, the password inside could have been compromised by now." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "(HLP): If so, change your database password." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 fi
 
 # Check MYSQL_SSL_ENABLE
 if ! set | grep '^MYSQL_SSL_ENABLE=' >/dev/null 2>&1; then
-	debug "err" "(CFG): \$MYSQL_SSL_ENABLE variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "err" "(HLP): It is not clear whether or not you only allow secure connections." $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err" "(CFG): \$MYSQL_SSL_ENABLE variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(HLP): It is not clear whether or not you only allow secure connections." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 elif [ -z "${MYSQL_SSL_ENABLE}" ]; then
 	debug "err" "(CFG): \$MYSQL_SSL_ENABLE variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "err" "(HLP): It is not clear whether or not you only allow secure connections." $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err" "(HLP): It is not clear whether or not you only allow secure connections." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 elif [ "${MYSQL_SSL_ENABLE}" = "1" ]; then
 	if ! set | grep '^MYSQL_SSL_CA_PEM=' >/dev/null 2>&1; then
-		debug "err" "(CFG): \$MYSQL_SSL_CA_PEM variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "err" "(HLP): It is required for SSL connections" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "err"  "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err" "(CFG): \$MYSQL_SSL_CA_PEM variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "(HLP): It is required for SSL connections" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err"  "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit 1
 	elif [ -z "${MYSQL_SSL_CA_PEM}" ]; then
-		debug "err" "(CFG): \$MYSQL_SSL_CA_PEM variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "err" "(HLP): It is required for SSL connections" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err" "(CFG): \$MYSQL_SSL_CA_PEM variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "(HLP): It is required for SSL connections" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit 1
 	elif [ ! -f "${MYSQL_SSL_CA_PEM}" ]; then
-		debug "err" "(RUN): \$MYSQL_SSL_CA_PEM=\"$MYSQL_SSL_CA_PEM\" does not exist" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "err" "(HLP): It is required for SSL connections" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err" "(RUN): \$MYSQL_SSL_CA_PEM=\"$MYSQL_SSL_CA_PEM\" does not exist" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "(HLP): It is required for SSL connections" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit 1
 	fi
 
@@ -1382,9 +1382,9 @@ elif [ "${MYSQL_SSL_ENABLE}" = "1" ]; then
 	# MYSQL_SSL_CLIENT_CERT_PEM
 	if [ -n "${MYSQL_SSL_CLIENT_CERT_PEM-}" ]; then
 		if [ ! -f "${MYSQL_SSL_CLIENT_CERT_PEM}" ]; then
-			debug "err"  "(RUN): \$MYSQL_SSL_CLIENT_CERT_PEM=\"$MYSQL_SSL_CLIENT_CERT_PEM\" does not exist" $LOG "${LOGFILE}" "${_ARG_CRON}"
-			debug "err"  "(HLP): Comment it out or specify the correct path." $LOG "${LOGFILE}" "${_ARG_CRON}"
-			debug "err"  "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "(RUN): \$MYSQL_SSL_CLIENT_CERT_PEM=\"$MYSQL_SSL_CLIENT_CERT_PEM\" does not exist" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err"  "(HLP): Comment it out or specify the correct path." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err"  "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			exit 1
 		fi
 		MYSQL_SSL_ARGS="${MYSQL_SSL_ARGS} --ssl-cert=${MYSQL_SSL_CLIENT_CERT_PEM}"
@@ -1392,49 +1392,49 @@ elif [ "${MYSQL_SSL_ENABLE}" = "1" ]; then
 	# MYSQL_SSL_CLIENT_KEY_PEM
 	if [ -n "${MYSQL_SSL_CLIENT_KEY_PEM-}" ]; then
 		if [ ! -f "${MYSQL_SSL_CLIENT_KEY_PEM}" ]; then
-			debug "err"  "(RUN): \$MYSQL_SSL_CLIENT_KEY_PEM=\"$MYSQL_SSL_CLIENT_KEY_PEM\" does not exist" $LOG "${LOGFILE}" "${_ARG_CRON}"
-			debug "err"  "(HLP): Comment it out or specify the correct path." $LOG "${LOGFILE}" "${_ARG_CRON}"
-			debug "err"  "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "(RUN): \$MYSQL_SSL_CLIENT_KEY_PEM=\"$MYSQL_SSL_CLIENT_KEY_PEM\" does not exist" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err"  "(HLP): Comment it out or specify the correct path." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err"  "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			exit 1
 		fi
 		MYSQL_SSL_ARGS="${MYSQL_SSL_ARGS} --ssl-key=${MYSQL_SSL_CLIENT_KEY_PEM}"
 	fi
 
-	debug "info" "(OPT): MySQL SSL connection enabled: ${MYSQL_SSL_ARGS}." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(OPT): MySQL SSL connection enabled: ${MYSQL_SSL_ARGS}." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 elif [ "${MYSQL_SSL_ENABLE}" = "0" ]; then
 	MYSQL_SSL_ENABLE=0
 	MYSQL_SSL_ARGS=""
-	debug "info" "(OPT): MySQL SSL connection disabled." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(OPT): MySQL SSL connection disabled." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "err"  "(CFG): Wrong value for \$MYSQL_SSL_ENABLE: $MYSQL_SSL_ENABLE" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "(HLP): It is not clear whether or not you only allow secure connections." $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "(CFG): Wrong value for \$MYSQL_SSL_ENABLE: $MYSQL_SSL_ENABLE" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "(HLP): It is not clear whether or not you only allow secure connections." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "Aborting." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 fi
 
 
 # Testing MySQL connection
 if ! _CONN_ERR="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e exit 2>&1)"; then
-	debug  "err"  "(RUN): Cannot connect to mysql database." $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debugr "err"  "(RUN): Via: $(which mysql) --defaults-file=${MYSQL_CNF_FILE} ${MYSQL_SSL_ARGS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debugr "err"  "(RUN): SQL: ${_CONN_ERR}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug  "err"  "(RUN): Cannot connect to mysql database." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debugr "err"  "(RUN): Via: $(which mysql) --defaults-file=${MYSQL_CNF_FILE} ${MYSQL_SSL_ARGS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debugr "err"  "(RUN): SQL: ${_CONN_ERR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 3
 else
-	debug "info" "(RUN): MySQL connection test successful." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(RUN): MySQL connection test successful." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 # Testing MySQL for SSL connection
 MYSQL_SSL_STATUS="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e 'status;' 2>&1 | grep -E '^SSL:.*' | sed 's/SSL:\s*//g')"
 if [ "${MYSQL_SSL_STATUS}" = "Not in use" ]; then
 	if [ "${MYSQL_SSL_ENABLE}" = "1" ]; then
-		debug "err"  "(RUN): MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "err"  "(RUN): MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit 1
 	else
-		debug "info"  "(RUN): MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "info"  "(RUN): MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	fi
 else
-	debug "info" "(RUN): MySQL connection is using SSL: ${MYSQL_SSL_STATUS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(RUN): MySQL connection is using SSL: ${MYSQL_SSL_STATUS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 
@@ -1445,24 +1445,24 @@ fi
 ############################################################
 
 if ! set | grep '^MYSQL_OPTS=' >/dev/null 2>&1; then
-	debug "info" "(CFG): \$MYSQL_OPTS variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(CFG): \$MYSQL_OPTS variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	MYSQL_OPTS=""
 elif [ -z "${MYSQL_SSL_ENABLE}" ]; then
-	debug "info" "(CFG): \$MYSQL_OPTS is empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(CFG): \$MYSQL_OPTS is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	MYSQL_OPTS=""
 fi
 
-debug "info"  "(CFG): mysqldump options: ${MYSQL_OPTS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+debug "info"  "(CFG): mysqldump options: ${MYSQL_OPTS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 # Warnings about inconsistent dumps? (IGNORE_CONSISTENT_DUMP_WARNINGS)
 if ! set | grep '^IGNORE_CONSISTENT_DUMP_WARNINGS=' >/dev/null 2>&1; then
-	debug "warn" "(CFG): \$IGNORE_CONSISTENT_DUMP_WARNINGS variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(RUN): Will warn you about inconsistent dumps." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "(CFG): \$IGNORE_CONSISTENT_DUMP_WARNINGS variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(RUN): Will warn you about inconsistent dumps." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	IGNORE_CONSISTENT_DUMP_WARNINGS=0
 elif [ -z "${IGNORE_CONSISTENT_DUMP_WARNINGS}" ]; then
-	debug "warn" "(CFG): \$IGNORE_CONSISTENT_DUMP_WARNINGS variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(RUN): Will warn you about inconsistent dumps." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "(CFG): \$IGNORE_CONSISTENT_DUMP_WARNINGS variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(RUN): Will warn you about inconsistent dumps." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	IGNORE_CONSISTENT_DUMP_WARNINGS=0
 elif [ "${IGNORE_CONSISTENT_DUMP_WARNINGS}" = "1" ]; then
 	debug "info" "(CFG): Will not warn you about inconsistent dumps (unsafe)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1470,27 +1470,27 @@ elif [ "${IGNORE_CONSISTENT_DUMP_WARNINGS}" = "1" ]; then
 elif [ "${IGNORE_CONSISTENT_DUMP_WARNINGS}" = "0" ]; then
 	debug "info" "(CFG): Will warn you about inconsistent dumps (safe)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "err"  "(CFG): \$IGNORE_CONSISTENT_DUMP_WARNINGS variable has an invalid value: ${IGNORE_CONSISTENT_DUMP_WARNINGS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "(RUN): Will warn you about inconsistent dumps." $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "(CFG): \$IGNORE_CONSISTENT_DUMP_WARNINGS variable has an invalid value: ${IGNORE_CONSISTENT_DUMP_WARNINGS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "(RUN): Will warn you about inconsistent dumps." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	IGNORE_CONSISTENT_DUMP_WARNINGS=0
 fi
 
 # Dump consistent?
 if ! set | grep '^CONSISTENT_DUMP=' >/dev/null 2>&1; then
-	debug "warn" "(CFG): \$CONSISTENT_DUMP variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(RUN): Intentionally disabling consistent dumps (no '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "(CFG): \$CONSISTENT_DUMP variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(RUN): Intentionally disabling consistent dumps (no '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	CONSISTENT_DUMP=0
 elif [ -z "${IGNORE_CONSISTENT_DUMP_WARNINGS}" ]; then
-	debug "warn" "(CFG): \$CONSISTENT_DUMP variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(RUN): Intentionally disabling consistent dumps (no '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "(CFG): \$CONSISTENT_DUMP variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(RUN): Intentionally disabling consistent dumps (no '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	CONSISTENT_DUMP=0
 elif [ "${CONSISTENT_DUMP}" = "1" ]; then
-	debug "info" "(CFG): Dumping consistently across tables (using '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(CFG): Dumping consistently across tables (using '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 elif [ "${CONSISTENT_DUMP}" = "0" ]; then
-	debug "info" "(CFG): Not dumping consistently across tables (unsafe)" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(CFG): Not dumping consistently across tables (unsafe)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "err"  "(CFG): \$CONSISTENT_DUMP variable has an invalid value: ${CONSISTENT_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err"  "(RUN): Intentionally disabling consistent dumps (no '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "err"  "(CFG): \$CONSISTENT_DUMP variable has an invalid value: ${CONSISTENT_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "(RUN): Intentionally disabling consistent dumps (no '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	CONSISTENT_DUMP=0
 fi
 
@@ -1503,17 +1503,17 @@ for opt in ${MYSQL_OPTS}; do
 	for evil in ${MYSQL_EVIL_OPTS}; do
 		if echo "${opt}" | grep -e "^${evil}" > /dev/null 2>&1; then
 			echo "opt: ${opt}   | evil: ${evil}"
-			debug "err"  "(CFG): Insecure mysqldump option found in MYSQL_OPTS: '${opt}'" $LOG "${LOGFILE}" "${_ARG_CRON}"
-			debug "err"  "(HLP): Remove it. This option is handled by the tool itself." $LOG "${LOGFILE}" "${_ARG_CRON}"
-			debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "(CFG): Insecure mysqldump option found in MYSQL_OPTS: '${opt}'" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err"  "(HLP): Remove it. This option is handled by the tool itself." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			exit 3
 		fi
 	done
 	for bad in ${MYSQL_BAD_OPTS}; do
 		if echo "${opt}" | grep -e "^${bad}" > /dev/null 2>&1; then
-			debug "err"  "(CFG): Disallowed mysqldump option found in MYSQL_OPTS: '${opt}'" $LOG "${LOGFILE}" "${_ARG_CRON}"
-			debug "err"  "(HLP): Remove it. This option can be controlled via the configuration file itself." $LOG "${LOGFILE}" "${_ARG_CRON}"
-			debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "err"  "(CFG): Disallowed mysqldump option found in MYSQL_OPTS: '${opt}'" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err"  "(HLP): Remove it. This option can be controlled via the configuration file itself." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			exit 3
 		fi
 	done
@@ -1527,28 +1527,28 @@ done
 
 # Ignored databases
 if ! set | grep '^IGNORE=' >/dev/null 2>&1; then
-	debug "warn" "(CFG): \$IGNORE variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "info" "(RUN): No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "(CFG): \$IGNORE variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+	debug "info" "(RUN): No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	IGNORE=""
 elif [ -z "${IGNORE}" ]; then
-	debug "info" "(CFG): \$IGNORE variable is empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "info" "(RUN): No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(CFG): \$IGNORE variable is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(RUN): No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	IGNORE=""
 else
-	debug "info" "(CFG): Ignored DB's: ${IGNORE}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(CFG): Ignored DB's: ${IGNORE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 # Required databases
 if ! set | grep '^REQUIRE=' >/dev/null 2>&1; then
-	debug "warn" "(CFG): \$REQUIRE variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "info" "(RUN): No database will be required" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "warn" "(CFG): \$REQUIRE variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(RUN): No database will be required" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	REQUIRE=""
 elif [ -z "${REQUIRE}" ]; then
-	debug "info" "(CFG): \$REQUIRE variable is empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "info" "(RUN): No database will explicitly be required" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(CFG): \$REQUIRE variable is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(RUN): No database will explicitly be required" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	IGNORE=""
 else
-	debug "info" "(CFG): Required DB's: ${REQUIRE}" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(CFG): Required DB's: ${REQUIRE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 
@@ -1560,28 +1560,28 @@ fi
 ############################################################
 # Check $DUMP_FILE_PRE
 if ! set | grep '^COMPRESS=' >/dev/null 2>&1; then
-	debug "warn" "(CFG): \$COMPRESS variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(OPT): Compression disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): \$COMPRESS variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	COMPRESS=0
 elif [ -z "${COMPRESS}" ]; then
-	debug "warn" "(CFG): \$COMPRESS variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(OPT): Compression disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): \$COMPRESS variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	COMPRESS=0
 elif [ "${COMPRESS}" = "1" ]; then
 
 	# COMPRESS_BIN
 	if ! set | grep '^COMPRESS_BIN=' >/dev/null 2>&1; then
-		debug "err" "(CFG): \$COMPRESS_BIN variable is not defined, but required" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "err" "(OPT): Compression disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "(CFG): \$COMPRESS_BIN variable is not defined, but required" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		COMPRESS=0
 	elif [ -z "${COMPRESS_BIN}" ]; then
-		debug "err" "(CFG): \$COMPRESS_BIN variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "err" "(OPT): Compression disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "(CFG): \$COMPRESS_BIN variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		COMPRESS=0
 	elif ! command -v "${COMPRESS_BIN}" > /dev/null 2>&1 ; then
-		debug "err" "(CFG): ${COMPRESS_BIN} not found. Fix \$COMPRESS_BIN" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "err" "(HLP): Fix \$COMPRESS_BIN" $LOG "${LOGFILE}" "${_ARG_CRON}"
-		debug "err" "(OPT): Compression disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "(CFG): ${COMPRESS_BIN} not found. Fix \$COMPRESS_BIN" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "(HLP): Fix \$COMPRESS_BIN" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		COMPRESS=0
 	fi
 
@@ -1589,12 +1589,12 @@ elif [ "${COMPRESS}" = "1" ]; then
 	if [ "${COMPRESS}" = "1" ]; then
 		# COMPRESS_ARG
 		if ! set | grep '^COMPRESS_ARG=' >/dev/null 2>&1; then
-			debug "err" "(CFG): \$COMPRESS_ARG variable is not defined, but required" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug "err" "(OPT): Compression disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err" "(CFG): \$COMPRESS_ARG variable is not defined, but required" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			COMPRESS=0
 		elif [ -z "${COMPRESS_ARG}" ]; then
-			debug "err" "(CFG): \$COMPRESS_ARG variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug "err" "(OPT): Compression disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err" "(CFG): \$COMPRESS_ARG variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			COMPRESS=0
 		fi
 	fi
@@ -1603,26 +1603,26 @@ elif [ "${COMPRESS}" = "1" ]; then
 	if [ "${COMPRESS}" = "1" ]; then
 		# COMPRESS_ARG
 		if ! set | grep '^COMPRESS_EXT=' >/dev/null 2>&1; then
-			debug "warn" "(CFG): \$COMPRESS_EXT variable is not defined" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug "warn" "(RUN): Using 'compressed' as file extension." $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "warn" "(CFG): \$COMPRESS_EXT variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(RUN): Using 'compressed' as file extension." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			COMPRESS_EXT="compressed"
 		elif [ -z "${COMPRESS_EXT}" ]; then
-			debug "warn" "(CFG): \$COMPRESS_EXT variable should not be empty" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug "warn" "(RUN): Using 'compressed' as file extension." $LOG "${LOGFILE}" "${_ARG_CRON}"
+			debug "warn" "(CFG): \$COMPRESS_EXT variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(RUN): Using 'compressed' as file extension." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			COMPRESS_EXT="compressed"
 		fi
 	fi
 
 	# If compression is still enabled
 	if [ "${COMPRESS}" = "1" ]; then
-		debug "info" "(OPT): Compression enabled: Using ${COMPRESS_BIN} ${COMPRESS_ARG}" $LOG "${LOGFILE}" "${_ARG_CRON}"
+		debug "info" "(OPT): Compression enabled: Using ${COMPRESS_BIN} ${COMPRESS_ARG}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	fi
 
 elif [ "${COMPRESS}" = "0" ]; then
-	debug "info" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}"
+	debug "info" "(OPT): Compression disabled"$LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "err" "(CFG): Invalid value for \$COMPRESS: ${COMPRESS}" $LOG "${LOGFILE}" "${_ARG_CRON}"
-	debug "err" "(OPT): Compression disabled" "" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(CFG): Invalid value for \$COMPRESS: ${COMPRESS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	COMPRESS=0
 fi
 
