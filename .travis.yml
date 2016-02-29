@@ -134,7 +134,7 @@ script:
   # TODO:
   #  * Duplicate files testing!!!
   #  * Connection checking (host not found, access denied, etc)
-  #
+  #  * nagios check
 
 
 

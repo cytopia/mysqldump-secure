@@ -2429,7 +2429,7 @@ fi
 # Nagios Plugin Log
 ############################################################
 if [ "${NAGIOS_LOG}" = "1" ]; then
-	debug "info" "Writing nagios logfile" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(RUN): Writing nagios logfile" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 	{
 		echo "[state]";
