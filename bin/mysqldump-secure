@@ -1599,7 +1599,7 @@ elif [ "${COMPRESS}" = "1" ]; then
 
 	# COMPRESS_BIN
 	if ! set | grep '^COMPRESS_BIN=' >/dev/null 2>&1; then
-		debug "err" "(CFG): \$COMPRESS_BIN variable is not defined, but required" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "(CFG): \$COMPRESS_BIN variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "err" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		COMPRESS=0
 	elif [ -z "${COMPRESS_BIN}" ]; then
@@ -1618,6 +1618,7 @@ elif [ "${COMPRESS}" = "1" ]; then
 		# COMPRESS_ARG
 		if ! set | grep '^COMPRESS_ARG=' >/dev/null 2>&1; then
 			debug "warn" "(CFG): \$COMPRESS_ARG variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			COMPRESS_ARG=""
 		# Can be empty
 		elif [ -z "${COMPRESS_ARG}" ]; then
 			debug "verbose" "(CFG): No compression arguments specified" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
