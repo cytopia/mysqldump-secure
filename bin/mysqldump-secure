@@ -1845,7 +1845,7 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 		debug "warn" "(RUN): Setting default to ${_DEFAULT_NAGIOS_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		NAGIOS_LOG_CHMOD="${_DEFAULT_NAGIOS_LOG_CHMOD}"
 	elif ! valid_chmod "${NAGIOS_LOG_CHMOD}" > /dev/null 2>&1; then
-		debug "err"  "(CFG): Invalid chmod value for \$NAGIOS_LOG_CHMOD: ${NAGIOS_LOG_CHMOD} in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err"  "(CFG): Invalid chmod value for \$NAGIOS_LOG_CHMOD: ${NAGIOS_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "err"  "(RUN): Setting default to ${_DEFAULT_NAGIOS_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		NAGIOS_LOG_CHMOD="${_DEFAULT_NAGIOS_LOG_CHMOD}"
 	fi

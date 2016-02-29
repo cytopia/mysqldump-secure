@@ -128,7 +128,7 @@ script:
   #- ./.travis/05-check_logging.sh
   #- ./.travis/06-check_compression.sh
   #- ./.travis/07-check_encryption.sh
-  - ./.travis/08-check_deletion.sh
+  #- ./.travis/08-check_deletion.sh
   - ./.travis/09-check_nagios_log.sh
 
 
