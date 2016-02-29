@@ -1286,7 +1286,7 @@ if [ ! -d "${DUMP_PATH}" ]; then
 fi
 # Check correct permissions of destination dir
 if ! compare_chmod "$(permission "${DUMP_PATH}")" "${DUMP_DIR_CHMOD}" > /dev/null 2>&1 ; then
-	debug  "err"  "(RUN): Target directory has wrong permissions: $(permission "${DUMP_PATH}"), but should ${DUMP_DIR_CHMOD}." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug  "err"  "(RUN): Destination dir has wrong permissions: $(permission "${DUMP_PATH}"), but should ${DUMP_DIR_CHMOD}." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debugi "info" "(RUN): Trying to chmod to ${DUMP_DIR_CHMOD}... " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 	if ! chmod "${DUMP_DIR_CHMOD}" "${DUMP_PATH}" > /dev/null 2>&1 ; then
@@ -1304,6 +1304,8 @@ if [ ! -w "${DUMP_PATH}" ]; then
 	debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 fi
+debug "info" "(CFG): Destination dir: ${DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
 
 # Check $DUMP_FILE_PRE
 if ! set | grep '^DUMP_FILE_PRE=' >/dev/null 2>&1; then
@@ -1921,12 +1923,6 @@ else
 fi
 
 
-
-############################################################
-# Print additional information
-############################################################
-
-debug "info" "Backup directory: ${DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 
