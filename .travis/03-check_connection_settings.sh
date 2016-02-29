@@ -371,7 +371,7 @@ echo
 echo "----------------------------------------"
 echo " 3.2.4 MYSQL_SSL_ENABLE=0"
 echo "----------------------------------------"
-sudo sed -i'' 's/MYSQL_SSL_ENABLE=1/MYSQL_SSL_ENABLE=/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/MYSQL_SSL_ENABLE=1/MYSQL_SSL_ENABLE=0/' /etc/mysqldump-secure.conf
 
 echo "---------- CRON MODE ----------"
 CMD="sudo mysqldump-secure --cron"
@@ -418,7 +418,7 @@ sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && su
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' 's/MYSQL_SSL_ENABLE=/MYSQL_SSL_ENABLE=1/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/MYSQL_SSL_ENABLE=0/MYSQL_SSL_ENABLE=1/' /etc/mysqldump-secure.conf
 
 
 
