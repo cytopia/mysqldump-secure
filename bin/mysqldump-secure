@@ -1929,7 +1929,7 @@ fi
 # Test mode
 ############################################################
 if [ "${_ARG_TEST}" = "1" ]; then
-	debug "info" "Exiting program from test mode (--test)."  ${LOG} "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(ARG): Exiting program from test mode (--test)."  ${LOG} "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 0
 fi
 
@@ -1956,33 +1956,33 @@ ERROR=0
 ############################################################
 
 if MY_TMP_DIR="$( mktemp -d /tmp/mysqldump-secure.XXXXXXXXXX 2>/dev/null)"; then
-	debug "verbose"  "Creating tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose"  "(RUN): Creating tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "err"  "Cannot create tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "(RUN): Cannot create tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err" "Aborting" $LOG "" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 fi
 
 if MY_TMP_FILE_DUMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
-	debug "verbose"  "Creating tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose"  "(RUN): Creating tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "err"  "Cannot create tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "(RUN): Cannot create tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err" "Aborting" $LOG "" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 fi
 
 if MY_TMP_FILE_COMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
-	debug "verbose"  "Creating tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose"  "(RUN): Creating tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "err"  "Cannot create tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "(RUN): Cannot create tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err" "Aborting" $LOG "" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 fi
 
 if MY_TMP_FILE_ENCR="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
-	debug "verbose"  "Creating tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose"  "(RUN): Creating tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "err"  "Cannot create tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "(RUN): Cannot create tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err" "Aborting" $LOG "" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 fi
@@ -1993,7 +1993,7 @@ fi
 ############################################################
 
 # Get a list of all databases
-debugi "info" "Retrieving list of databases... " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debugi "info" "(SQL): Retrieving list of databases... " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 # gets all databases (even empty ones)
 DATABASES="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" --batch -e 'show databases;' | sed 1d )"
@@ -2072,7 +2072,7 @@ for db in ${DATABASES}; do
 			# Add failed db to nagios log
 			[ "${NAGIOS_DB_ERROR}" = "" ] && NAGIOS_DB_ERROR="${db}" || NAGIOS_DB_ERROR="${NAGIOS_DB_ERROR},${db}"
 
-			debug "err"  "${db} cannot be written to disk (file exists: ${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext})" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err" "(RUN): ${db} cannot be written to disk (file exists: ${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext})" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			ERROR="$(merge_exit_codes "${ERROR}" 2)"
 
 		# All Good, file can be written
@@ -2126,18 +2126,18 @@ for db in ${DATABASES}; do
 
 				# information_schema and performance schema are special tables, which do not allow locking
 				if [ "${db}" = "information_schema" ] || [ "${db}" = "performance_schema" ]; then
-					debug "verbose" "\"${db}\" cannot be dumped with --lock-tables. Adding --skip-lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "verbose" "(RUN): \"${db}\" cannot be dumped with --lock-tables. Adding --skip-lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 					MYSQL_LOCK_OPTS="--skip-lock-tables"
 				# All other tables
 				else
 					if [ "${_TABLES_MYISAM}" != "" ]; then
-						debug "verbose" "Some tables use MyISAM (${_TABLES_MYISAM}). Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+						debug "verbose" "(RUN): Some tables use MyISAM (${_TABLES_MYISAM}). Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 						MYSQL_LOCK_OPTS="--lock-tables"
 					elif [ "${_TABLES_OTHER}" != "" ]; then
-						debug "verbose" "Some tables use an unknown Engine (${_TABLES_OTHER}). Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+						debug "verbose" "(RUN): Some tables use an unknown Engine (${_TABLES_OTHER}). Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 						MYSQL_LOCK_OPTS="--lock-tables"
 					else
-						debug "verbose" "All tables use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+						debug "verbose" "(RUN): All tables use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 						MYSQL_LOCK_OPTS="--single-transaction"
 					fi
 				fi
@@ -2154,7 +2154,7 @@ for db in ${DATABASES}; do
 			# Performance schema does not allow to dump events
 			# mysqldump: mysqldump  Couldn't execute 'show events'  Access denied for user 'root'@'localhost' to database 'performance_schema' (1044)
 			if [ "${db}" = "performance_schema" ]; then
-				debug "verbose" "\"${db}\" cannot be dumped with --events. Adding --skip-events" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+				debug "verbose" "(RUN): \"${db}\" cannot be dumped with --events. Adding --skip-events" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 				MYSQL_SPECIAL_OPTS="--skip-events"
 			fi
 
@@ -2191,7 +2191,7 @@ for db in ${DATABASES}; do
 				#
 				if [ ${ENCRYPT} -eq 1 ]; then
 					ext=".sql.${COMPRESS_EXT}.enc"
-					debugi "info"  "Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS})" ) $( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugi "info"  "(SQL): Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS})" ) $( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 					# Set umask prior writing
@@ -2224,7 +2224,7 @@ for db in ${DATABASES}; do
 				#
 				else
 					ext=".sql.${COMPRESS_EXT}"
-					debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (compressed) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ") $( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugi "info" "(SQL): Dumping:  ${db} (${DB_SIZE} MB) (compressed) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ") $( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")"
@@ -2254,7 +2254,7 @@ for db in ${DATABASES}; do
 				#
 				if [ ${ENCRYPT} -eq 1 ]; then
 					ext=".sql.enc"
-					debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ") $( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugi "info" "(SQL): Dumping:  ${db} (${DB_SIZE} MB) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ") $( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
@@ -2279,7 +2279,7 @@ for db in ${DATABASES}; do
 				#
 				else
 					ext=".sql"
-					debugi "info" "Dumping:  ${db} (${DB_SIZE} MB) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ") $( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugi "info" "(SQL): Dumping:  ${db} (${DB_SIZE} MB) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ") $( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
@@ -2352,7 +2352,7 @@ for db in ${DATABASES}; do
 				TOTAL_ERR=$((TOTAL_ERR + 1))
 
 				debug_nl "info" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-				debug    "err"  "Error dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug    "err"  "(RUN): Error dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 				debugr   "err"  "${MY_ERRORS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 				ERROR="$(merge_exit_codes "${ERROR}" 2)"
@@ -2366,7 +2366,7 @@ for db in ${DATABASES}; do
 				[ "${NAGIOS_DB_DUMPED}" = "" ] && NAGIOS_DB_DUMPED="${db}" || NAGIOS_DB_DUMPED="${NAGIOS_DB_DUMPED},${db}"
 
 				if [ "${MY_WARNINGS}" != "" ]; then
-					debug  "warn" "Warning dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debug  "warn" "(RUN): Warning dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 					debugr "warn" "${MY_WARNINGS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 				fi
 			fi
@@ -2377,11 +2377,11 @@ for db in ${DATABASES}; do
 		fi
 
 	elif [ ${skip} -eq 1 ]; then
-		debug "info" "Skipping: ${db} (DB is empty)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "info" "(SQL): Skipping: ${db} (DB is empty)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		TOTAL_IGN=$((TOTAL_IGN + 1))
 		[ "${NAGIOS_DB_IGNORED}" = "" ] && NAGIOS_DB_IGNORED="${db}" || NAGIOS_DB_IGNORED="${NAGIOS_DB_IGNORED},${db}"
 	else
-		debug "info" "Skipping: ${db} (IGNORE=\"${db}\" in config)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "info" "(SQL): Skipping: ${db} (IGNORE=\"${db}\" in config)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		TOTAL_IGN=$((TOTAL_IGN + 1))
 		[ "${NAGIOS_DB_IGNORED}" = "" ] && NAGIOS_DB_IGNORED="${db}" || NAGIOS_DB_IGNORED="${NAGIOS_DB_IGNORED},${db}"
 	fi
@@ -2391,14 +2391,14 @@ TOTAL_ENDTIME=$(date +%s)
 
 
 for req in ${REQUIRE}; do
-	debug "err" "Required database: \"${req}\" has not been dumped." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(RUN): Required database: \"${req}\" has not been dumped." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	ERROR="$(merge_exit_codes "${ERROR}" 2)"
 done
 
 
-debug "info" "Dumping finished (OK: ${TOTAL_DBS} dbs, IGN: ${TOTAL_IGN} dbs, ERR: ${TOTAL_ERR}, TOTAL: ${NUM_DB})" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-debug "info" "Took $((TOTAL_ENDTIME - TOTAL_STARTTIME)) seconds" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-debug "info" "Total size dumped: ${TOTAL_SIZE} MB" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "info" "(RUN): Dumping finished (OK: ${TOTAL_DBS} dbs, IGN: ${TOTAL_IGN} dbs, ERR: ${TOTAL_ERR}, TOTAL: ${NUM_DB})" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "info" "(RUN): Took $((TOTAL_ENDTIME - TOTAL_STARTTIME)) seconds" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "info" "(RUN): Total size dumped: ${TOTAL_SIZE} MB" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 
@@ -2417,7 +2417,7 @@ if [ ${DELETE} -eq 1 ]; then
 		ERROR="$(merge_exit_codes "${ERROR}" 1)"
 	fi
 	NUM_DEL="$( echo "${DELETED}" | grep -ci 'Removing' )"
-	debug  "info" "Deleting files older than ${DELETE_IF_OLDER} hours... ${NUM_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug  "info" "(RUN): Deleting files older than ${DELETE_IF_OLDER} hours... ${NUM_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debugr "info" "${DELETED}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	NUM_DEL="0"
@@ -2476,27 +2476,27 @@ fi
 ############################################################
 
 if rm "${MY_TMP_FILE_DUMP}" 2>/dev/null; then
-	debug "verbose"  "Deleting tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+	debug "verbose"  "(RUN): Deleting tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 else
-	debug "warn"  "Cannot delete tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 if rm "${MY_TMP_FILE_COMP}" 2>/dev/null; then
-	debug "verbose"  "Deleting tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+	debug "verbose"  "(RUN): Deleting tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 else
-	debug "warn"  "Cannot delete tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 if rm "${MY_TMP_FILE_ENCR}" 2>/dev/null; then
-	debug "verbose"  "Deleting tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+	debug "verbose"  "(RUN): Deleting tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 else
-	debug "warn"  "Cannot delete tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 if rm -rf "${MY_TMP_DIR}" 2>/dev/null; then
-	debug "verbose"  "Deleting tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+	debug "verbose"  "(RUN): Deleting tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 else
-	debug "warn"  "Cannot delete tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"  "(RUN): Cannot delete tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 
