@@ -29,7 +29,6 @@ echo " 6.1.1 #COMPRESS=1"
 echo "----------------------------------------"
 sudo sed -i'' 's/^COMPRESS=1/#COMPRESS=1/' /etc/mysqldump-secure.conf
 
-
 echo "---------- CRON MODE ----------"
 CMD="sudo mysqldump-secure --cron"
 

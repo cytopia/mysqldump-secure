@@ -4,7 +4,6 @@ ERROR=0
 
 . "./.travis/functions.bash"
 
-# TODO: del method = /bin/false
 
 
 
