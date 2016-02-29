@@ -2372,8 +2372,9 @@ for db in ${DATABASES}; do
 				fi
 			fi
 
+			# Commented, because it is to much output
 			# Debug output.
-			debugr "verbose" "${error_statuses}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+			# debugr "verbose" "${error_statuses}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 		fi
 
 	elif [ ${skip} -eq 1 ]; then
