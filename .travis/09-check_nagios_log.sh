@@ -447,15 +447,15 @@ CMD="sudo mysqldump-secure --cron"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-rm "/var/log/mysqldump-secure.nagios.log.notfound"
+rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-rm "/var/log/mysqldump-secure.nagios.log.notfound"
+rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-rm "/var/log/mysqldump-secure.nagios.log.notfound"
+rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 
 echo "---------- NORMAL MODE ----------"
@@ -463,19 +463,19 @@ CMD="sudo mysqldump-secure"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-rm "/var/log/mysqldump-secure.nagios.log.notfound"
+rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-rm "/var/log/mysqldump-secure.nagios.log.notfound"
+rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-rm "/var/log/mysqldump-secure.nagios.log.notfound"
+rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-rm "/var/log/mysqldump-secure.nagios.log.notfound"
+rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
@@ -483,19 +483,19 @@ CMD="sudo mysqldump-secure --verbose"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-rm "/var/log/mysqldump-secure.nagios.log.notfound"
+rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-rm "/var/log/mysqldump-secure.nagios.log.notfound"
+rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-rm "/var/log/mysqldump-secure.nagios.log.notfound"
+rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-rm "/var/log/mysqldump-secure.nagios.log.notfound"
+rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 
 sudo sed -i'' 's/NAGIOS_LOGFILE="\${_INSTALL_PREFIX}\/var\/log\/mysqldump-secure.nagios.log.notfound"/NAGIOS_LOGFILE="\${_INSTALL_PREFIX}\/var\/log\/mysqldump-secure.nagios.log"/' /etc/mysqldump-secure.conf
