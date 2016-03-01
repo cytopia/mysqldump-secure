@@ -9,26 +9,27 @@ ERROR=0
 
 echo "##########################################################################################"
 echo "#"
-echo "#  9.  C H E C K I N G   N A G I O S   L O G"
+echo "#  5.  C H E C K I N G   M Y S Q L D U M P   S E T T I N G S"
 echo "#"
 echo "##########################################################################################"
 
 
 
+
+
 echo
 echo
 echo "--------------------------------------------------------------------------------"
 echo "-"
-echo "-  9.1 \$NAGIOS_LOG"
+echo "-  5.1 \$CONSISTENT_DUMP_ONLY_INNODB"
 echo "-"
 echo "--------------------------------------------------------------------------------"
 
 echo
 echo "----------------------------------------"
-echo " 9.1.1 #NAGIOS_LOG=1"
+echo " 5.1.1 #CONSISTENT_DUMP_ONLY_INNODB=1"
 echo "----------------------------------------"
-sudo sed -i'' 's/^NAGIOS_LOG=1/#NAGIOS_LOG=1/' /etc/mysqldump-secure.conf
-
+sudo sed -i'' 's/^CONSISTENT_DUMP_ONLY_INNODB=1/#CONSISTENT_DUMP_ONLY_INNODB=1/' /etc/mysqldump-secure.conf
 
 echo "---------- CRON MODE ----------"
 CMD="sudo mysqldump-secure --cron"
@@ -75,73 +76,16 @@ sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && su
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' 's/^#NAGIOS_LOG=1/NAGIOS_LOG=1/' /etc/mysqldump-secure.conf
-
-
-
-echo
-echo "----------------------------------------"
-echo " 9.1.2 NAGIOS_LOG=2"
-echo "----------------------------------------"
-sudo sed -i'' 's/^NAGIOS_LOG=1/NAGIOS_LOG=2/' /etc/mysqldump-secure.conf
-
-
-echo "---------- CRON MODE ----------"
-CMD="sudo mysqldump-secure --cron"
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo mysqldump-secure"
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo mysqldump-secure --verbose"
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^NAGIOS_LOG=2/NAGIOS_LOG=1/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^#CONSISTENT_DUMP_ONLY_INNODB=1/CONSISTENT_DUMP_ONLY_INNODB=1/' /etc/mysqldump-secure.conf
 
 
 
 
 echo
 echo "----------------------------------------"
-echo " 9.1.3 NAGIOS_LOG=\"wrong\""
+echo " 5.1.2 CONSISTENT_DUMP_ONLY_INNODB=2"
 echo "----------------------------------------"
-sudo sed -i'' 's/^NAGIOS_LOG=1/NAGIOS_LOG="wrong"/' /etc/mysqldump-secure.conf
-
+sudo sed -i'' 's/^CONSISTENT_DUMP_ONLY_INNODB=1/CONSISTENT_DUMP_ONLY_INNODB=2/' /etc/mysqldump-secure.conf
 
 echo "---------- CRON MODE ----------"
 CMD="sudo mysqldump-secure --cron"
@@ -188,17 +132,16 @@ sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && su
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' 's/^NAGIOS_LOG="wrong"/NAGIOS_LOG=1/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^CONSISTENT_DUMP_ONLY_INNODB=2/CONSISTENT_DUMP_ONLY_INNODB=1/' /etc/mysqldump-secure.conf
 
 
 
 
 echo
 echo "----------------------------------------"
-echo " 9.1.4 NAGIOS_LOG=\"\""
+echo " 5.1.3 CONSISTENT_DUMP_ONLY_INNODB=0"
 echo "----------------------------------------"
-sudo sed -i'' 's/^NAGIOS_LOG=1/NAGIOS_LOG=""/' /etc/mysqldump-secure.conf
-
+sudo sed -i'' 's/^CONSISTENT_DUMP_ONLY_INNODB=1/CONSISTENT_DUMP_ONLY_INNODB=0/' /etc/mysqldump-secure.conf
 
 echo "---------- CRON MODE ----------"
 CMD="sudo mysqldump-secure --cron"
@@ -245,18 +188,16 @@ sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && su
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' 's/^NAGIOS_LOG=""/NAGIOS_LOG=1/' /etc/mysqldump-secure.conf
-
+sudo sed -i'' 's/^CONSISTENT_DUMP_ONLY_INNODB=0/CONSISTENT_DUMP_ONLY_INNODB=1/' /etc/mysqldump-secure.conf
 
 
 
 
 echo
 echo "----------------------------------------"
-echo " 9.1.5 NAGIOS_LOG=0"
+echo " 5.1.4 CONSISTENT_DUMP_ONLY_INNODB=\"wrong\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^NAGIOS_LOG=1/NAGIOS_LOG=0/' /etc/mysqldump-secure.conf
-
+sudo sed -i'' 's/^CONSISTENT_DUMP_ONLY_INNODB=1/CONSISTENT_DUMP_ONLY_INNODB="wrong"/' /etc/mysqldump-secure.conf
 
 echo "---------- CRON MODE ----------"
 CMD="sudo mysqldump-secure --cron"
@@ -303,7 +244,7 @@ sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && su
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' 's/^NAGIOS_LOG=0/NAGIOS_LOG=1/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^CONSISTENT_DUMP_ONLY_INNODB="wrong"/CONSISTENT_DUMP_ONLY_INNODB=1/' /etc/mysqldump-secure.conf
 
 
 
@@ -318,16 +259,15 @@ echo
 echo
 echo "--------------------------------------------------------------------------------"
 echo "-"
-echo "-  9.2 \$NAGIOS_LOGFILE"
+echo "-  5.2 \$CONSISTENT_DUMP_NO_INNODB"
 echo "-"
 echo "--------------------------------------------------------------------------------"
 
 echo
 echo "----------------------------------------"
-echo " 9.2.1 #NAGIOS_LOGFILE=\"\${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""
+echo " 5.2.1 #CONSISTENT_DUMP_NO_INNODB=1"
 echo "----------------------------------------"
-sudo sed -i'' 's/NAGIOS_LOGFILE="\${_INSTALL_PREFIX}\/var\/log\/mysqldump-secure.nagios.log"/#NAGIOS_LOGFILE="\${_INSTALL_PREFIX}\/var\/log\/mysqldump-secure.nagios.log"/' /etc/mysqldump-secure.conf
-
+sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=1/#CONSISTENT_DUMP_NO_INNODB=1/' /etc/mysqldump-secure.conf
 
 echo "---------- CRON MODE ----------"
 CMD="sudo mysqldump-secure --cron"
@@ -374,16 +314,16 @@ sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && su
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' 's/#NAGIOS_LOGFILE="\${_INSTALL_PREFIX}\/var\/log\/mysqldump-secure.nagios.log"/NAGIOS_LOGFILE="\${_INSTALL_PREFIX}\/var\/log\/mysqldump-secure.nagios.log"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^#CONSISTENT_DUMP_NO_INNODB=1/CONSISTENT_DUMP_NO_INNODB=1/' /etc/mysqldump-secure.conf
+
 
 
 
 echo
 echo "----------------------------------------"
-echo " 9.2.2 NAGIOS_LOGFILE=\"\""
+echo " 5.2.2 CONSISTENT_DUMP_NO_INNODB=2"
 echo "----------------------------------------"
-sudo sed -i'' 's/NAGIOS_LOGFILE="\${_INSTALL_PREFIX}\/var\/log\/mysqldump-secure.nagios.log"/NAGIOS_LOGFILE=""/' /etc/mysqldump-secure.conf
-
+sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=1/CONSISTENT_DUMP_NO_INNODB=2/' /etc/mysqldump-secure.conf
 
 echo "---------- CRON MODE ----------"
 CMD="sudo mysqldump-secure --cron"
@@ -430,32 +370,28 @@ sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && su
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' 's/NAGIOS_LOGFILE=""/NAGIOS_LOGFILE="\${_INSTALL_PREFIX}\/var\/log\/mysqldump-secure.nagios.log"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=2/CONSISTENT_DUMP_NO_INNODB=1/' /etc/mysqldump-secure.conf
 
 
 
 
 echo
 echo "----------------------------------------"
-echo " 9.2.3 NAGIOS_LOGFILE=\"\${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound\""
+echo " 5.2.3 CONSISTENT_DUMP_NO_INNODB=0"
 echo "----------------------------------------"
-sudo sed -i'' 's/NAGIOS_LOGFILE="\${_INSTALL_PREFIX}\/var\/log\/mysqldump-secure.nagios.log"/NAGIOS_LOGFILE="\${_INSTALL_PREFIX}\/var\/log\/mysqldump-secure.nagios.log.notfound"/' /etc/mysqldump-secure.conf
-
+sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=1/CONSISTENT_DUMP_NO_INNODB=0/' /etc/mysqldump-secure.conf
 
 echo "---------- CRON MODE ----------"
 CMD="sudo mysqldump-secure --cron"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 
 echo "---------- NORMAL MODE ----------"
@@ -463,19 +399,15 @@ CMD="sudo mysqldump-secure"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
@@ -483,47 +415,99 @@ CMD="sudo mysqldump-secure --verbose"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
 
 
-sudo sed -i'' 's/NAGIOS_LOGFILE="\${_INSTALL_PREFIX}\/var\/log\/mysqldump-secure.nagios.log.notfound"/NAGIOS_LOGFILE="\${_INSTALL_PREFIX}\/var\/log\/mysqldump-secure.nagios.log"/' /etc/mysqldump-secure.conf
-
-
-
-
-
+sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=0/CONSISTENT_DUMP_NO_INNODB=1/' /etc/mysqldump-secure.conf
 
 
 
 
 echo
+echo "----------------------------------------"
+echo " 5.2.4 CONSISTENT_DUMP_NO_INNODB=\"wrong\""
+echo "----------------------------------------"
+sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=1/CONSISTENT_DUMP_NO_INNODB="wrong"/' /etc/mysqldump-secure.conf
+
+echo "---------- CRON MODE ----------"
+CMD="sudo mysqldump-secure --cron"
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+
+echo "---------- NORMAL MODE ----------"
+CMD="sudo mysqldump-secure"
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+
+echo "---------- NORMAL MODE VERBOSE ----------"
+CMD="sudo mysqldump-secure --verbose"
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
+if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+
+sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB="wrong"/CONSISTENT_DUMP_NO_INNODB=1/' /etc/mysqldump-secure.conf
+
+
+
+
+
+
+
+
+
+
+
+
 echo
 echo
 echo "--------------------------------------------------------------------------------"
 echo "-"
-echo "-  9.3 \$NAGIOS_LOG_CHMOD"
+echo "-  5.3 \$CONSISTENT_DUMP_MIXED_INNODB"
 echo "-"
 echo "--------------------------------------------------------------------------------"
 
 echo
 echo "----------------------------------------"
-echo " 9.3.1 #NAGIOS_LOG_CHMOD=\"0644\""
+echo " 5.3.1 #CONSISTENT_DUMP_MIXED_INNODB=1"
 echo "----------------------------------------"
-echo
-sudo sed -i'' 's/NAGIOS_LOG_CHMOD="0644"/#NAGIOS_LOG_CHMOD="0644"/' /etc/mysqldump-secure.conf
-
+sudo sed -i'' 's/^CONSISTENT_DUMP_MIXED_INNODB=1/#CONSISTENT_DUMP_MIXED_INNODB=1/' /etc/mysqldump-secure.conf
 
 echo "---------- CRON MODE ----------"
 CMD="sudo mysqldump-secure --cron"
@@ -570,16 +554,16 @@ sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && su
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' 's/#NAGIOS_LOG_CHMOD="0644"/NAGIOS_LOG_CHMOD="0644"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^#CONSISTENT_DUMP_MIXED_INNODB=1/CONSISTENT_DUMP_MIXED_INNODB=1/' /etc/mysqldump-secure.conf
+
 
 
 
 echo
 echo "----------------------------------------"
-echo " 9.3.2 NAGIOS_LOG_CHMOD=\"0644a\""
+echo " 5.3.2 CONSISTENT_DUMP_NO_INNODB=2"
 echo "----------------------------------------"
-echo
-sudo sed -i'' 's/NAGIOS_LOG_CHMOD="0644"/NAGIOS_LOG_CHMOD="0644a"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=1/CONSISTENT_DUMP_NO_INNODB=2/' /etc/mysqldump-secure.conf
 
 echo "---------- CRON MODE ----------"
 CMD="sudo mysqldump-secure --cron"
@@ -626,16 +610,16 @@ sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && su
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' 's/NAGIOS_LOG_CHMOD="0644a"/NAGIOS_LOG_CHMOD="0644"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=2/CONSISTENT_DUMP_NO_INNODB=1/' /etc/mysqldump-secure.conf
+
 
 
 
 echo
 echo "----------------------------------------"
-echo " 9.3.3 NAGIOS_LOG_CHMOD=\"abc\""
+echo " 5.3.3 CONSISTENT_DUMP_NO_INNODB=0"
 echo "----------------------------------------"
-echo
-sudo sed -i'' 's/NAGIOS_LOG_CHMOD="0644"/NAGIOS_LOG_CHMOD="abc"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=1/CONSISTENT_DUMP_NO_INNODB=0/' /etc/mysqldump-secure.conf
 
 echo "---------- CRON MODE ----------"
 CMD="sudo mysqldump-secure --cron"
@@ -682,16 +666,16 @@ sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && su
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' 's/NAGIOS_LOG_CHMOD="abc"/NAGIOS_LOG_CHMOD="0644"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=0/CONSISTENT_DUMP_NO_INNODB=1/' /etc/mysqldump-secure.conf
+
 
 
 
 echo
 echo "----------------------------------------"
-echo " 9.3.4 NAGIOS_LOG_CHMOD=\"\""
+echo " 5.3.4 CONSISTENT_DUMP_NO_INNODB=\"wrong\""
 echo "----------------------------------------"
-echo
-sudo sed -i'' 's/NAGIOS_LOG_CHMOD="0644"/NAGIOS_LOG_CHMOD=""/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=1/CONSISTENT_DUMP_NO_INNODB="wrong"/' /etc/mysqldump-secure.conf
 
 echo "---------- CRON MODE ----------"
 CMD="sudo mysqldump-secure --cron"
@@ -738,78 +722,7 @@ sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && su
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' 's/NAGIOS_LOG_CHMOD=""/NAGIOS_LOG_CHMOD="0644"/' /etc/mysqldump-secure.conf
-
-
-
-
-
-echo
-echo "----------------------------------------"
-echo " 9.3.5 NAGIOS_LOG_CHMOD=\"444\""
-echo "----------------------------------------"
-echo
-sudo sed -i'' 's/NAGIOS_LOG_CHMOD="0644"/NAGIOS_LOG_CHMOD="444"/' /etc/mysqldump-secure.conf
-
-echo "---------- CRON MODE ----------"
-CMD="sudo mysqldump-secure --cron"
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo chmod 0644 /var/log/mysqldump-secure.nagios.log
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo chmod 0644 /var/log/mysqldump-secure.nagios.log
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo chmod 0644 /var/log/mysqldump-secure.nagios.log
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo mysqldump-secure"
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo chmod 0644 /var/log/mysqldump-secure.nagios.log
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo chmod 0644 /var/log/mysqldump-secure.nagios.log
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo chmod 0644 /var/log/mysqldump-secure.nagios.log
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo chmod 0644 /var/log/mysqldump-secure.nagios.log
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo mysqldump-secure --verbose"
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo chmod 0644 /var/log/mysqldump-secure.nagios.log
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo chmod 0644 /var/log/mysqldump-secure.nagios.log
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo chmod 0644 /var/log/mysqldump-secure.nagios.log
-
-sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && sudo chmod 0700 /var/mysqldump-secure/
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo chmod 0644 /var/log/mysqldump-secure.nagios.log
-
-
-sudo sed -i'' 's/NAGIOS_LOG_CHMOD="444"/NAGIOS_LOG_CHMOD="0644"/' /etc/mysqldump-secure.conf
-
-
+sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB="wrong"/CONSISTENT_DUMP_NO_INNODB=1/' /etc/mysqldump-secure.conf
 
 
 
@@ -820,11 +733,11 @@ echo
 echo
 if [ "$ERROR" = "0" ]; then
   echo "${txtgrn}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
-  echo "${txtgrn}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ [09] SUCCESS @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
+  echo "${txtgrn}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ [05] SUCCESS @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
   echo "${txtgrn}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
 else
   echo "${txtpur}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
-  echo "${txtpur}@@@@@@@@@@@@@@@@@@@@@@@@  [09] FAILED: ${ERROR} Errors   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
+  echo "${txtpur}@@@@@@@@@@@@@@@@@@@@@@@@  [05] FAILED: ${ERROR} Errors   @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
   echo "${txtpur}@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@${txtrst}"
 fi
 exit $ERROR

@@ -3,15 +3,14 @@ Version 0.16 (unreleased)
 
 - [Fix]		Show pipefail emulation errors and warnings (now works as expected)
 - [Fix]		Using --defaults-file instead of --defaults-extra-file to make sure no unwanted options are loaded.
-- [Fix]		Do not throw a warning on empty $IGNORE/$REQUIRE variables
 - [Fix]		Handle all unbound variables
 - [Fix]		Catch error in case of wrong values in all 0/1 variables
 - [Fix]		tmpreaper/tmpwatch values now also accept and validate units (m, h, d)
-- [Fix]		$NUM_DEL was unset, if no files have been deleted
 - [Fix]		Output/Log did not show all deleted files by tmpwatch/tmpreaper
 - [Fix]		Validate MYSQL_OPTS
-- [Enh]		Adding option for consistend database dumps (MyISAM and InnoDB ready)
-- [Enh]		Adding debug output
+- [Enh]     Adding lots and lots of travis checks.
+- [Enh]		Adding option for consistend database dumps (InnoDB and others)
+- [Enh]		Adding --verbose argument
 - [Enh]		Add ability to use mysql connection over SSL and validate it.
 - [Enh]		Use #!/bin/sh -u to check against unset variables
 - [Enh]		Colorized logging

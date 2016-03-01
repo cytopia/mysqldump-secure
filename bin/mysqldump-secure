@@ -22,7 +22,6 @@ INFO_URL="https://github.com/cytopia/mysqldump-secure"
 INFO_DATE="2016-02-27"
 INFO_VERSION="0.16"
 
-
 ################################################################################
 #
 # AUTO-GENERATED
@@ -76,14 +75,24 @@ _DEFAULT_LOG_CHMOD="0600"
 _DEFAULT_NAGIOS_LOG_CHMOD="0644"
 
 
+# This option will be forced
+MYSQL_FORCED_OPTS="--skip-opt"
+
 # These command line arguments are considered insecure and can lead
 # to compromising your data
 MYSQL_EVIL_OPTS="--password -p --port -P --user -u --host -h --socket -s"
 
 # Do not allow to read any other MySQL configuration file
 # than the one specified in the configuration.
-# Also all SSL Options are done via configuration
-MYSQL_BAD_OPTS="--no-defaults --defaults-extra-file --defaults-file --ssl --ssl-ca --ssl-cert --ssl-key --single-transaction --lock-tables"
+MYSQL_BAD_OPTS="--no-defaults --defaults-extra-file --defaults-file"
+# All SSL Options are done via configuration
+MYSQL_BAD_OPTS="${MYSQL_BAD_OPTS} --ssl --ssl-ca --ssl-cert --ssl-key"
+# All Transaction Options (Consistency) are done via configuration
+MYSQL_BAD_OPTS="${MYSQL_BAD_OPTS} --single-transaction --lock-tables --skip-lock-tables"
+# They pull in too much options blacklisted above
+MYSQL_BAD_OPTS="${MYSQL_BAD_OPTS} --opt --skip-opt"
+# Handled conditionally
+MYSQL_BAD_OPTS="${MYSQL_BAD_OPTS} --quick -q --skip-quick"
 
 
 
@@ -1021,7 +1030,7 @@ if [ ! -r "${CONFIG_FILE}" ]; then
 fi
 if ! compare_chmod "$(permission "${CONFIG_FILE}")" "${_DEFAULT_CONFIG_CHMOD}" > /dev/null 2>&1 ; then
 	debug  "warn" "(RUN): Configuration file ${CONFIG_FILE} has dangerous permissions: $(permission "${CONFIG_FILE}"), should be: ${_DEFAULT_CONFIG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	debugi "info" "(RUN): Trying to chmod to ${_DEFAULT_CONFIG_CHMOD}..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debugi "warn" "(RUN): Trying to chmod to ${_DEFAULT_CONFIG_CHMOD}..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 
 	if ! chmod ${_DEFAULT_CONFIG_CHMOD} "${CONFIG_FILE}" > /dev/null 2>&1 ; then
 		debugn "err" "Failed" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1030,7 +1039,7 @@ if ! compare_chmod "$(permission "${CONFIG_FILE}")" "${_DEFAULT_CONFIG_CHMOD}" >
 		debug  "err" "Aborting" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit 1
 	else
-		debugn "info" "OK" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debugn "warn" "OK" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	fi
 fi
 
@@ -1110,28 +1119,28 @@ elif [ "${LOG}" = "1" ]; then
 		# Check if logging directory exists
 		if [ ! -d "$(dirname "${LOGFILE}")" ]; then
 			debug  "warn" "(RUN): Logfile directory does not exist in $(dirname "${LOGFILE}")" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-			debugi "info" "(RUN): Trying to create..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debugi "warn" "(RUN): Trying to create..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			if ! mkdir -p "$(dirname "${LOGFILE}")" > /dev/null 2>&1 ; then
-				debugn "err"  "Failed" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-				debug  "err"  "(RUN): Failed to create directoy: $(dirname "${LOGFILE}")" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-				debug  "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+				debugn "err" "Failed" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug  "err" "(RUN): Failed to create directoy: $(dirname "${LOGFILE}")" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug  "err" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				LOG=0
 			else
-				debugn "info" "OK" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+				debugn "warn" "OK" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			fi
 		fi
 		# If logging is still OK (dir exists), check if the file can be created
 		if [ "${LOG}" = "1" ]; then
 			debug  "warn" "(RUN): Logfile does not exist in ${LOGFILE}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-			debugi "info" "(RUN): Trying to create..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debugi "warn" "(RUN): Trying to create..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 
 			if ! touch "${LOGFILE}" > /dev/null 2>&1 ; then
 				debugn "err"  "Failed" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				debug  "err"  "(RUN): Failed to create file: ${LOGFILE}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-				debug  "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug  "err"  "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				LOG=0
 			else
-				debugn "info" "OK" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+				debugn "warn" "OK" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			fi
 		fi
 	fi
@@ -1141,15 +1150,15 @@ elif [ "${LOG}" = "1" ]; then
 	if [ "${LOG}" = "1" ]; then
 		if ! compare_chmod "$(permission "${LOGFILE}")" "${LOG_CHMOD}" > /dev/null 2>&1 ; then
 			debug  "warn" "(RUN): Logfile has wrong permissions: $(permission "${LOGFILE}"), should be: ${LOG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-			debugi "info" "(RUN): Trying to chmod to ${LOG_CHMOD}..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debugi "warn" "(RUN): Trying to chmod to ${LOG_CHMOD}..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 
 			if ! chmod ${LOG_CHMOD} "${LOGFILE}" > /dev/null 2>&1 ; then
 				debugn "err"  "Failed" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				debug  "err"  "(RUN): Failed to chmod ${LOG_CHMOD} ${LOGFILE}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-				debug  "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug  "err"  "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				LOG=0
 			else
-				debugn "info" "OK" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+				debugn "warn" "OK" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			fi
 		fi
 	fi
@@ -1160,8 +1169,8 @@ elif [ "${LOG}" = "1" ]; then
 
 		# Logfile not writeable
 		if [ ! -w "${LOGFILE}" ]; then
-			debug  "err"  "(RUN): Logfile ${LOGFILE} not writeable. Check \$LOG_CHMOD value inf config." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug  "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug  "err" "(RUN): Logfile ${LOGFILE} not writeable. Check \$LOG_CHMOD value inf config." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug  "err" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			LOG=0
 		fi
 	fi
@@ -1183,10 +1192,10 @@ if [ "${LOG}" = "1" ]; then
 		echo "--------------------------------------------------------------------------------";
 		echo "$(date '+%Y-%m-%d') $(date '+%H:%M:%S') Starting";
 	} >> "${LOGFILE}"
-	debug "info" "(CFG): Using config: ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose" "(CFG): Using config: ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "info" "(OPT): Logging enabled: ${LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "info" "(CFG): Using config: ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose" "(CFG): Using config: ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 
@@ -1195,13 +1204,13 @@ fi
 # Command line arguments
 ############################################################
 if [ "${_ARG_CRON}" = "1" ]; then
-	debug "info" "(ARG): Running in cron mode (--cron)." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose" "(ARG): Running in cron mode (--cron)." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 if [ "${_ARG_TEST}" = "1" ]; then
-	debug "info" "(ARG): Running tests only (--test)." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose" "(ARG): Running tests only (--test)." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 if [ "${_ARG_VERB}" = "1" ]; then
-	debug "info" "(ARG): Running in verbose mode (--verbose)." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose" "(ARG): Running in verbose mode (--verbose)." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 #if [ "${_ARG_INFO}" = "1" ]; then
 #	debug "info" "Showing information only (--info)."  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1259,42 +1268,42 @@ if [ -L "${DUMP_PATH}" ]; then
 		debug "verbose" "(RUN): \$DUMP_PATH is a symlink. Setting target to: ${_TMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		DUMP_PATH="${_TMP}"
 	else
-		debug "err"    "(RUN): Cannot resolve symlink of: $DUMP_PATH" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "err"    "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "(RUN): Cannot resolve symlink of: $DUMP_PATH" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit 1
 	fi
 fi
 
 if [ ! -d "${DUMP_PATH}" ]; then
 	debug  "warn" "(RUN): Destination dir does not exist: ${DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debugi "info" "(RUN): Trying to create... " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debugi "warn" "(RUN): Trying to create... " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	if ! mkdir -p "${DUMP_PATH}" > /dev/null 2>&1 ; then
 		debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit 1
 	else
-		debugn "info" "Done" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debugi  "info" "(RUN): Trying to chmod to: ${DUMP_DIR_CHMOD}..." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debugn "warn" "Done" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debugi "warn" "(RUN): Trying to chmod to: ${DUMP_DIR_CHMOD}..." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		if ! chmod ${DUMP_DIR_CHMOD} "${DUMP_PATH}" >/dev/null 2>&1; then
 			debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			exit 1
 		else
-			debugn "info" "Done" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debugn "warn" "Done" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		fi
 	fi
 fi
 # Check correct permissions of destination dir
 if ! compare_chmod "$(permission "${DUMP_PATH}")" "${DUMP_DIR_CHMOD}" > /dev/null 2>&1 ; then
-	debug  "err"  "(RUN): Destination dir has wrong permissions: $(permission "${DUMP_PATH}"), but should ${DUMP_DIR_CHMOD}." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debugi "info" "(RUN): Trying to chmod to ${DUMP_DIR_CHMOD}... " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug  "warn" "(RUN): Destination dir has wrong permissions: $(permission "${DUMP_PATH}"), but should ${DUMP_DIR_CHMOD}." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debugi "warn" "(RUN): Trying to chmod to ${DUMP_DIR_CHMOD}... " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 	if ! chmod "${DUMP_DIR_CHMOD}" "${DUMP_PATH}" > /dev/null 2>&1 ; then
 		debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit 1
 	else
-		debugn "info" "Done" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debugn "warn" "Done" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	fi
 fi
 # Check if destination dir is writeable
@@ -1304,7 +1313,7 @@ if [ ! -w "${DUMP_PATH}" ]; then
 	debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 fi
-debug "info" "(CFG): Destination dir: ${DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "verbose" "(CFG): Destination dir: ${DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 # Check $DUMP_FILE_PRE
@@ -1449,7 +1458,7 @@ if ! _CONN_ERR="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SS
 	debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 3
 else
-	debug "info" "(RUN): MySQL connection test successful." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose" "(RUN): MySQL connection test successful." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 # Testing MySQL for SSL connection
@@ -1459,10 +1468,10 @@ if [ "${MYSQL_SSL_STATUS}" = "Not in use" ]; then
 		debug "err"  "(RUN): MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit 1
 	else
-		debug "info"  "(RUN): MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "verbose"  "(RUN): MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	fi
 else
-	debug "info" "(RUN): MySQL connection is using SSL: ${MYSQL_SSL_STATUS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose" "(RUN): MySQL connection is using SSL: ${MYSQL_SSL_STATUS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 
@@ -1473,54 +1482,16 @@ fi
 ############################################################
 
 if ! set | grep '^MYSQL_OPTS=' >/dev/null 2>&1; then
-	debug "info" "(CFG): \$MYSQL_OPTS variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): \$MYSQL_OPTS variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(RUN): Disabling custom mysqldump options" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	MYSQL_OPTS=""
 elif [ -z "${MYSQL_SSL_ENABLE}" ]; then
-	debug "info" "(CFG): \$MYSQL_OPTS is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose" "(CFG): \$MYSQL_OPTS is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	MYSQL_OPTS=""
 fi
 
-debug "info"  "(CFG): mysqldump options: ${MYSQL_OPTS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-
-
-# Warnings about inconsistent dumps? (IGNORE_CONSISTENT_DUMP_WARNINGS)
-if ! set | grep '^IGNORE_CONSISTENT_DUMP_WARNINGS=' >/dev/null 2>&1; then
-	debug "warn" "(CFG): \$IGNORE_CONSISTENT_DUMP_WARNINGS variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(RUN): Will warn you about inconsistent dumps." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	IGNORE_CONSISTENT_DUMP_WARNINGS=0
-elif [ -z "${IGNORE_CONSISTENT_DUMP_WARNINGS}" ]; then
-	debug "warn" "(CFG): \$IGNORE_CONSISTENT_DUMP_WARNINGS variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(RUN): Will warn you about inconsistent dumps." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	IGNORE_CONSISTENT_DUMP_WARNINGS=0
-elif [ "${IGNORE_CONSISTENT_DUMP_WARNINGS}" = "1" ]; then
-	debug "info" "(CFG): Will not warn you about inconsistent dumps (unsafe)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "info" "(HLP): It is recommended to turn off \$IGNORE_CONSISTENT_DUMP_WARNINGS" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-elif [ "${IGNORE_CONSISTENT_DUMP_WARNINGS}" = "0" ]; then
-	debug "info" "(CFG): Will warn you about inconsistent dumps (safe)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-else
-	debug "err"  "(CFG): \$IGNORE_CONSISTENT_DUMP_WARNINGS variable has an invalid value: ${IGNORE_CONSISTENT_DUMP_WARNINGS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "err"  "(RUN): Will warn you about inconsistent dumps." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	IGNORE_CONSISTENT_DUMP_WARNINGS=0
-fi
-
-# Dump consistent?
-if ! set | grep '^CONSISTENT_DUMP=' >/dev/null 2>&1; then
-	debug "warn" "(CFG): \$CONSISTENT_DUMP variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(RUN): Intentionally disabling consistent dumps (no '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	CONSISTENT_DUMP=0
-elif [ -z "${IGNORE_CONSISTENT_DUMP_WARNINGS}" ]; then
-	debug "warn" "(CFG): \$CONSISTENT_DUMP variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(RUN): Intentionally disabling consistent dumps (no '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	CONSISTENT_DUMP=0
-elif [ "${CONSISTENT_DUMP}" = "1" ]; then
-	debug "info" "(CFG): Dumping consistently across tables (using '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-elif [ "${CONSISTENT_DUMP}" = "0" ]; then
-	debug "info" "(CFG): Not dumping consistently across tables (unsafe)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-else
-	debug "err"  "(CFG): \$CONSISTENT_DUMP variable has an invalid value: ${CONSISTENT_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "err"  "(RUN): Intentionally disabling consistent dumps (no '--lock-tables' or '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	CONSISTENT_DUMP=0
-fi
+debug "verbose"  "(CFG): mysqldump custom options: ${MYSQL_OPTS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "verbose"  "(CFG): mysqldump forced options: ${MYSQL_FORCED_OPTS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 
@@ -1532,6 +1503,7 @@ for opt in ${MYSQL_OPTS}; do
 		if echo "${opt}" | grep -e "^${evil}" > /dev/null 2>&1; then
 			echo "opt: ${opt}   | evil: ${evil}"
 			debug "err"  "(CFG): Insecure mysqldump option found in MYSQL_OPTS: '${opt}'" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err"  "(RUN): Blacklist pattern: '^${evil}'" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "err"  "(HLP): Remove it. This option is handled by the tool itself." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			exit 3
@@ -1540,12 +1512,86 @@ for opt in ${MYSQL_OPTS}; do
 	for bad in ${MYSQL_BAD_OPTS}; do
 		if echo "${opt}" | grep -e "^${bad}" > /dev/null 2>&1; then
 			debug "err"  "(CFG): Disallowed mysqldump option found in MYSQL_OPTS: '${opt}'" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err"  "(RUN): Blacklist pattern: '^${bad}'" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "err"  "(HLP): Remove it. This option can be controlled via the configuration file itself." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			exit 3
 		fi
 	done
 done
+
+#
+# Merge custom and forced options
+#
+MYSQL_OPTS="${MYSQL_OPTS} ${MYSQL_FORCED_OPTS}"
+
+
+
+
+############################################################
+# Consistency/Transactions
+############################################################
+
+
+# CONSISTENT_DUMP_ONLY_INNODB
+if ! set | grep '^CONSISTENT_DUMP_ONLY_INNODB=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$CONSISTENT_DUMP_ONLY_INNODB variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(RUN): Intentionally disabling consistent dumps for databases with InnoDB tables (no '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	CONSISTENT_DUMP_ONLY_INNODB=0
+elif [ -z "${CONSISTENT_DUMP_ONLY_INNODB}" ]; then
+	debug "warn" "(CFG): \$CONSISTENT_DUMP_ONLY_INNODB variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(RUN): Intentionally disabling consistent dumps for databases with InnoDB tables (no '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	CONSISTENT_DUMP_ONLY_INNODB=0
+elif [ "${CONSISTENT_DUMP_ONLY_INNODB}" = "1" ]; then
+	debug "verbose" "(CFG): InnoDB-only:  Dumping consistently across tables (using '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+elif [ "${CONSISTENT_DUMP_ONLY_INNODB}" = "0" ]; then
+	debug "verbose" "(CFG): InnoDB-only:  Not dumping consistently across tables (using '--skip-lock-tables') [unsafe]" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+else
+	debug "err" "(CFG): \$CONSISTENT_DUMP_ONLY_INNODB variable has an invalid value: ${CONSISTENT_DUMP_ONLY_INNODB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(RUN): Intentionally disabling consistent dumps for databases with InnoDB tables (no '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	CONSISTENT_DUMP_ONLY_INNODB=0
+fi
+
+# CONSISTENT_DUMP_NO_INNODB
+if ! set | grep '^CONSISTENT_DUMP_NO_INNODB=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$CONSISTENT_DUMP_NO_INNODB variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(RUN): Intentionally disabling consistent dumps for databases with no InnoDB tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	CONSISTENT_DUMP_NO_INNODB=0
+elif [ -z "${CONSISTENT_DUMP_NO_INNODB}" ]; then
+	debug "warn" "(CFG): \$CONSISTENT_DUMP_NO_INNODB variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(RUN): Intentionally disabling consistent dumps for databases with no InnoDB tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	CONSISTENT_DUMP_NO_INNODB=0
+elif [ "${CONSISTENT_DUMP_NO_INNODB}" = "1" ]; then
+	debug "verbose" "(CFG): InnoDB-none:  Dumping consistently across tables (using '--lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+elif [ "${CONSISTENT_DUMP_NO_INNODB}" = "0" ]; then
+	debug "verbose" "(CFG): InnoDB-none:  Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+else
+	debug "err" "(CFG): \$CONSISTENT_DUMP_NO_INNODB variable has an invalid value: ${CONSISTENT_DUMP_NO_INNODB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(RUN): Intentionally disabling consistent dumps for databases with no InnoDB tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	CONSISTENT_DUMP_NO_INNODB=0
+fi
+
+# CONSISTENT_DUMP_MIXED_INNODB
+if ! set | grep '^CONSISTENT_DUMP_MIXED_INNODB=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$CONSISTENT_DUMP_MIXED_INNODB variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(RUN): Intentionally disabling consistent dumps for databases with mixed tables (InnoDB and others) (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	CONSISTENT_DUMP_MIXED_INNODB=0
+elif [ -z "${CONSISTENT_DUMP_MIXED_INNODB}" ]; then
+	debug "warn" "(CFG): \$CONSISTENT_DUMP_MIXED_INNODB variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(RUN): Intentionally disabling consistent dumps for databases with mixed tables (InnoDB and others) (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	CONSISTENT_DUMP_MIXED_INNODB=0
+elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "1" ]; then
+	debug "verbose" "(CFG): InnoDB-mixed: Dumping consistently across tables (using '--lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "2" ]; then
+	debug "verbose" "(CFG): InnoDB-mixed: Dumping consistently across tables (using '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "0" ]; then
+	debug "verbose" "(CFG): InnoDB-mixed: Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+else
+	debug "err" "(CFG): \$CONSISTENT_DUMP_MIXED_INNODB variable has an invalid value: ${CONSISTENT_DUMP_MIXED_INNODB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(RUN): Intentionally disabling consistent dumps for databases with mixed tables (InnoDB and others) (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	CONSISTENT_DUMP_MIXED_INNODB=0
+fi
+
 
 
 
@@ -1556,27 +1602,29 @@ done
 # Ignored databases
 if ! set | grep '^IGNORE=' >/dev/null 2>&1; then
 	debug "warn" "(CFG): \$IGNORE variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
-	debug "info" "(RUN): No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(HLP): Define \$IGNORE in your config to get rid of this warning" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(RUN): No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	IGNORE=""
 elif [ -z "${IGNORE}" ]; then
-	debug "info" "(CFG): \$IGNORE variable is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "info" "(RUN): No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose" "(CFG): \$IGNORE variable is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose" "(RUN): No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	IGNORE=""
 else
-	debug "info" "(CFG): Ignored DB's: ${IGNORE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose" "(CFG): Ignored DB's: ${IGNORE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 # Required databases
 if ! set | grep '^REQUIRE=' >/dev/null 2>&1; then
 	debug "warn" "(CFG): \$REQUIRE variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "info" "(RUN): No database will be required" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(HLP): Define \$REQUIRE in your config to get rid of this warning" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(RUN): No database will be required" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	REQUIRE=""
 elif [ -z "${REQUIRE}" ]; then
-	debug "info" "(CFG): \$REQUIRE variable is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "info" "(RUN): No database will explicitly be required" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose" "(CFG): \$REQUIRE variable is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose" "(RUN): No database will explicitly be required" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	REQUIRE=""
 else
-	debug "info" "(CFG): Required DB's: ${REQUIRE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose" "(CFG): Required DB's: ${REQUIRE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 
@@ -1798,9 +1846,9 @@ elif [ "${DELETE}" = "1"  ]; then
 			debug "warn" "(RUN): Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			DELETE_FORCE=0
 		elif [ "${DELETE_FORCE}" = "1"  ]; then
-			debug "info" "(CFG): ${DELETE_METHOD}: Using '--force' option (deleting read-only files)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "verbose" "(CFG): ${DELETE_METHOD}: Using '--force' option (deleting read-only files)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		elif [ "${DELETE_FORCE}" = "0"  ]; then
-			debug "info" "(CFG): ${DELETE_METHOD}: Not forcing (--force) deletion for read-only files" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "verbose" "(CFG): ${DELETE_METHOD}: Not forcing (--force) deletion for read-only files" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		else
 			debug "err" "(CFG): Invalid value for \$DELETE_FORCE: ${DELETE_FORCE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "err" "(RUN): Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1860,38 +1908,38 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 		NAGIOS_LOG=0
 	elif [ ! -f "${NAGIOS_LOGFILE}" ]; then
 		debug  "warn" "(RUN): ${NAGIOS_LOGFILE} not found" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debugi "info" "(RUN): Trying to create..." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debugi "warn" "(RUN): Trying to create..." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 		if ! touch "${NAGIOS_LOGFILE}" > /dev/null 2>&1 ; then
-			debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug  "err"  "(RUN): Failed to create file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug  "warn" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debugn "err" "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug  "err" "(RUN): Failed to create file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug  "err" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			NAGIOS_LOG=0
 		else
-			debugn "info" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug  "info" "(RUN): Created file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-			debugi "info" "(RUN): Trying to chmod to ${NAGIOS_LOG_CHMOD}..." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debugn "warn" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug  "warn" "(RUN): Created file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debugi "warn" "(RUN): Trying to chmod to ${NAGIOS_LOG_CHMOD}..." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 			if ! chmod ${NAGIOS_LOG_CHMOD} "${NAGIOS_LOGFILE}" > /dev/null 2>&1 ; then
 				debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 				debug  "err"  "(RUN): Failed to chmod ${NAGIOS_LOG_CHMOD} ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-				debug  "warn" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug  "err" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 				NAGIOS_LOG=0
 			else
-				debugn "info" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debugn "warn" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			fi
 		fi
 	# Check if it has wrong permissions
 	elif ! compare_chmod "$(permission "${NAGIOS_LOGFILE}")" "${NAGIOS_LOG_CHMOD}" > /dev/null 2>&1 ; then
 		debug  "warn" "(RUN): Nagios logfile has wrong permissions: $(permission "${NAGIOS_LOGFILE}"), but should be: ${NAGIOS_LOG_CHMOD} " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debugi "info" "(RUN): Trying to chmod to ${NAGIOS_LOG_CHMOD}... " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debugi "warn" "(RUN): Trying to chmod to ${NAGIOS_LOG_CHMOD}... " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		if ! chmod "${NAGIOS_LOG_CHMOD}" "${NAGIOS_LOGFILE}" > /dev/null 2>&1 ; then
 			debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug  "err"  "(RUN): Failed to chmod ${NAGIOS_LOG_CHMOD} ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug  "warn" "(OPT): Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			NAGIOS_LOG=0
 		else
-			debugn "info" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debugn "warn" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		fi
 	fi
 
@@ -1929,7 +1977,7 @@ fi
 # Test mode
 ############################################################
 if [ "${_ARG_TEST}" = "1" ]; then
-	debug "info" "(ARG): Exiting program from test mode (--test)."  ${LOG} "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "verbose" "(ARG): Exiting program from test mode (--test)."  ${LOG} "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 0
 fi
 
@@ -2094,9 +2142,8 @@ for db in ${DATABASES}; do
 			# TABLE ENGINES
 			#
 			_TABLES_INNODB=""
-			_TABLES_MYISAM=""
 			_TABLES_OTHER=""
-			MYSQL_LOCK_OPTS=""
+			MYSQL_LOCK_OPTS="--skip-lock-tables"
 
 			# Gather all table engines.
 			TBL_ENGINES="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} --batch \
@@ -2113,37 +2160,45 @@ for db in ${DATABASES}; do
 
 				if [ "${_engine}" = "InnoDB" ]; then
 					[ -z "${_TABLES_INNODB}" ] && _TABLES_INNODB="${_table}" || _TABLES_INNODB="$( printf "%s %s" "${_TABLES_INNODB}" "${_table}")"
-				elif  [ "${_engine}" = "MyISAM" ]; then
-					[ -z "${_TABLES_MYISAM}" ] && _TABLES_MYISAM="${_table}" || _TABLES_MYISAM="$( printf "%s %s" "${_TABLES_MYISAM}" "${_table}")"
 				else
-					[ -z "${_TABLES_OTHER}" ] && _TABLES_OTHER="${_table}" || _TABLES_OTHER="$( printf "%s %s" "${_TABLES_OTHER}" "${_table}")"
+					[ -z "${_TABLES_OTHER}"  ] && _TABLES_OTHER="${_table}"  || _TABLES_OTHER="$( printf "%s %s" "${_TABLES_OTHER}" "${_table}")"
 				fi
 			done
 			unset IFS
 
-			# Set dump options if consistent dumping is enabled
-			if [ "${CONSISTENT_DUMP}" = "1" ]; then
 
-				# information_schema and performance schema are special tables, which do not allow locking
-				if [ "${db}" = "information_schema" ] || [ "${db}" = "performance_schema" ]; then
-					debug "verbose" "(RUN): \"${db}\" cannot be dumped with --lock-tables. Adding --skip-lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
-					MYSQL_LOCK_OPTS="--skip-lock-tables"
-				# All other tables
+			# information_schema and performance schema are special tables, which do not allow locking
+			if [ "${db}" != "information_schema" ] && [ "${db}" != "performance_schema" ]; then
+
+				# Apply consistency to InnoDB
+				if [ "${CONSISTENT_DUMP_ONLY_INNODB}" = "1" ] && [ "${_TABLES_OTHER}" = "" ]; then
+					debug "verbose" "(RUN): All tables use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "verbose" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					MYSQL_LOCK_OPTS="--single-transaction"
+				elif [ "${CONSISTENT_DUMP_NO_INNODB}" = "1" ] && [ "${_TABLES_INNODB}" = "" ]; then
+					debug "verbose" "(RUN): No tables use InnoDB. Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "verbose" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					MYSQL_LOCK_OPTS="--lock-tables"
+				elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "1" ] && [ "${_TABLES_INNODB}" != "" ] && [ "${_TABLES_OTHER}" != "" ]; then
+					debug "verbose" "(RUN): Some tables don't use InnoDB. Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "verbose" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					MYSQL_LOCK_OPTS="--lock-tables"
+				elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "2" ] && [ "${_TABLES_INNODB}" != "" ] && [ "${_TABLES_OTHER}" != "" ]; then
+					debug "verbose" "(RUN): Some tables don't use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "verbose" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					MYSQL_LOCK_OPTS="--single-transaction"
 				else
-					if [ "${_TABLES_MYISAM}" != "" ]; then
-						debug "verbose" "(RUN): Some tables use MyISAM (${_TABLES_MYISAM}). Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
-						MYSQL_LOCK_OPTS="--lock-tables"
-					elif [ "${_TABLES_OTHER}" != "" ]; then
-						debug "verbose" "(RUN): Some tables use an unknown Engine (${_TABLES_OTHER}). Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
-						MYSQL_LOCK_OPTS="--lock-tables"
-					else
-						debug "verbose" "(RUN): All tables use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
-						MYSQL_LOCK_OPTS="--single-transaction"
-					fi
+					debug "verbose" "(RUN): \"${db}\": Not dumping consistently with '--lock-tables' or '--single-transaction'." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "verbose" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					MYSQL_LOCK_OPTS="--skip-lock-tables"
 				fi
+
 			else
-				debug "warn" "(RUN): \"${db}\": Not dumping consistently with '--lock-tables' or '--single-transaction'. Turn on via \$CONSISTENT_DUMP" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+				debug "verbose" "(RUN): \"${db}\" is special and needs '--skip-lock-tables'" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+				MYSQL_LOCK_OPTS="--skip-lock-tables"
 			fi
+
+
 
 
 			#

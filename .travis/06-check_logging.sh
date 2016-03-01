@@ -9,23 +9,25 @@ ERROR=0
 
 echo "##########################################################################################"
 echo "#"
-echo "#  5.  C H E C K I N G   L O G G I N G"
+echo "#  6.  C H E C K I N G   L O G G I N G"
 echo "#"
 echo "##########################################################################################"
 
-
+#
+# TODO:
+#
 
 echo
 echo
 echo "--------------------------------------------------------------------------------"
 echo "-"
-echo "-  5.1 \$LOG"
+echo "-  6.1 \$LOG"
 echo "-"
 echo "--------------------------------------------------------------------------------"
 
 echo
 echo "----------------------------------------"
-echo " 5.1.1 #LOG=1"
+echo " 6.1.1 #LOG=1"
 echo "----------------------------------------"
 sudo sed -i'' 's/^LOG=1/#LOG=1/' /etc/mysqldump-secure.conf
 
@@ -82,7 +84,7 @@ sudo sed -i'' 's/^#LOG=1/LOG=1/' /etc/mysqldump-secure.conf
 
 echo
 echo "----------------------------------------"
-echo " 5.1.2 LOG=2"
+echo " 6.1.2 LOG=2"
 echo "----------------------------------------"
 sudo sed -i'' 's/^LOG=1/LOG=2/' /etc/mysqldump-secure.conf
 
@@ -138,7 +140,7 @@ sudo sed -i'' 's/^LOG=2/LOG=1/' /etc/mysqldump-secure.conf
 
 echo
 echo "----------------------------------------"
-echo " 5.1.3 LOG=\"wrong\""
+echo " 6.1.3 LOG=\"wrong\""
 echo "----------------------------------------"
 sudo sed -i'' 's/^LOG=1/LOG="wrong"/' /etc/mysqldump-secure.conf
 
@@ -193,7 +195,7 @@ sudo sed -i'' 's/^LOG="wrong"/LOG=1/' /etc/mysqldump-secure.conf
 
 echo
 echo "----------------------------------------"
-echo " 5.1.4 LOG=0"
+echo " 6.1.4 LOG=0"
 echo "----------------------------------------"
 sudo sed -i'' 's/^LOG=1/LOG=0/' /etc/mysqldump-secure.conf
 
@@ -251,13 +253,13 @@ echo
 echo
 echo "--------------------------------------------------------------------------------"
 echo "-"
-echo "-  5.2 \$LOG_CHMOD"
+echo "-  6.2 \$LOG_CHMOD"
 echo "-"
 echo "--------------------------------------------------------------------------------"
 
 echo
 echo "----------------------------------------"
-echo " 5.2.1 #LOG_CHMOD=\"0600\""
+echo " 6.2.1 #LOG_CHMOD=\"0600\""
 echo "----------------------------------------"
 sudo sed -i'' 's/^LOG_CHMOD="0600"/#LOG_CHMOD="0600"/' /etc/mysqldump-secure.conf
 
@@ -313,7 +315,7 @@ sudo sed -i'' 's/^#LOG_CHMOD="0600"/LOG_CHMOD="0600"/' /etc/mysqldump-secure.con
 
 echo
 echo "----------------------------------------"
-echo " 5.2.2 LOG_CHMOD=\"0600a\""
+echo " 6.2.2 LOG_CHMOD=\"0600a\""
 echo "----------------------------------------"
 sudo sed -i'' 's/^LOG_CHMOD="0600"/LOG_CHMOD="0600a"/' /etc/mysqldump-secure.conf
 
@@ -369,7 +371,7 @@ sudo sed -i'' 's/^LOG_CHMOD="0600a"/LOG_CHMOD="0600"/' /etc/mysqldump-secure.con
 
 echo
 echo "----------------------------------------"
-echo " 5.2.3 LOG_CHMOD=\"wrong\""
+echo " 6.2.3 LOG_CHMOD=\"wrong\""
 echo "----------------------------------------"
 sudo sed -i'' 's/^LOG_CHMOD="0600"/LOG_CHMOD="wrong"/' /etc/mysqldump-secure.conf
 
@@ -425,7 +427,7 @@ sudo sed -i'' 's/^LOG_CHMOD="wrong"/LOG_CHMOD="0600"/' /etc/mysqldump-secure.con
 
 echo
 echo "----------------------------------------"
-echo " 5.2.4 LOG_CHMOD=\"\""
+echo " 6.2.4 LOG_CHMOD=\"\""
 echo "----------------------------------------"
 sudo sed -i'' 's/^LOG_CHMOD="0600"/LOG_CHMOD=""/' /etc/mysqldump-secure.conf
 
@@ -482,7 +484,7 @@ sudo sed -i'' 's/^LOG_CHMOD=""/LOG_CHMOD="0600"/' /etc/mysqldump-secure.conf
 
 echo
 echo "----------------------------------------"
-echo " 5.2.5 LOG_CHMOD="
+echo " 6.2.5 LOG_CHMOD="
 echo "----------------------------------------"
 sudo sed -i'' 's/^LOG_CHMOD="0600"/LOG_CHMOD=/' /etc/mysqldump-secure.conf
 
@@ -541,13 +543,13 @@ echo
 echo
 echo "--------------------------------------------------------------------------------"
 echo "-"
-echo "-  5.3 \$LOGFILE"
+echo "-  6.3 \$LOGFILE"
 echo "-"
 echo "--------------------------------------------------------------------------------"
 
 echo
 echo "----------------------------------------"
-echo " 5.3.1 #LOGFILE=\"/var/log/mysqldump-secure.log\""
+echo " 6.3.1 #LOGFILE=\"/var/log/mysqldump-secure.log\""
 echo "----------------------------------------"
 sudo sed -i'' 's/^LOGFILE=/#LOGFILE=/' /etc/mysqldump-secure.conf
 
@@ -603,7 +605,7 @@ sudo sed -i'' 's/^#LOGFILE=/LOGFILE=/' /etc/mysqldump-secure.conf
 
 echo
 echo "----------------------------------------"
-echo " 5.3.2 LOGFILE=\"/var/log/mysqldump-secure.log.wrong\""
+echo " 6.3.2 LOGFILE=\"/var/log/mysqldump-secure.log.wrong\""
 echo "----------------------------------------"
 sudo sed -i'' 's/mysqldump-secure.log/mysqldump-secure.log.wrong/' /etc/mysqldump-secure.conf
 
@@ -670,7 +672,7 @@ sudo sed -i'' 's/mysqldump-secure.log.wrong/mysqldump-secure.log/' /etc/mysqldum
 
 echo
 echo "----------------------------------------"
-echo " 5.3.3 LOGFILE=\"/var/log/dir1/dir2/mysqldump-secure.log\""
+echo " 6.3.3 LOGFILE=\"/var/log/dir1/dir2/mysqldump-secure.log\""
 echo "----------------------------------------"
 sudo sed -i'' 's/mysqldump-secure.log/\/dir1\/dir2\/mysqldump-secure.log/' /etc/mysqldump-secure.conf
 
