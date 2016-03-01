@@ -2316,6 +2316,8 @@ for db in ${DATABASES}; do
 
 					# POSIX pipefail emulation
 					exec 4>&1
+					# Ignore ${COMPRESS_ARG} to be quoted
+					# shellcheck disable=SC2086
 					error_statuses="$( (
 						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} ${MYSQL_SPECIAL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
@@ -2341,6 +2343,8 @@ for db in ${DATABASES}; do
 
 					# POSIX pipefail emulation
 					exec 4>&1
+					# Ignore ${COMPRESS_ARG} to be quoted
+					# shellcheck disable=SC2086
 					error_statuses="$( (
 						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} ${MYSQL_SPECIAL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}"; then
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
