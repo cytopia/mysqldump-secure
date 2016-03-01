@@ -561,9 +561,9 @@ sudo sed -i'' 's/^#CONSISTENT_DUMP_MIXED_INNODB=1/CONSISTENT_DUMP_MIXED_INNODB=1
 
 echo
 echo "----------------------------------------"
-echo " 5.3.2 CONSISTENT_DUMP_NO_INNODB=2"
+echo " 5.3.2 CONSISTENT_DUMP_MIXED_INNODB=2"
 echo "----------------------------------------"
-sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=1/CONSISTENT_DUMP_NO_INNODB=2/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^CONSISTENT_DUMP_MIXED_INNODB=1/CONSISTENT_DUMP_MIXED_INNODB=2/' /etc/mysqldump-secure.conf
 
 echo "---------- CRON MODE ----------"
 CMD="sudo mysqldump-secure --cron"
@@ -610,16 +610,16 @@ sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && su
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=2/CONSISTENT_DUMP_NO_INNODB=1/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^CONSISTENT_DUMP_MIXED_INNODB=2/CONSISTENT_DUMP_MIXED_INNODB=1/' /etc/mysqldump-secure.conf
 
 
 
 
 echo
 echo "----------------------------------------"
-echo " 5.3.3 CONSISTENT_DUMP_NO_INNODB=0"
+echo " 5.3.3 CONSISTENT_DUMP_MIXED_INNODB=0"
 echo "----------------------------------------"
-sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=1/CONSISTENT_DUMP_NO_INNODB=0/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^CONSISTENT_DUMP_MIXED_INNODB=1/CONSISTENT_DUMP_MIXED_INNODB=0/' /etc/mysqldump-secure.conf
 
 echo "---------- CRON MODE ----------"
 CMD="sudo mysqldump-secure --cron"
@@ -666,16 +666,16 @@ sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && su
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=0/CONSISTENT_DUMP_NO_INNODB=1/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^CONSISTENT_DUMP_MIXED_INNODB=0/CONSISTENT_DUMP_MIXED_INNODB=1/' /etc/mysqldump-secure.conf
 
 
 
 
 echo
 echo "----------------------------------------"
-echo " 5.3.4 CONSISTENT_DUMP_NO_INNODB=\"wrong\""
+echo " 5.3.4 CONSISTENT_DUMP_MIXED_INNODB=\"wrong\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=1/CONSISTENT_DUMP_NO_INNODB="wrong"/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^CONSISTENT_DUMP_MIXED_INNODB=1/CONSISTENT_DUMP_MIXED_INNODB="wrong"/' /etc/mysqldump-secure.conf
 
 echo "---------- CRON MODE ----------"
 CMD="sudo mysqldump-secure --cron"
@@ -722,7 +722,7 @@ sudo rm -rf /var/mysqldump-secure/ && sudo mkdir -p /var/mysqldump-secure/ && su
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB="wrong"/CONSISTENT_DUMP_NO_INNODB=1/' /etc/mysqldump-secure.conf
+sudo sed -i'' 's/^CONSISTENT_DUMP_MIXED_INNODB="wrong"/CONSISTENT_DUMP_MIXED_INNODB=1/' /etc/mysqldump-secure.conf
 
 
 
