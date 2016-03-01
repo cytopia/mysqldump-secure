@@ -56,9 +56,12 @@ before_script:
   - mysql -uroot -e 'create database db_InnoDB_only;'
   - mysql -uroot -e 'create database db_MyISAM_only;'
   - mysql -uroot -e 'create database db_InnoDB_and_MyISAM;'
-  - bunzip2 < ./.travis/db_InnoDB_only.sql.bz2
-  - bunzip2 < ./.travis/db_MyISAM_only.sql.bz2
-  - bunzip2 < ./.travis/db_InnoDB_and_MyISAM.sql.bz2
+  - bunzip2 < ./.travis/db_InnoDB_only.sql.bz2 | mysql -uroot my_full_db1
+  - bunzip2 < ./.travis/db_MyISAM_only.sql.bz2 | mysql -uroot my_full_db1
+  - bunzip2 < ./.travis/db_InnoDB_and_MyISAM.sql.bz2 | mysql -uroot my_full_db1
+
+
+
 
 
 
