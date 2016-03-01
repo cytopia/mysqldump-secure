@@ -1535,50 +1535,50 @@ MYSQL_OPTS="${MYSQL_OPTS} ${MYSQL_FORCED_OPTS}"
 
 # CONSISTENT_DUMP_ONLY_INNODB
 if ! set | grep '^CONSISTENT_DUMP_ONLY_INNODB=' >/dev/null 2>&1; then
-	debug "warn" "(CFG): \$CONSISTENT_DUMP_ONLY_INNODB variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(RUN): Intentionally disabling consistent dumps for databases with InnoDB tables (no '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"    "(CFG): \$CONSISTENT_DUMP_ONLY_INNODB variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"    "(RUN): InnoDB-only:  Not dumping consistently across tables (using '--skip-lock-tables') [unsafe]" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	CONSISTENT_DUMP_ONLY_INNODB=0
 elif [ -z "${CONSISTENT_DUMP_ONLY_INNODB}" ]; then
-	debug "warn" "(CFG): \$CONSISTENT_DUMP_ONLY_INNODB variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(RUN): Intentionally disabling consistent dumps for databases with InnoDB tables (no '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"    "(CFG): \$CONSISTENT_DUMP_ONLY_INNODB variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"    "(RUN): InnoDB-only:  Not dumping consistently across tables (using '--skip-lock-tables') [unsafe]" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	CONSISTENT_DUMP_ONLY_INNODB=0
 elif [ "${CONSISTENT_DUMP_ONLY_INNODB}" = "1" ]; then
 	debug "verbose" "(CFG): InnoDB-only:  Dumping consistently across tables (using '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 elif [ "${CONSISTENT_DUMP_ONLY_INNODB}" = "0" ]; then
 	debug "verbose" "(CFG): InnoDB-only:  Not dumping consistently across tables (using '--skip-lock-tables') [unsafe]" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "err" "(CFG): \$CONSISTENT_DUMP_ONLY_INNODB variable has an invalid value: ${CONSISTENT_DUMP_ONLY_INNODB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "err" "(RUN): Intentionally disabling consistent dumps for databases with InnoDB tables (no '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"     "(CFG): \$CONSISTENT_DUMP_ONLY_INNODB variable has an invalid value: ${CONSISTENT_DUMP_ONLY_INNODB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"     "(RUN): InnoDB-only:  Not dumping consistently across tables (using '--skip-lock-tables') [unsafe]" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	CONSISTENT_DUMP_ONLY_INNODB=0
 fi
 
 # CONSISTENT_DUMP_NO_INNODB
 if ! set | grep '^CONSISTENT_DUMP_NO_INNODB=' >/dev/null 2>&1; then
-	debug "warn" "(CFG): \$CONSISTENT_DUMP_NO_INNODB variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(RUN): Intentionally disabling consistent dumps for databases with no InnoDB tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"    "(CFG): \$CONSISTENT_DUMP_NO_INNODB variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"    "(RUN): InnoDB-none:  Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	CONSISTENT_DUMP_NO_INNODB=0
 elif [ -z "${CONSISTENT_DUMP_NO_INNODB}" ]; then
-	debug "warn" "(CFG): \$CONSISTENT_DUMP_NO_INNODB variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(RUN): Intentionally disabling consistent dumps for databases with no InnoDB tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"    "(CFG): \$CONSISTENT_DUMP_NO_INNODB variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"    "(RUN): InnoDB-none:  Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	CONSISTENT_DUMP_NO_INNODB=0
 elif [ "${CONSISTENT_DUMP_NO_INNODB}" = "1" ]; then
 	debug "verbose" "(CFG): InnoDB-none:  Dumping consistently across tables (using '--lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 elif [ "${CONSISTENT_DUMP_NO_INNODB}" = "0" ]; then
 	debug "verbose" "(CFG): InnoDB-none:  Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "err" "(CFG): \$CONSISTENT_DUMP_NO_INNODB variable has an invalid value: ${CONSISTENT_DUMP_NO_INNODB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "err" "(RUN): Intentionally disabling consistent dumps for databases with no InnoDB tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"     "(CFG): \$CONSISTENT_DUMP_NO_INNODB variable has an invalid value: ${CONSISTENT_DUMP_NO_INNODB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"     "(RUN): InnoDB-none:  Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	CONSISTENT_DUMP_NO_INNODB=0
 fi
 
 # CONSISTENT_DUMP_MIXED_INNODB
 if ! set | grep '^CONSISTENT_DUMP_MIXED_INNODB=' >/dev/null 2>&1; then
-	debug "warn" "(CFG): \$CONSISTENT_DUMP_MIXED_INNODB variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(RUN): Intentionally disabling consistent dumps for databases with mixed tables (InnoDB and others) (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"    "(CFG): \$CONSISTENT_DUMP_MIXED_INNODB variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"    "(RUN): InnoDB-mixed: Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	CONSISTENT_DUMP_MIXED_INNODB=0
 elif [ -z "${CONSISTENT_DUMP_MIXED_INNODB}" ]; then
 	debug "warn" "(CFG): \$CONSISTENT_DUMP_MIXED_INNODB variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(RUN): Intentionally disabling consistent dumps for databases with mixed tables (InnoDB and others) (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"    "(RUN): InnoDB-mixed: Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	CONSISTENT_DUMP_MIXED_INNODB=0
 elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "1" ]; then
 	debug "verbose" "(CFG): InnoDB-mixed: Dumping consistently across tables (using '--lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1587,8 +1587,8 @@ elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "2" ]; then
 elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "0" ]; then
 	debug "verbose" "(CFG): InnoDB-mixed: Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "err" "(CFG): \$CONSISTENT_DUMP_MIXED_INNODB variable has an invalid value: ${CONSISTENT_DUMP_MIXED_INNODB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "err" "(RUN): Intentionally disabling consistent dumps for databases with mixed tables (InnoDB and others) (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"    "(CFG): \$CONSISTENT_DUMP_MIXED_INNODB variable has an invalid value: ${CONSISTENT_DUMP_MIXED_INNODB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"    "(RUN): InnoDB-mixed: Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	CONSISTENT_DUMP_MIXED_INNODB=0
 fi
 
