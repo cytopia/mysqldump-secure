@@ -1,21 +1,24 @@
 Version 0.16 (unreleased)
 ------------
 
-- [Fix]		Show pipefail emulation errors and warnings (now works as expected)
+- [Fix]		Show pipefail-emulation errors and warnings (now works as expected)
 - [Fix]		Using --defaults-file instead of --defaults-extra-file to make sure no unwanted options are loaded.
 - [Fix]		Handle all unbound variables
 - [Fix]		Catch error in case of wrong values in all 0/1 variables
 - [Fix]		tmpreaper/tmpwatch values now also accept and validate units (m, h, d)
 - [Fix]		Output/Log did not show all deleted files by tmpwatch/tmpreaper
 - [Fix]		Validate MYSQL_OPTS
-- [Enh]     Allowing wildcards for ignored databases (e.g: IGNORE="*")
+- [Enh]     Adding info: Show SSL cyphers in use by server (If SSL is enabled)
+- [Enh]     Adding info: Show if Server is master (with/without replication) or slave
+- [Enh]     Improving Option: Allowing wildcards for ignored databases (e.g: IGNORE="*")
 - [Enh]     Adding lots and lots of travis checks.
-- [Enh]		Adding option for consistend database dumps (InnoDB, mixed, others)
-- [Enh]		Adding --verbose argument
-- [Enh]		Add ability to use mysql connection over SSL and validate it.
-- [Enh]		Use #!/bin/sh -u to check against unset variables
-- [Enh]		Colorized logging
-- [Enh]		Consolidate logging
+- [Enh]     Adding option: SSL Consistend DB dumps (InnoDB, mixed, other)
+- [Enh]		Adding option: SSL Connection
+- [Enh]     Adding argument: --verbose argument
+- [Enh]		Output: Colorized logging
+- [Enh]		Output: Consolidate logging
+- [Enh]     Script: Use #!/bin/sh -u to check against unset variables
+- [Enh]     Removed ${_INSTALL_PREFIX} from config file
 
 
 Version 0.15

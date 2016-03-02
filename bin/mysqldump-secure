@@ -102,11 +102,13 @@ MYSQL_BAD_OPTS="${MYSQL_BAD_OPTS} --quick -q --skip-quick"
 #
 ################################################################################
 
+# If having a tty (console) use colors
 if [ -t 1 ]; then
 	CLR_ERROR="$(tput setf 4 2>/dev/null || tput setaf 1 2>/dev/null)"
 	CLR_WARNING="$(tput setf 6 2>/dev/null || tput setaf 3 2>/dev/null)"
 	CLR_DEBUG="$(tput setf 0 2>/dev/null || tput setaf 7 2>/dev/null)"
 	CLR_RESET="$(tput sgr0 2>/dev/null)"
+# Dump terminal (e.g.: via cron)
 else
 	CLR_ERROR=""
 	CLR_WARNING=""
@@ -830,6 +832,168 @@ merge_exit_codes() {
 }
 
 
+
+############################################################
+# MySQL Helper
+############################################################
+
+
+
+
+# Determines wheter the server connected to
+# is
+# * a master without replication (single)
+# * a master with replication (master)
+# * a slave
+# * or unknown
+#
+# @param  string  Credentials file (mysqldump-secure.cnf).
+# @param  string  SSL connection options.
+# @output string  Type (unknown|single|master|slave)
+# @return integer Type (0: unknown | 1: single | 2: master | 3: slave)
+_mysql_replication_type() {
+	_cnf_file="${1}"
+	_ssl_opts="${2}"
+
+	_sql_err=0			# Errors on SQL queries
+
+	_rep_master_type="single"	# single/master
+	_rep_master_used=0			# 0: No replication | 1: replication
+	_rep_master_err=0			# Errors on replication
+
+	_rep_slave1_type="single"	# single/slave
+	_rep_slave1_used=0			# 0: No replication | 1: replication
+	_rep_slave1_err=0			# Errors on replication
+
+	_rep_slave2_type="single"	# single/slave
+	_rep_slave2_used=0			# 0: No replication | 1: replication
+	_rep_slave2_err=0			# Errors on replication
+
+
+	# Final type (unknown|single|master|slave)
+	_type=""
+
+
+	# 0: unknown
+	# 1: single (master, no replication)
+	# 2: master (master, with replication)
+	# 3: slave
+	_return=0
+
+
+
+	# Check for MASTER
+	# This will work if the Master has a Slave Connected
+	_query="SELECT COUNT(1) AS cnt FROM
+				(SELECT user FROM information_schema.processlist) A
+			INNER JOIN
+				(SELECT user FROM mysql.user B WHERE repl_slave_priv = 'Y') AS B
+			USING (user);"
+
+
+	if ! _result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" | tail -n1 )"; then
+		_sql_err=1
+	else
+		if [ "${_result}" = "0" ]; then
+			_rep_master_type="single"
+			_rep_master_used=0
+		elif  [ "${_result}" -gt "0" ]; then
+			_rep_master_type="master"
+			_rep_master_used=1
+		else
+			_rep_master_type="unknown"
+			_rep_master_used=0
+			_rep_master_err=1
+		fi
+	fi
+
+
+	# Check for SLAVE (Method 1)
+	_query="SELECT COUNT(1) AS cnt FROM information_schema.global_status
+				WHERE variable_name = 'Slave_running'
+				AND variable_value = 'ON';"
+
+	if ! _result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" | tail -n1 )"; then
+		_sql_err=1
+	else
+		if [ "${_result}" = "0" ]; then
+			_rep_slave1_type="single"
+			_rep_slave1_used=0
+		elif  [ "${_result}" -gt "0" ]; then
+			_rep_slave1_type="slave"
+			_rep_slave1_used=1
+		else
+			_rep_slave1_type="unknown"
+			_rep_slave1_used=0
+			_rep_slave1_err=1
+		fi
+	fi
+
+
+	# Check for SLAVE (Method 2)
+	_query="SELECT COUNT(1) AS cnt FROM information_schema.processlist
+				WHERE user = 'system user';"
+
+	if ! _result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" | tail -n1 )"; then
+		_sql_err=1
+	else
+		# No slave
+		if [ "${_result}" = "0" ]; then
+			_rep_slave2_type="single"
+			_rep_slave2_used=0
+		# Slave (Broken slave)
+		elif  [ "${_result}" = "1" ]; then
+			_rep_slave2_type="slave"
+			_rep_slave2_used=1
+			_rep_slave2_err=1
+		# Slave (working)
+		elif  [ "${_result}" = "2" ]; then
+			_rep_slave2_type="slave"
+			_rep_slave2_used=1
+		# Unknown
+		else
+			_rep_slave2_type="unknown"
+			_rep_slave2_used=0
+			_rep_slave2_err=1
+		fi
+	fi
+
+
+	# Evaluate Master
+	if [ "${_rep_master_type}" = "master" ] && [ "${_rep_slave1_type}" = "single" ] && [ "${_rep_slave2_type}" = "single" ]; then
+		# Validate master for replicatied slaves
+		if ! _result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "SHOW PROCESSLIST \\G;")"; then
+			_sql_err=1
+		else
+			if echo "${_result}" | grep "Command: Binlog Dump" >/dev/null 2>&1; then
+				_type="master"
+				_return=2
+			else
+				_type="single"
+				_return=1
+			fi
+		fi
+	elif [ "${_rep_master_type}" = "single" ]; then
+		if [ "${_rep_slave1_type}" = "slave" ] || [ "${_rep_slave2_type}" = "slave" ]; then
+			_type="slave"
+			_return=3
+		else
+			_type="unknown"
+			_return=0
+		fi
+	else
+		_type="unknown"
+		_return=0
+	fi
+
+	echo "${_type}"
+	return "${_return}"
+}
+
+
+
+
+
 ############################################################
 # Usage/Help/Version
 ############################################################
@@ -1473,6 +1637,29 @@ if [ "${MYSQL_SSL_STATUS}" = "Not in use" ]; then
 else
 	debug "verbose" "(RUN): MySQL connection is using SSL: ${MYSQL_SSL_STATUS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
+
+# Testing for Master slave connection
+MYSQL_SERVER_TYPE_NAME="$(_mysql_replication_type "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}")"
+
+case "${MYSQL_SERVER_TYPE_NAME}" in
+	single)
+		debug "verbose"  "(RUN): MySQL server type: Master without replication" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		;;
+	master)
+		debug "verbose"  "(RUN): MySQL server type: Master with replication" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		;;
+	slave)
+		debug "verbose"  "(RUN): MySQL server type: Slave" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		;;
+	unknown)
+		debug "warn"  "(RUN): MySQL server type is unknown (master? or slave?)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		;;
+	*)
+		debug "err"  "(RUN): MySQL server type not found (Internal error)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		;;
+esac
+
+
 
 
 
