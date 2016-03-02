@@ -2071,8 +2071,17 @@ NAGIOS_DB_ERROR=""
 
 for db in ${DATABASES}; do
 
+	#
+	# SKIPPING DATABASES
+	#
+
 	# Reset skip flag
 	skip=0
+
+
+	#
+	# Empty databases
+	#
 
 	# If a database does not show up in information_schema.tables, it means it
 	# has no tables yet and is therefore empty.
@@ -2085,12 +2094,29 @@ for db in ${DATABASES}; do
 		skip=1
 	fi
 
-	# Skip databases that are scheduled for skipping in config
+
+	#
+	# Ignored databases
+	#
+
+	# We need to disable "variable globbing" (set -f) here,
+	# because if there is only a '*' inside '$IGNORE'
+	# then
+	#       'for ign_db in ${IGNORE}; do'
+	# would list all files in the current directory.
+	set -f
 	for ign_db in ${IGNORE}; do
-		if [ "${ign_db}" = "${db}" ]; then
+		# Replace '*' with '.*' to create a regex pattern
+		_regex="$(echo "${ign_db}" | sed 's/\*/\.\*/')"
+		# Check if the pattern matches the complete db name
+		_found="$(echo "${db}" | grep -oe "${_regex}")"
+		if [ "${_found}" = "${db}" ]; then
+			debug "verbose" "(CFG): Ignoring DB: \"${db}\" by wildcard: \"${ign_db}\" (regex: \"${_regex}\")"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			skip=2
 		fi
 	done
+	set +f
+
 
 
 	if [ ${skip} -eq 0 ]; then
