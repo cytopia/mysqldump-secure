@@ -64,8 +64,12 @@ $(which sed) -i'' -e "s|_PREFIX_BIN=\"\"|_PREFIX_BIN=\"${PREFIX}\"|g" build/mysq
 $(which sed) -i'' -e "s|_PREFIX_ETC=\"\"|_PREFIX_ETC=\"${PREFIX}\"|g" build/mysqldump-secure
 $(which sed) -i'' -e "s|_PREFIX_LOG=\"\"|_PREFIX_LOG=\"${PREFIX}\"|g" build/mysqldump-secure
 
-# Adjust auto-generated vars
-$(which sed) -i'' -e "s|_INSTALL_PREFIX=\"\"|_INSTALL_PREFIX=\"${PREFIX}\"|g" build/mysqldump-secure.conf
+# Adjust prefix-paths in config
+$(which sed) -i'' -e "s|DUMP_PATH=\"/var/mysqldump-secure\"|DUMP_PATH=\"${PREFIX}/var/mysqldump-secure\"|g" build/mysqldump-secure.conf
+$(which sed) -i'' -e "s|MYSQL_CNF_FILE=\"/etc/mysqldump-secure.cnf\"|MYSQL_CNF_FILE=\"${PREFIX}/etc/mysqldump-secure.cnf\"|g" build/mysqldump-secure.conf
+$(which sed) -i'' -e "s|LOGFILE=\"/var/log/mysqldump-secure.log\"|LOGFILE=\"${PREFIX}/var/log/mysqldump-secure.log\"|g" build/mysqldump-secure.conf
+$(which sed) -i'' -e "s|OPENSSL_PUBKEY_PEM=\"/etc/mysqldump-secure.pub.pem\"|OPENSSL_PUBKEY_PEM=\"${PREFIX}/etc/mysqldump-secure.pub.pem\"|g" build/mysqldump-secure.conf
+$(which sed) -i'' -e "s|NAGIOS_LOGFILE=\"/var/log/mysqldump-secure.nagios.log\"|NAGIOS_LOGFILE=\"${PREFIX}/var/log/mysqldump-secure.nagios.log\"|g" build/mysqldump-secure.conf
 
 if [ -z "${PREFIX}" ]; then
 	ETCDIR="/etc"
