@@ -43,12 +43,11 @@ before_script:
   #- sudo mysql_install_db --defaults-file=/opt/mysqldump-secure/tests/etc/my-master.cnf
   #- sudo mysqld --defaults-file=/opt/mysqldump-secure/tests/etc/my-master.cnf &
   - sleep 10
-  - netstat -an
-  - sudo cat /opt/mysqldump-secure/tests/var/log/mysql-master/error.log
-  - sudo cat /opt/mysqldump-secure/tests/var/log/mysql-slave/error.log
 
 
-  #- sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "CREATE USER 'slave_user'@'localhost' IDENTIFIED BY 'aaa';"
+  - sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "status;"
+  - sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13307 -e "status;"
+
   #- sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "CREATE USER 'slave_user'@'127.0.0.1' IDENTIFIED BY 'aaa';"
   #- sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "CREATE USER 'slave_user'@'%' IDENTIFIED BY 'aaa';"
   #- sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "GRANT REPLICATION SLAVE ON *.* TO 'slave_user'@'localhost' IDENTIFIED BY 'aaa';"
