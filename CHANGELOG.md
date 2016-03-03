@@ -3,19 +3,22 @@ Version 0.16 (unreleased)
 
 - [Fix]		Show pipefail-emulation errors and warnings (now works as expected)
 - [Fix]		Using --defaults-file instead of --defaults-extra-file to make sure no unwanted options are loaded.
-- [Fix]		Handle all unbound variables
+- [Fix]		Exception Handling: Handle all unbound variables
 - [Fix]		Catch error in case of wrong values in all 0/1 variables
 - [Fix]		tmpreaper/tmpwatch values now also accept and validate units (m, h, d)
-- [Fix]		Output/Log did not show all deleted files by tmpwatch/tmpreaper
-- [Fix]		Validate MYSQL_OPTS
+- [Fix]		Output: stdout did not show all deleted files by tmpwatch/tmpreaper
+- [Fix]		Testing: Validate MYSQL_OPTS
 - [Enh]     Adding info: Show SSL cyphers in use by server (If SSL is enabled)
 - [Enh]     Adding info: Show if Server is master or slave
-- [Enh]     Adding info: Show server version, hostname and port
+- [Enh]     Adding info: Show server name and version
+- [Enh]     Adding info: Show current connection IP/Port or socket
+- [Enh]     Improving Logic: Allow $REQUIRE to overwrite $IGNORE
 - [Enh]     Improving Option: Allowing wildcards for ignored databases (e.g: IGNORE="*")
-- [Enh]     Adding lots and lots of travis checks.
+- [Enh]     Adding option: Conditional `--quick` dependent on database size
 - [Enh]     Adding option: Consistend DB dumps (InnoDB, mixed, other)
 - [Enh]		Adding option: SSL Connection
 - [Enh]     Adding argument: --verbose argument
+- [Enh]     Testing: Adding lots and lots of travis checks.
 - [Enh]		Output: Colorized logging
 - [Enh]		Output: Consolidate logging
 - [Enh]     Script: Use #!/bin/sh -u to check against unset variables

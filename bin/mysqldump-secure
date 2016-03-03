@@ -63,6 +63,9 @@ _DEFAULT_DUMP_PATH="${_PREFIX_ETC}/var/mysqldump-secure"
 _DEFAULT_MYSQL_CNF_CHMOD="0400"
 #_DEFAULT_MYSQL_CNF_FILE="${_PREFIX_ETC}/etc/mysqldump-secure.cnf"
 
+# Default minimum size (in MB) required to enable `--quick`
+_DEFAULT_MYSQL_OPTS_QUICK_MIN_SIZE=200
+
 
 # Default OpenSSL Variables
 _DEFAULT_OPENSSL_ALGO_ARG="-aes256"
@@ -1508,6 +1511,7 @@ fi
 # MySQL Dump Opts
 ############################################################
 
+# MYSQL_OPTS
 if ! set | grep '^MYSQL_OPTS=' >/dev/null 2>&1; then
 	debug "warn" "(CFG): \$MYSQL_OPTS variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(RUN): Disabling custom mysqldump options" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1520,6 +1524,23 @@ fi
 debug "verbose"  "(CFG): mysqldump custom options: ${MYSQL_OPTS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 debug "verbose"  "(CFG): mysqldump forced options: ${MYSQL_FORCED_OPTS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
+
+# MYSQL_OPTS_QUICK_MIN_SIZE
+if ! set | grep '^MYSQL_OPTS_QUICK_MIN_SIZE=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$MYSQL_OPTS_QUICK_MIN_SIZE variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_MYSQL_OPTS_QUICK_MIN_SIZE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	MYSQL_OPTS_QUICK_MIN_SIZE=${_DEFAULT_MYSQL_OPTS_QUICK_MIN_SIZE}
+elif [ -z "${MYSQL_OPTS_QUICK_MIN_SIZE}" ]; then
+	debug "warn" "(CFG): \$MYSQL_OPTS_QUICK_MIN_SIZE is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_MYSQL_OPTS_QUICK_MIN_SIZE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	MYSQL_OPTS_QUICK_MIN_SIZE=${_DEFAULT_MYSQL_OPTS_QUICK_MIN_SIZE}
+elif ! isint "${MYSQL_OPTS_QUICK_MIN_SIZE}" >/dev/null 2>&1; then
+	debug "err"  "(CFG): Wrong integer value for \$MYSQL_OPTS_QUICK_MIN_SIZE: ${MYSQL_OPTS_QUICK_MIN_SIZE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "(CFG): Setting default to: ${_DEFAULT_MYSQL_OPTS_QUICK_MIN_SIZE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	MYSQL_OPTS_QUICK_MIN_SIZE=${_DEFAULT_MYSQL_OPTS_QUICK_MIN_SIZE}
+fi
+debug "verbose"  "(CFG): mysqldump '--quick':      Applied to DB's >= ${MYSQL_OPTS_QUICK_MIN_SIZE} MB" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "verbose"  "(CFG): mysqldump '--skip-quick': Applied to DB's  < ${MYSQL_OPTS_QUICK_MIN_SIZE} MB" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 ############################################################
@@ -2038,10 +2059,10 @@ if [ "${MYSQL_SSL_STATUS}" = "Not in use" ]; then
 		debug "err"  "(SRV): MySQL server connection: Not using SSL, but demanded." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit 1
 	else
-		debug "info"  "(RUN): MySQL server connection: Not using SSL (plain)." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "info"  "(SRV): MySQL server connection: Not using SSL (plain)." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	fi
 else
-	debug "info" "(RUN): MySQL server connection: Using SSL (${MYSQL_SSL_STATUS})" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(SRV): MySQL server connection: Using SSL (${MYSQL_SSL_STATUS})" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 # Testing MySQL for Name and version
@@ -2210,14 +2231,36 @@ for db in ${DATABASES}; do
 		# Check if the pattern matches the complete db name
 		_found="$(echo "${db}" | grep -oe "${_regex}")"
 		if [ "${_found}" = "${db}" ]; then
+
+			_required=0
+
+			# Now check if the ignored db is actually a required db inside $REQUIRE
+			for _req in ${REQUIRE}; do
+				# Required database found?
+				# Remove from variable
+				if [ "${db}" = "${_req}" ]; then
+					_required=1
+					break
+				fi
+			done
+
 			debug "verbose" "(CFG): Ignoring DB: \"${db}\" by wildcard: \"${ign_db}\" (regex: \"${_regex}\")"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			skip=2
+
+			if [ "${_required}" = "1" ]; then
+				debug "verbose" "(CFG): Required DB: \"${db}\" re-enabled by \$REQUIRE variable from config"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				skip=0
+			else
+				skip=2
+			fi
 		fi
 	done
 	set +f
 
 
-
+	#
+	# Evaluate SKIP
+	#
 	if [ ${skip} -eq 0 ]; then
 
 		# Get file extension
@@ -2349,6 +2392,11 @@ for db in ${DATABASES}; do
 
 			TOTAL_SIZE=$( sum "${TOTAL_SIZE}" "${DB_SIZE}" )
 
+			#
+			# MYSQL --quick/--skip-quick OPTION
+			#
+			MYSQL_QUICK_OPT="$(echo "${DB_SIZE} ${MYSQL_OPTS_QUICK_MIN_SIZE}" | awk '{print ($1 >= $2) ? "--quick" : "--skip-quick" }')"
+
 
 			#
 			# RESET pipefail VARIABLE
@@ -2371,7 +2419,12 @@ for db in ${DATABASES}; do
 				#
 				if [ ${ENCRYPT} -eq 1 ]; then
 					ext=".sql.${COMPRESS_EXT}.enc"
-					debugi "info"  "(SQL): Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS})" ) $( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
+					#
+					# TODO: sync debug output and actual commmand (maybe via eval), so that it is made suer
+					#       we are doing what we are showing.
+
+					debugi "info"  "(SQL): Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) " )$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 					# Set umask prior writing
@@ -2382,7 +2435,7 @@ for db in ${DATABASES}; do
 					# Ignore ${COMPRESS_ARG} to be quoted
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} ${MYSQL_SPECIAL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
+						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} ${MYSQL_SPECIAL_OPTS} ${MYSQL_QUICK_OPT} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
 						else
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
@@ -2404,7 +2457,7 @@ for db in ${DATABASES}; do
 				#
 				else
 					ext=".sql.${COMPRESS_EXT}"
-					debugi "info" "(SQL): Dumping:  ${db} (${DB_SIZE} MB) (compressed) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ") $( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugi "info" "(SQL): Dumping:  ${db} (${DB_SIZE} MB) (compressed) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")"
@@ -2414,7 +2467,7 @@ for db in ${DATABASES}; do
 					# Ignore ${COMPRESS_ARG} to be quoted
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} ${MYSQL_SPECIAL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
+						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} ${MYSQL_SPECIAL_OPTS} ${MYSQL_QUICK_OPT} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
 						else
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
@@ -2434,7 +2487,7 @@ for db in ${DATABASES}; do
 				#
 				if [ ${ENCRYPT} -eq 1 ]; then
 					ext=".sql.enc"
-					debugi "info" "(SQL): Dumping:  ${db} (${DB_SIZE} MB) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ") $( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugi "info" "(SQL): Dumping:  ${db} (${DB_SIZE} MB) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
@@ -2444,7 +2497,7 @@ for db in ${DATABASES}; do
 					# Ignore ${COMPRESS_ARG} to be quoted
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} ${MYSQL_SPECIAL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
+						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} ${MYSQL_SPECIAL_OPTS} ${MYSQL_QUICK_OPT} "${db}" 2> "${MY_TMP_FILE_DUMP}"; then
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
 						else
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
@@ -2461,7 +2514,7 @@ for db in ${DATABASES}; do
 				#
 				else
 					ext=".sql"
-					debugi "info" "(SQL): Dumping:  ${db} (${DB_SIZE} MB) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ") $( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugi "info" "(SQL): Dumping:  ${db} (${DB_SIZE} MB) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
@@ -2471,7 +2524,7 @@ for db in ${DATABASES}; do
 					# Ignore ${COMPRESS_ARG} to be quoted
 					# shellcheck disable=SC2086
 					error_statuses="$( (
-						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} ${MYSQL_SPECIAL_OPTS} "${db}" 2> "${MY_TMP_FILE_DUMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}"; then
+						(if ${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} ${MYSQL_SPECIAL_OPTS} ${MYSQL_QUICK_OPT} "${db}" 2> "${MY_TMP_FILE_DUMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}"; then
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;
 						else
 							echo "0:$?:$(cat "${MY_TMP_FILE_DUMP}")" >&3;

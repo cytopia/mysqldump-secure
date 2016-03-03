@@ -1,4 +1,5 @@
 [client]
 host = localhost
+port = 3306
 user = readonlyrootuser
 password = "verySecurePasswordWith$%&SpecialChars"
