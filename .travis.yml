@@ -39,6 +39,17 @@ before_script:
   - ./.travis/00-install.sh
 
 
+- echo "mysql master Adding User"
+- sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "CREATE USER 'slave_user'@'localhost' IDENTIFIED BY 'aaa';"
+- sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "CREATE USER 'slave_user'@'127.0.0.1' IDENTIFIED BY 'aaa';"
+- sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "CREATE USER 'slave_user'@'%' IDENTIFIED BY 'aaa';"
+- sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "GRANT REPLICATION SLAVE ON *.* TO 'slave_user'@'localhost' IDENTIFIED BY 'aaa';"
+- sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "GRANT REPLICATION SLAVE ON *.* TO 'slave_user'@'127.0.0.1' IDENTIFIED BY 'aaa';"
+- sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "GRANT REPLICATION SLAVE ON *.* TO 'slave_user'@'%' IDENTIFIED BY 'aaa';"
+- sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "FLUSH PRIVILEGES;"
+- echo "mysql master Adding User done"
+
+
   # Copy MySQL certificates
  # - sudo cp -f ./.travis/certs/mysql.ca-key.pem          /etc/ && sudo chmod 600 /etc/mysql.ca-key.pem
  # - sudo cp -f ./.travis/certs/mysql.ca.pem              /etc/ && sudo chmod 644 /etc/mysql.ca.pem
