@@ -106,6 +106,13 @@ sudo cp -f ${DIR}/data/certs/mysql.client-cert.pem ${_INSTALL_PREFIX}/etc/ && su
 sudo cp -f ${DIR}/data/certs/mysql.client-key.pem  ${_INSTALL_PREFIX}/etc/ && sudo chmod 600 ${_INSTALL_PREFIX}/etc/mysql.client-key.pem
 
 #
+# Copy MySQL Default file (in case it does not exist)
+#
+if [ ! -f /usr/share/mysql/my-default.cnf ]; then
+	sudo cp ${DIR}/data/my-default.cnf /usr/share/mysql/my-default.cnf
+fi
+
+#
 # Copy MySQL Configuration file
 #
 sudo cp -f ${DIR}/data/my-master.cnf ${_INSTALL_PREFIX}/etc/my-master.cnf
