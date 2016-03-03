@@ -207,7 +207,17 @@ bunzip2 < ${DIR}/data/db/db_InnoDB_and_MyISAM.sql.bz2 | sudo mysql --ssl-ca=${_I
 
 
 
+#
+# Show listening ports
+#
+netstat -an | grep LISTEN
 
+
+#
+# Show database error logs
+#
+sudo cat ${_INSTALL_PREFIX}/var/log/mysql-master/error.log
+sudo cat ${_INSTALL_PREFIX}/var/log/mysql-slave/error.log
 
 
 
