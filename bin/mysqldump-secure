@@ -2022,13 +2022,13 @@ fi
 
 # Getting server status
 if ! MYSQL_SERVER_STATUS="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e 'status;' 2>&1)"; then
-	debug "err"  "(RUN): Cannot retrieve MySQL server status" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "(SRV): Cannot retrieve MySQL server status" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 fi
 
 # Testing MySQL for IP/Socket connection
 MYSQL_CONN_STATUS="$( echo "${MYSQL_SERVER_STATUS}" | grep -E '^Connection:.*' | sed 's/Connection:\s*//g')"
-debug "info"  "(RUN): MySQL server connection: ${MYSQL_CONN_STATUS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "info"  "(SRV): MySQL server connection: ${MYSQL_CONN_STATUS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 # Testing MySQL for SSL connection
@@ -2047,7 +2047,7 @@ fi
 # Testing MySQL for Name and version
 MYSQL_SERVER="$( echo "${MYSQL_SERVER_STATUS}" | grep -E '^Server:.*' | sed 's/Server:\s*//g')"
 MYSQL_VERSION="$( echo "${MYSQL_SERVER_STATUS}" | grep -E '^Server version:.*' | sed 's/Server version:\s*//g')"
-debug "info" "(SRV): MySQL server version:  $( [ "${MYSQL_SERVER}" != "" ] && echo "${MYSQL_SERVER} " )${MYSQL_VERSION}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "info" "(SRV): MySQL server version:    $( [ "${MYSQL_SERVER}" != "" ] && echo "${MYSQL_SERVER} " )${MYSQL_VERSION}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 # Testing MySQL for Hostname/Port
 MYSQL_PORT="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e "SHOW GLOBAL VARIABLES LIKE 'PORT';" 2>&1 | tail -n1 | sed 's/port\s*//g')"
