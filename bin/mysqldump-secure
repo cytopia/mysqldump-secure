@@ -19,7 +19,7 @@ INFO_AUTHOR="Patrick Plocke <patrick@plocke.de>"
 INFO_GPGKEY="0x28BF179F"
 INFO_LICENSE="MIT"
 INFO_URL="https://github.com/cytopia/mysqldump-secure"
-INFO_DATE="2016-02-27"
+INFO_DATE="2016-03-03"
 INFO_VERSION="0.16"
 
 ################################################################################
@@ -887,7 +887,7 @@ _mysql_replication_type() {
 # Usage
 #
 print_usage() {
-#	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cron] [--verbose] [--test] [--info] [--help] [--version]"
+#	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cnf] [--cron] [--verbose] [--test] [--info] [--help] [--version]"
 	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cron] [--verbose] [--test] [--help] [--version]"
 	printf "%s %s %s\n" "      " "${INFO_NAME}" "[--conf] [--cron] [--verbose]"
 	printf "%s %s %s\n" "      " "${INFO_NAME}" "--test [--conf] [--verbose]"
@@ -909,6 +909,9 @@ print_help() {
 	echo "--conf            Pass different configuration file than the default one."
 	echo "                  E.g.: --conf=/etc/mysqldump-secure-alt.conf"
 	echo
+#	echo "--cnf             Pass different mysql cnf credentials file than the default one."
+#	echo "                  E.g.: --cnf=/etc/mysqldump-secure-slave.cnf"
+#	echo
 	echo "--cron            Use for cron run. It will only output errors and warnings"
 	echo "                  and will silence all debug output."
 	echo
