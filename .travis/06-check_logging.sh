@@ -1,9 +1,9 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash -e
 
 ERROR=0
 
-. "./.travis/functions.bash"
-
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+. "${DIR}/config"
 
 
 

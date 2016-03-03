@@ -849,145 +849,30 @@ merge_exit_codes() {
 #
 # @param  string  Credentials file (mysqldump-secure.cnf).
 # @param  string  SSL connection options.
-# @output string  Type (unknown|single|master|slave)
-# @return integer Type (0: unknown | 1: single | 2: master | 3: slave)
+# @output string  Type (unknown|master|slave)
+# @return integer Success (0: OK | 1: Error)
 _mysql_replication_type() {
 	_cnf_file="${1}"
 	_ssl_opts="${2}"
 
-	_sql_err=0			# Errors on SQL queries
-
-	_rep_master_type="single"	# single/master
-	_rep_master_used=0			# 0: No replication | 1: replication
-	_rep_master_err=0			# Errors on replication
-
-	_rep_slave1_type="single"	# single/slave
-	_rep_slave1_used=0			# 0: No replication | 1: replication
-	_rep_slave1_err=0			# Errors on replication
-
-	_rep_slave2_type="single"	# single/slave
-	_rep_slave2_used=0			# 0: No replication | 1: replication
-	_rep_slave2_err=0			# Errors on replication
-
-
-	# Final type (unknown|single|master|slave)
-	_type=""
-
-
-	# 0: unknown
-	# 1: single (master, no replication)
-	# 2: master (master, with replication)
-	# 3: slave
-	_return=0
-
-
-
-	# Check for MASTER
-	# This will work if the Master has a Slave Connected
-	_query="SELECT COUNT(1) AS cnt FROM
-				(SELECT user FROM information_schema.processlist) A
-			INNER JOIN
-				(SELECT user FROM mysql.user B WHERE repl_slave_priv = 'Y') AS B
-			USING (user);"
+	_query="select COUNT(1) SlaveThreads from information_schema.processlist where user = 'system user';"
 
 
 	if ! _result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" | tail -n1 )"; then
-		_sql_err=1
+		echo "unknown"
+		return 1
 	else
 		if [ "${_result}" = "0" ]; then
-			_rep_master_type="single"
-			_rep_master_used=0
+			echo "master"
+			return 0
 		elif  [ "${_result}" -gt "0" ]; then
-			_rep_master_type="master"
-			_rep_master_used=1
+			echo "slave"
+			return 0
 		else
-			_rep_master_type="unknown"
-			_rep_master_used=0
-			_rep_master_err=1
+			echo "unknown"
+			return 1
 		fi
 	fi
-
-
-	# Check for SLAVE (Method 1)
-	_query="SELECT COUNT(1) AS cnt FROM information_schema.global_status
-				WHERE variable_name = 'Slave_running'
-				AND variable_value = 'ON';"
-
-	if ! _result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" | tail -n1 )"; then
-		_sql_err=1
-	else
-		if [ "${_result}" = "0" ]; then
-			_rep_slave1_type="single"
-			_rep_slave1_used=0
-		elif  [ "${_result}" -gt "0" ]; then
-			_rep_slave1_type="slave"
-			_rep_slave1_used=1
-		else
-			_rep_slave1_type="unknown"
-			_rep_slave1_used=0
-			_rep_slave1_err=1
-		fi
-	fi
-
-
-	# Check for SLAVE (Method 2)
-	_query="SELECT COUNT(1) AS cnt FROM information_schema.processlist
-				WHERE user = 'system user';"
-
-	if ! _result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" | tail -n1 )"; then
-		_sql_err=1
-	else
-		# No slave
-		if [ "${_result}" = "0" ]; then
-			_rep_slave2_type="single"
-			_rep_slave2_used=0
-		# Slave (Broken slave)
-		elif  [ "${_result}" = "1" ]; then
-			_rep_slave2_type="slave"
-			_rep_slave2_used=1
-			_rep_slave2_err=1
-		# Slave (working)
-		elif  [ "${_result}" = "2" ]; then
-			_rep_slave2_type="slave"
-			_rep_slave2_used=1
-		# Unknown
-		else
-			_rep_slave2_type="unknown"
-			_rep_slave2_used=0
-			_rep_slave2_err=1
-		fi
-	fi
-
-
-	# Evaluate Master
-	if [ "${_rep_master_type}" = "master" ] && [ "${_rep_slave1_type}" = "single" ] && [ "${_rep_slave2_type}" = "single" ]; then
-		# Validate master for replicatied slaves
-		if ! _result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "SHOW PROCESSLIST \\G;")"; then
-			_sql_err=1
-		else
-			if echo "${_result}" | grep "Command: Binlog Dump" >/dev/null 2>&1; then
-				_type="master"
-				_return=2
-			else
-				_type="single"
-				_return=1
-			fi
-		fi
-	elif [ "${_rep_master_type}" = "single" ]; then
-		if [ "${_rep_slave1_type}" = "slave" ] || [ "${_rep_slave2_type}" = "slave" ]; then
-			_type="slave"
-			_return=3
-		else
-			_type="unknown"
-			_return=0
-		fi
-	else
-		_type="unknown"
-		_return=0
-	fi
-
-	echo "${_type}"
-	return "${_return}"
 }
 
 
@@ -1614,54 +1499,6 @@ else
 fi
 
 
-# Testing MySQL connection
-if ! _CONN_ERR="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e exit 2>&1)"; then
-	debug  "err"  "(RUN): Cannot connect to mysql database." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debugr "err"  "(RUN): Via: $(which mysql) --defaults-file=${MYSQL_CNF_FILE} ${MYSQL_SSL_ARGS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debugr "err"  "(RUN): SQL: ${_CONN_ERR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	exit 3
-else
-	debug "verbose" "(RUN): MySQL connection test successful." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-fi
-
-# Testing MySQL for SSL connection
-MYSQL_SSL_STATUS="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e 'status;' 2>&1 | grep -E '^SSL:.*' | sed 's/SSL:\s*//g')"
-if [ "${MYSQL_SSL_STATUS}" = "Not in use" ]; then
-	if [ "${MYSQL_SSL_ENABLE}" = "1" ]; then
-		debug "err"  "(RUN): MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		exit 1
-	else
-		debug "verbose"  "(RUN): MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	fi
-else
-	debug "verbose" "(RUN): MySQL connection is using SSL: ${MYSQL_SSL_STATUS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-fi
-
-# Testing for Master slave connection
-MYSQL_SERVER_TYPE_NAME="$(_mysql_replication_type "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}")"
-
-case "${MYSQL_SERVER_TYPE_NAME}" in
-	single)
-		debug "verbose"  "(RUN): MySQL server type: Master without replication" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		;;
-	master)
-		debug "verbose"  "(RUN): MySQL server type: Master with replication" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		;;
-	slave)
-		debug "verbose"  "(RUN): MySQL server type: Slave" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		;;
-	unknown)
-		debug "warn"  "(RUN): MySQL server type is unknown (master? or slave?)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		;;
-	*)
-		debug "err"  "(RUN): MySQL server type not found (Internal error)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		;;
-esac
-
-
-
-
 
 
 ############################################################
@@ -1688,7 +1525,6 @@ debug "verbose"  "(CFG): mysqldump forced options: ${MYSQL_FORCED_OPTS}" $LOG "$
 for opt in ${MYSQL_OPTS}; do
 	for evil in ${MYSQL_EVIL_OPTS}; do
 		if echo "${opt}" | grep -e "^${evil}" > /dev/null 2>&1; then
-			echo "opt: ${opt}   | evil: ${evil}"
 			debug "err"  "(CFG): Insecure mysqldump option found in MYSQL_OPTS: '${opt}'" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "err"  "(RUN): Blacklist pattern: '^${evil}'" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "err"  "(HLP): Remove it. This option is handled by the tool itself." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2155,6 +1991,74 @@ else
 	debug "err" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	DELETE=0
 fi
+
+
+
+
+
+
+############################################################
+# Connection
+############################################################
+
+
+
+
+
+# Testing MySQL connection
+if ! _CONN_ERR="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e exit 2>&1)"; then
+	debug  "err"  "(RUN): Cannot connect to mysql database." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debugr "err"  "(RUN): Via: $(which mysql) --defaults-file=${MYSQL_CNF_FILE} ${MYSQL_SSL_ARGS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debugr "err"  "(RUN): SQL: ${_CONN_ERR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	exit 3
+else
+	debug "verbose" "(RUN): MySQL connection test successful." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+fi
+
+
+# Getting server status
+if ! MYSQL_SERVER_STATUS="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e 'status;' 2>&1)"; then
+	debug "err"  "(RUN): Cannot retrieve MySQL server status" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	exit 1
+fi
+
+# Testing MySQL for SSL connection
+MYSQL_SSL_STATUS="$( echo "${MYSQL_SERVER_STATUS}" | grep -E '^SSL:.*' | sed 's/SSL:\s*//g')"
+if [ "${MYSQL_SSL_STATUS}" = "Not in use" ]; then
+	if [ "${MYSQL_SSL_ENABLE}" = "1" ]; then
+		debug "err"  "(RUN): MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		exit 1
+	else
+		debug "verbose"  "(RUN): MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	fi
+else
+	debug "verbose" "(RUN): MySQL connection is using SSL: ${MYSQL_SSL_STATUS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+fi
+
+# Testing MySQL for Name and version
+MYSQL_SERVER="$( echo "${MYSQL_SERVER_STATUS}" | grep -E '^Server:.*' | sed 's/Server:\s*//g')"
+MYSQL_VERSION="$( echo "${MYSQL_SERVER_STATUS}" | grep -E '^Server version:.*' | sed 's/Server version:\s*//g')"
+debug "info" "(SRV): MySQL server version:  ${MYSQL_SERVER} ${MYSQL_VERSION}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
+# Testing MySQL for Hostname/Port
+MYSQL_PORT="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e "SHOW GLOBAL VARIABLES LIKE 'PORT';" 2>&1 | tail -n1 | sed 's/port\s*//g')"
+MYSQL_HOST="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e "SHOW GLOBAL VARIABLES LIKE 'HOSTNAME';" 2>&1 | tail -n1 | sed 's/hostname\s*//g')"
+debug "info" "(SRV): MySQL server hostname: ${MYSQL_HOST}:${MYSQL_PORT}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
+
+# Testing for Master slave connection
+if ! MYSQL_SERVER_TYPE="$(_mysql_replication_type "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}")"; then
+	debug "err"  "(RUN): Connection error" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	exit 3
+else
+	debug "info" "(SRV): MySQL server rep type: ${MYSQL_SERVER_TYPE}"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+fi
+
+
+
+
 
 
 

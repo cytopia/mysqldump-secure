@@ -9,10 +9,11 @@ Version 0.16 (unreleased)
 - [Fix]		Output/Log did not show all deleted files by tmpwatch/tmpreaper
 - [Fix]		Validate MYSQL_OPTS
 - [Enh]     Adding info: Show SSL cyphers in use by server (If SSL is enabled)
-- [Enh]     Adding info: Show if Server is master (with/without replication) or slave
+- [Enh]     Adding info: Show if Server is master or slave
+- [Enh]     Adding info: Show server version, hostname and port
 - [Enh]     Improving Option: Allowing wildcards for ignored databases (e.g: IGNORE="*")
 - [Enh]     Adding lots and lots of travis checks.
-- [Enh]     Adding option: SSL Consistend DB dumps (InnoDB, mixed, other)
+- [Enh]     Adding option: Consistend DB dumps (InnoDB, mixed, other)
 - [Enh]		Adding option: SSL Connection
 - [Enh]     Adding argument: --verbose argument
 - [Enh]		Output: Colorized logging

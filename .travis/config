@@ -1,5 +1,15 @@
-#!/usr/bin/env bash
+#
+# Test install directory
+#
+_INSTALL_PREFIX="/opt/mysqldump-secure/tests"
 
+
+SQL_MASTER_PORT="13306"
+SQL_SLAVE_PORT="13307"
+
+#
+# Some colors for the test output
+#
 txtgrn=$(tput setaf 2) # Green
 txtylw=$(tput setaf 3) # Yellow
 txtblu=$(tput setaf 4) # Blue
@@ -7,6 +17,11 @@ txtpur=$(tput setaf 5) # Purple
 txtcyn=$(tput setaf 6) # Cyan
 txtwht=$(tput setaf 7) # White
 txtrst=$(tput sgr0) # Text reset.
+
+#
+# Some repeating functions
+#
+
 
 #
 # @param  string  PASS|FAIL what is expected?
