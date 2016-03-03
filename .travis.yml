@@ -38,6 +38,10 @@ before_script:
   # Installs mysqldump-secure and MySQL as with as master and a slave server
   - ./.travis/00-install.sh
 
+  - netstat -an
+  - sudo cat /opt/mysqldump-secure/tests/var/log/mysql-master/error.log
+
+
   - sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "CREATE USER 'slave_user'@'localhost' IDENTIFIED BY 'aaa';"
   - sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "CREATE USER 'slave_user'@'127.0.0.1' IDENTIFIED BY 'aaa';"
   - sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "CREATE USER 'slave_user'@'%' IDENTIFIED BY 'aaa';"
