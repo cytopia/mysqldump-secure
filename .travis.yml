@@ -38,6 +38,10 @@ before_script:
   # Installs mysqldump-secure and MySQL as with as master and a slave server
   - ./.travis/00-install.sh
 
+
+  - sudo mysql_install_db --defaults-file=/opt/mysqldump-secure/tests/etc/my-master.cnf
+  - sudo mysqld --defaults-file=/opt/mysqldump-secure/tests/etc/my-master.cnf &
+  - sleep 10
   - netstat -an
   - sudo cat /opt/mysqldump-secure/tests/var/log/mysql-master/error.log
 
