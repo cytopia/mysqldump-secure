@@ -34,45 +34,45 @@ sudo sed -i'' 's/^CONSISTENT_DUMP_ONLY_INNODB=1/#CONSISTENT_DUMP_ONLY_INNODB=1/'
 echo "---------- CRON MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
@@ -90,45 +90,45 @@ sudo sed -i'' 's/^CONSISTENT_DUMP_ONLY_INNODB=1/CONSISTENT_DUMP_ONLY_INNODB=2/' 
 echo "---------- CRON MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
@@ -146,45 +146,45 @@ sudo sed -i'' 's/^CONSISTENT_DUMP_ONLY_INNODB=1/CONSISTENT_DUMP_ONLY_INNODB=0/' 
 echo "---------- CRON MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
@@ -202,45 +202,45 @@ sudo sed -i'' 's/^CONSISTENT_DUMP_ONLY_INNODB=1/CONSISTENT_DUMP_ONLY_INNODB="wro
 echo "---------- CRON MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
@@ -272,45 +272,45 @@ sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=1/#CONSISTENT_DUMP_NO_INNODB=1/' ${_
 echo "---------- CRON MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
@@ -328,45 +328,45 @@ sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=1/CONSISTENT_DUMP_NO_INNODB=2/' ${_I
 echo "---------- CRON MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
@@ -384,45 +384,45 @@ sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=1/CONSISTENT_DUMP_NO_INNODB=0/' ${_I
 echo "---------- CRON MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
@@ -440,45 +440,45 @@ sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=1/CONSISTENT_DUMP_NO_INNODB="wrong"/
 echo "---------- CRON MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
@@ -512,45 +512,45 @@ sudo sed -i'' 's/^CONSISTENT_DUMP_MIXED_INNODB=1/#CONSISTENT_DUMP_MIXED_INNODB=1
 echo "---------- CRON MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
@@ -568,45 +568,45 @@ sudo sed -i'' 's/^CONSISTENT_DUMP_MIXED_INNODB=1/CONSISTENT_DUMP_MIXED_INNODB=2/
 echo "---------- CRON MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
@@ -624,45 +624,45 @@ sudo sed -i'' 's/^CONSISTENT_DUMP_MIXED_INNODB=1/CONSISTENT_DUMP_MIXED_INNODB=0/
 echo "---------- CRON MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
@@ -680,45 +680,45 @@ sudo sed -i'' 's/^CONSISTENT_DUMP_MIXED_INNODB=1/CONSISTENT_DUMP_MIXED_INNODB="w
 echo "---------- CRON MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 

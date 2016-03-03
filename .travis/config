@@ -167,3 +167,24 @@ end_test() {
 }
 
 
+
+
+mds_remove_datadir() {
+	sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/
+	return $?
+}
+mds_remove_logfiles() {
+	_exit=0
+
+	sudo rm -f ${_INSTALL_PREFIX}/var/log/mysqldump-secure.log
+	if [ "$?" != "0" ]; then _exit=1; fi
+
+	sudo rm -f ${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log
+	if [ "$?" != "0" ]; then _exit=1; fi
+
+	return $_exit
+}
+mds_recreate_datadir() {
+	sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+	return $?
+}
