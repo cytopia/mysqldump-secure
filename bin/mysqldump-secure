@@ -2026,28 +2026,33 @@ if ! MYSQL_SERVER_STATUS="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "
 	exit 1
 fi
 
+# Testing MySQL for IP/Socket connection
+MYSQL_CONN_STATUS="$( echo "${MYSQL_SERVER_STATUS}" | grep -E '^Connection:.*' | sed 's/Connection:\s*//g')"
+debug "info"  "(RUN): MySQL server connection: ${MYSQL_CONN_STATUS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
+
 # Testing MySQL for SSL connection
 MYSQL_SSL_STATUS="$( echo "${MYSQL_SERVER_STATUS}" | grep -E '^SSL:.*' | sed 's/SSL:\s*//g')"
 if [ "${MYSQL_SSL_STATUS}" = "Not in use" ]; then
 	if [ "${MYSQL_SSL_ENABLE}" = "1" ]; then
-		debug "err"  "(RUN): MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err"  "(SRV): MySQL server connection: Not using SSL, but demanded." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit 1
 	else
-		debug "verbose"  "(RUN): MySQL connection is not using SSL." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "info"  "(RUN): MySQL server connection: Not using SSL (plain)." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	fi
 else
-	debug "verbose" "(RUN): MySQL connection is using SSL: ${MYSQL_SSL_STATUS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(RUN): MySQL server connection: Using SSL (${MYSQL_SSL_STATUS})" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 # Testing MySQL for Name and version
 MYSQL_SERVER="$( echo "${MYSQL_SERVER_STATUS}" | grep -E '^Server:.*' | sed 's/Server:\s*//g')"
 MYSQL_VERSION="$( echo "${MYSQL_SERVER_STATUS}" | grep -E '^Server version:.*' | sed 's/Server version:\s*//g')"
-debug "info" "(SRV): MySQL server version:  ${MYSQL_SERVER} ${MYSQL_VERSION}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "info" "(SRV): MySQL server version:  $( [ "${MYSQL_SERVER}" != "" ] && echo "${MYSQL_SERVER} " )${MYSQL_VERSION}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 # Testing MySQL for Hostname/Port
 MYSQL_PORT="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e "SHOW GLOBAL VARIABLES LIKE 'PORT';" 2>&1 | tail -n1 | sed 's/port\s*//g')"
 MYSQL_HOST="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e "SHOW GLOBAL VARIABLES LIKE 'HOSTNAME';" 2>&1 | tail -n1 | sed 's/hostname\s*//g')"
-debug "info" "(SRV): MySQL server hostname: ${MYSQL_HOST}:${MYSQL_PORT}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "info" "(SRV): MySQL server hostname:   ${MYSQL_HOST}:${MYSQL_PORT}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 # Testing for Master slave connection
@@ -2056,7 +2061,7 @@ if ! MYSQL_SERVER_TYPE="$(_mysql_replication_type "${MYSQL_CNF_FILE}" "${MYSQL_S
 	debug "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 3
 else
-	debug "info" "(SRV): MySQL server rep type: ${MYSQL_SERVER_TYPE}"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(SRV): MySQL server rep type:   ${MYSQL_SERVER_TYPE}"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 
