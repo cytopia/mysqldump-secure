@@ -160,6 +160,7 @@ script:
   - ./.travis/08-check_encryption.sh
   - ./.travis/09-check_deletion.sh
   - ./.travis/10-check_nagios_log.sh
+  - ./.travis/11-check_misc_settings_log.sh
 
 
   # TODO:

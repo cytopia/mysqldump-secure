@@ -1,3 +1,4 @@
+#!/bin/bash -e
 #!/usr/bin/env bash
 
 ERROR=0
@@ -13,9 +14,7 @@ echo "#  6.  C H E C K I N G   L O G G I N G"
 echo "#"
 echo "##########################################################################################"
 
-#
-# TODO:
-#
+
 
 echo
 echo

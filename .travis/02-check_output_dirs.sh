@@ -1,3 +1,4 @@
+#!/bin/bash -e
 #!/usr/bin/env bash
 
 ERROR=0
@@ -97,7 +98,7 @@ sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf /${_INSTALL_PREFIX}var/mysqldump-secure/dir1/dir2
+sudo rm -rf ${_INSTALL_PREFIX}var/mysqldump-secure/dir1/dir2
 
 mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi

@@ -1,10 +1,10 @@
+#!/bin/bash -e
 #!/usr/bin/env bash
 
 ERROR=0
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 . "${DIR}/config"
-
 
 
 

@@ -31,7 +31,7 @@ run_test() {
 	mod="${1}"
 	cmd="${@:2}"
 
-	echo "${txtblu}--> Run test:${txtrst}"
+	echo "${txtblu}--> Run Test:${txtrst}"
 	echo "\$ ${txtblu}${cmd}${txtrst}"
 	eval "${cmd}"
 	exit="$?"
@@ -91,7 +91,7 @@ run_test() {
 var_test() {
 	cmd="$@"
 
-	echo "${txtblu}--> Unbound variable test:${txtrst}"
+	echo "${txtblu}--> Unbound Variable Test:${txtrst}"
 	echo "\$ ${txtblu}${cmd} | grep 'parameter not set'${txtrst}"
 	unbound="$(eval "${cmd} 3>&2 2>&1 1>&3 > /dev/null | grep 'parameter not set'")"
 
@@ -118,7 +118,7 @@ var_test() {
 syn_test() {
 	cmd="$@"
 
-	echo "${txtblu}--> Syntax error test:${txtrst}"
+	echo "${txtblu}--> Syntax Error Test:${txtrst}"
 	echo "\$ ${txtblu}${cmd} | grep -E '.*[0-9]*:.*: not found.*'${txtrst}"
 	unfound="$(eval "${cmd} 3>&2 2>&1 1>&3 > /dev/null | grep -E '.*[0-9]*:.*: not found.*'")"
 	syntax="$(eval "${cmd} 3>&2 2>&1 1>&3 > /dev/null | grep -E '.*[0-9]*:.*: Syntax error:.*'")"
@@ -161,7 +161,7 @@ syn_test() {
 end_test() {
 	cmd="$@"
 
-	echo "${txtblu}--> Finish test test (does not abort unwantedly):${txtrst}"
+	echo "${txtblu}--> Finish Test (does not abort unwantedly):${txtrst}"
 	echo "\$ ${txtblu}${cmd} | grep -E 'Aborting|Finished successfully|Finished with errors|invalid argument:'${txtrst}"
 	found="$(eval "${cmd} 2>&1 | tail -n1 | grep -E '(\[ERR\]\s*\[FAIL\]\s* Finished with errors)|(\[INFO\]\s*\[OK\]\s* Finished successfully)|(\[ERR\]\s*Aborting)|(\sfor available options.)'")"
 
@@ -180,6 +180,40 @@ end_test() {
 		return 0
 	fi
 }
+
+
+
+#
+## Test if specific error sting is present in stderr
+# @param  string  Expected error string
+# @param  string  Command
+# @return integer 0:OK | 1:FAI:
+expect_err_msg() {
+	msg="${1}"
+	cmd="${@:2}"
+
+	echo "${txtblu}--> Required error-msg Test (only from stderr):${txtrst}"
+	echo "\$ ${txtblu}${cmd} | grep \"${msg}\"${txtrst}"
+	found="$(eval "${cmd} 2>&1 >/dev/null")"
+	found="$(echo "${found}" | grep "${msg}")"
+
+	if [ "${found}" = "" ]; then
+		echo "${txtpur}===> [FAIL]${txtrst}"
+		echo "${txtpur}===> [FAIL] Expected error string not found in stderr.${txtrst}"
+		echo "${txtpur}===> [FAIL]${txtrst}"
+		echo "${txtpur}Expected:${txtrst} ${msg}${txtrst}"
+		echo
+		return 1
+	else
+		echo "${txtgrn}===> [OK]${txtrst}"
+		echo "${txtgrn}===> [OK] Expected error string found in stderr:${txtrst} \"${msg}\""
+		echo "${txtgrn}===> [OK]${txtrst}"
+		echo "${txtgrn}Found:${txtrst} ${found}${txtrst}"
+		echo
+		return 0
+	fi
+}
+
 
 
 

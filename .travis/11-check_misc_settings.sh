@@ -1,3 +1,4 @@
+#!/bin/bash -e
 #!/usr/bin/env bash
 
 ERROR=0
@@ -37,6 +38,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$TMP_DIR" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -49,6 +53,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$TMP_DIR" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -65,6 +72,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$TMP_DIR" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -84,7 +94,7 @@ sudo sed -i'' 's/^#TMP_DIR/TMP_DIR/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.con
 
 echo
 echo "----------------------------------------"
-echo " 11.1.2 TMP_DIR=\"/\""
+echo " 11.1.2 TMP_DIR=\"\""
 echo "----------------------------------------"
 echo
 sudo sed -i'' "s|^TMP_DIR=\"/tmp\"|TMP_DIR=\"\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
@@ -93,57 +103,54 @@ echo "---------- CRON MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
 mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$TMP_DIR" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf /${_INSTALL_PREFIX}var/mysqldump-secure/dir1/dir2
 
 mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
 
 
 echo "---------- NORMAL MODE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$TMP_DIR" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
 
 mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
 
 mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
 CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
+if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$TMP_DIR" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
 
 mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
 
 mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
-
 
 sudo sed -i'' "s|^TMP_DIR=\"\"|TMP_DIR=\"/tmp\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
 
@@ -163,15 +170,16 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
+
+mds_recreate_datadir
+if ! expect_err_msg "\$TMP_DIR" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf /${_INSTALL_PREFIX}var/mysqldump-secure/dir1/dir2
+sudo rm -rf ${_INSTALL_PREFIX}var/mysqldump-secure/dir1/dir2
 
 mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
 
 
 echo "---------- NORMAL MODE ----------"
@@ -179,19 +187,18 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
+
+mds_recreate_datadir
+if ! expect_err_msg "\$TMP_DIR" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
 
 mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
 
 mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
@@ -199,19 +206,18 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
+
+mds_recreate_datadir
+if ! expect_err_msg "\$TMP_DIR" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
 
 mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
 
 mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
 
 
 sudo sed -i'' "s|^TMP_DIR=\"/foo\"|TMP_DIR=\"/tmp\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf

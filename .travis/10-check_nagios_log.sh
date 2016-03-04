@@ -1,3 +1,4 @@
+#!/bin/bash -e
 #!/usr/bin/env bash
 
 ERROR=0
@@ -37,6 +38,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -48,6 +52,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -64,6 +71,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -93,6 +103,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -104,6 +117,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -120,6 +136,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -150,6 +169,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -161,6 +183,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -177,6 +202,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -207,6 +235,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -218,6 +249,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -234,6 +268,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -324,9 +361,9 @@ echo "--------------------------------------------------------------------------
 
 echo
 echo "----------------------------------------"
-echo " 10.2.1 #NAGIOS_LOGFILE=\"\${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""
+echo " 10.2.1 #NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""
 echo "----------------------------------------"
-sudo sed -i'' "s|NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\"|#NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sudo sed -i'' "s|^NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\"|#NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
 
 
 echo "---------- CRON MODE ----------"
@@ -334,6 +371,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOGFILE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -347,6 +387,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOGFILE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -365,6 +408,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOGFILE" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -374,7 +420,7 @@ mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' "s|#NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\"|NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sudo sed -i'' "s|^#NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\"|NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
 
 
 
@@ -382,7 +428,7 @@ echo
 echo "----------------------------------------"
 echo " 10.2.2 NAGIOS_LOGFILE=\"\""
 echo "----------------------------------------"
-sudo sed -i'' "s|NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\"|#NAGIOS_LOGFILE=\"\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sudo sed -i'' "s|^NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\"|NAGIOS_LOGFILE=\"\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
 
 
 echo "---------- CRON MODE ----------"
@@ -390,6 +436,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOGFILE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -403,6 +452,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOGFILE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -421,6 +473,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOGFILE" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -430,7 +485,7 @@ mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-sudo sed -i'' "s|#NAGIOS_LOGFILE=\"|NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sudo sed -i'' "s|^NAGIOS_LOGFILE=\"\"|NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
 
 
 
@@ -438,9 +493,9 @@ sudo sed -i'' "s|#NAGIOS_LOGFILE=\"|NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/
 
 echo
 echo "----------------------------------------"
-echo " 10.2.3 NAGIOS_LOGFILE=\"\${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound\""
+echo " 10.2.3 NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound\""
 echo "----------------------------------------"
-sudo sed -i'' "s|NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\"|#NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sudo sed -i'' "s|^NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\"|NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
 
 
 echo "---------- CRON MODE ----------"
@@ -448,15 +503,19 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
+sudo rm -rf "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound"
+
+mds_recreate_datadir
+if ! expect_err_msg "mysqldump-secure.nagios.log.notfound" "${CMD}"; then ERROR=$((ERROR+1)); fi
+sudo rm -rf "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound"
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
+sudo rm -rf "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound"
 
 mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
+sudo rm -rf "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound"
 
 
 echo "---------- NORMAL MODE ----------"
@@ -464,19 +523,24 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
+sudo rm -rf "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound"
+
+mds_recreate_datadir
+if ! expect_err_msg "mysqldump-secure.nagios.log.notfound" "${CMD}"; then ERROR=$((ERROR+1)); fi
+sudo rm -rf "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound"
+
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
+sudo rm -rf "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound"
 
 mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
+sudo rm -rf "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound"
 
 mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
+sudo rm -rf "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound"
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
@@ -484,22 +548,26 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
+sudo rm -rf "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound"
+
+mds_recreate_datadir
+if ! expect_err_msg "mysqldump-secure.nagios.log.notfound" "${CMD}"; then ERROR=$((ERROR+1)); fi
+sudo rm -rf "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound"
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
+sudo rm -rf "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound"
 
 mds_recreate_datadir
 if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
+sudo rm -rf "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound"
 
 mds_recreate_datadir
 if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf "/var/log/mysqldump-secure.nagios.log.notfound"
+sudo rm -rf "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound"
 
 
-sudo sed -i'' "s|#NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound\"|NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sudo sed -i'' "s|^NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound\"|NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
 
 
 
@@ -530,6 +598,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG_CHMOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -541,6 +612,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG_CHMOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -557,6 +631,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG_CHMOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -586,6 +663,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG_CHMOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -597,6 +677,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG_CHMOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -613,6 +696,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG_CHMOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -642,6 +728,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG_CHMOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -653,6 +742,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG_CHMOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -669,6 +761,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG_CHMOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -698,6 +793,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG_CHMOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -709,6 +807,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG_CHMOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -725,6 +826,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$NAGIOS_LOG_CHMOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi

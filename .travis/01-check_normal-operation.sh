@@ -1,3 +1,4 @@
+#!/bin/bash -e
 #!/usr/bin/env bash
 
 ERROR=0

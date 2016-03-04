@@ -1,3 +1,4 @@
+#!/bin/bash -e
 #!/usr/bin/env bash
 
 ERROR=0
@@ -37,6 +38,9 @@ mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -48,6 +52,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -64,6 +71,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -93,6 +103,9 @@ mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -104,6 +117,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -120,6 +136,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -150,6 +169,9 @@ mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -161,6 +183,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -177,6 +202,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -207,6 +235,9 @@ mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -218,6 +249,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -234,6 +268,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -318,7 +355,7 @@ echo "--------------------------------------------------------------------------
 
 echo
 echo "----------------------------------------"
-echo " 8.2.1 #OPENSSL_PUBKEY_PEM=\"\${_INSTALL_PREFIX}/etc/mysqldump-secure.pub.pem\""
+echo " 8.2.1 #OPENSSL_PUBKEY_PEM=\"${_INSTALL_PREFIX}/etc/mysqldump-secure.pub.pem\""
 echo "----------------------------------------"
 sudo sed -i'' 's/^OPENSSL_PUBKEY_PEM=/#OPENSSL_PUBKEY_PEM=/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
 
@@ -328,6 +365,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$OPENSSL_PUBKEY_PEM" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -341,6 +381,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$OPENSSL_PUBKEY_PEM" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -357,6 +400,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$OPENSSL_PUBKEY_PEM" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -387,6 +433,9 @@ mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$OPENSSL_PUBKEY_PEM" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -398,6 +447,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$OPENSSL_PUBKEY_PEM" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -414,6 +466,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$OPENSSL_PUBKEY_PEM" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -433,7 +488,7 @@ sudo sed -i'' "s|OPENSSL_PUBKEY_PEM=\"\"|OPENSSL_PUBKEY_PEM=\"${_INSTALL_PREFIX}
 
 echo
 echo "----------------------------------------"
-echo " 8.2.3 OPENSSL_PUBKEY_PEM=\"\${_INSTALL_PREFIX}/etc/mysqldump-secure.pub.pem.notfound\""
+echo " 8.2.3 OPENSSL_PUBKEY_PEM=\"${_INSTALL_PREFIX}/etc/mysqldump-secure.pub.pem.notfound\""
 echo "----------------------------------------"
 
 sudo sed -i'' 's/mysqldump-secure.pub.pem/mysqldump-secure.pub.pem.notfound/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
@@ -444,6 +499,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "etc/mysqldump-secure.pub.pem.notfound" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -457,6 +515,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "etc/mysqldump-secure.pub.pem.notfound" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -473,6 +534,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "etc/mysqldump-secure.pub.pem.notfound" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -512,6 +576,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$OPENSSL_ALGO_ARG" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -523,6 +590,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$OPENSSL_ALGO_ARG" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -539,6 +609,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$OPENSSL_ALGO_ARG" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -568,6 +641,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$OPENSSL_ALGO_ARG" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -579,6 +655,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$OPENSSL_ALGO_ARG" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -595,6 +674,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$OPENSSL_ALGO_ARG" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -625,6 +707,9 @@ mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$OPENSSL_ALGO_ARG" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -636,6 +721,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$OPENSSL_ALGO_ARG" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -652,6 +740,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$OPENSSL_ALGO_ARG" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi

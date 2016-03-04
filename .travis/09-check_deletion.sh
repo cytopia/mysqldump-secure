@@ -1,3 +1,4 @@
+#!/bin/bash -e
 #!/usr/bin/env bash
 
 ERROR=0
@@ -37,6 +38,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -48,6 +52,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -64,6 +71,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -93,6 +103,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -104,6 +117,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -120,6 +136,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -150,6 +169,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -161,6 +183,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -177,6 +202,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -207,6 +235,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -218,6 +249,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -234,6 +268,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -334,6 +371,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -345,6 +385,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -361,6 +404,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -391,6 +437,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -402,6 +451,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -418,6 +470,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -448,6 +503,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -459,6 +517,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -475,6 +536,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -506,6 +570,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -517,6 +584,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -533,6 +603,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -574,6 +647,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -585,6 +661,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -601,6 +680,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -630,6 +712,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -641,6 +726,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -657,6 +745,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -687,6 +778,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -698,6 +792,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -714,6 +811,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -744,6 +844,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -755,6 +858,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -771,6 +877,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -873,6 +982,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -884,6 +996,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -900,6 +1015,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -929,6 +1047,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -940,6 +1061,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -956,6 +1080,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -986,6 +1113,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -997,6 +1127,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -1013,6 +1146,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -1043,6 +1179,9 @@ mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
@@ -1054,6 +1193,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -1070,6 +1212,9 @@ CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+mds_recreate_datadir
+if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 mds_recreate_datadir
 if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi

@@ -1,3 +1,4 @@
+#!/bin/bash -e
 #!/usr/bin/env bash
 
 ERROR=0
@@ -12,8 +13,6 @@ echo "#"
 echo "#  5.  C H E C K I N G   C O N S I S T E N C Y   S E T T I N G S"
 echo "#"
 echo "##########################################################################################"
-
-
 
 
 
