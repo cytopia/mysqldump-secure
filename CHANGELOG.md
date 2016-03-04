@@ -20,6 +20,7 @@ Version 0.16 (unreleased)
 - [Enh]     Adding argument: --verbose argument
 - [Enh]     Testing: Adding lots and lots of travis checks.
 - [Enh]     Making /tmp folder settable via config
+- [Enh]     Output: New debug level: trace
 - [Enh]		Output: Colorized logging
 - [Enh]		Output: Consolidate logging
 - [Enh]     Script: Use #!/bin/sh -u to check against unset variables

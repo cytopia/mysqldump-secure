@@ -61,7 +61,7 @@ if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
+CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -118,7 +118,7 @@ if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
+CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -174,7 +174,7 @@ if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
+CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -229,7 +229,7 @@ if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
+CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -293,7 +293,7 @@ if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
+CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -349,7 +349,7 @@ if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
+CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -405,7 +405,7 @@ if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
+CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -461,7 +461,7 @@ if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
+CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -518,7 +518,7 @@ if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
+CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -583,7 +583,7 @@ if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
+CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -646,7 +646,7 @@ sudo rm "/var/log/mysqldump-secure.log.wrong"
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
+CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
@@ -713,7 +713,7 @@ sudo rm -rf "/var/log/dir1/"
 
 
 echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --verbose"
+CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
 mds_recreate_datadir
 if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi

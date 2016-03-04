@@ -121,12 +121,14 @@ if [ -t 1 ]; then
 	CLR_ERROR="$(tput setf 4 2>/dev/null || tput setaf 1 2>/dev/null)"
 	CLR_WARNING="$(tput setf 6 2>/dev/null || tput setaf 3 2>/dev/null)"
 	CLR_DEBUG="$(tput setf 0 2>/dev/null || tput setaf 7 2>/dev/null)"
+	CLR_TRACE="$(tput setf 0 2>/dev/null || tput setaf 7 2>/dev/null)"
 	CLR_RESET="$(tput sgr0 2>/dev/null)"
 # Dump terminal (e.g.: via cron)
 else
 	CLR_ERROR=""
 	CLR_WARNING=""
 	CLR_DEBUG=""
+	CLR_TRACE=""
 	CLR_RESET=""
 fi
 
@@ -152,20 +154,23 @@ fi
 # @param  string  _debug  (0|1) 1: Show debug output | 0: do not show debug output
 # @return integer 0
 debug() {
-	_lvl="${1}"		# Loglevel: "verbose", "info", "warn" or "err"
+	_lvl="${1}"		# Loglevel: "trace", "debug", "info", "warn" or "err"
 	_msg="${2}"		# message to output
 	_log="${3}"		# (0|1) log to file?
 	_file="${4}"	# full path to logfile
 	_cron="${5}"	# (0|1) run for cron?
-	_debug="${6}"	# (0|1) run in debug mode?
+	_debug="${6}"	# (0|1|2) run in debug (and trace) mode?
 
 	# Hide info/debug output when in cron-mode
 	if [ "${_cron}" = "0" ]; then
 		[ "${_lvl}" = "info" ] && printf "[INFO]  %s\n" "${_msg}"
 
-		# Show debug output?
+		# Show debug/trace output?
 		if [ "${_debug}" = "1" ]; then
-			[ "${_lvl}" = "verbose" ] && printf "${CLR_DEBUG}[DEBUG] %s\n${CLR_RESET}" "${_msg}"
+			[ "${_lvl}" = "debug" ] && printf "${CLR_DEBUG}[DEBUG] %s\n${CLR_RESET}" "${_msg}"
+		elif [ "${_debug}" = "2" ]; then
+			[ "${_lvl}" = "debug" ] && printf "${CLR_DEBUG}[DEBUG] %s\n${CLR_RESET}" "${_msg}"
+			[ "${_lvl}" = "trace" ] && printf "${CLR_TRACE}[TRACE] %s\n${CLR_RESET}" "${_msg}"
 		elif [ "${_debug}" != "0" ]; then
 			echo "${_msg}"
 			echo "Internal Error: Invalid value for \$_debug: '${_debug}'"
@@ -187,10 +192,11 @@ debug() {
 	# Log to file
 	if [ "${_log}" = "1" ]; then
 		_pre=""
-		[ "${_lvl}" = "verbose" ] && _pre="[DEBUG]"
-		[ "${_lvl}" = "info" ]    && _pre="[INFO] "
-		[ "${_lvl}" = "warn" ]    && _pre="[WARN] "
-		[ "${_lvl}" = "err" ]     && _pre="[ERR]  "
+		[ "${_lvl}" = "trace" ] && _pre="[TRACE]"
+		[ "${_lvl}" = "debug" ] && _pre="[DEBUG]"
+		[ "${_lvl}" = "info" ]  && _pre="[INFO] "
+		[ "${_lvl}" = "warn" ]  && _pre="[WARN] "
+		[ "${_lvl}" = "err" ]   && _pre="[ERR]  "
 		printf "%s %s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${_msg}" >> "${_file}"
 	elif [ "${_log}" != "0" ]; then
 		echo "${_msg}"
@@ -213,12 +219,12 @@ debug() {
 # @param  string  _debug  (0|1) 1: Show debug output | 0: do not show debug output
 # @return integer 0
 debugr() {
-	_lvl="${1}"		# Loglevel: "verbose", "info", "warn" or "err"
+	_lvl="${1}"		# Loglevel: "trace", "debug", "info", "warn" or "err"
 	_msg="${2}"		# message to output
 	_log="${3}"		# (0|1) log to file?
 	_file="${4}"	# full path to logfile
 	_cron="${5}"	# (0|1) run for cron?
-	_debug="${6}"	# (0|1) run in debug mode?
+	_debug="${6}"	# (0|1|2) run in debug (and trace) mode?
 
 	# [INFO]/[DEBUG] Hide info/debug output when in cron-mode
 	if [ "${_cron}" = "0" ]; then
@@ -234,11 +240,29 @@ debugr() {
 
 		# [DEBUG] Show debug output?
 		if [ "${_debug}" = "1" ]; then
-			if [ "${_lvl}" = "verbose" ]; then
+			if [ "${_lvl}" = "debug" ]; then
 				IFS='
 				'
 				for line in ${_msg}; do
 					printf "${CLR_DEBUG}[DEBUG] %s\n${CLR_RESET}" "${line}"
+				done
+				unset IFS
+			fi
+		# [TRACE]/[DEBUG] Show debug output?
+		elif [ "${_debug}" = "2" ]; then
+			if [ "${_lvl}" = "debug" ]; then
+				IFS='
+				'
+				for line in ${_msg}; do
+					printf "${CLR_DEBUG}[DEBUG] %s\n${CLR_RESET}" "${line}"
+				done
+				unset IFS
+			fi
+			if [ "${_lvl}" = "trace" ]; then
+				IFS='
+				'
+				for line in ${_msg}; do
+					printf "${CLR_TRACE}[TRACE] %s\n${CLR_RESET}" "${line}"
 				done
 				unset IFS
 			fi
@@ -280,7 +304,8 @@ debugr() {
 	# Log to file
 	if [ "${_log}" = "1"    ]; then
 		_pre=""
-		[ "${_lvl}" = "verbose" ] && _pre="[DEBUG]"
+		[ "${_lvl}" = "trace" ] && _pre="[TRACE]"
+		[ "${_lvl}" = "debug" ] && _pre="[DEBUG]"
 		[ "${_lvl}" = "info" ]  && _pre="[INFO] "
 		[ "${_lvl}" = "warn" ]  && _pre="[WARN] "
 		[ "${_lvl}" = "err" ]   && _pre="[ERR]  "
@@ -312,12 +337,12 @@ debugr() {
 # @param  string  _debug  (0|1) 1: Show debug output | 0: do not show debug output
 # @return integer 0
 debugi() {
-	_lvl="${1}"		# Loglevel: "verbose", "info", "warn" or "err"
+	_lvl="${1}"		# Loglevel: "trace", "debug", "info", "warn" or "err"
 	_msg="${2}"		# message to output
 	_log="${3}"		# (0|1) log to file?
 	_file="${4}"	# full path to logfile
 	_cron="${5}"	# (0|1) run for cron?
-	_debug="${6}"	# (0|1) run in debug mode?
+	_debug="${6}"	# (0|1|2) run in debug (and trace) mode?
 
 	# Hide info/debug output when in cron-mode
 	if [ "${_cron}" = "0" ]; then
@@ -325,7 +350,10 @@ debugi() {
 
 		# Show debug output?
 		if [ "${_debug}" = "1" ]; then
-			[ "${_lvl}" = "verbose" ] && printf "${CLR_DEBUG}[DEBUG] %s${CLR_RESET}" "${_msg}"
+			[ "${_lvl}" = "debug" ] && printf "${CLR_DEBUG}[DEBUG] %s${CLR_RESET}" "${_msg}"
+		elif [ "${_debug}" = "2" ]; then
+			[ "${_lvl}" = "debug" ] && printf "${CLR_DEBUG}[DEBUG] %s${CLR_RESET}" "${_msg}"
+			[ "${_lvl}" = "trace" ] && printf "${CLR_TRACE}[TRACE] %s${CLR_RESET}" "${_msg}"
 		elif [ "${_debug}" != "0" ]; then
 			echo "${_msg}"
 			echo "Internal Error: Invalid value for \$_debug: '${_debug}'"
@@ -347,7 +375,8 @@ debugi() {
 	# Log to file
 	if [ "${_log}" = "1"    ]; then
 		_pre=""
-		[ "${_lvl}" = "verbose" ] && _pre="[DEBUG]"
+		[ "${_lvl}" = "trace" ] && _pre="[TRACE]"
+		[ "${_lvl}" = "debug" ] && _pre="[DEBUG]"
 		[ "${_lvl}" = "info" ]  && _pre="[INFO] "
 		[ "${_lvl}" = "warn" ]  && _pre="[WARN] "
 		[ "${_lvl}" = "err" ]   && _pre="[ERR]  "
@@ -371,7 +400,7 @@ debugi() {
 # @param  string  _debug  (0|1) 1: Show debug output | 0: do not show debug output
 # @return integer 0
 debugn() {
-	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
+	_lvl="${1}"		# Loglevel: "trace", "debug", "info", "warn" or "err"
 	_msg="${2}"		# message to output
 	_log="${3}"		# log to file?
 	_file="${4}"	# full path to logfile
@@ -384,7 +413,10 @@ debugn() {
 
 		# Show debug output?
 		if [ "${_debug}" = "1" ]; then
-			[ "${_lvl}" = "verbose" ] && printf "${CLR_DEBUG}%s\n${CLR_RESET}" "${_msg}"
+			[ "${_lvl}" = "debug" ] && printf "${CLR_DEBUG}%s\n${CLR_RESET}" "${_msg}"
+		elif [ "${_debug}" = "2" ]; then
+			[ "${_lvl}" = "debug" ] && printf "${CLR_DEBUG}%s\n${CLR_RESET}" "${_msg}"
+			[ "${_lvl}" = "trace" ] && printf "${CLR_TRACE}%s\n${CLR_RESET}" "${_msg}"
 		elif [ "${_debug}" != "0" ]; then
 			echo "${_msg}"
 			echo "Internal Error: Invalid value for \$_debug: '${_debug}'"
@@ -426,7 +458,7 @@ debugn() {
 # @param  string  _debug  (0|1) 1: Show debug output | 0: do not show debug output
 # @return integer 0
 debug_nl() {
-	_lvl="${1}"		# Loglevel: "info", "warn" or "err"
+	_lvl="${1}"		# "trace", "debug", "info", "warn" or "err"
 	_log="${2}"		# log to file?
 	_file="${3}"	# full path to logfile
 	_cron="${4}"	# run for cron?
@@ -438,7 +470,10 @@ debug_nl() {
 
 		# Show debug output?
 		if [ "${_debug}" = "1" ]; then
-			[ "${_lvl}" = "verbose" ] && printf "\n"
+			[ "${_lvl}" = "debug" ] && printf "\n"
+		elif [ "${_debug}" = "2" ]; then
+			[ "${_lvl}" = "debug" ] && printf "\n" "${_msg}"
+			[ "${_lvl}" = "trace" ] && printf "\n" "${_msg}"
 		elif [ "${_debug}" != "0" ]; then
 			echo "Internal Error: Invalid value for \$_debug: '${_debug}'"
 			echo "Please report this at github"
@@ -478,7 +513,7 @@ debug_nl() {
 # @param  mixed
 # @return integer	0: is number | 1: not a number
 isint(){
-	printf '%d' "$1" >/dev/null 2>&1 && return 0 || return 1;
+	printf "%d" "$1" >/dev/null 2>&1 && return 0 || return 1;
 }
 
 
@@ -523,7 +558,7 @@ permission() {
 	fi
 
 	# For special cases check the length and add a leading 0
-	_len=$(echo "${_perm}" | awk '{ print length() }')
+	_len="$(echo "${_perm}" | awk '{ print length() }')"
 	if [ "${_len}" = "3" ]; then
 		_perm="0${_perm}"
 	fi
@@ -620,8 +655,8 @@ compare_chmod() {
 	_chmod1="${1}"
 	_chmod2="${2}"
 
-	_len1=$(echo "${_chmod1}" | awk '{ print length()   }')
-	_len2=$(echo "${_chmod2}" | awk '{ print length()   }')
+	_len1="$(echo "${_chmod1}" | awk '{ print length()   }')"
+	_len2="$(echo "${_chmod2}" | awk '{ print length()   }')"
 
 	if [ "${_len1}" = "${_len2}" ]; then
 		if [ "${_chmod1}" = "${_chmod2}" ]; then
@@ -653,7 +688,7 @@ compare_chmod() {
 # @return string	3-digit umask
 chmod_2_umask() {
 	_chmod="${1}"
-	_len=$(echo "${_chmod}" | awk '{ print length()   }')
+	_len="$(echo "${_chmod}" | awk '{ print length()   }')"
 
 	if [ "${_len}" = "3" ]; then
 		r=$(echo "${_chmod}" | awk '{print substr($0,1,1)}')
@@ -899,10 +934,10 @@ _mysql_replication_type() {
 # Usage
 #
 print_usage() {
-#	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cnf] [--cron] [--verbose] [--test] [--info] [--help] [--version]"
-	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cron] [--verbose] [--test] [--help] [--version]"
-	printf "%s %s %s\n" "      " "${INFO_NAME}" "[--conf] [--cron] [--verbose]"
-	printf "%s %s %s\n" "      " "${INFO_NAME}" "--test [--conf] [--verbose]"
+#	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cnf] [--cron] [-v[v]] [--test] [--info] [--help] [--version]"
+	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cron] [--test] [-v[v]] [--help] [--version]"
+	printf "%s %s %s\n" "      " "${INFO_NAME}" "[--conf] [--cron] [-v[v]]"
+	printf "%s %s %s\n" "      " "${INFO_NAME}" "--test [--conf] [-v[v]]"
 #	printf "%s %s %s\n" "      " "${INFO_NAME}" "--info"
 	printf "%s %s %s\n" "      " "${INFO_NAME}" "--help"
 	printf "%s %s %s\n" "      " "${INFO_NAME}" "--version"
@@ -918,25 +953,29 @@ print_help() {
 	echo "When invoked without any arguments, it will start dumping databases as"
 	echo "defined in mysqldump-secure.conf."
 	echo
-	echo "--conf            Pass different configuration file than the default one."
+	echo "  --conf          Pass different configuration file than the default one."
 	echo "                  E.g.: --conf=/etc/mysqldump-secure-alt.conf"
 	echo
-#	echo "--cnf             Pass different mysql cnf credentials file than the default one."
+#	echo "  --cnf           Pass different mysql cnf credentials file than the default one."
 #	echo "                  E.g.: --cnf=/etc/mysqldump-secure-slave.cnf"
 #	echo
-	echo "--cron            Use for cron run. It will only output errors and warnings"
+	echo "  --cron          Use for cron run. It will only output errors and warnings"
 	echo "                  and will silence all debug output."
 	echo
-	echo "--verbose         Show verbose debug output. If in cron mode, verbose output"
-	echo "                  will go to the logfile instead of stdout."
+	echo "  --test          Test requirements and exit."
 	echo
-	echo "--test            Test requirements and exit."
+	echo "  -v              Show debug (and trace) output."
+	echo "                  If running with cron mode (--cron) and logging is turned on,"
+	echo "                  verbose/trace output will go to logfile instead of stdout."
+	echo "                  Specify twice (-vv) to also show trace output."
+	echo "                  Can be combined with --conf, --cron and --test"
+	echo "                  E.g.: -v or -vv"
 	echo
-#	echo "--info            Show settings and exit."
+#	echo "  --info          Show settings and exit."
 #	echo
-	echo "--help            Show this help screen."
+	echo "  --help          Show this help screen."
 	echo
-	echo "--version         Show version information."
+	echo "  --version       Show version information."
 }
 # TODO:
 # --------
@@ -988,7 +1027,12 @@ while [ $# -gt 0  ]; do
 
 		--conf=*)
 			if [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ]; then
-				echo "Arguments cannot be mixed."
+				echo "Invalid. Arguments cannot be mixed."
+				echo "Type '${INFO_NAME} --help' for available options."
+				exit 1
+			fi
+			if [ "${_ARG_CONF}" != "0" ]; then
+				echo "Invalid. Argument '--conf' already specified."
 				echo "Type '${INFO_NAME} --help' for available options."
 				exit 1
 			fi
@@ -996,9 +1040,15 @@ while [ $# -gt 0  ]; do
 			_CUS_CONF="$(echo "$1" | sed 's/--conf=//g')"
 			;;
 
-		--verbose)
+
+		-v)
 			if [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ]; then
-				echo "Arguments cannot be mixed."
+				echo "Invalid. Arguments cannot be mixed."
+				echo "Type '${INFO_NAME} --help' for available options."
+				exit 1
+			fi
+			if [ "${_ARG_VERB}" != "0" ]; then
+				echo "Invalid. Argument '-v' already specified (use -vv for more verbosity)."
 				echo "Type '${INFO_NAME} --help' for available options."
 				exit 1
 			fi
@@ -1006,18 +1056,44 @@ while [ $# -gt 0  ]; do
 			;;
 
 
+		-vv)
+			if [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ]; then
+				echo "Invalid. Arguments cannot be mixed."
+				echo "Type '${INFO_NAME} --help' for available options."
+				exit 1
+			fi
+			if [ "${_ARG_VERB}" != "0" ]; then
+				echo "Invalid. Argument '-v' already specified (use -vv for more verbosity)."
+				echo "Type '${INFO_NAME} --help' for available options."
+				exit 1
+			fi
+			_ARG_VERB="2"
+			;;
+
+
 		--cron)
 			if [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ]; then
-				echo "Arguments cannot be mixed."
+				echo "Invalid. Arguments cannot be mixed."
+				echo "Type '${INFO_NAME} --help' for available options."
+				exit 1
+			fi
+			if [ "${_ARG_CRON}" != "0" ]; then
+				echo "Invalid. Argument '--cron' already specified."
 				echo "Type '${INFO_NAME} --help' for available options."
 				exit 1
 			fi
 			_ARG_CRON="1"
 			;;
 
+
 		--test)
 			if [ "${_ARG_CRON}" = "1" ] || [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ]; then
-				echo "Arguments cannot be mixed."
+				echo "Invalid. Arguments cannot be mixed."
+				echo "Type '${INFO_NAME} --help' for available options."
+				exit 1
+			fi
+			if [ "${_ARG_TEST}" != "0" ]; then
+				echo "Invalid. Argument '--test' already specified."
 				echo "Type '${INFO_NAME} --help' for available options."
 				exit 1
 			fi
@@ -1028,9 +1104,15 @@ while [ $# -gt 0  ]; do
 #			_ARG_INFO="1"
 #			;;
 
+
 		--help)
 			if [ "${_ARG_CONF}" = "1" ] || [ "${_ARG_CRON}" = "1" ] || [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_VERS}" = "1" ] || [ "${_ARG_VERB}" = "1" ]; then
-				echo "Arguments cannot be mixed."
+				echo "Invalid. Arguments cannot be mixed."
+				echo "Type '${INFO_NAME} --help' for available options."
+				exit 1
+			fi
+			if [ "${_ARG_HELP}" != "0" ]; then
+				echo "Invalid. Argument '--help' already specified."
 				echo "Type '${INFO_NAME} --help' for available options."
 				exit 1
 			fi
@@ -1039,9 +1121,15 @@ while [ $# -gt 0  ]; do
 			exit 0
 			;;
 
+
 		--version)
 			if [ "${_ARG_CONF}" = "1" ] || [ "${_ARG_CRON}" = "1" ] || [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERB}" = "1" ]; then
-				echo "Arguments cannot be mixed."
+				echo "Invalid. Arguments cannot be mixed."
+				echo "Type '${INFO_NAME} --help' for available options."
+				exit 1
+			fi
+			if [ "${_ARG_VERS}" != "0" ]; then
+				echo "Invalid. Argument '--versopm' already specified."
 				echo "Type '${INFO_NAME} --help' for available options."
 				exit 1
 			fi
@@ -1050,11 +1138,13 @@ while [ $# -gt 0  ]; do
 			exit 0
 			;;
 
+
 		*)
 			echo "Invalid argument: '${1}'."
 			echo "Type '${INFO_NAME} --help' for available options."
 			exit 1
 			;;
+
 	esac
 	shift
 done
@@ -1079,7 +1169,7 @@ if [ ! -f "${CONFIG_FILE}" ]; then
 fi
 if [ -L "${CONFIG_FILE}" ]; then
 	if _TMP="$(_realpath "${CONFIG_FILE}")" >/dev/null 2>&1; then
-		debug "verbose" "(RUN): \$CONFIG_FILE is a symlink. Setting target to: ${_TMP}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "debug" "(RUN): \$CONFIG_FILE is a symlink. Setting target to: ${_TMP}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		CONFIG_FILE="${_TMP}"
 	else
 		debug "err"    "(RUN): Cannot resolve symlink of: $CONFIG_FILE" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1169,7 +1259,7 @@ elif [ "${LOG}" = "1" ]; then
 	# Resolve symlink?
 	if [ -L "${LOGFILE}" ]; then
 		if _TMP="$(_realpath "${LOGFILE}")" >/dev/null 2>&1; then
-			debug "verbose" "(RUN): \$LOGFILE is a symlink. Setting target to: ${_TMP}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "debug" "(RUN): \$LOGFILE is a symlink. Setting target to: ${_TMP}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			LOGFILE="${_TMP}"
 		else
 			debug "err"    "(RUN): Cannot resolve symlink of: $LOGFILE" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1256,10 +1346,10 @@ if [ "${LOG}" = "1" ]; then
 		echo "--------------------------------------------------------------------------------";
 		echo "$(date '+%Y-%m-%d') $(date '+%H:%M:%S') Starting";
 	} >> "${LOGFILE}"
-	debug "verbose" "(CFG): Using config: ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(CFG): Using config: ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "info" "(OPT): Logging enabled: ${LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "verbose" "(CFG): Using config: ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(CFG): Using config: ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 
@@ -1268,13 +1358,13 @@ fi
 # Command line arguments
 ############################################################
 if [ "${_ARG_CRON}" = "1" ]; then
-	debug "verbose" "(ARG): Running in cron mode (--cron)." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(ARG): Running in cron mode (--cron)." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 if [ "${_ARG_TEST}" = "1" ]; then
-	debug "verbose" "(ARG): Running tests only (--test)." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(ARG): Running tests only (--test)." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 if [ "${_ARG_VERB}" = "1" ]; then
-	debug "verbose" "(ARG): Running in verbose mode (--verbose)." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(ARG): Running in verbose mode (--verbose)." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 #if [ "${_ARG_INFO}" = "1" ]; then
 #	debug "info" "Showing information only (--info)."  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1308,7 +1398,7 @@ elif [ ! -w "${TMP_DIR}" ]; then
 	debug "err" "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 fi
-debug "verbose" "(CFG): Using temporary directory: ${TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "debug" "(CFG): Using temporary directory: ${TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 
@@ -1361,7 +1451,7 @@ fi
 # Resolve symlink?
 if [ -L "${DUMP_PATH}" ]; then
 	if _TMP="$(_realpath "${DUMP_PATH}")" >/dev/null 2>&1; then
-		debug "verbose" "(RUN): \$DUMP_PATH is a symlink. Setting target to: ${_TMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "debug" "(RUN): \$DUMP_PATH is a symlink. Setting target to: ${_TMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		DUMP_PATH="${_TMP}"
 	else
 		debug "err" "(RUN): Cannot resolve symlink of: $DUMP_PATH" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1409,7 +1499,7 @@ if [ ! -w "${DUMP_PATH}" ]; then
 	debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 fi
-debug "verbose" "(CFG): Destination dir: ${DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "debug" "(CFG): Destination dir: ${DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 # Check $DUMP_FILE_PRE
@@ -1455,7 +1545,7 @@ fi
 # Resolve symlink?
 if [ -L "${MYSQL_CNF_FILE}" ]; then
 	if _TMP="$(_realpath "${MYSQL_CNF_FILE}")" >/dev/null 2>&1; then
-		debug "verbose" "(RUN): \$MYSQL_CNF_FILE is a symlink. Setting target to: ${_TMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "debug" "(RUN): \$MYSQL_CNF_FILE is a symlink. Setting target to: ${_TMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		MYSQL_CNF_FILE="${_TMP}"
 	else
 		debug "err"    "(RUN): Cannot resolve symlink of: $MYSQL_CNF_FILE" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1558,12 +1648,12 @@ if ! set | grep '^MYSQL_OPTS=' >/dev/null 2>&1; then
 	debug "warn" "(RUN): Disabling custom mysqldump options" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	MYSQL_OPTS=""
 elif [ -z "${MYSQL_SSL_ENABLE}" ]; then
-	debug "verbose" "(CFG): \$MYSQL_OPTS is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(CFG): \$MYSQL_OPTS is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	MYSQL_OPTS=""
 fi
 
-debug "verbose"  "(CFG): mysqldump custom options: ${MYSQL_OPTS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-debug "verbose"  "(CFG): mysqldump forced options: ${MYSQL_FORCED_OPTS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "debug"  "(CFG): mysqldump custom options: ${MYSQL_OPTS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "debug"  "(CFG): mysqldump forced options: ${MYSQL_FORCED_OPTS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 # MYSQL_OPTS_QUICK_MIN_SIZE
@@ -1580,8 +1670,8 @@ elif ! isint "${MYSQL_OPTS_QUICK_MIN_SIZE}" >/dev/null 2>&1; then
 	debug "err"  "(CFG): Setting default to: ${_DEFAULT_MYSQL_OPTS_QUICK_MIN_SIZE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	MYSQL_OPTS_QUICK_MIN_SIZE=${_DEFAULT_MYSQL_OPTS_QUICK_MIN_SIZE}
 fi
-debug "verbose"  "(CFG): mysqldump '--quick':      Applied to DB's >= ${MYSQL_OPTS_QUICK_MIN_SIZE} MB" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-debug "verbose"  "(CFG): mysqldump '--skip-quick': Applied to DB's  < ${MYSQL_OPTS_QUICK_MIN_SIZE} MB" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "debug"  "(CFG): mysqldump '--quick':      Applied to DB's >= ${MYSQL_OPTS_QUICK_MIN_SIZE} MB" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "debug"  "(CFG): mysqldump '--skip-quick': Applied to DB's  < ${MYSQL_OPTS_QUICK_MIN_SIZE} MB" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 ############################################################
@@ -1631,9 +1721,9 @@ elif [ -z "${CONSISTENT_DUMP_ONLY_INNODB}" ]; then
 	debug "warn"    "(RUN): InnoDB-only:  Not dumping consistently across tables (using '--skip-lock-tables') [unsafe]" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	CONSISTENT_DUMP_ONLY_INNODB=0
 elif [ "${CONSISTENT_DUMP_ONLY_INNODB}" = "1" ]; then
-	debug "verbose" "(CFG): InnoDB-only:  Dumping consistently across tables (using '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(CFG): InnoDB-only:  Dumping consistently across tables (using '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 elif [ "${CONSISTENT_DUMP_ONLY_INNODB}" = "0" ]; then
-	debug "verbose" "(CFG): InnoDB-only:  Not dumping consistently across tables (using '--skip-lock-tables') [unsafe]" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(CFG): InnoDB-only:  Not dumping consistently across tables (using '--skip-lock-tables') [unsafe]" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"     "(CFG): \$CONSISTENT_DUMP_ONLY_INNODB variable has an invalid value: ${CONSISTENT_DUMP_ONLY_INNODB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err"     "(RUN): InnoDB-only:  Not dumping consistently across tables (using '--skip-lock-tables') [unsafe]" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1650,9 +1740,9 @@ elif [ -z "${CONSISTENT_DUMP_NO_INNODB}" ]; then
 	debug "warn"    "(RUN): InnoDB-none:  Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	CONSISTENT_DUMP_NO_INNODB=0
 elif [ "${CONSISTENT_DUMP_NO_INNODB}" = "1" ]; then
-	debug "verbose" "(CFG): InnoDB-none:  Dumping consistently across tables (using '--lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(CFG): InnoDB-none:  Dumping consistently across tables (using '--lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 elif [ "${CONSISTENT_DUMP_NO_INNODB}" = "0" ]; then
-	debug "verbose" "(CFG): InnoDB-none:  Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(CFG): InnoDB-none:  Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"     "(CFG): \$CONSISTENT_DUMP_NO_INNODB variable has an invalid value: ${CONSISTENT_DUMP_NO_INNODB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err"     "(RUN): InnoDB-none:  Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1669,11 +1759,11 @@ elif [ -z "${CONSISTENT_DUMP_MIXED_INNODB}" ]; then
 	debug "warn"    "(RUN): InnoDB-mixed: Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	CONSISTENT_DUMP_MIXED_INNODB=0
 elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "1" ]; then
-	debug "verbose" "(CFG): InnoDB-mixed: Dumping consistently across tables (using '--lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(CFG): InnoDB-mixed: Dumping consistently across tables (using '--lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "2" ]; then
-	debug "verbose" "(CFG): InnoDB-mixed: Dumping consistently across tables (using '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(CFG): InnoDB-mixed: Dumping consistently across tables (using '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "0" ]; then
-	debug "verbose" "(CFG): InnoDB-mixed: Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(CFG): InnoDB-mixed: Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"    "(CFG): \$CONSISTENT_DUMP_MIXED_INNODB variable has an invalid value: ${CONSISTENT_DUMP_MIXED_INNODB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err"    "(RUN): InnoDB-mixed: Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1694,11 +1784,11 @@ if ! set | grep '^IGNORE=' >/dev/null 2>&1; then
 	debug "warn" "(RUN): No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	IGNORE=""
 elif [ -z "${IGNORE}" ]; then
-	debug "verbose" "(CFG): \$IGNORE variable is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "verbose" "(RUN): No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(CFG): \$IGNORE variable is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(RUN): No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	IGNORE=""
 else
-	debug "verbose" "(CFG): Ignored DB's: ${IGNORE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(CFG): Ignored DB's: ${IGNORE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 # Required databases
@@ -1708,11 +1798,11 @@ if ! set | grep '^REQUIRE=' >/dev/null 2>&1; then
 	debug "warn" "(RUN): No database will be required" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	REQUIRE=""
 elif [ -z "${REQUIRE}" ]; then
-	debug "verbose" "(CFG): \$REQUIRE variable is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "verbose" "(RUN): No database will explicitly be required" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(CFG): \$REQUIRE variable is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(RUN): No database will explicitly be required" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	REQUIRE=""
 else
-	debug "verbose" "(CFG): Required DB's: ${REQUIRE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(CFG): Required DB's: ${REQUIRE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 
@@ -1757,7 +1847,7 @@ elif [ "${COMPRESS}" = "1" ]; then
 			COMPRESS_ARG=""
 		# Can be empty
 		elif [ -z "${COMPRESS_ARG}" ]; then
-			debug "verbose" "(CFG): No compression arguments specified" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "debug" "(CFG): No compression arguments specified" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		fi
 	fi
 
@@ -1934,9 +2024,9 @@ elif [ "${DELETE}" = "1"  ]; then
 			debug "warn" "(RUN): Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			DELETE_FORCE=0
 		elif [ "${DELETE_FORCE}" = "1"  ]; then
-			debug "verbose" "(CFG): ${DELETE_METHOD}: Using '--force' option (deleting read-only files)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "debug" "(CFG): ${DELETE_METHOD}: Using '--force' option (deleting read-only files)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		elif [ "${DELETE_FORCE}" = "0"  ]; then
-			debug "verbose" "(CFG): ${DELETE_METHOD}: Not forcing (--force) deletion for read-only files" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "debug" "(CFG): ${DELETE_METHOD}: Not forcing (--force) deletion for read-only files" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		else
 			debug "err" "(CFG): Invalid value for \$DELETE_FORCE: ${DELETE_FORCE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "err" "(RUN): Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2078,7 +2168,7 @@ if ! _CONN_ERR="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SS
 	debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 3
 else
-	debug "verbose" "(RUN): MySQL connection test successful." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(RUN): MySQL connection test successful." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 
@@ -2138,7 +2228,7 @@ fi
 # Test mode
 ############################################################
 if [ "${_ARG_TEST}" = "1" ]; then
-	debug "verbose" "(ARG): Exiting program from test mode (--test)."  ${LOG} "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(ARG): Exiting program from test mode (--test)."  ${LOG} "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 0
 fi
 
@@ -2165,7 +2255,7 @@ ERROR=0
 ############################################################
 
 if MY_TMP_DIR="$( mktemp -d ${TMP_DIR}/mysqldump-secure.XXXXXXXXXX 2>/dev/null)"; then
-	debug "verbose"  "(RUN): Creating tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug"  "(RUN): Creating tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "(RUN): Cannot create tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err" "Aborting" $LOG "" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2173,7 +2263,7 @@ else
 fi
 
 if MY_TMP_FILE_DUMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
-	debug "verbose"  "(RUN): Creating tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug"  "(RUN): Creating tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "(RUN): Cannot create tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err" "Aborting" $LOG "" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2181,7 +2271,7 @@ else
 fi
 
 if MY_TMP_FILE_COMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
-	debug "verbose"  "(RUN): Creating tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug"  "(RUN): Creating tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "(RUN): Cannot create tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err" "Aborting" $LOG "" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2189,7 +2279,7 @@ else
 fi
 
 if MY_TMP_FILE_ENCR="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
-	debug "verbose"  "(RUN): Creating tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug"  "(RUN): Creating tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "(RUN): Cannot create tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err" "Aborting" $LOG "" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2285,11 +2375,11 @@ for db in ${DATABASES}; do
 				fi
 			done
 
-			debug "verbose" "(CFG): Ignoring DB: \"${db}\" by wildcard: \"${ign_db}\" (regex: \"${_regex}\")"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "debug" "(CFG): Ignoring DB: \"${db}\" by wildcard: \"${ign_db}\" (regex: \"${_regex}\")"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			skip=2
 
 			if [ "${_required}" = "1" ]; then
-				debug "verbose" "(CFG): Required DB: \"${db}\" re-enabled by \$REQUIRE variable from config"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug "debug" "(CFG): Required DB: \"${db}\" re-enabled by \$REQUIRE variable from config"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 				skip=0
 			else
 				skip=2
@@ -2381,29 +2471,29 @@ for db in ${DATABASES}; do
 
 				# Apply consistency to InnoDB
 				if [ "${CONSISTENT_DUMP_ONLY_INNODB}" = "1" ] && [ "${_TABLES_OTHER}" = "" ]; then
-					debug "verbose" "(RUN): All tables use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
-					debug "verbose" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "debug" "(RUN): All tables use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "debug" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 					MYSQL_LOCK_OPTS="--single-transaction"
 				elif [ "${CONSISTENT_DUMP_NO_INNODB}" = "1" ] && [ "${_TABLES_INNODB}" = "" ]; then
-					debug "verbose" "(RUN): No tables use InnoDB. Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
-					debug "verbose" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "debug" "(RUN): No tables use InnoDB. Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "debug" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 					MYSQL_LOCK_OPTS="--lock-tables"
 				elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "1" ] && [ "${_TABLES_INNODB}" != "" ] && [ "${_TABLES_OTHER}" != "" ]; then
-					debug "verbose" "(RUN): Some tables don't use InnoDB. Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
-					debug "verbose" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "debug" "(RUN): Some tables don't use InnoDB. Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "debug" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 					MYSQL_LOCK_OPTS="--lock-tables"
 				elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "2" ] && [ "${_TABLES_INNODB}" != "" ] && [ "${_TABLES_OTHER}" != "" ]; then
-					debug "verbose" "(RUN): Some tables don't use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
-					debug "verbose" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "debug" "(RUN): Some tables don't use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "debug" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 					MYSQL_LOCK_OPTS="--single-transaction"
 				else
-					debug "verbose" "(RUN): \"${db}\": Not dumping consistently with '--lock-tables' or '--single-transaction'." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
-					debug "verbose" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "debug" "(RUN): \"${db}\": Not dumping consistently with '--lock-tables' or '--single-transaction'." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "debug" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 					MYSQL_LOCK_OPTS="--skip-lock-tables"
 				fi
 
 			else
-				debug "verbose" "(RUN): \"${db}\" is special and needs '--skip-lock-tables'" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+				debug "debug" "(RUN): \"${db}\" is special and needs '--skip-lock-tables'" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 				MYSQL_LOCK_OPTS="--skip-lock-tables"
 			fi
 
@@ -2418,7 +2508,7 @@ for db in ${DATABASES}; do
 			# Performance schema does not allow to dump events
 			# mysqldump: mysqldump  Couldn't execute 'show events'  Access denied for user 'root'@'localhost' to database 'performance_schema' (1044)
 			if [ "${db}" = "performance_schema" ]; then
-				debug "verbose" "(RUN): \"${db}\" cannot be dumped with --events. Adding --skip-events" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+				debug "debug" "(RUN): \"${db}\" cannot be dumped with --events. Adding --skip-events" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 				MYSQL_SPECIAL_OPTS="--skip-events"
 			fi
 
@@ -2640,7 +2730,7 @@ for db in ${DATABASES}; do
 				endtime=$(date +%s)
 
 				debugn "info"    "$((endtime - starttime)) sec" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-				debug  "verbose" "File: ${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug  "debug" "File: ${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 				[ "${NAGIOS_DB_DUMPED}" = "" ] && NAGIOS_DB_DUMPED="${db}" || NAGIOS_DB_DUMPED="${NAGIOS_DB_DUMPED},${db}"
@@ -2653,7 +2743,7 @@ for db in ${DATABASES}; do
 
 			# Commented, because it is to much output
 			# Debug output.
-			# debugr "verbose" "${error_statuses}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+			# debugr "debug" "${error_statuses}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 		fi
 
 	elif [ ${skip} -eq 1 ]; then
@@ -2756,27 +2846,27 @@ fi
 ############################################################
 
 if rm "${MY_TMP_FILE_DUMP}" 2>/dev/null; then
-	debug "verbose"  "(RUN): Deleting tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+	debug "debug" "(RUN): Deleting tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 else
-	debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"    "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 if rm "${MY_TMP_FILE_COMP}" 2>/dev/null; then
-	debug "verbose"  "(RUN): Deleting tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+	debug "debug" "(RUN): Deleting tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 else
-	debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"    "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 if rm "${MY_TMP_FILE_ENCR}" 2>/dev/null; then
-	debug "verbose"  "(RUN): Deleting tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+	debug "debug" "(RUN): Deleting tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 else
-	debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"    "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 if rm -rf "${MY_TMP_DIR}" 2>/dev/null; then
-	debug "verbose"  "(RUN): Deleting tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+	debug "debug" "(RUN): Deleting tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 else
-	debug "warn"  "(RUN): Cannot delete tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"    "(RUN): Cannot delete tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 
