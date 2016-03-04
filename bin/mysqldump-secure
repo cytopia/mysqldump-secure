@@ -537,16 +537,15 @@ permission() {
 # @param  string	numerical chmod
 # @return boolean	0: valid, 1: invalid
 valid_chmod() {
-	CHMOD="${1}"
+	_chmod="${1}"
+	_len="$(echo "${_chmod}" | awk '{ print length() }')"
 
-	len="$(echo "${CHMOD}" | awk '{ print length()   }')"
 
+	if [ "${_len}" = "3" ]; then
 
-	if [ "${len}" = "3" ]; then
-
-		r="$(echo "${CHMOD}" | awk '{print substr($0,1,1)}')"
-		w="$(echo "${CHMOD}" | awk '{print substr($0,2,1)}')"
-		x="$(echo "${CHMOD}" | awk '{print substr($0,3,1)}')"
+		r="$(echo "${_chmod}" | awk '{print substr($0,1,1)}')"
+		w="$(echo "${_chmod}" | awk '{print substr($0,2,1)}')"
+		x="$(echo "${_chmod}" | awk '{print substr($0,3,1)}')"
 
 
 		# Check if it is an integer
@@ -571,12 +570,12 @@ valid_chmod() {
 		# All good
 		return 0
 
-	elif  [ "${len}" = "4" ]; then
+	elif  [ "${_len}" = "4" ]; then
 
-		s="$(echo "${CHMOD}" | awk '{print substr($0,1,1)}')"
-		r="$(echo "${CHMOD}" | awk '{print substr($0,2,1)}')"
-		w="$(echo "${CHMOD}" | awk '{print substr($0,3,1)}')"
-		x="$(echo "${CHMOD}" | awk '{print substr($0,4,1)}')"
+		s="$(echo "${_chmod}" | awk '{print substr($0,1,1)}')"
+		r="$(echo "${_chmod}" | awk '{print substr($0,2,1)}')"
+		w="$(echo "${_chmod}" | awk '{print substr($0,3,1)}')"
+		x="$(echo "${_chmod}" | awk '{print substr($0,4,1)}')"
 
 		# Check if it is an integer
 		if ! isint "${s}" > /dev/null 2>&1 ; then
@@ -618,26 +617,26 @@ valid_chmod() {
 # @param  string	numerical chmod (3 or 4 digits)
 # @return boolean	0: equals, 1: unequal
 compare_chmod() {
-	_CHMOD1="${1}"
-	_CHMOD2="${2}"
+	_chmod1="${1}"
+	_chmod2="${2}"
 
-	_len1=$(echo "${_CHMOD1}" | awk '{ print length()   }')
-	_len2=$(echo "${_CHMOD2}" | awk '{ print length()   }')
+	_len1=$(echo "${_chmod1}" | awk '{ print length()   }')
+	_len2=$(echo "${_chmod2}" | awk '{ print length()   }')
 
 	if [ "${_len1}" = "${_len2}" ]; then
-		if [ "${_CHMOD1}" = "${_CHMOD2}" ]; then
+		if [ "${_chmod1}" = "${_chmod2}" ]; then
 			return 0
 		else
 			return 1
 		fi
 	elif [ "${_len1}" = "3" ] && [ "${_len2}" = "4" ]; then
-		if [ "0${_CHMOD1}" = "${_CHMOD2}" ]; then
+		if [ "0${_chmod1}" = "${_chmod2}" ]; then
 			return 0
 		else
 			return 1
 		fi
 	elif [ "${_len1}" = "4" ] && [ "${_len2}" = "3" ]; then
-		if [ "${_CHMOD1}" = "0${_CHMOD2}" ]; then
+		if [ "${_chmod1}" = "0${_chmod2}" ]; then
 			return 0
 		else
 			return 1
@@ -653,18 +652,17 @@ compare_chmod() {
 # @param  string	numerical chmod (3 or 4 digit)
 # @return string	3-digit umask
 chmod_2_umask() {
-	_CHMOD=${1}
-
-	_len=$(echo "${_CHMOD}" | awk '{ print length()   }')
+	_chmod="${1}"
+	_len=$(echo "${_chmod}" | awk '{ print length()   }')
 
 	if [ "${_len}" = "3" ]; then
-		r=$(echo "${_CHMOD}" | awk '{print substr($0,1,1)}')
-		w=$(echo "${_CHMOD}" | awk '{print substr($0,2,1)}')
-		x=$(echo "${_CHMOD}" | awk '{print substr($0,3,1)}')
+		r=$(echo "${_chmod}" | awk '{print substr($0,1,1)}')
+		w=$(echo "${_chmod}" | awk '{print substr($0,2,1)}')
+		x=$(echo "${_chmod}" | awk '{print substr($0,3,1)}')
 	elif  [ "${_len}" = "4" ]; then
-		r=$(echo "${_CHMOD}" | awk '{print substr($0,2,1)}')
-		w=$(echo "${_CHMOD}" | awk '{print substr($0,3,1)}')
-		x=$(echo "${_CHMOD}" | awk '{print substr($0,4,1)}')
+		r=$(echo "${_chmod}" | awk '{print substr($0,2,1)}')
+		w=$(echo "${_chmod}" | awk '{print substr($0,3,1)}')
+		x=$(echo "${_chmod}" | awk '{print substr($0,4,1)}')
 	fi
 
 	ur="$(sub "7" "${r}")"
@@ -2152,10 +2150,10 @@ fi
 ################################################################################
 
 # Binaries
-MYSQL="$(which mysql)"
-MYSQLDUMP="$(which mysqldump)"
-OPENSSL="$(which openssl)"
-TMPWATCH="$(which "${DELETE_METHOD}")"	# This can be tmpwatch or tmpreaper
+MYSQL="$(which mysql 2>/dev/null)"
+MYSQLDUMP="$(which mysqldump 2>/dev/null)"
+OPENSSL="$(which openssl 2>/dev/null)"
+TMPWATCH="$(which "${DELETE_METHOD}" 2>/dev/null)"	# This can be tmpwatch or tmpreaper
 
 # Error code for nagios
 ERROR=0
