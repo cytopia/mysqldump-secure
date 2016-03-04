@@ -28,64 +28,22 @@ echo
 echo "----------------------------------------"
 echo " 8.1.1 #ENCRYPT=1"
 echo "----------------------------------------"
-sudo sed -i'' 's/^ENCRYPT=1/#ENCRYPT=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^ENCRYPT=1"  "#ENCRYPT=1"
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "FAIL" "1" "\$ENCRYPT" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "FAIL" "1" "\$ENCRYPT" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "FAIL" "1" "\$ENCRYPT" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^#ENCRYPT=1/ENCRYPT=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^#ENCRYPT=1"  "ENCRYPT=1"
 
 
 
@@ -93,65 +51,22 @@ echo
 echo "----------------------------------------"
 echo " 8.1.2 ENCRYPT=2"
 echo "----------------------------------------"
-sudo sed -i'' 's/^ENCRYPT=1/ENCRYPT=2/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^ENCRYPT=1"  "ENCRYPT=2"
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "FAIL" "1" "\$ENCRYPT" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "FAIL" "1" "\$ENCRYPT" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "FAIL" "1" "\$ENCRYPT" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^ENCRYPT=2/ENCRYPT=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^ENCRYPT=2"  "ENCRYPT=1"
 
 
 
@@ -159,65 +74,22 @@ echo
 echo "----------------------------------------"
 echo " 8.1.3 ENCRYPT=\"wrong\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^ENCRYPT=1/ENCRYPT="wrong"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^ENCRYPT=1"  "ENCRYPT=\"wrong\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "FAIL" "1" "\$ENCRYPT" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "FAIL" "1" "\$ENCRYPT" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "FAIL" "1" "\$ENCRYPT" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^ENCRYPT="wrong"/ENCRYPT=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^ENCRYPT=\"wrong\""  "ENCRYPT=1"
 
 
 
@@ -225,66 +97,22 @@ echo
 echo "----------------------------------------"
 echo " 8.1.4 ENCRYPT=\"\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^ENCRYPT=1/ENCRYPT=""/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^ENCRYPT=1"  "ENCRYPT=\"\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "FAIL" "1" "\$ENCRYPT" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "FAIL" "1" "\$ENCRYPT" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "FAIL" "1" "\$ENCRYPT" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$ENCRYPT" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^ENCRYPT=""/ENCRYPT=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
+sed_change_config_file "^ENCRYPT=\"\""  "ENCRYPT=1"
 
 
 
@@ -292,55 +120,26 @@ echo
 echo "----------------------------------------"
 echo " 8.1.5 ENCRYPT=0"
 echo "----------------------------------------"
-sudo sed -i'' 's/^ENCRYPT=1/ENCRYPT=0/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^ENCRYPT=1"  "ENCRYPT=0"
+
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sed_change_config_file "^ENCRYPT=0"  "ENCRYPT=1"
 
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^ENCRYPT=0/ENCRYPT=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
 
 
 
@@ -357,132 +156,44 @@ echo
 echo "----------------------------------------"
 echo " 8.2.1 #OPENSSL_PUBKEY_PEM=\"${_INSTALL_PREFIX}/etc/mysqldump-secure.pub.pem\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^OPENSSL_PUBKEY_PEM=/#OPENSSL_PUBKEY_PEM=/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^OPENSSL_PUBKEY_PEM="  "#OPENSSL_PUBKEY_PEM="
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "FAIL" "1" "\$OPENSSL_PUBKEY_PEM" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "FAIL" "1" "\$OPENSSL_PUBKEY_PEM" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "FAIL" "1" "\$OPENSSL_PUBKEY_PEM" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$OPENSSL_PUBKEY_PEM" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$OPENSSL_PUBKEY_PEM" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$OPENSSL_PUBKEY_PEM" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^#OPENSSL_PUBKEY_PEM=/OPENSSL_PUBKEY_PEM=/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
+sed_change_config_file "^#OPENSSL_PUBKEY_PEM="  "OPENSSL_PUBKEY_PEM="
 
 
 echo
 echo "----------------------------------------"
 echo " 8.2.2 OPENSSL_PUBKEY_PEM=\"\""
 echo "----------------------------------------"
-sudo sed -i'' "s|OPENSSL_PUBKEY_PEM=\"${_INSTALL_PREFIX}/etc/mysqldump-secure.pub.pem\"|OPENSSL_PUBKEY_PEM=\"\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^OPENSSL_PUBKEY_PEM=\"${_INSTALL_PREFIX}/etc/mysqldump-secure.pub.pem\""  "OPENSSL_PUBKEY_PEM=\"\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "FAIL" "1" "\$OPENSSL_PUBKEY_PEM" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "FAIL" "1" "\$OPENSSL_PUBKEY_PEM" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "FAIL" "1" "\$OPENSSL_PUBKEY_PEM" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$OPENSSL_PUBKEY_PEM" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$OPENSSL_PUBKEY_PEM" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$OPENSSL_PUBKEY_PEM" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-sudo sed -i'' "s|OPENSSL_PUBKEY_PEM=\"\"|OPENSSL_PUBKEY_PEM=\"${_INSTALL_PREFIX}/etc/mysqldump-secure.pub.pem\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
-
+sed_change_config_file "^OPENSSL_PUBKEY_PEM=\"\""  "OPENSSL_PUBKEY_PEM=\"${_INSTALL_PREFIX}/etc/mysqldump-secure.pub.pem\""
 
 
 
@@ -490,66 +201,22 @@ echo
 echo "----------------------------------------"
 echo " 8.2.3 OPENSSL_PUBKEY_PEM=\"${_INSTALL_PREFIX}/etc/mysqldump-secure.pub.pem.notfound\""
 echo "----------------------------------------"
+echo
+sed_change_config_file "^OPENSSL_PUBKEY_PEM=\"${_INSTALL_PREFIX}/etc/mysqldump-secure.pub.pem\""  "OPENSSL_PUBKEY_PEM=\"${_INSTALL_PREFIX}/etc/mysqldump-secure.pub.pem.notfound\""
 
-sudo sed -i'' 's/mysqldump-secure.pub.pem/mysqldump-secure.pub.pem.notfound/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "FAIL" "1" "etc/mysqldump-secure.pub.pem.notfound" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "FAIL" "1" "etc/mysqldump-secure.pub.pem.notfound" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "FAIL" "1" "etc/mysqldump-secure.pub.pem.notfound" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "etc/mysqldump-secure.pub.pem.notfound" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "etc/mysqldump-secure.pub.pem.notfound" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "etc/mysqldump-secure.pub.pem.notfound" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/mysqldump-secure.pub.pem.notfound/mysqldump-secure.pub.pem/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^OPENSSL_PUBKEY_PEM=\"${_INSTALL_PREFIX}/etc/mysqldump-secure.pub.pem.notfound\""  "OPENSSL_PUBKEY_PEM=\"${_INSTALL_PREFIX}/etc/mysqldump-secure.pub.pem\""
 
 
 
@@ -567,64 +234,22 @@ echo
 echo "----------------------------------------"
 echo " 8.3.1 #OPENSSL_ALGO_ARG=\"-aes256\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^OPENSSL_ALGO_ARG="-aes256"$/#OPENSSL_ALGO_ARG="-aes256"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^OPENSSL_ALGO_ARG=\"-aes256\""  "#OPENSSL_ALGO_ARG=\"-aes256\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$OPENSSL_ALGO_ARG" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$OPENSSL_ALGO_ARG" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$OPENSSL_ALGO_ARG" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^#OPENSSL_ALGO_ARG="-aes256"$/OPENSSL_ALGO_ARG="-aes256"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^#OPENSSL_ALGO_ARG=\"-aes256\""  "OPENSSL_ALGO_ARG=\"-aes256\""
 
 
 
@@ -632,65 +257,22 @@ echo
 echo "----------------------------------------"
 echo " 8.3.2 OPENSSL_ALGO_ARG=\"\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^OPENSSL_ALGO_ARG="-aes256"$/OPENSSL_ALGO_ARG=""/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^OPENSSL_ALGO_ARG=\"-aes256\""  "OPENSSL_ALGO_ARG=\"\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$OPENSSL_ALGO_ARG" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$OPENSSL_ALGO_ARG" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$OPENSSL_ALGO_ARG" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^OPENSSL_ALGO_ARG=""$/OPENSSL_ALGO_ARG="-aes256"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
+sed_change_config_file "^OPENSSL_ALGO_ARG=\"\""  "OPENSSL_ALGO_ARG=\"-aes256\""
 
 
 
@@ -698,67 +280,22 @@ echo
 echo "----------------------------------------"
 echo " 8.3.3 OPENSSL_ALGO_ARG=\"wrong\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^OPENSSL_ALGO_ARG="-aes256"$/OPENSSL_ALGO_ARG="wrong"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^OPENSSL_ALGO_ARG=\"-aes256\""  "OPENSSL_ALGO_ARG=\"wrong\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "FAIL" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "FAIL" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$OPENSSL_ALGO_ARG" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "FAIL" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$OPENSSL_ALGO_ARG" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$OPENSSL_ALGO_ARG" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^OPENSSL_ALGO_ARG="wrong"$/OPENSSL_ALGO_ARG="-aes256"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
-
-
+sed_change_config_file "^OPENSSL_ALGO_ARG=\"wrong\""  "OPENSSL_ALGO_ARG=\"-aes256\""
 
 
 

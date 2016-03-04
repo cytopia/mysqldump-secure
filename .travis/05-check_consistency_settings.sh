@@ -28,55 +28,22 @@ echo
 echo "----------------------------------------"
 echo " 5.1.1 #CONSISTENT_DUMP_ONLY_INNODB=1"
 echo "----------------------------------------"
-sudo sed -i'' 's/^CONSISTENT_DUMP_ONLY_INNODB=1/#CONSISTENT_DUMP_ONLY_INNODB=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^CONSISTENT_DUMP_ONLY_INNODB=1"  "#CONSISTENT_DUMP_ONLY_INNODB=1"
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^#CONSISTENT_DUMP_ONLY_INNODB=1/CONSISTENT_DUMP_ONLY_INNODB=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^#CONSISTENT_DUMP_ONLY_INNODB=1"  "CONSISTENT_DUMP_ONLY_INNODB=1"
 
 
 
@@ -84,55 +51,22 @@ echo
 echo "----------------------------------------"
 echo " 5.1.2 CONSISTENT_DUMP_ONLY_INNODB=2"
 echo "----------------------------------------"
-sudo sed -i'' 's/^CONSISTENT_DUMP_ONLY_INNODB=1/CONSISTENT_DUMP_ONLY_INNODB=2/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^CONSISTENT_DUMP_ONLY_INNODB=1"  "CONSISTENT_DUMP_ONLY_INNODB=2"
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^CONSISTENT_DUMP_ONLY_INNODB=2/CONSISTENT_DUMP_ONLY_INNODB=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^CONSISTENT_DUMP_ONLY_INNODB=2"  "CONSISTENT_DUMP_ONLY_INNODB=1"
 
 
 
@@ -140,55 +74,22 @@ echo
 echo "----------------------------------------"
 echo " 5.1.3 CONSISTENT_DUMP_ONLY_INNODB=0"
 echo "----------------------------------------"
-sudo sed -i'' 's/^CONSISTENT_DUMP_ONLY_INNODB=1/CONSISTENT_DUMP_ONLY_INNODB=0/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^CONSISTENT_DUMP_ONLY_INNODB=1"  "CONSISTENT_DUMP_ONLY_INNODB=0"
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^CONSISTENT_DUMP_ONLY_INNODB=0/CONSISTENT_DUMP_ONLY_INNODB=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^CONSISTENT_DUMP_ONLY_INNODB=0"  "CONSISTENT_DUMP_ONLY_INNODB=1"
 
 
 
@@ -196,56 +97,22 @@ echo
 echo "----------------------------------------"
 echo " 5.1.4 CONSISTENT_DUMP_ONLY_INNODB=\"wrong\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^CONSISTENT_DUMP_ONLY_INNODB=1/CONSISTENT_DUMP_ONLY_INNODB="wrong"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^CONSISTENT_DUMP_ONLY_INNODB=1"  "CONSISTENT_DUMP_ONLY_INNODB=\"wrong\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^CONSISTENT_DUMP_ONLY_INNODB="wrong"/CONSISTENT_DUMP_ONLY_INNODB=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
+sed_change_config_file "^CONSISTENT_DUMP_ONLY_INNODB=\"wrong\""  "CONSISTENT_DUMP_ONLY_INNODB=1"
 
 
 
@@ -266,55 +133,22 @@ echo
 echo "----------------------------------------"
 echo " 5.2.1 #CONSISTENT_DUMP_NO_INNODB=1"
 echo "----------------------------------------"
-sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=1/#CONSISTENT_DUMP_NO_INNODB=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^CONSISTENT_DUMP_NO_INNODB=1"  "#CONSISTENT_DUMP_NO_INNODB=1"
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^#CONSISTENT_DUMP_NO_INNODB=1/CONSISTENT_DUMP_NO_INNODB=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^#CONSISTENT_DUMP_NO_INNODB=1"  "CONSISTENT_DUMP_NO_INNODB=1"
 
 
 
@@ -322,55 +156,22 @@ echo
 echo "----------------------------------------"
 echo " 5.2.2 CONSISTENT_DUMP_NO_INNODB=2"
 echo "----------------------------------------"
-sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=1/CONSISTENT_DUMP_NO_INNODB=2/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^CONSISTENT_DUMP_NO_INNODB=1"  "CONSISTENT_DUMP_NO_INNODB=2"
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=2/CONSISTENT_DUMP_NO_INNODB=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^CONSISTENT_DUMP_NO_INNODB=2"  "CONSISTENT_DUMP_NO_INNODB=1"
 
 
 
@@ -378,55 +179,22 @@ echo
 echo "----------------------------------------"
 echo " 5.2.3 CONSISTENT_DUMP_NO_INNODB=0"
 echo "----------------------------------------"
-sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=1/CONSISTENT_DUMP_NO_INNODB=0/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^CONSISTENT_DUMP_NO_INNODB=1"  "CONSISTENT_DUMP_NO_INNODB=0"
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=0/CONSISTENT_DUMP_NO_INNODB=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^CONSISTENT_DUMP_NO_INNODB=0"  "CONSISTENT_DUMP_NO_INNODB=1"
 
 
 
@@ -434,55 +202,22 @@ echo
 echo "----------------------------------------"
 echo " 5.2.4 CONSISTENT_DUMP_NO_INNODB=\"wrong\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB=1/CONSISTENT_DUMP_NO_INNODB="wrong"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^CONSISTENT_DUMP_NO_INNODB=1"  "CONSISTENT_DUMP_NO_INNODB=\"wrong\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^CONSISTENT_DUMP_NO_INNODB="wrong"/CONSISTENT_DUMP_NO_INNODB=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^CONSISTENT_DUMP_NO_INNODB=\"wrong\""  "CONSISTENT_DUMP_NO_INNODB=1"
 
 
 
@@ -506,55 +241,22 @@ echo
 echo "----------------------------------------"
 echo " 5.3.1 #CONSISTENT_DUMP_MIXED_INNODB=1"
 echo "----------------------------------------"
-sudo sed -i'' 's/^CONSISTENT_DUMP_MIXED_INNODB=1/#CONSISTENT_DUMP_MIXED_INNODB=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^CONSISTENT_DUMP_MIXED_INNODB=1"  "#CONSISTENT_DUMP_MIXED_INNODB=1"
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_MIXED_INNODB" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_MIXED_INNODB" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_MIXED_INNODB" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^#CONSISTENT_DUMP_MIXED_INNODB=1/CONSISTENT_DUMP_MIXED_INNODB=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^#CONSISTENT_DUMP_MIXED_INNODB=1"  "CONSISTENT_DUMP_MIXED_INNODB=1"
 
 
 
@@ -562,55 +264,22 @@ echo
 echo "----------------------------------------"
 echo " 5.3.2 CONSISTENT_DUMP_MIXED_INNODB=2"
 echo "----------------------------------------"
-sudo sed -i'' 's/^CONSISTENT_DUMP_MIXED_INNODB=1/CONSISTENT_DUMP_MIXED_INNODB=2/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^CONSISTENT_DUMP_MIXED_INNODB=1"  "CONSISTENT_DUMP_MIXED_INNODB=2"
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^CONSISTENT_DUMP_MIXED_INNODB=2/CONSISTENT_DUMP_MIXED_INNODB=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^CONSISTENT_DUMP_MIXED_INNODB=2"  "CONSISTENT_DUMP_MIXED_INNODB=1"
 
 
 
@@ -618,55 +287,22 @@ echo
 echo "----------------------------------------"
 echo " 5.3.3 CONSISTENT_DUMP_MIXED_INNODB=0"
 echo "----------------------------------------"
-sudo sed -i'' 's/^CONSISTENT_DUMP_MIXED_INNODB=1/CONSISTENT_DUMP_MIXED_INNODB=0/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^CONSISTENT_DUMP_MIXED_INNODB=1"  "CONSISTENT_DUMP_MIXED_INNODB=0"
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^CONSISTENT_DUMP_MIXED_INNODB=0/CONSISTENT_DUMP_MIXED_INNODB=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^CONSISTENT_DUMP_MIXED_INNODB=0"  "CONSISTENT_DUMP_MIXED_INNODB=1"
 
 
 
@@ -674,56 +310,22 @@ echo
 echo "----------------------------------------"
 echo " 5.3.4 CONSISTENT_DUMP_MIXED_INNODB=\"wrong\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^CONSISTENT_DUMP_MIXED_INNODB=1/CONSISTENT_DUMP_MIXED_INNODB="wrong"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^CONSISTENT_DUMP_MIXED_INNODB=1"  "CONSISTENT_DUMP_MIXED_INNODB=\"wrong\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_MIXED_INNODB" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_MIXED_INNODB" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$CONSISTENT_DUMP_MIXED_INNODB" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^CONSISTENT_DUMP_MIXED_INNODB="wrong"/CONSISTENT_DUMP_MIXED_INNODB=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
+sed_change_config_file "^CONSISTENT_DUMP_MIXED_INNODB=\"wrong\""  "CONSISTENT_DUMP_MIXED_INNODB=1"
 
 
 

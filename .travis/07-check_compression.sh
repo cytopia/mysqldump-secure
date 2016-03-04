@@ -28,54 +28,22 @@ echo
 echo "----------------------------------------"
 echo " 7.1.1 #COMPRESS=1"
 echo "----------------------------------------"
-sudo sed -i'' 's/^COMPRESS=1/#COMPRESS=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^COMPRESS=1"  "#COMPRESS=1"
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^#COMPRESS=1/COMPRESS=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^#COMPRESS=1"  "COMPRESS=1"
 
 
 
@@ -83,56 +51,22 @@ echo
 echo "----------------------------------------"
 echo " 7.1.2 COMPRESS=2"
 echo "----------------------------------------"
-sudo sed -i'' 's/^COMPRESS=1/COMPRESS=2/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^COMPRESS=1"  "COMPRESS=2"
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^COMPRESS=2/COMPRESS=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^COMPRESS=2"  "COMPRESS=1"
 
 
 
@@ -140,56 +74,22 @@ echo
 echo "----------------------------------------"
 echo " 7.1.3 COMPRESS=\"wrong\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^COMPRESS=1/COMPRESS="wrong"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^COMPRESS=1"  "COMPRESS=\"wrong\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^COMPRESS="wrong"/COMPRESS=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^COMPRESS=\"wrong\""  "COMPRESS=1"
 
 
 
@@ -197,56 +97,22 @@ echo
 echo "----------------------------------------"
 echo " 7.1.4 COMPRESS=\"\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^COMPRESS=1/COMPRESS=""/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^COMPRESS=1"  "COMPRESS=\"\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^COMPRESS=""/COMPRESS=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^COMPRESS=\"\""  "COMPRESS=1"
 
 
 
@@ -254,55 +120,22 @@ echo
 echo "----------------------------------------"
 echo " 7.1.5 COMPRESS=0"
 echo "----------------------------------------"
-sudo sed -i'' 's/^COMPRESS=1/COMPRESS=0/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^COMPRESS=1"  "COMPRESS=0"
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^COMPRESS=0/COMPRESS=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^COMPRESS=0"  "COMPRESS=1"
 
 
 
@@ -322,55 +155,22 @@ echo
 echo "----------------------------------------"
 echo " 7.2.1 #COMPRESS_BIN=\"gzip\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^COMPRESS_BIN="gzip"$/#COMPRESS_BIN="gzip"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^COMPRESS_BIN=\"gzip\""  "#COMPRESS_BIN=\"gzip\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS_BIN" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS_BIN" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS_BIN" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^#COMPRESS_BIN="gzip"$/COMPRESS_BIN="gzip"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^#COMPRESS_BIN=\"gzip\""  "COMPRESS_BIN=\"gzip\""
 
 
 
@@ -379,56 +179,22 @@ echo
 echo "----------------------------------------"
 echo " 7.2.2 COMPRESS_BIN=\"\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^COMPRESS_BIN="gzip"$/COMPRESS_BIN=""/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^COMPRESS_BIN=\"gzip\""  "COMPRESS_BIN=\"\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS_BIN" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS_BIN" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS_BIN" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^COMPRESS_BIN=""$/COMPRESS_BIN="gzip"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
+sed_change_config_file "^COMPRESS_BIN=\"\""  "COMPRESS_BIN=\"gzip\""
 
 
 
@@ -436,57 +202,45 @@ echo
 echo "----------------------------------------"
 echo " 7.2.3 COMPRESS_BIN=\"wrong\""
 echo "----------------------------------------"
+echo
+sed_change_config_file "^COMPRESS_BIN=\"gzip\""  "COMPRESS_BIN=\"wrong\""
 
-sudo sed -i'' 's/^COMPRESS_BIN="gzip"$/COMPRESS_BIN="wrong"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS_BIN" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS_BIN" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS_BIN" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+sed_change_config_file "^COMPRESS_BIN=\"wrong\""  "COMPRESS_BIN=\"gzip\""
 
 
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+echo
+echo "----------------------------------------"
+echo " 7.2.4 COMPRESS_BIN=\"false\""
+echo "----------------------------------------"
+echo
+sed_change_config_file "^COMPRESS_BIN=\"gzip\""  "COMPRESS_BIN=\"false\""
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "FAIL" "1" "\[ERR\]\s*compression" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "FAIL" "1" "\[ERR\]\s*compression" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "FAIL" "1" "\[ERR\]\s*compression" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-
-sudo sed -i'' 's/^COMPRESS_BIN="wrong"$/COMPRESS_BIN="gzip"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^COMPRESS_BIN=\"false\""  "COMPRESS_BIN=\"gzip\""
 
 
 
@@ -504,55 +258,22 @@ echo
 echo "----------------------------------------"
 echo " 7.3.1 #COMPRESS_ARG=\"-9 --stdout\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^COMPRESS_ARG="-9 --stdout"$/#COMPRESS_ARG="-9 --stdout"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^COMPRESS_ARG=\"-9 --stdout\""  "#COMPRESS_ARG=\"-9 --stdout\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS_ARG" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS_ARG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS_ARG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^#COMPRESS_ARG="-9 --stdout"$/COMPRESS_ARG="-9 --stdout"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^#COMPRESS_ARG=\"-9 --stdout\""  "COMPRESS_ARG=\"-9 --stdout\""
 
 
 
@@ -560,57 +281,22 @@ echo
 echo "----------------------------------------"
 echo " 7.3.2 COMPRESS_ARG=\"\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^COMPRESS_ARG="-9 --stdout"$/COMPRESS_ARG=""/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^COMPRESS_ARG=\"-9 --stdout\""  "COMPRESS_ARG=\"\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^COMPRESS_ARG=""$/COMPRESS_ARG="-9 --stdout"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
-
+sed_change_config_file "^COMPRESS_ARG=\"\""  "COMPRESS_ARG=\"-9 --stdout\""
 
 
 
@@ -618,55 +304,22 @@ echo
 echo "----------------------------------------"
 echo " 7.3.3 COMPRESS_ARG=\"wrong\" (encryption: on)"
 echo "----------------------------------------"
-sudo sed -i'' 's/^COMPRESS_ARG="-9 --stdout"$/COMPRESS_ARG="wrong"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^COMPRESS_ARG=\"-9 --stdout\""  "COMPRESS_ARG=\"wrong\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "FAIL" "1" "\[ERR\]\s*compression" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "FAIL" "1" "\[ERR\]\s*compression" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "FAIL" "1" "\[ERR\]\s*compression" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^COMPRESS_ARG="wrong"$/COMPRESS_ARG="-9 --stdout"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^COMPRESS_ARG=\"wrong\""  "COMPRESS_ARG=\"-9 --stdout\""
 
 
 
@@ -674,56 +327,24 @@ echo
 echo "----------------------------------------"
 echo " 7.3.4 COMPRESS_ARG=\"wrong\" (encryption: off)"
 echo "----------------------------------------"
-sudo sed -i'' 's/^COMPRESS_ARG="-9 --stdout"$/COMPRESS_ARG="wrong"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-sudo sed -i'' 's/^ENCRYPT=1$/ENCRYPT=0/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^ENCRYPT=1"  "ENCRYPT=0"
+sed_change_config_file "^COMPRESS_ARG=\"-9 --stdout\""  "COMPRESS_ARG=\"wrong\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "FAIL" "1" "\[ERR\]\s*compression" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "FAIL" "1" "\[ERR\]\s*compression" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "FAIL" "1" "\[ERR\]\s*compression" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^ENCRYPT=0$/ENCRYPT=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-sudo sed -i'' 's/^COMPRESS_ARG="wrong"$/COMPRESS_ARG="-9 --stdout"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^COMPRESS_ARG=\"wrong\""  "COMPRESS_ARG=\"-9 --stdout\""
+sed_change_config_file "^ENCRYPT=0"  "ENCRYPT=1"
 
 
 
@@ -744,55 +365,22 @@ echo
 echo "----------------------------------------"
 echo " 7.4.1 #COMPRESS_EXT=\"gz\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^COMPRESS_EXT="gz"$/#COMPRESS_EXT="gz"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^COMPRESS_EXT=\"gz\"\$"  "#COMPRESS_EXT=\"gz\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS_EXT" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS_EXT" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS_EXT" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^#COMPRESS_EXT="gz"$/COMPRESS_EXT="gz"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^#COMPRESS_EXT=\"gz\"\$"  "COMPRESS_EXT=\"gz\""
 
 
 
@@ -800,58 +388,22 @@ echo
 echo "----------------------------------------"
 echo " 7.4.2 COMPRESS_EXT=\"\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^COMPRESS_EXT="gz"$/COMPRESS_EXT=""/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^COMPRESS_EXT=\"gz\"\$"  "COMPRESS_EXT=\"\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS_EXT" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS_EXT" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$COMPRESS_EXT" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^COMPRESS_EXT=""$/COMPRESS_EXT="gz"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
-
-
+sed_change_config_file "^COMPRESS_EXT=\"\"\$"  "COMPRESS_EXT=\"gz\""
 
 
 
@@ -859,56 +411,22 @@ echo
 echo "----------------------------------------"
 echo " 7.4.3 COMPRESS_EXT=\"/www/test\" (encryption: on)"
 echo "----------------------------------------"
-sudo sed -i'' 's/^COMPRESS_EXT="gz"$/COMPRESS_EXT="www\/test"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^COMPRESS_EXT=\"gz\"\$"  "COMPRESS_EXT=\"www/test\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "FAIL" "1" "\[ERR\]\s*compression" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "FAIL" "1" "\[ERR\]\s*compression" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "FAIL" "1" "\[ERR\]\s*compression" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^COMPRESS_EXT="www\/test"$/COMPRESS_EXT="gz"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^COMPRESS_EXT=\"www/test\"\$"  "COMPRESS_EXT=\"gz\""
 
 
 
@@ -916,65 +434,24 @@ echo
 echo "----------------------------------------"
 echo " 7.4.4 COMPRESS_EXT=\"/www/test\" (encryption: off)"
 echo "----------------------------------------"
-sudo sed -i'' 's/^COMPRESS_EXT="gz"$/COMPRESS_EXT="www\/test"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-sudo sed -i'' 's/^ENCRYPT=1$/ENCRYPT=0/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^ENCRYPT=1"  "ENCRYPT=0"
+sed_change_config_file "^COMPRESS_EXT=\"gz\"\$"  "COMPRESS_EXT=\"www/test\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "FAIL" "1" "\[ERR\]\s*compression" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "FAIL" "1" "\[ERR\]\s*compression" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "FAIL" "1" "\[ERR\]\s*compression" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^ENCRYPT=0$/ENCRYPT=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-sudo sed -i'' 's/^COMPRESS_EXT="www\/test"$/COMPRESS_EXT="gz"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
-
-
-
-
-
-
+sed_change_config_file "^COMPRESS_EXT=\"www/test\"\$"  "COMPRESS_EXT=\"gz\""
+sed_change_config_file "^ENCRYPT=0"  "ENCRYPT=1"
 
 
 

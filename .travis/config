@@ -4,8 +4,21 @@
 _INSTALL_PREFIX="/opt/mysqldump-secure/tests"
 
 
+#
+# MySQL Ports
+#
 SQL_MASTER_PORT="13306"
 SQL_SLAVE_PORT="13307"
+
+
+#
+# 3 possible commands
+#
+CMD_CRON="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+CMD_NORM="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
+CMD_VERB="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
+
+
 
 #
 # Some colors for the test output
@@ -16,202 +29,219 @@ txtblu=$(tput setaf 4) # Blue
 txtpur=$(tput setaf 5) # Purple
 txtcyn=$(tput setaf 6) # Cyan
 txtwht=$(tput setaf 7) # White
-txtrst=$(tput sgr0) # Text reset.
+txtrst=$(tput sgr0)    # Text reset.
 
+
+
+#
+# Is it Debian-based? (tmpwatch or tmpreaper)
+#
+if command -v apt-get >/dev/null 2>&1; then
+	TMPWATCH="tmpreaper"
+else
+	TMPWATCH="tmpwatch"
+fi
+
+
+
+
+
+
+################################################################################
 #
 # Some repeating functions
 #
+################################################################################
+
 
 
 #
-# @param  string  PASS|FAIL what is expected?
-# @param  string  Command
-# @return integer 0:OK | 1:FAI:
-run_test() {
-	mod="${1}"
-	cmd="${@:2}"
+# sed 's//g' wrapper
+#
+sed_change_config_file() {
+	_find="${1}"
+	_repl="${2}"
 
-	echo "${txtblu}--> Run Test:${txtrst}"
-	echo "\$ ${txtblu}${cmd}${txtrst}"
-	eval "${cmd}"
-	exit="$?"
+	sudo sed -i'' "s|${_find}|${_repl}|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+}
 
-	# Test must succeed
-	if [ "${mod}" = "PASS" ]; then
 
-		if [ "${exit}" != "0" ]; then
-			echo "${txtpur}===> [FAIL]${txtrst}"
-			echo "${txtpur}===> [FAIL] Unexpected exit code: ${exit}${txtrst}"
-			echo "${txtpur}===> [FAIL]${txtrst}"
-			echo
-			return 1
-		else
-			echo "${txtgrn}===> [OK]${txtrst}"
-			echo "${txtgrn}===> [OK] Success${txtrst}"
-			echo "${txtgrn}===> [OK]${txtrst}"
-			echo
-		echo
-			return 0
+
+#
+# This runs all the checks as fast as possible
+# One run for all checks.
+#
+check() {
+
+	_data_dir="${1}" # Recreate datadir?
+
+	# 1.) Run test
+	_run="${2}"	# Do run test? (1|0)
+	_ret="${3}" # Expected return (PASS|FAIL)
+
+	# 2.) Expect test
+	_exp="${4}"	# Check for expected string? (1|0)
+	_str="${5}" # String that must be found
+
+	# 3.) Unbound variable test
+	_var="${6}" # Do unbound variable test? (1|0)
+
+	# 4.) Syntax error test
+	_syn="${7}" # Do syntax error test? (1|0)
+
+	# 5.) Do end test (check if program run till the end)
+	_end="${8}" # Do end test? (1|0)
+
+	# Command to execute
+	_cmd="${@:9}"
+
+	# Count errors
+	_ERROR=0
+
+
+	#
+	# RECREATE DATADIR?
+	#
+	if [ "${_data_dir}" = "1" ]; then
+		if [ -d ${_INSTALL_PREFIX}/var/mysqldump-secure/ ]; then
+			sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
 		fi
+	fi
 
-	# Test must fail
-	elif [ "${mod}" = "FAIL" ]; then
 
-		if [ "${exit}" = "0" ]; then
-			echo "${txtpur}===> [FAIL]${txtrst}"
-			echo "${txtpur}===> [FAIL] Unexpected OK${txtrst}"
-			echo "${txtpur}===> [FAIL]${txtrst}"
-			echo
-			return 1
+	#
+	# EXECUTE THE COMMAND (AND SHOW OUTPUT)
+	#
+	echo "\$ ${txtblu}${_cmd}${txtrst}"
+	_OUTPUT="$(${_cmd} 2>&1)"
+	_RETURN="$?"
+	echo -e -n "${_OUTPUT}"
+	echo
+	echo
+
+
+	#
+	# 1.) RUN TEST
+	#
+	if [ "${_run}" = "1" ]; then
+
+		echo "\$ 1. RUN TEST ..."
+
+		# Program must succeed
+		if [ "${_ret}" = "PASS" ]; then
+			if [ "${_RETURN}" != "0" ]; then
+				echo "${txtpur}===> [FAIL] Unexpected exit code: ${_RETURN}${txtrst}"
+				_ERROR=$((_ERROR+1));
+			else
+				echo "${txtgrn}===> [OK] Success${txtrst}"
+			fi
+		# Program must fail
+		elif [ "${_ret}" = "FAIL" ]; then
+			if [ "${_RETURN}" = "0" ]; then
+				echo "${txtpur}===> [FAIL] Unexpected OK${txtrst}"
+				_ERROR=$((_ERROR+1));
+			else
+				echo "${txtgrn}===> [OK] Expected Error. Exit code: ${exit}${txtrst}"
+			fi
+		# Something else happened
 		else
-			echo "${txtgrn}===> [OK]${txtrst}"
-			echo "${txtgrn}===> [OK] Expected Error. Exit code: ${exit}${txtrst}"
-			echo "${txtgrn}===> [OK]${txtrst}"
-			echo
-		echo
-			return 0
+			echo "${txtgrn}===> [FAIL] Invalid usage for 'run_test'${txtrst}"
+			_ERROR=$((_ERROR+1));
 		fi
-
-	# Something went wrong
-	else
-
-		echo "${txtpur}===> [FAIL]${txtrst}"
-		echo "${txtgrn}===> [FAIL] Invalid usage of 'run_test'${txtrst}"
-		echo "${txtpur}===> [FAIL]${txtrst}"
-		return 1
+		echo
 
 	fi
 
-}
+	#
+	# 2.) EXPECT TEST (expect string)
+	#
+	if [ "${_exp}" = "1" ]; then
 
-#
-## Test against unset variables
-# @param  string  Command
-# @return integer 0:OK | 1:FAI:
-var_test() {
-	cmd="$@"
+		echo "\$ 2. EXPECTED ERROR TEST ..."
 
-	echo "${txtblu}--> Unbound Variable Test:${txtrst}"
-	echo "\$ ${txtblu}${cmd} | grep 'parameter not set'${txtrst}"
-	unbound="$(eval "${cmd} 3>&2 2>&1 1>&3 > /dev/null | grep 'parameter not set'")"
+		_found="$(echo "${_OUTPUT}" | grep -A 1 -B 1 "${_str}")"
 
-	if [ "${unbound}" != "" ]; then
-		echo "${txtpur}===> [FAIL]${txtrst}"
-		echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}"
-		echo "${txtpur}===> [FAIL]${txtrst}"
-		echo "${txtpur}${unbound}${txtrst}"
-		echo
-		return 1
-	else
-		echo "${txtgrn}===> [OK]${txtrst}"
-		echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"
-		echo "${txtgrn}===> [OK]${txtrst}"
-		echo
-		return 0
-	fi
-}
-
-#
-## Test against syntax errors
-# @param  string  Command
-# @return integer 0:OK | 1:FAI:
-syn_test() {
-	cmd="$@"
-
-	echo "${txtblu}--> Syntax Error Test:${txtrst}"
-	echo "\$ ${txtblu}${cmd} | grep -E '.*[0-9]*:.*: not found.*'${txtrst}"
-	unfound="$(eval "${cmd} 3>&2 2>&1 1>&3 > /dev/null | grep -E '.*[0-9]*:.*: not found.*'")"
-	syntax="$(eval "${cmd} 3>&2 2>&1 1>&3 > /dev/null | grep -E '.*[0-9]*:.*: Syntax error:.*'")"
-
-
-	if [ "${syntax}" != "" ]; then
-		echo "${txtpur}===> [FAIL]${txtrst}"
-		echo "${txtpur}===> [FAIL] Syntax error found.${txtrst}"
-		echo "${txtpur}===> [FAIL]${txtrst}"
-		if [ "${unfound}" != "" ]; then
-			echo "${txtpur}${unfound}${txtrst}"
+		if [ "${_found}" = "" ]; then
+			echo "${txtpur}===> [FAIL] Expected error string not found in stderr:${txtrst} \"${_str}\""
+			_ERROR=$((_ERROR+1));
+		else
+			echo "${_found}"
+			echo "${txtgrn}===> [OK] Expected error string found in stderr:${txtrst} \"${_str}\""
 		fi
-		echo "${txtpur}${syntax}${txtrst}"
 		echo
-		return 1
-	else
+	fi
 
-		if [ "${unfound}" != "" ]; then
-			echo "${txtpur}===> [FAIL]${txtrst}"
+	#
+	# 3.) UNBOUND VARIABLE TEST
+	#
+	if [ "${_var}" = "1" ]; then
+
+		echo "\$ 3. UNBOUND VARIABLE TEST ..."
+
+		_found="$(echo "${_OUTPUT}" | grep 'parameter not set')"
+
+		if [ "${_found}" != "" ]; then
+			echo "${unbound}"
+			echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}"
+			_ERROR=$((_ERROR+1));
+		else
+			echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"
+		fi
+		echo
+	fi
+
+	#
+	# 4.) SYNTAX ERROR TEST
+	#
+	if [ "${_syn}" = "1" ]; then
+
+		echo "\$ 4. SYNTAX ERROR TEST ..."
+
+		_unfound="$(echo "${_OUTPUT}" | grep -E '.*[0-9]*:.*: not found.*')"
+		_syntax="$(echo "${_OUTPUT}" | grep -E '.*[0-9]*:.*: Syntax error:.*')"
+
+		if [ "${_syntax}" != "" ]; then
+			if [ "${_unfound}" != "" ]; then
+				echo "${_unfound}"
+			fi
+			echo "${_syntax}"
 			echo "${txtpur}===> [FAIL] Syntax error found.${txtrst}"
-			echo "${txtpur}===> [FAIL]${txtrst}"
-			echo "${txtpur}${unfound}${txtrst}"
-			echo
-			return 1
+			_ERROR=$((_ERROR+1));
 		else
-			echo "${txtgrn}===> [OK]${txtrst}"
-			echo "${txtgrn}===> [OK] No Syntax error found.${txtrst}"
-			echo "${txtgrn}===> [OK]${txtrst}"
-			echo
-			return 0
+
+			if [ "${_unfound}" != "" ]; then
+				echo "${_unfound}"
+				echo "${txtpur}===> [FAIL] Syntax error found.${txtrst}"
+				_ERROR=$((_ERROR+1));
+			else
+				echo "${txtgrn}===> [OK] No Syntax error found.${txtrst}"
+			fi
 		fi
+		echo
 	fi
-}
 
 
-#
-## Test if the program runs till the end and does not stop before
-# @param  string  Command
-# @return integer 0:OK | 1:FAI:
-end_test() {
-	cmd="$@"
 
-	echo "${txtblu}--> Finish Test (does not abort unwantedly):${txtrst}"
-	echo "\$ ${txtblu}${cmd} | grep -E 'Aborting|Finished successfully|Finished with errors|invalid argument:'${txtrst}"
-	found="$(eval "${cmd} 2>&1 | tail -n1 | grep -E '(\[ERR\]\s*\[FAIL\]\s* Finished with errors)|(\[INFO\]\s*\[OK\]\s* Finished successfully)|(\[ERR\]\s*Aborting)|(\sfor available options.)'")"
 
-	if [ "${found}" = "" ]; then
-		echo "${txtpur}===> [FAIL]${txtrst}"
-		echo "${txtpur}===> [FAIL] Program Terminated abnormally.${txtrst}"
-		echo "${txtpur}===> [FAIL]${txtrst}"
-		echo "${txtpur}${syntax}${txtrst}"
+	#
+	# 5.) END TEST
+	#
+	if [ "${_end}" = "1" ]; then
+
+		echo "\$ 5. FINISH TEST ..."
+
+		_found="$(echo "${_OUTPUT}" | grep -E 'Aborting|Finished successfully|Finished with errors|invalid argument:')"
+
+		if [ "${_found}" = "" ]; then
+			echo "${txtpur}===> [FAIL] Program Terminated abnormally.${txtrst}"
+			_ERROR=$((_ERROR+1));
+		else
+			echo "${txtgrn}===> [OK] Program exited as expected.${txtrst}"
+		fi
 		echo
-		return 1
-	else
-		echo "${txtgrn}===> [OK]${txtrst}"
-		echo "${txtgrn}===> [OK] Program exited as expected.${txtrst}"
-		echo "${txtgrn}===> [OK]${txtrst}"
-		echo
-		return 0
 	fi
-}
 
-
-
-#
-## Test if specific error sting is present in stderr
-# @param  string  Expected error string
-# @param  string  Command
-# @return integer 0:OK | 1:FAI:
-expect_err_msg() {
-	msg="${1}"
-	cmd="${@:2}"
-
-	echo "${txtblu}--> Required error-msg Test (only from stderr):${txtrst}"
-	echo "\$ ${txtblu}${cmd} | grep \"${msg}\"${txtrst}"
-	found="$(eval "${cmd} 2>&1 >/dev/null")"
-	found="$(echo "${found}" | grep "${msg}")"
-
-	if [ "${found}" = "" ]; then
-		echo "${txtpur}===> [FAIL]${txtrst}"
-		echo "${txtpur}===> [FAIL] Expected error string not found in stderr.${txtrst}"
-		echo "${txtpur}===> [FAIL]${txtrst}"
-		echo "${txtpur}Expected:${txtrst} ${msg}${txtrst}"
-		echo
-		return 1
-	else
-		echo "${txtgrn}===> [OK]${txtrst}"
-		echo "${txtgrn}===> [OK] Expected error string found in stderr:${txtrst} \"${msg}\""
-		echo "${txtgrn}===> [OK]${txtrst}"
-		echo "${txtgrn}Found:${txtrst} ${found}${txtrst}"
-		echo
-		return 0
-	fi
+	return ${_ERROR}
 }
 
 
@@ -219,21 +249,37 @@ expect_err_msg() {
 
 
 mds_remove_datadir() {
-	sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/
-	return $?
+	if [ -d ${_INSTALL_PREFIX}/var/mysqldump-secure/ ]; then
+		sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/
+		return $?
+	fi
+	return 0
 }
+
+
+
 mds_remove_logfiles() {
 	_exit=0
 
-	sudo rm -f ${_INSTALL_PREFIX}/var/log/mysqldump-secure.log
-	if [ "$?" != "0" ]; then _exit=1; fi
+	if [ -f ${_INSTALL_PREFIX}/var/log/mysqldump-secure.log ]; then
+		sudo rm -f ${_INSTALL_PREFIX}/var/log/mysqldump-secure.log
+		if [ "$?" != "0" ]; then _exit=1; fi
+	fi
 
-	sudo rm -f ${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log
-	if [ "$?" != "0" ]; then _exit=1; fi
+	if [ -f ${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log ]; then
+		sudo rm -f ${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log
+		if [ "$?" != "0" ]; then _exit=1; fi
+	fi
 
 	return $_exit
 }
+
+
+
 mds_recreate_datadir() {
-	sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
-	return $?
+	if [ -d ${_INSTALL_PREFIX}/var/mysqldump-secure/ ]; then
+		sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+		return $?
+	fi
+	return 0
 }

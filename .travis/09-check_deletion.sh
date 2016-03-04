@@ -16,6 +16,7 @@ echo "##########################################################################
 
 
 
+
 echo
 echo
 echo "--------------------------------------------------------------------------------"
@@ -28,196 +29,66 @@ echo
 echo "----------------------------------------"
 echo " 9.1.1 #DELETE=1"
 echo "----------------------------------------"
-sudo sed -i'' 's/^DELETE=1/#DELETE=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^DELETE=1"  "#DELETE=1"
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^#DELETE=1/DELETE=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^#DELETE=1"  "DELETE=1"
 
 
 echo
 echo "----------------------------------------"
 echo " 9.1.2 DELETE=2"
 echo "----------------------------------------"
-sudo sed -i'' 's/^DELETE=1/DELETE=2/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^DELETE=1"  "DELETE=2"
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^DELETE=2/DELETE=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
+sed_change_config_file "^DELETE=2"  "DELETE=1"
 
 
 echo
 echo "----------------------------------------"
 echo " 9.1.3 DELETE=\"wrong\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^DELETE=1/DELETE="wrong"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^DELETE=1"  "DELETE=\"wrong\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^DELETE="wrong"/DELETE=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^DELETE=\"wrong\""  "DELETE=1"
 
 
 
@@ -225,65 +96,22 @@ echo
 echo "----------------------------------------"
 echo " 9.1.4 DELETE=\"\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^DELETE=1/DELETE=""/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^DELETE=1"  "DELETE=\"\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^DELETE=""/DELETE=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^DELETE=\"\""  "DELETE=1"
 
 
 
@@ -291,57 +119,22 @@ echo
 echo "----------------------------------------"
 echo " 9.1.5 DELETE=0"
 echo "----------------------------------------"
-sudo sed -i'' 's/^DELETE=1/DELETE=0/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^DELETE=1"  "DELETE=0"
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "0" " " "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "0" " " "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "0" " " "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^DELETE=0/DELETE=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
+sed_change_config_file "^DELETE=0"  "DELETE=1"
 
 
 
@@ -357,272 +150,96 @@ echo "-  9.2 \$DELETE_METHOD"
 echo "-"
 echo "--------------------------------------------------------------------------------"
 
+
 echo
 echo "----------------------------------------"
-echo " 9.2.1 #DELETE_METHOD=\"tmpreaper\""
+echo " 9.2.1 #DELETE_METHOD=\"${TMPWATCH}\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^DELETE_METHOD="tmpreaper"/#DELETE_METHOD="tmpreaper"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DELETE_METHOD=\"${TMPWATCH}\""  "#DELETE_METHOD=\"${TMPWATCH}\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_METHOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_METHOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_METHOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^#DELETE_METHOD="tmpreaper"/DELETE_METHOD="tmpreaper"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
+sed_change_config_file "^#DELETE_METHOD=\"${TMPWATCH}\""  "DELETE_METHOD=\"${TMPWATCH}\""
 
 
 echo
 echo "----------------------------------------"
 echo " 9.2.2 DELETE_METHOD=\"\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^DELETE_METHOD="tmpreaper"/DELETE_METHOD=""/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DELETE_METHOD=\"${TMPWATCH}\""  "DELETE_METHOD=\"\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_METHOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_METHOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_METHOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^DELETE_METHOD=""/DELETE_METHOD="tmpreaper"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
+sed_change_config_file "^DELETE_METHOD=\"\""  "DELETE_METHOD=\"${TMPWATCH}\""
 
 
 echo
 echo "----------------------------------------"
 echo " 9.2.3 DELETE_METHOD=\"wrong\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^DELETE_METHOD="tmpreaper"/DELETE_METHOD="wrong"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DELETE_METHOD=\"${TMPWATCH}\""  "DELETE_METHOD=\"wrong\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_METHOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_METHOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_METHOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^DELETE_METHOD="wrong"/DELETE_METHOD="tmpreaper"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
-
+sed_change_config_file "^DELETE_METHOD=\"wrong\""  "DELETE_METHOD=\"${TMPWATCH}\""
 
 
 echo
 echo "----------------------------------------"
 echo " 9.2.4 DELETE_METHOD=\"false\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^DELETE_METHOD="tmpreaper"/DELETE_METHOD="false"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DELETE_METHOD=\"${TMPWATCH}\""  "DELETE_METHOD=\"false\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_METHOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_METHOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_METHOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_METHOD" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^DELETE_METHOD="false"/DELETE_METHOD="tmpreaper"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DELETE_METHOD=\"false\""  "DELETE_METHOD=\"${TMPWATCH}\""
 
 
 
 
-
+#
+# TODO: Don't know the resulting error code
+#
 
 
 echo
@@ -637,64 +254,21 @@ echo
 echo "----------------------------------------"
 echo " 9.3.1 #DELETE_FORCE=1"
 echo "----------------------------------------"
-sudo sed -i'' 's/^DELETE_FORCE=1/#DELETE_FORCE=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DELETE_FORCE=1"  "#DELETE_FORCE=1"
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_FORCE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_FORCE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_FORCE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^#DELETE_FORCE=1/DELETE_FORCE=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^#DELETE_FORCE=1"  "DELETE_FORCE=1"
 
 
 
@@ -702,65 +276,21 @@ echo
 echo "----------------------------------------"
 echo " 9.3.2 DELETE_FORCE=2"
 echo "----------------------------------------"
-sudo sed -i'' 's/^DELETE_FORCE=1/DELETE_FORCE=2/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DELETE_FORCE=1"  "DELETE_FORCE=2"
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_FORCE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_FORCE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_FORCE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^DELETE_FORCE=2/DELETE_FORCE=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^DELETE_FORCE=2"  "DELETE_FORCE=1"
 
 
 
@@ -768,65 +298,21 @@ echo
 echo "----------------------------------------"
 echo " 9.3.3 DELETE_FORCE=\"wrong\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^DELETE_FORCE=1/DELETE_FORCE="wrong"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DELETE_FORCE=1"  "DELETE_FORCE=\"wrong\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_FORCE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_FORCE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_FORCE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^DELETE_FORCE="wrong"/DELETE_FORCE=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^DELETE_FORCE=\"wrong\""  "DELETE_FORCE=1"
 
 
 
@@ -834,65 +320,21 @@ echo
 echo "----------------------------------------"
 echo " 9.3.4 DELETE_FORCE=\"\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^DELETE_FORCE=1/DELETE_FORCE=""/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DELETE_FORCE=1"  "DELETE_FORCE=\"\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_FORCE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_FORCE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_FORCE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_FORCE" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^DELETE_FORCE=""/DELETE_FORCE=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^DELETE_FORCE=\"\""  "DELETE_FORCE=1"
 
 
 
@@ -900,60 +342,21 @@ echo
 echo "----------------------------------------"
 echo " 9.3.5 DELETE_FORCE=0"
 echo "----------------------------------------"
-sudo sed -i'' 's/^DELETE_FORCE=1/DELETE_FORCE=0/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DELETE_FORCE=1"  "DELETE_FORCE=\"\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^DELETE_FORCE=0/DELETE_FORCE=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
-
-
-
+sed_change_config_file "^DELETE_FORCE=\"\""  "DELETE_FORCE=1"
 
 
 
@@ -972,64 +375,21 @@ echo
 echo "----------------------------------------"
 echo " 9.4.1 #DELETE_IF_OLDER=1m"
 echo "----------------------------------------"
-sudo sed -i'' 's/^DELETE_IF_OLDER=1m/#DELETE_IF_OLDER=1m/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DELETE_IF_OLDER=1m"  "#DELETE_IF_OLDER=1m"
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_IF_OLDER" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_IF_OLDER" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_IF_OLDER" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^#DELETE_IF_OLDER=1m/DELETE_IF_OLDER=1m/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^#DELETE_IF_OLDER=1m"  "DELETE_IF_OLDER=1m"
 
 
 
@@ -1037,65 +397,21 @@ echo
 echo "----------------------------------------"
 echo " 9.4.2 DELETE_IF_OLDER=0"
 echo "----------------------------------------"
-sudo sed -i'' 's/^DELETE_IF_OLDER=1m/DELETE_IF_OLDER=0/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DELETE_IF_OLDER=1m"  "DELETE_IF_OLDER=0"
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_IF_OLDER" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_IF_OLDER" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_IF_OLDER" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^DELETE_IF_OLDER=0/DELETE_IF_OLDER=1m/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^DELETE_IF_OLDER=0"  "DELETE_IF_OLDER=1m"
 
 
 
@@ -1103,65 +419,21 @@ echo
 echo "----------------------------------------"
 echo " 9.4.3 DELETE_IF_OLDER=\"wrong\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^DELETE_IF_OLDER=1m/DELETE_IF_OLDER="wrong"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DELETE_IF_OLDER=1m"  "DELETE_IF_OLDER=\"wrong\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_IF_OLDER" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_IF_OLDER" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_IF_OLDER" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^DELETE_IF_OLDER="wrong"/DELETE_IF_OLDER=1m/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^DELETE_IF_OLDER=\"wrong\""  "DELETE_IF_OLDER=1m"
 
 
 
@@ -1169,65 +441,21 @@ echo
 echo "----------------------------------------"
 echo " 9.4.4 DELETE_IF_OLDER=\"\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^DELETE_IF_OLDER=1m/DELETE_IF_OLDER=""/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DELETE_IF_OLDER=1m"  "DELETE_IF_OLDER=\"\""
 
+	echo "---------- CRON MODE ----------"
+	CMD="${CMD_CRON}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_IF_OLDER" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+	echo "---------- NORMAL MODE ----------"
+	CMD="${CMD_NORM}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_IF_OLDER" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	echo "---------- NORMAL MODE VERBOSE ----------"
+	CMD="${CMD_VERB}"
+	if ! check "1" "1" "PASS" "1" "\$DELETE_IF_OLDER" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! expect_err_msg "\$DELETE_IF_OLDER" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^DELETE_IF_OLDER=""/DELETE_IF_OLDER=1m/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^DELETE_IF_OLDER=\"\""  "DELETE_IF_OLDER=1m"
 
 
 

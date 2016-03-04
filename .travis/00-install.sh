@@ -69,8 +69,14 @@ sudo sed -i'' 's/^NAGIOS_LOG=0/NAGIOS_LOG=1/' ${_INSTALL_PREFIX}/etc/mysqldump-s
 # 5. Enable Deletion (Delete all files older than 1 minute)
 sudo sed -i'' 's/^DELETE=0/DELETE=1/'                                  ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
 sudo sed -i'' 's/^DELETE_FORCE=0/DELETE_FORCE=1/'                      ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-sudo sed -i'' 's/^DELETE_METHOD="tmpwatch"/DELETE_METHOD="tmpreaper"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
 sudo sed -i'' 's/^DELETE_IF_OLDER=720/DELETE_IF_OLDER=1m/'             ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+
+# Change tmpwatch to tmpreaper on debian based systems
+if command -v apt-get >/dev/null 2>&1; then
+	sudo sed -i'' 's/^DELETE_METHOD="tmpwatch"/DELETE_METHOD="tmpreaper"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+fi
+
+
 
 # 6. Show config
 #sudo cat ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
