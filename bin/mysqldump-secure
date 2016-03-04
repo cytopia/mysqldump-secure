@@ -2631,9 +2631,9 @@ for db in ${DATABASES}; do
 			if [ "${MY_ERRORS}" != "" ]; then
 				TOTAL_ERR=$((TOTAL_ERR + 1))
 
-				debug_nl "info" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-				debug    "err"  "(RUN): Error dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-				debugr   "err"  "${MY_ERRORS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debugn  "err" "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug   "err"  "(RUN): Error dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debugr  "err"  "${MY_ERRORS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 				ERROR="$(merge_exit_codes "${ERROR}" 2)"
 				[ "${NAGIOS_DB_ERROR}" = "" ] && NAGIOS_DB_ERROR="${db}" || NAGIOS_DB_ERROR="${NAGIOS_DB_ERROR},${db}"
@@ -2641,7 +2641,9 @@ for db in ${DATABASES}; do
 				TOTAL_DBS=$((TOTAL_DBS + 1))
 				endtime=$(date +%s)
 
-				debugn "info" "$((endtime - starttime)) sec" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debugn "info"    "$((endtime - starttime)) sec" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug  "verbose" "File: ${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
 
 				[ "${NAGIOS_DB_DUMPED}" = "" ] && NAGIOS_DB_DUMPED="${db}" || NAGIOS_DB_DUMPED="${NAGIOS_DB_DUMPED},${db}"
 
