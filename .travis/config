@@ -159,7 +159,7 @@ check() {
 
 		echo "\$ 2. EXPECTED ERROR TEST ..."
 
-		_found="$(echo "${_OUTPUT}" | grep -A 1 -B 1 "${_str}")"
+		_found="$(echo "${_OUTPUT}" | grep '\[WARN\]\|\[ERR\]' | grep -A 1 -B 1 -e "${_str}")"
 
 		if [ "${_found}" = "" ]; then
 			echo "${txtpur}===> [FAIL] Expected error string not found in stderr:${txtrst} \"${_str}\""

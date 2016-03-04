@@ -287,17 +287,17 @@ sed_change_config_file "/var/log/mysqldump-secure.log"  "/var/log/dir1/dir2/mysq
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "mysqldump-secure.log/dir1/dir2" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "PASS" "1" "/var/log/dir1/dir2/mysqldump-secure.log" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 	sudo rm -rf ${_INSTALL_PREFIX}/var/log/dir1
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "mysqldump-secure.log/dir1/dir2" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "PASS" "1" "/var/log/dir1/dir2/mysqldump-secure.log" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 	sudo rm -rf ${_INSTALL_PREFIX}/var/log/dir1
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "mysqldump-secure.log/dir1/dir2" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "PASS" "1" "/var/log/dir1/dir2/mysqldump-secure.log" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 	sudo rm -rf ${_INSTALL_PREFIX}/var/log/dir1
 
 sed_change_config_file "/var/log/dir1/dir2/mysqldump-secure.log"  "/var/log/mysqldump-secure.log"

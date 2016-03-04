@@ -28,55 +28,22 @@ echo
 echo "----------------------------------------"
 echo " 3.1.1 #MYSQL_CNF_FILE=\"/etc/mysqldump-secure.cnf\""
 echo "----------------------------------------"
-sudo sed -i'' 's/^MYSQL_CNF_FILE=/#MYSQL_CNF_FILE=/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^MYSQL_CNF_FILE="  "#MYSQL_CNF_FILE="
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_CNF_FILE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_CNF_FILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_CNF_FILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^#MYSQL_CNF_FILE=/MYSQL_CNF_FILE=/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^#MYSQL_CNF_FILE="  "MYSQL_CNF_FILE="
 
 
 
@@ -84,55 +51,22 @@ echo
 echo "----------------------------------------"
 echo " 3.1.2 MYSQL_CNF_FILE=\"/etc/mysqldump-secure.cnf2\""
 echo "----------------------------------------"
-sudo sed -i'' 's/mysqldump-secure.cnf/mysqldump-secure.cnf2/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "mysqldump-secure.cnf"  "mysqldump-secure.cnf.notfound"
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "FAIL" "1" "mysqldump-secure.cnf.notfound" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "FAIL" "1" "mysqldump-secure.cnf.notfound" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "FAIL" "1" "mysqldump-secure.cnf.notfound" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-sudo sed -i'' 's/mysqldump-secure.cnf2/mysqldump-secure.cnf/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
+sed_change_config_file "mysqldump-secure.cnf.notfound"  "mysqldump-secure.cnf"
 
 
 
@@ -140,54 +74,22 @@ echo
 echo "----------------------------------------"
 echo " 3.1.3 MYSQL_CNF_FILE=\"\""
 echo "----------------------------------------"
-sudo sed -i'' "s|MYSQL_CNF_FILE=\"${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf\"|MYSQL_CNF_FILE=\"\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^MYSQL_CNF_FILE=\"${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf\""  "MYSQL_CNF_FILE=\"\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_CNF_FILE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_CNF_FILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_CNF_FILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' "s|MYSQL_CNF_FILE=\"\"|MYSQL_CNF_FILE=\"${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^MYSQL_CNF_FILE=\"\""  "MYSQL_CNF_FILE=\"${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf\""
 
 
 
@@ -205,55 +107,22 @@ echo
 echo "----------------------------------------"
 echo " 3.2.1 #MYSQL_SSL_ENABLE=1"
 echo "----------------------------------------"
-sudo sed -i'' 's/MYSQL_SSL_ENABLE/#MYSQL_SSL_ENABLE/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^MYSQL_SSL_ENABLE="  "#MYSQL_SSL_ENABLE="
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/#MYSQL_SSL_ENABLE/MYSQL_SSL_ENABLE/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^#MYSQL_SSL_ENABLE="  "MYSQL_SSL_ENABLE="
 
 
 
@@ -261,55 +130,22 @@ echo
 echo "----------------------------------------"
 echo " 3.2.2 MYSQL_SSL_ENABLE=2"
 echo "----------------------------------------"
-sudo sed -i'' 's/MYSQL_SSL_ENABLE=1/MYSQL_SSL_ENABLE=2/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^MYSQL_SSL_ENABLE=1"  "MYSQL_SSL_ENABLE=2"
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-sudo sed -i'' 's/MYSQL_SSL_ENABLE=2/MYSQL_SSL_ENABLE=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
+sed_change_config_file "^MYSQL_SSL_ENABLE=2"  "MYSQL_SSL_ENABLE=1"
 
 
 
@@ -317,112 +153,44 @@ echo
 echo "----------------------------------------"
 echo " 3.2.3 MYSQL_SSL_ENABLE="
 echo "----------------------------------------"
-sudo sed -i'' 's/^MYSQL_SSL_ENABLE=1/MYSQL_SSL_ENABLE=/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^MYSQL_SSL_ENABLE=1"  "MYSQL_SSL_ENABLE="
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/^MYSQL_SSL_ENABLE=/MYSQL_SSL_ENABLE=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^MYSQL_SSL_ENABLE="  "MYSQL_SSL_ENABLE=1"
 
 
 echo
 echo "----------------------------------------"
 echo " 3.2.4 MYSQL_SSL_ENABLE=0"
 echo "----------------------------------------"
-sudo sed -i'' 's/MYSQL_SSL_ENABLE=1/MYSQL_SSL_ENABLE=0/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^MYSQL_SSL_ENABLE=1"  "MYSQL_SSL_ENABLE=0"
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/MYSQL_SSL_ENABLE=0/MYSQL_SSL_ENABLE=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
-
-
+sed_change_config_file "^MYSQL_SSL_ENABLE=0"  "MYSQL_SSL_ENABLE=1"
 
 
 
@@ -438,110 +206,48 @@ echo
 echo "----------------------------------------"
 echo " 3.3.1 #MYSQL_SSL_CA_PEM"
 echo "----------------------------------------"
-sudo sed -i'' 's/MYSQL_SSL_CA_PEM/#MYSQL_SSL_CA_PEM/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^MYSQL_SSL_CA_PEM"  "#MYSQL_SSL_CA_PEM"
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_CA_PEM" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_CA_PEM" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_CA_PEM" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/#MYSQL_SSL_CA_PEM/MYSQL_SSL_CA_PEM/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^#MYSQL_SSL_CA_PEM"  "MYSQL_SSL_CA_PEM"
 
 
 
 
 echo
 echo "----------------------------------------"
-echo " 3.3.2 ca.pem.notfound"
+echo " 3.3.2 MYSQL_SSL_CA_PEM=\"ca.pem.notfound\""
 echo "----------------------------------------"
-sudo sed -i'' 's/ca.pem/ca.pem.notfound/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "ca.pem"  "ca.pem.notfound"
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_CA_PEM" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_CA_PEM" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_CA_PEM" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+sed_change_config_file "ca.pem.notfound"  "ca.pem"
 
 
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "FAIL" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/ca.pem.notfound/ca.pem/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
 
   # 9.f [ABORT] $MYSQL_SSL_CLIENT_CERT_PEM
   # TODO:
