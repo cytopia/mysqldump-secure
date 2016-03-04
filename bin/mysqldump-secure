@@ -77,6 +77,17 @@ _DEFAULT_LOG_CHMOD="0600"
 # Default nagios variables
 _DEFAULT_NAGIOS_LOG_CHMOD="0644"
 
+# Default system temp directory
+_DEFAULT_TMP_DIR="/tmp"
+
+
+
+################################################################################
+#
+# MYSQL VARIABLES
+#
+################################################################################
+
 
 # This option will be forced
 MYSQL_FORCED_OPTS="--skip-opt"
@@ -1272,6 +1283,38 @@ fi
 #fi
 
 
+
+############################################################
+# Tmp folder
+############################################################
+
+# Check $DUMP_DIR_CHMOD
+if ! set | grep '^TMP_DIR=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$TMP_DIR variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	TMP_DIR=${_DEFAULT_TMP_DIR}
+elif [ -z "${TMP_DIR}" ]; then
+	debug "warn" "(CFG): \$TMP_DIR variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	TMP_DIR=${_DEFAULT_TMP_DIR}
+fi
+
+if [ ! -d "${TMP_DIR}" ]; then
+	debug "err" "(CFG): \$TMP_DIR is not a directory: ${TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(HLP): Change value of \$TMP_DIR in your config" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	exit 1
+elif [ ! -w "${TMP_DIR}" ]; then
+	debug "err" "(CFG): \$TMP_DIR is not writeable" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "(HLP): Change value of \$TMP_DIR in your config" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "err" "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	exit 1
+fi
+debug "verbose" "(CFG): Using temporary directory: ${TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
+
+
+
 ############################################################
 # Destination Directory and Prefix
 ############################################################
@@ -2123,7 +2166,7 @@ ERROR=0
 # Create tmp files and folders
 ############################################################
 
-if MY_TMP_DIR="$( mktemp -d /tmp/mysqldump-secure.XXXXXXXXXX 2>/dev/null)"; then
+if MY_TMP_DIR="$( mktemp -d ${TMP_DIR}/mysqldump-secure.XXXXXXXXXX 2>/dev/null)"; then
 	debug "verbose"  "(RUN): Creating tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "(RUN): Cannot create tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
