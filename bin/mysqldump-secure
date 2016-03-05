@@ -2792,24 +2792,58 @@ debug "info" "(RUN): Total size dumped: ${TOTAL_SIZE} MB" $LOG "${LOGFILE}" "${_
 ############################################################
 # Delete old Files
 ############################################################
+TMPWATCH_NUM_DEL="0"
+
 if [ ${DELETE} -eq 1 ]; then
 
 	# Force deletion?
-	[ "${DELETE_FORCE}" = "1" ] && FORCE_ARG="--force" || FORCE_ARG=""
+	if [ "${DELETE_FORCE}" = "1" ]; then FORCE_ARG="--force -vv"; else FORCE_ARG="-vv"; fi
 
-	DELETED="$(${TMPWATCH} ${FORCE_ARG} -m "$DELETE_IF_OLDER" -v "${DUMP_PATH}/" 2> "${MY_TMP_FILE_DEL}")"
-	TMP_ERR="$?"
-	if [ "${TMP_ERR}" != "0" ]; then
-		debug  "err" "(RUN): Error on ${TMPWATCH}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debugr "err" "${MY_TMP_FILE_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	TMPWATCH_RUN="$(${TMPWATCH} ${FORCE_ARG} -m "$DELETE_IF_OLDER" -v "${DUMP_PATH}/" 2> "${MY_TMP_FILE_DEL}")"
+	TMPWATCH_ERRNO="$?"
+	TMPWATCH_ERROR="$( cat "${MY_TMP_FILE_DEL}" )"
 
+	if [ "${TMPWATCH_ERRNO}" != "0" ]; then
+		debug  "err"  "(RUN): Error on ${TMPWATCH}: ${TMPWATCH_ERRNO}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debugr "err"  "${TMPWATCH_ERROR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		ERROR="$(merge_exit_codes "${ERROR}" 1)"
+	elif [ "${TMPWATCH_ERROR}" != "" ]; then
+		debug  "warn" "(RUN): Warning on ${TMPWATCH}: ${TMPWATCH_ERRNO}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debugr "warn" "${TMPWATCH_ERROR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		ERROR="$(merge_exit_codes "${ERROR}" 1)"
 	fi
-	NUM_DEL="$( echo "${DELETED}" | grep -ci 'Removing' )"
-	debug  "info" "(RUN): Deleting files older than ${DELETE_IF_OLDER} hours... ${NUM_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debugr "info" "${DELETED}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
+	# Number removed/skipped files
+	TMPWATCH_NUM_DEL="$( echo "${TMPWATCH_RUN}" | grep -ci 'Removing file' )"
+	TMPWATCH_NUM_IGN="$( echo "${TMPWATCH_RUN}" | grep -ci 'skipped:' )"
+
+	# Output of removed/skipped files
+	TMPWATCH_TXT_DEL="$( echo "${TMPWATCH_RUN}" | grep -i 'Removing file' )"
+	TMPWATCH_TXT_IGN="$( echo "${TMPWATCH_RUN}" | grep -i 'skipped:' )"
+
+
+	debug  "info" "(RUN): Deleting files older than $(get_tmpwatch_value "${DELETE_IF_OLDER}") $(get_tmpwatch_unit_name "${DELETE_IF_OLDER}") ... ${TMPWATCH_NUM_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
+
+	# Some files have been skipped!
+	if [ "${TMPWATCH_NUM_IGN}" != 0 ] || [ "${TMPWATCH_TXT_IGN}" != "" ]; then
+		debug  "warn" "(RUN): ${TMPWATCH}: Skipped ${TMPWATCH_NUM_IGN} files" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debugr "warn" "${TMPWATCH_TXT_IGN}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	fi
+	# Show deleted files
+	debugr "info" "${TMPWATCH_TXT_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
+	# Show full trace output
+	debugr "trace" "${TMPWATCH_RUN}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
+
+	#
+	# TODO: Make tmpwatch testrun for validation
+	#
+
+
 else
-	NUM_DEL="0"
+	TMPWATCH_NUM_DEL="0"
 fi
 
 
@@ -2839,7 +2873,7 @@ if [ "${NAGIOS_LOG}" = "1" ]; then
 		echo "msg_err = ${TOTAL_ERR}";
 		echo "msg_meg = ${TOTAL_SIZE}";
 		echo "msg_sec = $((TOTAL_ENDTIME - TOTAL_STARTTIME))";
-		echo "msg_del = ${NUM_DEL}";
+		echo "msg_del = ${TMPWATCH_NUM_DEL}";
 		echo;
 		echo "[tmpwatch]";
 	} > "${NAGIOS_LOGFILE}"

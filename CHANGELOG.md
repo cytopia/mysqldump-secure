@@ -5,7 +5,7 @@ Version 0.16 (unreleased)
 - [Fix]		Using --defaults-file instead of --defaults-extra-file to make sure no unwanted options are loaded.
 - [Fix]		Exception Handling: Handle all unbound variables
 - [Fix]		Catch error in case of wrong values in all 0/1 variables
-- [Fix]     Catch tmpwatch/tmpreaper errors and handle accordingly
+- [Fix]     Catch tmpwatch/tmpreaper errors show warnings or errors accordingly
 - [Fix]		tmpreaper/tmpwatch values now also accept and validate units (m, h, d)
 - [Fix]		Output: stdout did not show all deleted files by tmpwatch/tmpreaper
 - [Fix]		Testing: Validate MYSQL_OPTS
