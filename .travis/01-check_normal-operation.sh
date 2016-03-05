@@ -32,7 +32,7 @@ echo "\$ ${txtblu}${CMD_TEST}${txtrst}"
 
 mds_remove_logfiles
 mds_remove_datadir
-if ! eval "${CMD_TEST}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; fi
+if ! eval "${CMD_TEST}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; else echo "${txtgrn}===> [OK]${txtrst}"; fi
 
 
 
@@ -44,7 +44,7 @@ echo "----------------------------------------"
 echo "\$ ${txtblu}${CMD_TEST}${txtrst}"
 
 mds_recreate_datadir
-if ! eval "${CMD_TEST}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; fi
+if ! eval "${CMD_TEST}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; else echo "${txtgrn}===> [OK]${txtrst}"; fi
 
 
 
@@ -66,7 +66,7 @@ echo "\$ ${txtblu}${CMD_VERB}${txtrst}"
 
 mds_remove_logfiles
 mds_remove_datadir
-if ! eval "${CMD_VERB}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; fi
+if ! eval "${CMD_VERB}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; else echo "${txtgrn}===> [OK]${txtrst}"; fi
 
 
 
@@ -77,7 +77,7 @@ echo "----------------------------------------"
 echo "\$ ${txtblu}${CMD_VERB}${txtrst}"
 
 mds_recreate_datadir
-if ! eval "${CMD_VERB}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; fi
+if ! eval "${CMD_VERB}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; else echo "${txtgrn}===> [OK]${txtrst}"; fi
 
 
 
@@ -92,7 +92,7 @@ sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/dele
 sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-2.txt
 sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-3.txt
 sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-4.txt
-if ! eval "${CMD_VERB}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; fi
+if ! eval "${CMD_VERB}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; else echo "${txtgrn}===> [OK]${txtrst}"; fi
 
 
 
@@ -113,7 +113,7 @@ echo "----------------------------------------"
 
 mds_remove_logfiles
 mds_remove_datadir
-if ! eval "${CMD_CRON}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; fi
+if ! eval "${CMD_CRON}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; else echo "${txtgrn}===> [OK]${txtrst}"; fi
 
 
 
@@ -124,7 +124,7 @@ echo "----------------------------------------"
 echo "\$ ${txtblu}${CMD_CRON}${txtrst}"
 
 mds_recreate_datadir
-if ! eval "${CMD_CRON}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; fi
+if ! eval "${CMD_CRON}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; else echo "${txtgrn}===> [OK]${txtrst}"; fi
 
 
 
@@ -139,7 +139,7 @@ sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/dele
 sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-2.txt
 sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-3.txt
 sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-4.txt
-if ! eval "${CMD_CRON}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; fi
+if ! eval "${CMD_CRON}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; else echo "${txtgrn}===> [OK]${txtrst}"; fi
 
 
 
@@ -159,7 +159,7 @@ echo "----------------------------------------"
 echo "\$ ${txtblu}${CMD_HELP}${txtrst}"
 
 mds_recreate_datadir
-if ! eval "${CMD_HELP}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; fi
+if ! eval "${CMD_HELP}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; else echo "${txtgrn}===> [OK]${txtrst}"; fi
 
 
 
@@ -171,7 +171,7 @@ echo "\$ ${txtblu}${CMD_VERB} --conf=${_INSTALL_PREFIX}/etc/nothere${txtrst}"
 
 # MUST FAIL
 mds_recreate_datadir
-if eval "${CMD_VERB} --conf=${_INSTALL_PREFIX}/etc/nothere"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; fi
+if eval "${CMD_VERB} --conf=${_INSTALL_PREFIX}/etc/nothere"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; else echo "${txtgrn}===> [OK] Expected error${txtrst}"; fi
 
 
 
@@ -183,7 +183,7 @@ echo "\$ ${txtblu}${CMD_VERB} --conf=${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf
 
 # MUST FAIL
 mds_recreate_datadir
-if eval "${CMD_VERB} --conf=${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; fi
+if eval "${CMD_VERB} --conf=${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; else echo "${txtgrn}===> [OK] Expected error${txtrst}"; fi
 
 
 
@@ -195,7 +195,7 @@ echo "\$ ${txtblu}${CMD_VERB} --wrong${txtrst}"
 
 # MUST FAIL
 mds_recreate_datadir
-if eval "${CMD_VERB} --wrong"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; fi
+if eval "${CMD_VERB} --wrong"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; else echo "${txtgrn}===> [OK] Expected error${txtrst}"; fi
 
 
 

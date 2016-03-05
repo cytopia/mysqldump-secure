@@ -26,7 +26,6 @@ before_install:
   - sudo add-apt-repository "deb http://archive.ubuntu.com/ubuntu/ trusty-backports restricted main universe"
   - sudo apt-get update -qq
   - sudo apt-get install -qq shellcheck tmpreaper
-  #gnutls-bin bash
 
 
 
@@ -37,94 +36,14 @@ before_script:
 
   # Installs mysqldump-secure and MySQL as with as master and a slave server
   - ./.travis/00-install.sh
-
-  #- if [ ! -f /usr/share/mysql/my-default.cnf ] ; then sudo cp ./.travis/data/my-default.cnf /usr/share/mysql/my-default.cnf; fi
-
-  #- sudo mysql_install_db --defaults-file=/opt/mysqldump-secure/tests/etc/my-master.cnf
-  #- sudo mysqld --defaults-file=/opt/mysqldump-secure/tests/etc/my-master.cnf &
   - sleep 10
 
 
   - sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "status;"
   - sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13307 -e "status;"
 
-  #- sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "CREATE USER 'slave_user'@'127.0.0.1' IDENTIFIED BY 'aaa';"
-  #- sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "CREATE USER 'slave_user'@'%' IDENTIFIED BY 'aaa';"
-  #- sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "GRANT REPLICATION SLAVE ON *.* TO 'slave_user'@'localhost' IDENTIFIED BY 'aaa';"
-  #- sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "GRANT REPLICATION SLAVE ON *.* TO 'slave_user'@'127.0.0.1' IDENTIFIED BY 'aaa';"
-  #- sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "GRANT REPLICATION SLAVE ON *.* TO 'slave_user'@'%' IDENTIFIED BY 'aaa';"
-  #- sudo mysql --ssl-ca=/opt/mysqldump-secure/tests/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=13306 -e "FLUSH PRIVILEGES;"
-
-
-  # Copy MySQL certificates
- # - sudo cp -f ./.travis/certs/mysql.ca-key.pem          /etc/ && sudo chmod 600 /etc/mysql.ca-key.pem
- # - sudo cp -f ./.travis/certs/mysql.ca.pem              /etc/ && sudo chmod 644 /etc/mysql.ca.pem
- # - sudo cp -f ./.travis/certs/mysql.server-cert.pem     /etc/ && sudo chmod 644 /etc/mysql.server-cert.pem
- # - sudo cp -f ./.travis/certs/mysql.server-key.pem      /etc/ && sudo chmod 644 /etc/mysql.server-key.pem
- # - sudo cp -f ./.travis/certs/mysql.client-cert.pem     /etc/ && sudo chmod 600 /etc/mysql.client-cert.pem
- # - sudo cp -f ./.travis/certs/mysql.client-key.pem      /etc/ && sudo chmod 600 /etc/mysql.client-key.pem
-#
- # # Copy MySQL Configuration file
- # - sudo cp -f ./.travis/my.cnf /etc/my.cnf
-#
- # # Restart MySQL
- # - sudo service mysql restart
- # - sudo mysql --ssl-ca=/etc/mysql.ca.pem -uroot -e 'status;'
-#
-#
- # # Add MySQL data
- # - mysql -uroot -e 'create database my_empty_db1;'
- # - mysql -uroot -e 'create database my_empty_db2;'
- # - mysql -uroot -e 'create database db_InnoDB_only;'
- # - mysql -uroot -e 'create database db_MyISAM_only;'
- # - mysql -uroot -e 'create database db_InnoDB_and_MyISAM;'
-#
- # - bunzip2 < ./.travis/db_InnoDB_only.sql.bz2 | mysql -uroot db_InnoDB_only
- # - bunzip2 < ./.travis/db_MyISAM_only.sql.bz2 | mysql -uroot db_MyISAM_only
- # - bunzip2 < ./.travis/db_InnoDB_and_MyISAM.sql.bz2 | mysql -uroot db_InnoDB_and_MyISAM
-#
-#
-#
-#
-#
-#
- # # -------------------- mysqldump-secure --------------------
-#
- # # 1. Install mysqldump-secure
- # - ./configure
- # - make
- # - sudo make install
-#
- # # 2. Create credentials file
- # - printf '[client]\nhost = localhost\nuser = root\npassword =' | sudo tee /etc/mysqldump-secure.cnf
-#
- # # 3. Copy public/private keys
- # - sudo cp -f ./.travis/certs/mysqldump-secure.priv.pem /etc/ && sudo chmod 600 /etc/mysqldump-secure.priv.pem
- # - sudo cp -f ./.travis/certs/mysqldump-secure.pub.pem  /etc/ && sudo chmod 600 /etc/mysqldump-secure.pub.pem
-#
- # # -------------------- mysqldump-secure configuration --------------------
-#
- # # 2. Enable SSL Connection
- # - sudo sed -i'' 's/MYSQL_SSL_ENABLE=0/MYSQL_SSL_ENABLE=1/g' /etc/mysqldump-secure.conf
- # - sudo sed -i'' 's/MYSQL_SSL_CA_PEM="\/path\/to\/ca.pem"/MYSQL_SSL_CA_PEM="\/etc\/mysql.ca.pem"/g' /etc/mysqldump-secure.conf
- # # TODO: Validate this!
- # #- sudo sed -i'' 's/#MYSQL_SSL_CLIENT_CERT_PEM="\/path\/to\/client-cert.pem"/MYSQL_SSL_CLIENT_CERT_PEM="\/etc\/mysql.client-cert.pem"/g' /etc/mysqldump-secure.conf
- # #- sudo sed -i'' 's/#MYSQL_SSL_CLIENT_KEY_PEM="\/path\/to\/client-key.pem"/MYSQL_SSL_CLIENT_KEY_PEM="\/etc\/mysql.client-key.pem"/g' /etc/mysqldump-secure.conf
-#
- # # 3. Enable encryption
- # - sudo sed -i'' 's/^ENCRYPT=0/ENCRYPT=1/' /etc/mysqldump-secure.conf
-#
- # # 4. Enable Nagios log
- # - sudo sed -i'' 's/^NAGIOS_LOG=0/NAGIOS_LOG=1/' /etc/mysqldump-secure.conf
-#
- # # 5. Enable Deletion (Delete all files older than 1 minute)
- # - sudo sed -i'' 's/^DELETE=0/DELETE=1/'                                  /etc/mysqldump-secure.conf
- # - sudo sed -i'' 's/^DELETE_FORCE=0/DELETE_FORCE=1/'                      /etc/mysqldump-secure.conf
- # - sudo sed -i'' 's/^DELETE_METHOD="tmpwatch"/DELETE_METHOD="tmpreaper"/' /etc/mysqldump-secure.conf
- # - sudo sed -i'' 's/^DELETE_IF_OLDER=720/DELETE_IF_OLDER=1m/'             /etc/mysqldump-secure.conf
-#
- # # 6. Show config
- # - sudo cat /etc/mysqldump-secure.conf
+  # 6. Show config
+  # - sudo cat /etc/mysqldump-secure.conf
 
 
 script:
@@ -160,7 +79,7 @@ script:
   - ./.travis/08-check_encryption.sh
   - ./.travis/09-check_deletion.sh
   - ./.travis/10-check_nagios_log.sh
-  - ./.travis/11-check_misc_settings_log.sh
+  - ./.travis/11-check_misc_settings.sh
 
 
   # TODO:
