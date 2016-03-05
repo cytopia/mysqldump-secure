@@ -28,57 +28,22 @@ echo
 echo "----------------------------------------"
 echo " 2.1.1 #DUMP_PATH=\"${_INSTALL_PREFIX}/var/mysqldump-secure/\""
 echo "----------------------------------------"
-sudo sed -i'' 's/DUMP_PATH/#DUMP_PATH/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+echo
+sed_change_config_file "^DUMP_PATH="  "#DUMP_PATH="
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_PATH" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_PATH" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_PATH" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/#DUMP_PATH/DUMP_PATH/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^#DUMP_PATH="  "DUMP_PATH="
 
 
 
@@ -87,65 +52,24 @@ echo "----------------------------------------"
 echo " 2.1.2 DUMP_PATH=\"${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2\""
 echo "----------------------------------------"
 echo
-sudo sed -i'' "s|DUMP_PATH=\"${_INSTALL_PREFIX}/var/mysqldump-secure\"|DUMP_PATH=\"${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DUMP_PATH=\"${_INSTALL_PREFIX}/var/mysqldump-secure\""  "DUMP_PATH=\"${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "PASS" "1" "dir1/dir2" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "PASS" "1" "dir1/dir2" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}var/mysqldump-secure/dir1/dir2
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "PASS" "1" "dir1/dir2" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2
-
-
-sudo sed -i'' "s|DUMP_PATH=\"${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2\"|DUMP_PATH=\"${_INSTALL_PREFIX}/var/mysqldump-secure\"|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DUMP_PATH=\"${_INSTALL_PREFIX}/var/mysqldump-secure/dir1/dir2\"" "DUMP_PATH=\"${_INSTALL_PREFIX}/var/mysqldump-secure\""
 
 
 
@@ -164,55 +88,21 @@ echo "----------------------------------------"
 echo " 2.2.1 #DUMP_DIR_CHMOD=\"0700\""
 echo "----------------------------------------"
 echo
-sudo sed -i'' 's/DUMP_DIR_CHMOD="0700"/#DUMP_DIR_CHMOD="0700"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DUMP_DIR_CHMOD=\"0700\""  "#DUMP_DIR_CHMOD=\"0700\""
 
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_DIR_CHMOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_DIR_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_DIR_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/#DUMP_DIR_CHMOD="0700"/DUMP_DIR_CHMOD="0700"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^#DUMP_DIR_CHMOD=\"0700\""  "DUMP_DIR_CHMOD=\"0700\""
 
 
 
@@ -221,54 +111,21 @@ echo "----------------------------------------"
 echo " 2.2.2 DUMP_DIR_CHMOD=\"0700a\""
 echo "----------------------------------------"
 echo
-sudo sed -i'' 's/DUMP_DIR_CHMOD="0700"/DUMP_DIR_CHMOD="0700a"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DUMP_DIR_CHMOD=\"0700\""  "DUMP_DIR_CHMOD=\"0700a\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_DIR_CHMOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_DIR_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_DIR_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/DUMP_DIR_CHMOD="0700a"/DUMP_DIR_CHMOD="0700"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DUMP_DIR_CHMOD=\"0700a\""  "DUMP_DIR_CHMOD=\"0700\""
 
 
 
@@ -277,54 +134,21 @@ echo "----------------------------------------"
 echo " 2.2.3 DUMP_DIR_CHMOD=\"abc\""
 echo "----------------------------------------"
 echo
-sudo sed -i'' 's/DUMP_DIR_CHMOD="0700"/DUMP_DIR_CHMOD="abc"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DUMP_DIR_CHMOD=\"0700\""  "DUMP_DIR_CHMOD=\"abc\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_DIR_CHMOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_DIR_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_DIR_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/DUMP_DIR_CHMOD="abc"/DUMP_DIR_CHMOD="0700"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DUMP_DIR_CHMOD=\"abc\""  "DUMP_DIR_CHMOD=\"0700\""
 
 
 
@@ -333,55 +157,21 @@ echo "----------------------------------------"
 echo " 2.2.4 DUMP_DIR_CHMOD=\"\""
 echo "----------------------------------------"
 echo
-sudo sed -i'' 's/DUMP_DIR_CHMOD="0700"/DUMP_DIR_CHMOD=""/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DUMP_DIR_CHMOD=\"0700\""  "DUMP_DIR_CHMOD=\"\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_DIR_CHMOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_DIR_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_DIR_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/DUMP_DIR_CHMOD=""/DUMP_DIR_CHMOD="0700"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-
+sed_change_config_file "^DUMP_DIR_CHMOD=\"\""  "DUMP_DIR_CHMOD=\"0700\""
 
 
 
@@ -399,54 +189,21 @@ echo "----------------------------------------"
 echo " 2.3.1 #DUMP_FILE_CHMOD=\"0400\""
 echo "----------------------------------------"
 echo
-sudo sed -i'' 's/DUMP_FILE_CHMOD="0400"/#DUMP_FILE_CHMOD="0400"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DUMP_FILE_CHMOD=\"0400\""  "#DUMP_FILE_CHMOD=\"0400\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_FILE_CHMOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_FILE_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_FILE_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/#DUMP_FILE_CHMOD="0400"/DUMP_FILE_CHMOD="0400"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^#DUMP_FILE_CHMOD=\"0400\""  "DUMP_FILE_CHMOD=\"0400\""
 
 
 
@@ -455,54 +212,21 @@ echo "----------------------------------------"
 echo " 2.3.2 DUMP_FILE_CHMOD=\"0400a\""
 echo "----------------------------------------"
 echo
-sudo sed -i'' 's/DUMP_FILE_CHMOD="0400"/DUMP_FILE_CHMOD="0400a"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DUMP_FILE_CHMOD=\"0400\""  "DUMP_FILE_CHMOD=\"0400a\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_FILE_CHMOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_FILE_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_FILE_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/DUMP_FILE_CHMOD="0400a"/DUMP_FILE_CHMOD="0400"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DUMP_FILE_CHMOD=\"0400a\""  "DUMP_FILE_CHMOD=\"0400\""
 
 
 
@@ -511,54 +235,22 @@ echo "----------------------------------------"
 echo " 2.3.3 DUMP_FILE_CHMOD=\"abc\""
 echo "----------------------------------------"
 echo
-sudo sed -i'' 's/DUMP_FILE_CHMOD="0400"/DUMP_FILE_CHMOD="abc"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DUMP_FILE_CHMOD=\"0400\""  "DUMP_FILE_CHMOD=\"abc\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_FILE_CHMOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_FILE_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_FILE_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+sed_change_config_file "^DUMP_FILE_CHMOD=\"abc\""  "DUMP_FILE_CHMOD=\"0400\""
 
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/DUMP_FILE_CHMOD="abc"/DUMP_FILE_CHMOD="0400"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
 
 
 
@@ -567,54 +259,21 @@ echo "----------------------------------------"
 echo " 2.3.4 DUMP_FILE_CHMOD=\"\""
 echo "----------------------------------------"
 echo
-sudo sed -i'' 's/DUMP_FILE_CHMOD="0400"/DUMP_FILE_CHMOD=""/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DUMP_FILE_CHMOD=\"0400\""  "DUMP_FILE_CHMOD=\"\""
 
-echo "---------- CRON MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_FILE_CHMOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_FILE_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "PASS" "1" "\$DUMP_FILE_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-echo "---------- NORMAL MODE VERBOSE ----------"
-CMD="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
-
-mds_recreate_datadir
-if ! run_test "PASS" "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! var_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! syn_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-mds_recreate_datadir
-if ! end_test "${CMD}"; then ERROR=$((ERROR+1)); fi
-
-
-sudo sed -i'' 's/DUMP_FILE_CHMOD=""/DUMP_FILE_CHMOD="0400"/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sed_change_config_file "^DUMP_FILE_CHMOD=\"\""  "DUMP_FILE_CHMOD=\"0400\""
 
 
 
