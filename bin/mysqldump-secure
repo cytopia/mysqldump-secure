@@ -2254,6 +2254,7 @@ ERROR=0
 # Create tmp files and folders
 ############################################################
 
+# New temporary directory
 if MY_TMP_DIR="$( mktemp -d ${TMP_DIR}/mysqldump-secure.XXXXXXXXXX 2>/dev/null)"; then
 	debug "trace"  "(RUN): Creating tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
@@ -2262,6 +2263,7 @@ else
 	exit 1
 fi
 
+# Temp file 'mysqldump'
 if MY_TMP_FILE_DUMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
 	debug "trace"  "(RUN): Creating tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
@@ -2270,6 +2272,7 @@ else
 	exit 1
 fi
 
+# Temp file 'compression'
 if MY_TMP_FILE_COMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
 	debug "trace"  "(RUN): Creating tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
@@ -2278,12 +2281,24 @@ else
 	exit 1
 fi
 
+# Temp file 'encryption'
 if MY_TMP_FILE_ENCR="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
 	debug "trace"  "(RUN): Creating tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "(RUN): Cannot create tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err" "Aborting" $LOG "" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
+fi
+
+if [ "${DELETE}" = "1" ]; then
+	# Temp file 'tmpwatch/tmpreaper'
+	if MY_TMP_FILE_DEL="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
+		debug "trace"  "(RUN): Creating tmp file: ${MY_TMP_FILE_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	else
+		debug "err"  "(RUN): Cannot create tmp file: ${MY_TMP_FILE_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err" "Aborting" $LOG "" "${_ARG_CRON}" "${_ARG_VERB}"
+		exit 1
+	fi
 fi
 
 
@@ -2782,8 +2797,12 @@ if [ ${DELETE} -eq 1 ]; then
 	# Force deletion?
 	[ "${DELETE_FORCE}" = "1" ] && FORCE_ARG="--force" || FORCE_ARG=""
 
-	DELETED="$(${TMPWATCH} ${FORCE_ARG} -m "$DELETE_IF_OLDER" -v "${DUMP_PATH}/")"
-	if [ $? -ne 0 ]; then
+	DELETED="$(${TMPWATCH} ${FORCE_ARG} -m "$DELETE_IF_OLDER" -v "${DUMP_PATH}/" 2> "${MY_TMP_FILE_DEL}")"
+	TMP_ERR="$?"
+	if [ "${TMP_ERR}" != "0" ]; then
+		debug  "err" "(RUN): Error on ${TMPWATCH}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debugr "err" "${MY_TMP_FILE_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
 		ERROR="$(merge_exit_codes "${ERROR}" 1)"
 	fi
 	NUM_DEL="$( echo "${DELETED}" | grep -ci 'Removing' )"
@@ -2845,28 +2864,41 @@ fi
 # Delete temporary files
 ############################################################
 
+#
+# Delete tmp files/folders in reverse order
+#
+
+
+if [ "${DELETE}" = "1" ]; then
+	if rm "${MY_TMP_FILE_DEL}" 2>/dev/null; then
+		debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+	else
+		debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	fi
+fi
+
 if rm "${MY_TMP_FILE_DUMP}" 2>/dev/null; then
 	debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 else
-	debug "warn"    "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 if rm "${MY_TMP_FILE_COMP}" 2>/dev/null; then
 	debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 else
-	debug "warn"    "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 if rm "${MY_TMP_FILE_ENCR}" 2>/dev/null; then
 	debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 else
-	debug "warn"    "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 if rm -rf "${MY_TMP_DIR}" 2>/dev/null; then
 	debug "trace" "(RUN): Deleting tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 else
-	debug "warn"    "(RUN): Cannot delete tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"  "(RUN): Cannot delete tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
 
