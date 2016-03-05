@@ -17,6 +17,8 @@ SQL_SLAVE_PORT="13307"
 CMD_CRON="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
 CMD_NORM="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
 CMD_VERB="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
+CMD_HELP="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --help"
+CMD_TEST="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --test"
 
 
 
