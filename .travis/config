@@ -145,7 +145,7 @@ check() {
 		# Program must succeed
 		if [ "${_ret}" = "PASS" ]; then
 			if [ "${_RETURN}" != "0" ]; then
-				echo "${txtpur}===> [FAIL] Unexpected exit code: ${_RETURN}${txtrst}"
+				echo "${txtpur}===> [FAIL] Unexpected exit code: ${_RETURN} (should have passed)${txtrst}"
 				_ERROR=$((_ERROR+1));
 			else
 				echo "${txtgrn}===> [OK] Success${txtrst}"
@@ -153,14 +153,14 @@ check() {
 		# Program must fail
 		elif [ "${_ret}" = "FAIL" ]; then
 			if [ "${_RETURN}" = "0" ]; then
-				echo "${txtpur}===> [FAIL] Unexpected OK${txtrst}"
+				echo "${txtpur}===> [FAIL] Unexpected OK (should have exited with error)${txtrst}"
 				_ERROR=$((_ERROR+1));
 			else
-				echo "${txtgrn}===> [OK] Expected Error. Exit code: ${exit}${txtrst}"
+				echo "${txtgrn}===> [OK] Expected Error. Exit code: ${_RETURN}${txtrst}"
 			fi
 		# Something else happened
 		else
-			echo "${txtgrn}===> [FAIL] Invalid usage for 'run_test'${txtrst}"
+			echo "${txtgrn}===> [FAIL] Invalid usage for 'check()'${txtrst}"
 			_ERROR=$((_ERROR+1));
 		fi
 		echo
@@ -200,7 +200,7 @@ check() {
 			echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}"
 			_ERROR=$((_ERROR+1));
 		else
-			echo "${txtgrn}===> [OK] No Unbound variables found.${txtrst}"
+			echo "${txtgrn}===> [OK] No unbound variables found.${txtrst}"
 		fi
 		echo
 	fi
@@ -248,10 +248,12 @@ check() {
 		_found="$(echo "${_OUTPUT}" | grep -E 'Aborting|Finished successfully|Finished with errors|invalid argument:')"
 
 		if [ "${_found}" = "" ]; then
-			echo "${txtpur}===> [FAIL] Program Terminated abnormally.${txtrst}"
+			echo "${_OUTPUT}" | tail -n5
+			echo "${txtpur}===> [FAIL] Program aborted before it was finished.${txtrst}"
 			_ERROR=$((_ERROR+1));
 		else
-			echo "${txtgrn}===> [OK] Program exited as expected.${txtrst}"
+			echo "${_OUTPUT}" | tail -n1
+			echo "${txtgrn}===> [OK] Program run till the very end.${txtrst}"
 		fi
 		echo
 	fi
