@@ -63,13 +63,11 @@ sudo sed -i'' "s|MYSQL_SSL_CA_PEM=\"/path/to/ca.pem\"|MYSQL_SSL_CA_PEM=\"${_INST
 # 3. Enable encryption
 sudo sed -i'' 's/^ENCRYPT=0/ENCRYPT=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
 
-# 4. Enable Nagios log
-sudo sed -i'' 's/^NAGIOS_LOG=0/NAGIOS_LOG=1/' ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
 
 # 5. Enable Deletion (Delete all files older than 1 minute)
 sudo sed -i'' 's/^DELETE=0/DELETE=1/'                                  ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
 sudo sed -i'' 's/^DELETE_FORCE=0/DELETE_FORCE=1/'                      ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
-sudo sed -i'' 's/^DELETE_IF_OLDER=720/DELETE_IF_OLDER=1m/'             ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+sudo sed -i'' 's/^DELETE_IF_OLDER=30d/DELETE_IF_OLDER=1m/'             ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
 
 # Change tmpwatch to tmpreaper on debian based systems
 if command -v apt-get >/dev/null 2>&1; then
