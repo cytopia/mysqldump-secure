@@ -27,66 +27,66 @@ echo "--------------------------------------------------------------------------
 
 echo
 echo "----------------------------------------"
-echo " 9.1.1 #DELETE=1"
+echo " 9.1.1 #DELETE=1 (on read-only files)"
 echo "----------------------------------------"
 echo
 sed_change_config_file "^DELETE=1"  "#DELETE=1"
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "FAIL" "1" "\$DELETE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "FAIL" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "FAIL" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^#DELETE=1"  "DELETE=1"
 
 
 echo
 echo "----------------------------------------"
-echo " 9.1.2 DELETE=2"
+echo " 9.1.2 DELETE=2 (on read-only files)"
 echo "----------------------------------------"
 echo
 sed_change_config_file "^DELETE=1"  "DELETE=2"
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "FAIL" "1" "\$DELETE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "FAIL" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "FAIL" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^DELETE=2"  "DELETE=1"
 
 
 echo
 echo "----------------------------------------"
-echo " 9.1.3 DELETE=\"wrong\""
+echo " 9.1.3 DELETE=\"wrong\" (on read-only files)"
 echo "----------------------------------------"
 echo
 sed_change_config_file "^DELETE=1"  "DELETE=\"wrong\""
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "FAIL" "1" "\$DELETE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "FAIL" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "FAIL" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^DELETE=\"wrong\""  "DELETE=1"
 
@@ -94,22 +94,22 @@ sed_change_config_file "^DELETE=\"wrong\""  "DELETE=1"
 
 echo
 echo "----------------------------------------"
-echo " 9.1.4 DELETE=\"\""
+echo " 9.1.4 DELETE=\"\" (on read-only files)"
 echo "----------------------------------------"
 echo
 sed_change_config_file "^DELETE=1"  "DELETE=\"\""
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "FAIL" "1" "\$DELETE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "FAIL" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "FAIL" "1" "\$DELETE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^DELETE=\"\""  "DELETE=1"
 
@@ -117,22 +117,22 @@ sed_change_config_file "^DELETE=\"\""  "DELETE=1"
 
 echo
 echo "----------------------------------------"
-echo " 9.1.5 DELETE=0"
+echo " 9.1.5 DELETE=0 (on read-only files)"
 echo "----------------------------------------"
 echo
 sed_change_config_file "^DELETE=1"  "DELETE=0"
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "0" " " "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "FAIL" "1" " skipped:" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "0" " " "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "FAIL" "1" " skipped:" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "0" " " "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "FAIL" "1" " skipped:" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^DELETE=0"  "DELETE=1"
 
