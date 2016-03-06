@@ -1449,7 +1449,8 @@ if [ "${LOG}" = "1" ]; then
 	} >> "${LOGFILE}"
 	debug "trace" "(CFG): Using config: ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "info"  "(OPT): Logging enabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "debug" "(OPT): Using logfile: ${LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(OPT): Log level: ${LOG}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(OPT): Logfile: ${LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "trace" "(CFG): Using config: ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
