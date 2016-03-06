@@ -26,10 +26,10 @@ echo "--------------------------------------------------------------------------
 
 echo
 echo "----------------------------------------"
-echo " 6.1.1 #LOG=1"
+echo " 6.1.1 #LOG=2"
 echo "----------------------------------------"
 echo
-sed_change_config_file "^LOG=1"  "#LOG=1"
+sed_change_config_file "^LOG=2"  "#LOG=2"
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
@@ -43,16 +43,16 @@ sed_change_config_file "^LOG=1"  "#LOG=1"
 	CMD="${CMD_VERB}"
 	if ! check "1" "1" "PASS" "1" "\$LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sed_change_config_file "^#LOG=1"  "LOG=1"
+sed_change_config_file "^#LOG=2"  "LOG=2"
 
 
 
 echo
 echo "----------------------------------------"
-echo " 6.1.2 LOG=2"
+echo " 6.1.2 LOG=4"
 echo "----------------------------------------"
 echo
-sed_change_config_file "^LOG=1"  "LOG=2"
+sed_change_config_file "^LOG=2"  "LOG=4"
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
@@ -66,7 +66,7 @@ sed_change_config_file "^LOG=1"  "LOG=2"
 	CMD="${CMD_VERB}"
 	if ! check "1" "1" "PASS" "1" "\$LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sed_change_config_file "^LOG=2"  "LOG=1"
+sed_change_config_file "^LOG=4"  "LOG=2"
 
 
 
@@ -75,7 +75,7 @@ echo "----------------------------------------"
 echo " 6.1.3 LOG=\"wrong\""
 echo "----------------------------------------"
 echo
-sed_change_config_file "^LOG=1"  "LOG=\"wrong\""
+sed_change_config_file "^LOG=2"  "LOG=\"wrong\""
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
@@ -89,7 +89,7 @@ sed_change_config_file "^LOG=1"  "LOG=\"wrong\""
 	CMD="${CMD_VERB}"
 	if ! check "1" "1" "PASS" "1" "\$LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sed_change_config_file "^LOG=\"wrong\""  "LOG=1"
+sed_change_config_file "^LOG=\"wrong\""  "LOG=2"
 
 
 
@@ -98,7 +98,7 @@ echo "----------------------------------------"
 echo " 6.1.4 LOG=0"
 echo "----------------------------------------"
 echo
-sed_change_config_file "^LOG=1"  "LOG=0"
+sed_change_config_file "^LOG=2"  "LOG=0"
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
@@ -112,7 +112,7 @@ sed_change_config_file "^LOG=1"  "LOG=0"
 	CMD="${CMD_VERB}"
 	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sed_change_config_file "^LOG=0"  "LOG=1"
+sed_change_config_file "^LOG=0"  "LOG=2"
 
 
 
