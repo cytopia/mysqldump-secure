@@ -6,7 +6,7 @@
 #
 # Script to dump databases one by one
 #
-# Exit Codes
+# Exit Codes (0-127)
 # ---------------------
 # * 0: Success
 # * 1: Script specific: (writeable directory, config file not found, wrong permissions)
@@ -34,6 +34,15 @@ INFO_VERSION="0.16"
 _PREFIX_ETC=""
 #_PREFIX_BIN=""
 #_PREFIX_LOG=""
+
+
+#
+# TODO: variable conventions
+# * default vars (_DEFAULT_xxx)
+# * config file vars (XXX)
+# * vars created at run time (e.g. how many files deleted by tmpwatch)
+# * program vars (e.g.: MYSQL, ERROR_CODE, etc) (MDS_xxx)
+# * function vars (_small)
 
 
 
@@ -119,6 +128,7 @@ MYSQL_BAD_OPTS="${MYSQL_BAD_OPTS} --quick -q --skip-quick"
 
 # If having a tty (console) use colors
 if [ -t 1 ]; then
+	CLR_OK="$(tput setf 2 2>/dev/null || tput setaf 2 2>/dev/null)"
 	CLR_ERROR="$(tput setf 4 2>/dev/null || tput setaf 1 2>/dev/null)"
 	CLR_WARNING="$(tput setf 6 2>/dev/null || tput setaf 3 2>/dev/null)"
 	CLR_DEBUG="$(tput setf 0 2>/dev/null || tput setaf 248 2>/dev/null)"
@@ -126,6 +136,7 @@ if [ -t 1 ]; then
 	CLR_RESET="$(tput sgr0 2>/dev/null)"
 # Dump terminal (e.g.: via cron)
 else
+	CLR_OK=""
 	CLR_ERROR=""
 	CLR_WARNING=""
 	CLR_DEBUG=""
@@ -164,6 +175,7 @@ debug() {
 
 	# Hide info/debug output when in cron-mode
 	if [ "${_cron}" = "0" ]; then
+		[ "${_lvl}" = "ok" ]   && printf "${CLR_OK}[OK]    %s\n${CLR_RESET}" "${_msg}"
 		[ "${_lvl}" = "info" ] && printf "[INFO]  %s\n" "${_msg}"
 
 		# Show debug/trace output?
@@ -188,17 +200,30 @@ debug() {
 
 	# Always show warn and error
 	[ "${_lvl}" = "warn" ] && printf "${CLR_WARNING}[WARN]  %s\n${CLR_RESET}" "${_msg}" 1>&2	# stdout -> stderr
-	[ "${_lvl}" = "err"  ] && printf "${CLR_ERROR}[ERR]   %s\n${CLR_RESET}" "${_msg}" 1>&2	# stdout -> stderr
+	[ "${_lvl}" = "err"  ] && printf "${CLR_ERROR}[ERR]   %s\n${CLR_RESET}" "${_msg}" 1>&2		# stdout -> stderr
+
 
 	# Log to file
+	_pre=""
+	[ "${_lvl}" = "trace" ] && _pre="[TRACE]"
+	[ "${_lvl}" = "debug" ] && _pre="[DEBUG]"
+	[ "${_lvl}" = "info" ]  && _pre="[INFO] "
+	[ "${_lvl}" = "ok" ]    && _pre="[OK]   "
+	[ "${_lvl}" = "warn" ]  && _pre="[WARN] "
+	[ "${_lvl}" = "err" ]   && _pre="[ERR]  "
+
 	if [ "${_log}" = "1" ]; then
-		_pre=""
-		[ "${_lvl}" = "trace" ] && _pre="[TRACE]"
-		[ "${_lvl}" = "debug" ] && _pre="[DEBUG]"
-		[ "${_lvl}" = "info" ]  && _pre="[INFO] "
-		[ "${_lvl}" = "warn" ]  && _pre="[WARN] "
-		[ "${_lvl}" = "err" ]   && _pre="[ERR]  "
-		printf "%s %s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${_msg}" >> "${_file}"
+		if [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ]; then
+			printf "%s %s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${_msg}" >> "${_file}"
+		fi
+	elif [ "${_log}" = "2" ]; then
+		if [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "debug" ]; then
+			printf "%s %s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${_msg}" >> "${_file}"
+		fi
+	elif [ "${_log}" = "3" ]; then
+		if [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "debug" ] || [ "${_lvl}" = "trace" ]; then
+			printf "%s %s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${_msg}" >> "${_file}"
+		fi
 	elif [ "${_log}" != "0" ]; then
 		echo "${_msg}"
 		echo "Internal Error: Invalid value for \$_log: '${_log}'"
@@ -229,6 +254,15 @@ debugr() {
 
 	# [INFO]/[DEBUG] Hide info/debug output when in cron-mode
 	if [ "${_cron}" = "0" ]; then
+		# [OK]
+		if [ "${_lvl}" = "ok" ]; then
+			IFS='
+			'
+			for line in ${_msg}; do
+				printf "${CLR_OK}[OK]    %s\n${CLR_RESET}" "${line}"
+			done
+			unset IFS
+		fi
 		# [INFO]
 		if [ "${_lvl}" = "info" ]; then
 			IFS='
@@ -302,21 +336,43 @@ debugr() {
 		unset IFS
 	fi
 
-	# Log to file
-	if [ "${_log}" = "1"    ]; then
-		_pre=""
-		[ "${_lvl}" = "trace" ] && _pre="[TRACE]"
-		[ "${_lvl}" = "debug" ] && _pre="[DEBUG]"
-		[ "${_lvl}" = "info" ]  && _pre="[INFO] "
-		[ "${_lvl}" = "warn" ]  && _pre="[WARN] "
-		[ "${_lvl}" = "err" ]   && _pre="[ERR]  "
 
-		IFS='
-		'
-		for line in ${_msg}; do
-			printf "%s %s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${line}" >> "${_file}"
-		done
-		unset IFS
+	# Log to file
+	_pre=""
+	[ "${_lvl}" = "trace" ] && _pre="[TRACE]"
+	[ "${_lvl}" = "debug" ] && _pre="[DEBUG]"
+	[ "${_lvl}" = "ok" ]    && _pre="[OK]   "
+	[ "${_lvl}" = "info" ]  && _pre="[INFO] "
+	[ "${_lvl}" = "warn" ]  && _pre="[WARN] "
+	[ "${_lvl}" = "err" ]   && _pre="[ERR]  "
+
+	if [ "${_log}" = "1" ]; then
+		if [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ]; then
+			IFS='
+			'
+			for line in ${_msg}; do
+				printf "%s %s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${line}" >> "${_file}"
+			done
+			unset IFS
+		fi
+	elif [ "${_log}" = "2" ]; then
+		if [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "debug" ]; then
+			IFS='
+			'
+			for line in ${_msg}; do
+				printf "%s %s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${line}" >> "${_file}"
+			done
+			unset IFS
+		fi
+	elif [ "${_log}" = "3" ]; then
+		if [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "debug" ] || [ "${_lvl}" = "trace" ]; then
+			IFS='
+			'
+			for line in ${_msg}; do
+				printf "%s %s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${line}" >> "${_file}"
+			done
+			unset IFS
+		fi
 	elif [ "${_log}" != "0" ]; then
 		echo "${_msg}"
 		echo "Internal Error: Invalid value for \$_log: '${_log}'"
@@ -347,6 +403,7 @@ debugi() {
 
 	# Hide info/debug output when in cron-mode
 	if [ "${_cron}" = "0" ]; then
+		[ "${_lvl}" = "ok" ]   && printf "${CLR_OK}[OK]    %s${CLR_RESET}" "${_msg}"
 		[ "${_lvl}" = "info" ] && printf "[INFO]  %s" "${_msg}"
 
 		# Show debug output?
@@ -373,21 +430,34 @@ debugi() {
 	[ "${_lvl}" = "warn" ] && printf "${CLR_WARNING}[WARN]  %s${CLR_RESET}" "${_msg}" 1>&2	# stdout -> stderr
 	[ "${_lvl}" = "err"  ] && printf "${CLR_ERROR}[ERR]   %s${CLR_RESET}" "${_msg}" 1>&2	# stdout -> stderr
 
+
 	# Log to file
-	if [ "${_log}" = "1"    ]; then
-		_pre=""
-		[ "${_lvl}" = "trace" ] && _pre="[TRACE]"
-		[ "${_lvl}" = "debug" ] && _pre="[DEBUG]"
-		[ "${_lvl}" = "info" ]  && _pre="[INFO] "
-		[ "${_lvl}" = "warn" ]  && _pre="[WARN] "
-		[ "${_lvl}" = "err" ]   && _pre="[ERR]  "
-		printf "%s %s %s %s" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${_msg}" >> "${_file}"
+	_pre=""
+	[ "${_lvl}" = "trace" ] && _pre="[TRACE]"
+	[ "${_lvl}" = "debug" ] && _pre="[DEBUG]"
+	[ "${_lvl}" = "info" ]  && _pre="[INFO] "
+	[ "${_lvl}" = "warn" ]  && _pre="[WARN] "
+	[ "${_lvl}" = "err" ]   && _pre="[ERR]  "
+
+	if [ "${_log}" = "1" ]; then
+		if [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ]; then
+			printf "%s %s %s %s" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${_msg}" >> "${_file}"
+		fi
+	elif [ "${_log}" = "2" ]; then
+		if [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "debug" ]; then
+			printf "%s %s %s %s" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${_msg}" >> "${_file}"
+		fi
+	elif [ "${_log}" = "3" ]; then
+		if [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "debug" ] || [ "${_lvl}" = "trace" ]; then
+			printf "%s %s %s %s" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${_msg}" >> "${_file}"
+		fi
 	elif [ "${_log}" != "0" ]; then
 		echo "${_msg}"
 		echo "Internal Error: Invalid value for \$_log: '${_log}'"
 		echo "Please report this at github"
 		exit 1
 	fi
+
 	return 0
 }
 
@@ -410,6 +480,7 @@ debugn() {
 
 	# Hide info/debug output when in cron-mode
 	if [ "${_cron}" = "0" ]; then
+		[ "${_lvl}" = "ok" ]   && printf "${CLR_OK}%s\n${CLR_RESET}" "${_msg}"
 		[ "${_lvl}" = "info" ] && printf "%s\n" "${_msg}"
 
 		# Show debug output?
@@ -438,7 +509,17 @@ debugn() {
 
 	# Log to file
 	if [ "${_log}" = "1" ]; then
-		printf "%s\n" "${_msg}" >> "${_file}"
+		if [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ]; then
+			printf "%s\n" "${_msg}" >> "${_file}"
+		fi
+	elif [ "${_log}" = "2" ]; then
+		if [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "debug" ]; then
+			printf "%s\n" "${_msg}" >> "${_file}"
+		fi
+	elif [ "${_log}" = "3" ]; then
+		if [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "debug" ] || [ "${_lvl}" = "trace" ]; then
+			printf "%s\n" "${_msg}" >> "${_file}"
+		fi
 	elif [ "${_log}" != "0" ]; then
 		echo "${_msg}"
 		echo "Internal Error: Invalid value for \$_log: '${_log}'"
@@ -467,6 +548,7 @@ debug_nl() {
 
 	# Hide info output when in cron-mode
 	if [ "${_cron}" = "0" ]; then
+		[ "${_lvl}" = "ok" ]   && printf "\n"
 		[ "${_lvl}" = "info" ] && printf "\n"
 
 		# Show debug output?
@@ -492,7 +574,17 @@ debug_nl() {
 
 	# Log to file
 	if [ "${_log}" = "1" ]; then
-		printf "\n" >> "${_file}"
+		if [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ]; then
+			printf "\n" >> "${_file}"
+		fi
+	elif [ "${_log}" = "2" ]; then
+		if [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "debug" ]; then
+			printf "\n" >> "${_file}"
+		fi
+	elif [ "${_log}" = "3" ]; then
+		if [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "debug" ] || [ "${_lvl}" = "trace" ]; then
+			printf "\n" >> "${_file}"
+		fi
 	elif [ "${_log}" != "0" ]; then
 		echo "Internal Error: Invalid value for \$_log: '${_log}'"
 		echo "Please report this at github"
@@ -537,6 +629,14 @@ sub() {
 }
 
 
+#
+# Get the length of a string.
+#
+# @param  string
+# @output integer Length
+str_len() {
+	echo "${1}" | awk '{print length() }'
+}
 
 ############################################################
 # Security checker
@@ -936,9 +1036,10 @@ _mysql_replication_type() {
 #
 print_usage() {
 #	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cnf] [--cron] [-v[v]] [--test] [--info] [--help] [--version]"
-	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cron] [--test] [-v[v]] [--help] [--version]"
-	printf "%s %s %s\n" "      " "${INFO_NAME}" "[--conf] [--cron] [-v[v]]"
+	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--cron] [--test] [--conf] [-v[v]] [--help] [--version]"
+	printf "%s %s %s\n" "      " "${INFO_NAME}" "--cron [--conf]"
 	printf "%s %s %s\n" "      " "${INFO_NAME}" "--test [--conf] [-v[v]]"
+	printf "%s %s %s\n" "      " "${INFO_NAME}" "[--conf] [-v[v]]"
 #	printf "%s %s %s\n" "      " "${INFO_NAME}" "--info"
 	printf "%s %s %s\n" "      " "${INFO_NAME}" "--help"
 	printf "%s %s %s\n" "      " "${INFO_NAME}" "--version"
@@ -966,10 +1067,8 @@ print_help() {
 	echo "  --test          Test requirements and exit."
 	echo
 	echo "  -v              Show debug (and trace) output."
-	echo "                  If running with cron mode (--cron) and logging is turned on,"
-	echo "                  verbose/trace output will go to logfile instead of stdout."
 	echo "                  Specify twice (-vv) to also show trace output."
-	echo "                  Can be combined with --conf, --cron and --test"
+	echo "                  Can be combined with --conf  and --test"
 	echo "                  E.g.: -v or -vv"
 	echo
 #	echo "  --info          Show settings and exit."
@@ -1044,7 +1143,7 @@ while [ $# -gt 0  ]; do
 
 
 		-v)
-			if [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ]; then
+			if [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ] || [ "${_ARG_CRON}" = "1" ]; then
 				echo "Invalid. Arguments cannot be mixed."
 				echo "Type '${INFO_NAME} --help' for available options."
 				exit 1
@@ -1059,7 +1158,7 @@ while [ $# -gt 0  ]; do
 
 
 		-vv)
-			if [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ]; then
+			if [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ] || [ "${_ARG_CRON}" = "1" ]; then
 				echo "Invalid. Arguments cannot be mixed."
 				echo "Type '${INFO_NAME} --help' for available options."
 				exit 1
@@ -1074,7 +1173,7 @@ while [ $# -gt 0  ]; do
 
 
 		--cron)
-			if [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ]; then
+			if [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ] || [ "${_ARG_VERB}" = "1" ]; then
 				echo "Invalid. Arguments cannot be mixed."
 				echo "Type '${INFO_NAME} --help' for available options."
 				exit 1
@@ -1229,7 +1328,7 @@ elif [ -z "${LOG}" ]; then
 	debug "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	LOG=0
 	LOGFILE=""
-elif [ "${LOG}" = "1" ]; then
+elif [ "${LOG}" = "1" ] || [ "${LOG}" = "2" ] || [ "${LOG}" = "3" ]; then
 	# Check chmod variable
 	if ! set | grep '^LOG_CHMOD=' >/dev/null 2>&1; then
 		debug "warn" "(CFG): \$LOG_CHMOD variable is not defined" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1286,7 +1385,7 @@ elif [ "${LOG}" = "1" ]; then
 			fi
 		fi
 		# If logging is still OK (dir exists), check if the file can be created
-		if [ "${LOG}" = "1" ]; then
+		if [ "${LOG}" != "0" ]; then
 			debug  "warn" "(RUN): Logfile does not exist in ${LOGFILE}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			debugi "warn" "(RUN): Trying to create..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 
@@ -1303,7 +1402,7 @@ elif [ "${LOG}" = "1" ]; then
 
 	# Logging still on?
 	# Check for permissions
-	if [ "${LOG}" = "1" ]; then
+	if [ "${LOG}" != "0" ]; then
 		if ! compare_chmod "$(permission "${LOGFILE}")" "${LOG_CHMOD}" > /dev/null 2>&1 ; then
 			debug  "warn" "(RUN): Logfile has wrong permissions: $(permission "${LOGFILE}"), should be: ${LOG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			debugi "warn" "(RUN): Trying to chmod to ${LOG_CHMOD}..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1321,7 +1420,7 @@ elif [ "${LOG}" = "1" ]; then
 
 	# Logging still on?
 	# Check if it is writeable
-	if [ "${LOG}" = "1" ]; then
+	if [ "${LOG}" != "0" ]; then
 
 		# Logfile not writeable
 		if [ ! -w "${LOGFILE}" ]; then
@@ -1349,7 +1448,8 @@ if [ "${LOG}" = "1" ]; then
 		echo "$(date '+%Y-%m-%d') $(date '+%H:%M:%S') Starting";
 	} >> "${LOGFILE}"
 	debug "trace" "(CFG): Using config: ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "info" "(OPT): Logging enabled: ${LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info"  "(OPT): Logging enabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(OPT): Using logfile: ${LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "trace" "(CFG): Using config: ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
@@ -1625,11 +1725,12 @@ elif [ "${MYSQL_SSL_ENABLE}" = "1" ]; then
 		MYSQL_SSL_ARGS="${MYSQL_SSL_ARGS} --ssl-key=${MYSQL_SSL_CLIENT_KEY_PEM}"
 	fi
 
-	debug "info" "(OPT): MySQL SSL connection enabled: ${MYSQL_SSL_ARGS}." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info"  "(OPT): MySQL SSL connection enabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(OPT): MySQL SSL arguments: ${MYSQL_SSL_ARGS}." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 elif [ "${MYSQL_SSL_ENABLE}" = "0" ]; then
 	MYSQL_SSL_ENABLE=0
 	MYSQL_SSL_ARGS=""
-	debug "info" "(OPT): MySQL SSL connection disabled." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "(OPT): MySQL SSL connection disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "err"  "(CFG): Wrong value for \$MYSQL_SSL_ENABLE: $MYSQL_SSL_ENABLE" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err"  "(HLP): It is not clear whether or not you only allow secure connections." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1869,7 +1970,8 @@ elif [ "${COMPRESS}" = "1" ]; then
 
 	# If compression is still enabled
 	if [ "${COMPRESS}" = "1" ]; then
-		debug "info" "(OPT): Compression enabled: Using ${COMPRESS_BIN} ${COMPRESS_ARG}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "info"  "(OPT): Compression enabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "debug" "(OPT): Compression arguments: ${COMPRESS_BIN} ${COMPRESS_ARG}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	fi
 
 elif [ "${COMPRESS}" = "0" ]; then
@@ -1939,7 +2041,8 @@ elif [ "${ENCRYPT}" = "1" ]; then
 		exit 2
 	fi
 
-	debug "info" "(OPT): Encryption enabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info"  "(OPT): Encryption enabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(OPT): Encryption algorithm: ${OPENSSL_ALGO_ARG}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 elif [ "${ENCRYPT}" = "0" ]; then
 	debug "info" "(OPT): Encryption disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1956,6 +2059,12 @@ fi
 ############################################################
 # Deletion
 ############################################################
+
+#
+# TODO: Make tmpwatch testrun for validation
+#
+
+
 if ! set | grep '^DELETE=' >/dev/null 2>&1; then
 	debug "warn" "(CFG): \$DELETE variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2014,7 +2123,8 @@ elif [ "${DELETE}" = "1"  ]; then
 	# If deletion is still enabled
 	if [ "${DELETE}" = "1"  ]; then
 
-		debug "info" "(OPT): Deletion enabled. Deleting files older than $(get_tmpwatch_value "${DELETE_IF_OLDER}") $(get_tmpwatch_unit_name "${DELETE_IF_OLDER}"). Using: ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "info"  "(OPT): Deletion enabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "debug" "(OPT): Deleting files older than $(get_tmpwatch_value "${DELETE_IF_OLDER}") $(get_tmpwatch_unit_name "${DELETE_IF_OLDER}"). Using: ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 		# DELETE_FORCE
 		if ! set | grep '^DELETE_FORCE=' >/dev/null 2>&1; then
@@ -2136,7 +2246,8 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 			debug "warn" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			NAGIOS_LOG=0
 		else
-			debug "info" "(OPT): Nagios log enabled: ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "info"  "(OPT): Nagios log enabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "debug" "(OPT): Nagios logfile: ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		fi
 	fi
 
@@ -2157,9 +2268,6 @@ fi
 ############################################################
 # Connection
 ############################################################
-
-
-
 
 
 # Testing MySQL connection
@@ -2310,15 +2418,19 @@ fi
 ############################################################
 
 # Get a list of all databases
-debugi "info" "(SQL): Retrieving list of databases... " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debugi "debug" "(SQL): Retrieving list of databases... " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 # gets all databases (even empty ones)
 DATABASES="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" --batch -e 'show databases;' | sed 1d )"
+#
+# TODO: Error check this (above)
+#
+
 # Only gets databases which have content (tables)
 #DATABASES="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" --no-auto-rehash --skip-column-names -e 'SELECT DISTINCT table_schema FROM information_schema.tables;')"
 
 NUM_DB="$(echo "${DATABASES}" | wc -l | tr -d ' ')"
-debugn "info" "${NUM_DB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debugn "debug" "${NUM_DB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 
@@ -2338,8 +2450,13 @@ NAGIOS_DB_IGNORED=""
 NAGIOS_DB_ERROR=""
 
 
+# Lopp counter
+i=0
+
 for db in ${DATABASES}; do
 
+	i="$(sum "${i}" 1)"
+	_cnt="$(printf "%$(str_len "${NUM_DB}")d/%d" "${i}" "${NUM_DB}")"
 	#
 	# SKIPPING DATABASES
 	#
@@ -2573,7 +2690,7 @@ for db in ${DATABASES}; do
 					# TODO: sync debug output and actual commmand (maybe via eval), so that it is made suer
 					#       we are doing what we are showing.
 
-					debugi "info"  "(SQL): Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) " )$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugi "info"  "(SQL): ${_cnt} Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) " )$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 					# Set umask prior writing
@@ -2606,7 +2723,7 @@ for db in ${DATABASES}; do
 				#
 				else
 					ext=".sql.${COMPRESS_EXT}"
-					debugi "info" "(SQL): Dumping:  ${db} (${DB_SIZE} MB) (compressed) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugi "info" "(SQL): ${_cnt} Dumping:  ${db} (${DB_SIZE} MB) (compressed) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")"
@@ -2636,7 +2753,7 @@ for db in ${DATABASES}; do
 				#
 				if [ ${ENCRYPT} -eq 1 ]; then
 					ext=".sql.enc"
-					debugi "info" "(SQL): Dumping:  ${db} (${DB_SIZE} MB) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugi "info" "(SQL): ${_cnt} Dumping:  ${db} (${DB_SIZE} MB) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
@@ -2663,7 +2780,7 @@ for db in ${DATABASES}; do
 				#
 				else
 					ext=".sql"
-					debugi "info" "(SQL): Dumping:  ${db} (${DB_SIZE} MB) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugi "info" "(SQL): ${_cnt} Dumping:  ${db} (${DB_SIZE} MB) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
@@ -2747,8 +2864,8 @@ for db in ${DATABASES}; do
 				TOTAL_DBS=$((TOTAL_DBS + 1))
 				endtime=$(date +%s)
 
-				debugn "info"    "$((endtime - starttime)) sec" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-				debug  "trace" "File: ${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debugn "ok"    "$((endtime - starttime)) sec" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug  "trace" "(RUN): File: ${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 				[ "${NAGIOS_DB_DUMPED}" = "" ] && NAGIOS_DB_DUMPED="${db}" || NAGIOS_DB_DUMPED="${NAGIOS_DB_DUMPED},${db}"
@@ -2765,11 +2882,11 @@ for db in ${DATABASES}; do
 		fi
 
 	elif [ ${skip} -eq 1 ]; then
-		debug "info" "(SQL): Skipping: ${db} (DB is empty)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "info" "(SQL): ${_cnt} Skipping: ${db} (DB is empty)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		TOTAL_IGN=$((TOTAL_IGN + 1))
 		[ "${NAGIOS_DB_IGNORED}" = "" ] && NAGIOS_DB_IGNORED="${db}" || NAGIOS_DB_IGNORED="${NAGIOS_DB_IGNORED},${db}"
 	else
-		debug "info" "(SQL): Skipping: ${db} (IGNORE=\"${db}\" in config)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "info" "(SQL): ${_cnt} Skipping: ${db} (ignored)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		TOTAL_IGN=$((TOTAL_IGN + 1))
 		[ "${NAGIOS_DB_IGNORED}" = "" ] && NAGIOS_DB_IGNORED="${db}" || NAGIOS_DB_IGNORED="${NAGIOS_DB_IGNORED},${db}"
 	fi
@@ -2784,9 +2901,9 @@ for req in ${REQUIRE}; do
 done
 
 
-debug "info" "(RUN): Dumping finished (OK: ${TOTAL_DBS} dbs, IGN: ${TOTAL_IGN} dbs, ERR: ${TOTAL_ERR}, TOTAL: ${NUM_DB})" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-debug "info" "(RUN): Took $((TOTAL_ENDTIME - TOTAL_STARTTIME)) seconds" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-debug "info" "(RUN): Total size dumped: ${TOTAL_SIZE} MB" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "debug" "(RUN): Dumping finished (OK: ${TOTAL_DBS} dbs, IGN: ${TOTAL_IGN} dbs, ERR: ${TOTAL_ERR}, TOTAL: ${NUM_DB})" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "debug" "(RUN): Took $((TOTAL_ENDTIME - TOTAL_STARTTIME)) seconds" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "debug" "(RUN): Total size dumped: ${TOTAL_SIZE} MB" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 
@@ -2832,18 +2949,13 @@ if [ ${DELETE} -eq 1 ]; then
 	if [ "${TMPWATCH_NUM_IGN}" != 0 ] || [ "${TMPWATCH_TXT_IGN}" != "" ]; then
 		debug  "warn" "(RUN): ${TMPWATCH}: Skipped ${TMPWATCH_NUM_IGN} files" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debugr "warn" "${TMPWATCH_TXT_IGN}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		ERROR="$(merge_exit_codes "${ERROR}" 1)"
 	fi
 	# Show deleted files
 	debugr "info" "${TMPWATCH_TXT_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 	# Show full trace output
 	debugr "trace" "${TMPWATCH_RUN}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-
-
-	#
-	# TODO: Make tmpwatch testrun for validation
-	#
-
 
 else
 	TMPWATCH_NUM_DEL="0"
@@ -2855,7 +2967,7 @@ fi
 # Nagios Plugin Log
 ############################################################
 if [ "${NAGIOS_LOG}" = "1" ]; then
-	debug "info" "(RUN): Writing nagios logfile" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "debug" "(RUN): Writing nagios logfile" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 	{
 		echo "[state]";
@@ -2882,19 +2994,33 @@ if [ "${NAGIOS_LOG}" = "1" ]; then
 	} > "${NAGIOS_LOGFILE}"
 
 	if [ "${DELETE}" = "1" ]; then
-		echo "del_time = ${DELETE_IF_OLDER}" >> "${NAGIOS_LOGFILE}"
+		{
+			echo "del_time = ${DELETE_IF_OLDER}";
+			echo "del_del  = ${TMPWATCH_NUM_DEL}";	# how many files deleted
+			echo "del_skp  = ${TMPWATCH_NUM_IGN}";	# how many files skipped (due to unable to delete)
+		} >> "${NAGIOS_LOGFILE}"
 	else
-		echo "del_time = 0"	>> "${NAGIOS_LOGFILE}"
+		{
+			echo "del_time = 0";
+			echo "del_del  = 0";	# how many files deleted
+			echo "del_skp  = 0";	# how many files skipped (due to unable to delete)
+		} >> "${NAGIOS_LOGFILE}"
 	fi
 
 	{
+		echo;
 		echo "[stats]";
 		echo "db_dumped = ${NAGIOS_DB_DUMPED}";
 		echo "db_error = ${NAGIOS_DB_ERROR}";
-		echo "db_ignored = ${NAGIOS_DB_IGNORED}"
+		echo "db_ignored = ${NAGIOS_DB_IGNORED}";
+		echo;
+		echo "[misc]";
+		echo "version = ${INFO_VERSION}";	# mysqldump-secure version (for checking against latest)
 	} >> "${NAGIOS_LOGFILE}"
 
 fi
+
+
 
 
 ############################################################
@@ -2904,7 +3030,6 @@ fi
 #
 # Delete tmp files/folders in reverse order
 #
-
 
 if [ "${DELETE}" = "1" ]; then
 	if rm "${MY_TMP_FILE_DEL}" 2>/dev/null; then
@@ -2950,6 +3075,6 @@ if [ "${ERROR}" != "0" ]; then
 	exit 4
 else
 	# Send good exit code
-	debug "info" "[OK] Finished successfully" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "ok" "Finished successfully" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 0
 fi

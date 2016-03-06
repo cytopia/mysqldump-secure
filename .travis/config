@@ -264,6 +264,51 @@ check() {
 
 
 
+#
+# Check nagios log with nagios plugin
+#
+check_nagios() {
+
+	# 1.) Run test
+	_run="${1}"	# Do run test? (1|0)
+	_arg="${2}"	# Command arguments to pass (string)
+	_ret="${3}" # Expected return (PASS|WARN|FAIL)
+
+	# 2.) Expect test
+	_exp="${4}"	# Check for expected string? (1|0)
+	_str="${5}" # String that must be found
+
+
+	# Count errors
+	_ERROR=0
+
+
+
+	_CMD="$("./nagios/check_mysqldump-secure -f${_INSTALL_PREFIX} ${_arg}")"
+
+	#
+	# EXECUTE THE COMMAND
+	#
+	echo "\$ ${txtblu}${_CMD}${txtrst}"
+	_OUTPUT="$(${_CMD} 2>&1)"
+	_RETURN="$?"
+
+
+	#
+	# AND SHOW THE COMMAND
+	#
+	#echo -e -n "${_OUTPUT}"
+	echo
+	echo
+
+
+
+
+
+}
+
+
+
 
 mds_remove_datadir() {
 	if [ -d ${_INSTALL_PREFIX}/var/mysqldump-secure/ ]; then
