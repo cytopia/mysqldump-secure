@@ -138,6 +138,10 @@ check() {
 		# Program must succeed
 		if [ "${_ret}" = "PASS" ]; then
 			if [ "${_RETURN}" != "0" ]; then
+				echo "--------------- config output due to error: ---------------"
+				sudo cat ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+				echo "--------------- run output due to error: ---------------"
+				echo -e -n "${_OUTPUT}"
 				echo "${txtpur}===> [FAIL]${txtrst}"
 				echo "${txtpur}===> [FAIL] Unexpected exit code: ${_RETURN} (should have passed)${txtrst}"
 				echo "${txtpur}===> [FAIL]${txtrst}"
@@ -148,6 +152,10 @@ check() {
 		# Program must fail
 		elif [ "${_ret}" = "FAIL" ]; then
 			if [ "${_RETURN}" = "0" ]; then
+				echo "--------------- config output due to error: ---------------"
+				sudo cat ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+				echo "--------------- run output due to error: ---------------"
+				echo -e -n "${_OUTPUT}"
 				echo "${txtpur}===> [FAIL]${txtrst}"
 				echo "${txtpur}===> [FAIL] Unexpected OK (should have exited with error)${txtrst}"
 				echo "${txtpur}===> [FAIL]${txtrst}"
