@@ -2943,7 +2943,6 @@ if [ ${DELETE} -eq 1 ]; then
 	echo "${TMPWATCH_ERROR}"
 
 
-	tmpreaper -m 1m --test --showdeleted --verbose=3 ${DUMP_PATH}/
 
 	if [ "${DELETE_METHOD}" = "tmpwatch" ]; then
 		# Number removed/skipped files
@@ -2956,11 +2955,11 @@ if [ ${DELETE} -eq 1 ]; then
 	elif [ "${DELETE_METHOD}" = "tmpreaper" ]; then
 		# Number removed/skipped files
 		TMPWATCH_NUM_DEL="$( echo "${TMPWATCH_RUN}" | grep -Eic '\(PID [0-9]*\) Found' )"
-		TMPWATCH_NUM_IGN="0"	# TODO: tmpreaper does not show ignored files
+		TMPWATCH_NUM_IGN="$( echo "${TMPWATCH_RUN}" | grep -ci 'skipped:' )"
 
 		# Output of removed/skipped files
 		TMPWATCH_TXT_DEL="$( echo "${TMPWATCH_RUN}" | grep -Ei '\(PID [0-9]*\) Found' )"
-		TMPWATCH_TXT_IGN=""	# TODO: tmpreaper does not show ignored files
+		TMPWATCH_TXT_IGN="$( echo "${TMPWATCH_RUN}" | grep -ci 'skipped:' )"
 	fi
 
 	debug  "info"  "(RUN): Deleting files older than $(get_tmpwatch_value "${DELETE_IF_OLDER}") $(get_tmpwatch_unit_name "${DELETE_IF_OLDER}") ... ${TMPWATCH_NUM_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2968,7 +2967,7 @@ if [ ${DELETE} -eq 1 ]; then
 
 
 	# Some files have been skipped!
-	if [ "${TMPWATCH_NUM_IGN}" != 0 ] || [ "${TMPWATCH_TXT_IGN}" != "" ]; then
+	if [ "${TMPWATCH_NUM_IGN}" != "0" ] || [ "${TMPWATCH_TXT_IGN}" != "" ]; then
 		debug  "warn" "(RUN): ${TMPWATCH}: Skipped ${TMPWATCH_NUM_IGN} files" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debugr "warn" "${TMPWATCH_TXT_IGN}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		ERROR="$(merge_exit_codes "${ERROR}" 1)"
