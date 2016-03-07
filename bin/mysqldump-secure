@@ -2938,6 +2938,12 @@ if [ ${DELETE} -eq 1 ]; then
 		debugr "warn" "${TMPWATCH_ERROR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		ERROR="$(merge_exit_codes "${ERROR}" 1)"
 	fi
+	echo "run:"
+	echo "${TMPWATCH_RUN}"
+
+	echo "err:"
+	echo "${TMPWATCH_ERROR}"
+
 
 	# Number removed/skipped files
 	TMPWATCH_NUM_DEL="$( echo "${TMPWATCH_RUN}" | grep -ci 'Removing file' )"
