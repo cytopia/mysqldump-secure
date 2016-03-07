@@ -2919,7 +2919,7 @@ TMPWATCH_NUM_IGN="0"
 if [ ${DELETE} -eq 1 ]; then
 
 	# Force deletion?
-	if [ "${DELETE_FORCE}" = "1" ]; then FORCE_ARG="--force"; else FORCE_ARG=""; fi
+	if [ "${DELETE_FORCE}" = "1" ]; then FORCE_ARG=""; else FORCE_ARG=""; fi
 
 	# Verbosity
 	if [ "${DELETE_METHOD}" = "tmpwatch" ]; then TMPWATCH_OPTS="-vv"; else TMPWATCH_OPTS="--verbose=3 --showdeleted"; fi
@@ -2940,7 +2940,7 @@ if [ ${DELETE} -eq 1 ]; then
 	fi
 
 
-	if [ "${DELETE_METHOD}" = "tmpwatch" ]; then
+	#if [ "${DELETE_METHOD}" = "tmpwatch" ]; then
 		# Number removed/skipped files
 		TMPWATCH_NUM_DEL="$( echo "${TMPWATCH_RUN}" | grep -ci 'Removing file' )"
 		TMPWATCH_NUM_IGN="$( echo "${TMPWATCH_RUN}" | grep -ci 'skipped:' )"
@@ -2948,15 +2948,15 @@ if [ ${DELETE} -eq 1 ]; then
 		# Output of removed/skipped files
 		TMPWATCH_TXT_DEL="$( echo "${TMPWATCH_RUN}" | grep -i 'Removing file' )"
 		TMPWATCH_TXT_IGN="$( echo "${TMPWATCH_RUN}" | grep -i 'skipped:' )"
-	elif [ "${DELETE_METHOD}" = "tmpreaper" ]; then
-		# Number removed/skipped files
-		TMPWATCH_NUM_DEL="$( echo "${TMPWATCH_RUN}" | grep -Eic '\(PID [0-9]*\) Found' )"
-		TMPWATCH_NUM_IGN="$( echo "${TMPWATCH_RUN}" | grep -ci 'skipped:' )"
-
-		# Output of removed/skipped files
-		TMPWATCH_TXT_DEL="$( echo "${TMPWATCH_RUN}" | grep -Ei '\(PID [0-9]*\) Found' )"
-		TMPWATCH_TXT_IGN="$( echo "${TMPWATCH_RUN}" | grep -ci 'skipped:' )"
-	fi
+	#elif [ "${DELETE_METHOD}" = "tmpreaper" ]; then
+	#	# Number removed/skipped files
+	#	TMPWATCH_NUM_DEL="$( echo "${TMPWATCH_RUN}" | grep -Eic '\(PID [0-9]*\) Found' )"
+	#	TMPWATCH_NUM_IGN="$( echo "${TMPWATCH_RUN}" | grep -ci 'skipped:' )"
+	#
+	#	# Output of removed/skipped files
+	#	TMPWATCH_TXT_DEL="$( echo "${TMPWATCH_RUN}" | grep -Ei '\(PID [0-9]*\) Found' )"
+	#	TMPWATCH_TXT_IGN="$( echo "${TMPWATCH_RUN}" | grep -ci 'skipped:' )"
+	#fi
 
 	debug  "info"  "(RUN): Deleting files older than $(get_tmpwatch_value "${DELETE_IF_OLDER}") $(get_tmpwatch_unit_name "${DELETE_IF_OLDER}") ... ${TMPWATCH_NUM_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug  "trace" "${TMPWATCH} ${FORCE_ARG} -m ${DELETE_IF_OLDER} ${TMPWATCH_OPTS} ${DUMP_PATH}/" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
