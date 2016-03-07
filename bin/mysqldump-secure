@@ -2943,7 +2943,7 @@ if [ ${DELETE} -eq 1 ]; then
 	echo "${TMPWATCH_ERROR}"
 
 
-	tmpreaper -m 1m --showdeleted --verbose=3 ${DUMP_PATH}/
+	tmpreaper -m 1m --test --showdeleted --verbose=3 ${DUMP_PATH}/
 
 	if [ "${DELETE_METHOD}" = "tmpwatch" ]; then
 		# Number removed/skipped files
