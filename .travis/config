@@ -134,8 +134,10 @@ check() {
 	#
 	echo "\$ ${txtblu}${_cmd}${txtrst}"
 	_OUTPUT="$(${_cmd} 2>&1)"
-	_OUTPUT_STDERR="$(echo "${_OUTPUT}" | grep '\[WARN\]\|\[ERR\]')"
 	_RETURN="$?"
+
+	# Get all errors and warnings
+	_OUTPUT_STDERR="$(echo "${_OUTPUT}" | grep '\[WARN\]\|\[ERR\]')"
 
 
 	#
