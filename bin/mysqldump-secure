@@ -2922,8 +2922,6 @@ if [ ${DELETE} -eq 1 ]; then
 
 	if [ "${DELETE_METHOD}" = "tmpwatch" ]; then TMPWATCH_OPTS="-vv"; else TMPWATCH_OPTS="--verbose=3 --showdeleted"; fi
 
-	# Show tmpwatch/tmpreaper command
-	debug  "trace" "${TMPWATCH} ${FORCE_ARG} -m ${DELETE_IF_OLDER} ${TMPWATCH_OPTS} ${DUMP_PATH}/" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 	TMPWATCH_RUN="$(${TMPWATCH} ${FORCE_ARG} -m "${DELETE_IF_OLDER}" "${TMPWATCH_OPTS}" "${DUMP_PATH}/" 2> "${MY_TMP_FILE_DEL}")"
 	TMPWATCH_ERRNO="$?"
@@ -2945,16 +2943,28 @@ if [ ${DELETE} -eq 1 ]; then
 	echo "${TMPWATCH_ERROR}"
 
 
-	# Number removed/skipped files
-	TMPWATCH_NUM_DEL="$( echo "${TMPWATCH_RUN}" | grep -ci 'Removing file' )"
-	TMPWATCH_NUM_IGN="$( echo "${TMPWATCH_RUN}" | grep -ci 'skipped:' )"
+	tmpreaper -m 1m --showdeleted --verbose=3 ${DUMP_PATH}/
 
-	# Output of removed/skipped files
-	TMPWATCH_TXT_DEL="$( echo "${TMPWATCH_RUN}" | grep -i 'Removing file' )"
-	TMPWATCH_TXT_IGN="$( echo "${TMPWATCH_RUN}" | grep -i 'skipped:' )"
+	if [ "${DELETE_METHOD}" = "tmpwatch" ]; then
+		# Number removed/skipped files
+		TMPWATCH_NUM_DEL="$( echo "${TMPWATCH_RUN}" | grep -ci 'Removing file' )"
+		TMPWATCH_NUM_IGN="$( echo "${TMPWATCH_RUN}" | grep -ci 'skipped:' )"
 
+		# Output of removed/skipped files
+		TMPWATCH_TXT_DEL="$( echo "${TMPWATCH_RUN}" | grep -i 'Removing file' )"
+		TMPWATCH_TXT_IGN="$( echo "${TMPWATCH_RUN}" | grep -i 'skipped:' )"
+	elif [ "${DELETE_METHOD}" = "tmpreaper" ]; then
+		# Number removed/skipped files
+		TMPWATCH_NUM_DEL="$( echo "${TMPWATCH_RUN}" | grep -Eic '\(PID [0-9]*\) Found' )"
+		TMPWATCH_NUM_IGN="0"	# TODO: tmpreaper does not show ignored files
 
-	debug  "info" "(RUN): Deleting files older than $(get_tmpwatch_value "${DELETE_IF_OLDER}") $(get_tmpwatch_unit_name "${DELETE_IF_OLDER}") ... ${TMPWATCH_NUM_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		# Output of removed/skipped files
+		TMPWATCH_TXT_DEL="$( echo "${TMPWATCH_RUN}" | grep -Ei '\(PID [0-9]*\) Found' )"
+		TMPWATCH_TXT_IGN=""	# TODO: tmpreaper does not show ignored files
+	fi
+
+	debug  "info"  "(RUN): Deleting files older than $(get_tmpwatch_value "${DELETE_IF_OLDER}") $(get_tmpwatch_unit_name "${DELETE_IF_OLDER}") ... ${TMPWATCH_NUM_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug  "trace" "${TMPWATCH} ${FORCE_ARG} -m ${DELETE_IF_OLDER} ${TMPWATCH_OPTS} ${DUMP_PATH}/" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 	# Some files have been skipped!
@@ -2963,6 +2973,7 @@ if [ ${DELETE} -eq 1 ]; then
 		debugr "warn" "${TMPWATCH_TXT_IGN}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		ERROR="$(merge_exit_codes "${ERROR}" 1)"
 	fi
+
 	# Show deleted files
 	debugr "info" "${TMPWATCH_TXT_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
