@@ -88,8 +88,8 @@ echo "----------------------------------------"
 echo "\$ ${txtblu}${CMD_VERB}${txtrst}"
 
 mds_recreate_datadir
-sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-1.txt
-sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-2.txt
+sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-1.txt && sudo chmod 400 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-1.txt
+sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-2.txt && sudo chmod 400 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-2.txt
 sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-3.txt
 sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-4.txt
 if ! eval "${CMD_VERB}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; else echo "${txtgrn}===> [OK]${txtrst}"; fi

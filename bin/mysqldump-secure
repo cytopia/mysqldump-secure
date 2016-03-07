@@ -2920,7 +2920,9 @@ if [ ${DELETE} -eq 1 ]; then
 	# Force deletion?
 	if [ "${DELETE_FORCE}" = "1" ]; then FORCE_ARG="--force"; else FORCE_ARG=""; fi
 
-	TMPWATCH_RUN="$(${TMPWATCH} ${FORCE_ARG} -m "${DELETE_IF_OLDER}" -vv "${DUMP_PATH}/" 2> "${MY_TMP_FILE_DEL}")"
+	if [ "${DELETE_METHOD}" = "tmpreaper" ]; then TMPWATCH_OPTS="-vv"; else TMPWATCH_OPTS="--verbose=3 --showdeleted"; fi
+
+	TMPWATCH_RUN="$(${TMPWATCH} ${FORCE_ARG} -m "${DELETE_IF_OLDER}" ${TMPWATCH_OPTS} "${DUMP_PATH}/" 2> "${MY_TMP_FILE_DEL}")"
 	TMPWATCH_ERRNO="$?"
 	TMPWATCH_ERROR="$( cat "${MY_TMP_FILE_DEL}" )"
 
