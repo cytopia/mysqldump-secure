@@ -2920,7 +2920,7 @@ if [ ${DELETE} -eq 1 ]; then
 	# Force deletion?
 	if [ "${DELETE_FORCE}" = "1" ]; then FORCE_ARG="--force"; else FORCE_ARG=""; fi
 
-	if [ "${DELETE_METHOD}" = "tmpreaper" ]; then TMPWATCH_OPTS="-vv"; else TMPWATCH_OPTS="--verbose=3 --showdeleted"; fi
+	if [ "${DELETE_METHOD}" = "tmpwatch" ]; then TMPWATCH_OPTS="-vv"; else TMPWATCH_OPTS="--verbose=3 --showdeleted"; fi
 
 	# Show tmpwatch/tmpreaper command
 	debug  "trace" "${TMPWATCH} ${FORCE_ARG} -m ${DELETE_IF_OLDER} ${TMPWATCH_OPTS} ${DUMP_PATH}/" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
