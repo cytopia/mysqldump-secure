@@ -2914,12 +2914,14 @@ debug "debug" "(RUN): Total size dumped: ${TOTAL_SIZE} MB" $LOG "${LOGFILE}" "${
 # Delete old Files
 ############################################################
 TMPWATCH_NUM_DEL="0"
+TMPWATCH_NUM_IGN="0"
 
 if [ ${DELETE} -eq 1 ]; then
 
 	# Force deletion?
-	if [ "${DELETE_FORCE}" = "1" ]; then FORCE_ARG=""; else FORCE_ARG=""; fi
+	if [ "${DELETE_FORCE}" = "1" ]; then FORCE_ARG="--force"; else FORCE_ARG=""; fi
 
+	# Verbosity
 	if [ "${DELETE_METHOD}" = "tmpwatch" ]; then TMPWATCH_OPTS="-vv"; else TMPWATCH_OPTS="--verbose=3 --showdeleted"; fi
 
 
@@ -2929,19 +2931,13 @@ if [ ${DELETE} -eq 1 ]; then
 
 	if [ "${TMPWATCH_ERRNO}" != "0" ]; then
 		debug  "err"  "(RUN): Error on ${TMPWATCH}: ${TMPWATCH_ERRNO}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debugr "err"  "${TMPWATCH_ERROR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debugr "err"  "(RUN): ${DELETE_METHOD} error: ${TMPWATCH_ERROR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		ERROR="$(merge_exit_codes "${ERROR}" 1)"
 	elif [ "${TMPWATCH_ERROR}" != "" ]; then
 		debug  "warn" "(RUN): Warning on ${TMPWATCH}: ${TMPWATCH_ERRNO}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debugr "warn" "${TMPWATCH_ERROR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debugr "warn" "(RUN): ${DELETE_METHOD} error: ${TMPWATCH_ERROR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		ERROR="$(merge_exit_codes "${ERROR}" 1)"
 	fi
-	echo "run:"
-	echo "${TMPWATCH_RUN}"
-
-	echo "err:"
-	echo "${TMPWATCH_ERROR}"
-
 
 
 	if [ "${DELETE_METHOD}" = "tmpwatch" ]; then
@@ -2979,8 +2975,6 @@ if [ ${DELETE} -eq 1 ]; then
 	# Show full trace output
 	debugr "trace" "${TMPWATCH_RUN}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
-else
-	TMPWATCH_NUM_DEL="0"
 fi
 
 
