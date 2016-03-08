@@ -1,6 +1,6 @@
-# mysqldump-secure
+# [![MDS](https://raw.githubusercontent.com/cytopia/mysqldump-secure/master/doc/img/logo.png)](http://mysqldump-secure.org)mysqldump-secure
 
-[General Warning](https://github.com/cytopia/mysqldump-secure#1-general-warning) |
+[Tested](https://github.com/cytopia/mysqldump-secure#1-tested-intensively) |
 [Features](https://github.com/cytopia/mysqldump-secure#2-features) |
 [Installation](https://github.com/cytopia/mysqldump-secure#3-installation) |
 [Configuration](https://github.com/cytopia/mysqldump-secure#4-configuration) |
@@ -33,53 +33,35 @@ Find the whole post at [www.everythingcli.org](http://www.everythingcli.org/inde
 
 <sub>(If the script runs on any other system not mentioned here, please drop me a note.)</sub>
 
-##### Requirements
-| Program  | Required | Description |
-| ------------- | ------------- | -------- |
-| bourne shell (sh)  | yes  | The whole script is written in pure bourne shell (sh) and is 100% Posix compliant |
-| [mysql](https://dev.mysql.com/downloads/mysql/)  | yes  | The mysql binary is used to find all available databases and their corresponding size |
-| [mysqldump](https://dev.mysql.com/downloads/mysql/)  | yes  | This is used for the actual dump procedure |
-| [openssl](https://www.openssl.org)  | optional  | Optionally used for private/public key encrypting the database dump |
-| [gzip](http://www.gzip.org)  | optional  | Optionally used for compressing the database dump |
-| [pigz](http://zlib.net/pigz/)  | optional  | Optionally used for compressing the database dump (multithreaded) |
-| [bzip2](http://www.bzip.org/)  | optional  | Optionally used for compressing the database dump |
-| [pbzip2](http://compression.ca/pbzip2/)  | optional  | Optionally used for compressing the database dump (multithreaded) |
-| [xz](http://www.bzip.org/)  | optional  | Optionally used for compressing the database dump |
-| [lzma](http://tukaani.org/lzma/)  | optional  | Optionally used for compressing the database dump |
-| [lzop](http://www.lzop.org/)  | optional  | Optionally used for compressing the database dump |
-| [tmpwatch](https://fedorahosted.org/tmpwatch/)  | optional  | Optionally used to delete old database dumps |
-| [tmpreaper](https://packages.debian.org/sid/tmpreaper)  | optional  | Optionally used to delete old database dumps |
-| [check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure)  | optional  | Optionally used to monitor the dump via nagios (already bundled as a submodule inside this repository) |
 
 
-## 1. General Warning
-Most mysqldump scripts I have seen out there do something like this:
-```shell
-mysqldump --user=root --password=foo --host=localhost database > database.sql
-```
-**THIS IS REALLY DANGEROUS**
+## 1. Tested intensively
 
-Even if run inside a script, you can see the mysql password in cleartext in `ps aux`.
-You should always define your credentials in a my.cnf file with `chmod 400` or you can loose all your databases to everybody with access to that machine.
+Every push to `mysqldump-secure` triggers `travis-ci` which will run hundreds of all kinds of tests against the new code and stress the tool in every way. You can find the tests within the `.travis` folder including an automated setup to get a master-slave server with SSL encryption setup.
 
-> <sub>[MySQL End-User Guidelines for Password Security](https://dev.mysql.com/doc/refman/5.7/en/password-security-user.html)</sub>
-
-> <sub>Specifying a password on the command line should be considered insecure. You can use an option file to avoid giving the password on the command line.</sub>
-
+See [travis-ci.org/cytopia/mysqldump-secure](travis-ci.org/cytopia/mysqldump-secure) for what is going on.
 
 
 ## 2. Features
 
-* Compression (`gzip`, `pigz`, `bzip2`, `pbzip2`, `lzop`, `lzma`, `xz`)
-* Encryption (hybrid encryption: private/public key and aes)
+### Primary Features
+
+* **Encryption** (hybrid encryption: `RSA` and `AES` via `openssl smime`)
+* **Compression** (`gzip`, `pigz`, `bzip2`, `pbzip2`, `lzop`, `lzma`, `xz`)
+* **Tmpwatch** integration (`tmpwatch` or `tmpreaper`)
+* **Transaction-safe** / **Consistent** backups across tables (for DBs with: InnoDB only, mixed and non-InnoDB tables)
+* **Conditional mysqldump options** (e.g.: apply `--quick` on DBs > 200MB)
+* **Nagios** / **Icinga** integration ([check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure))
+
+### Secondary Features
+
+* Custom mysqldump options
+* Master/Slave recognition
 * Blacklisting
 * Whitelisting
-* Tmpwatch integration (`tmpwatch` or `tmpreaper`)
 * File logging
-* Custom mysqldump options
-* Security validation
-* Self testing
-* Nagios/Icinga integration ([check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure))
+* Self validation
+* Rock stable (see travis for hundreds of checks)
 * 100% POSIX compliant
 
 
@@ -133,39 +115,44 @@ For more detailed instructions go to the [Setup guidelines](https://github.com/c
 
 ### 5.1 Usage
 ```shell
-Usage: mysqldump-secure [--conf] [--cron] [--test] [--help] [--version]
-       mysqldump-secure [--conf]
+Usage: mysqldump-secure [--cron] [--test] [--conf] [-v[v]] [--help] [--version]
        mysqldump-secure --cron [--conf]
-       mysqldump-secure --test [--conf]
+       mysqldump-secure --test [--conf] [-v[v]]
+       mysqldump-secure [--conf] [-v[v]]
        mysqldump-secure --help
        mysqldump-secure --version
 
 When invoked without any arguments, it will start dumping databases as
 defined in mysqldump-secure.conf.
 
---conf            Pass different configuration file than the default one.
+  --conf          Pass different configuration file than the default one.
                   E.g.: --conf=/etc/mysqldump-secure-alt.conf
 
---cron            Use for cron run. It will only output errors and warnings
+  --cron          Use for cron run. It will only output errors and warnings
                   and will silence all debug output.
 
---test            Test requirements and exit.
+  --test          Test requirements and exit.
 
---help            Show this help screen.
+  -v              Show debug (and trace) output.
+                  Specify twice (-vv) to also show trace output.
+                  Can be combined with --conf  and --test
+                  E.g.: -v or -vv
 
---version         Show version information.
+  --help          Show this help screen.
+
+  --version       Show version information.
 ```
 
 ### 5.2 Default
 
 Test if everything is configured correctly:
 ```shell
-mysqldump-secure --test
+mysqldump-secure --test -vv
 ```
 
 Manual run from commmand line:
 ```shell
-mysqldump-secure
+mysqldump-secure -v
 ```
 
 Run from within cron
@@ -200,6 +187,7 @@ mysqldump-secure --cron --config=/etc/mysqldump-secure.encrypted.conf
 |------|-------------|
 | [mysqldump-secure.org](http://mysqldump-secure.org) | mysqldump-secure homepage |
 | [Installation](https://github.com/cytopia/mysqldump-secure/blob/master/doc/INSTALL.md) | Different ways to install mysqldump-secure |
+| [Requirements](https://github.com/cytopia/mysqldump-secure/blob/master/doc/REQUIREMENTS.md) | What tools are required to run mysqldump-secure |
 | [Configuration](https://github.com/cytopia/mysqldump-secure/blob/master/doc/SETUP.md) | How to configure mysqldump-secure |
 | [Security](https://github.com/cytopia/mysqldump-secure/blob/master/doc/SECURITY.md) | Information and usage about security measurements |
 | [Compression](https://github.com/cytopia/mysqldump-secure/blob/master/doc/COMPRESSION.md) | Information and usage about compression |

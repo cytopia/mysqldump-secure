@@ -1,5 +1,6 @@
 [Readme](https://github.com/cytopia/mysqldump-secure/blob/master/README.md) |
 [Installation](https://github.com/cytopia/mysqldump-secure/blob/master/doc/INSTALL.md) |
+[Requirements](https://github.com/cytopia/mysqldump-secure/blob/master/doc/REQUIREMENTS.md) |
 [Configuration](https://github.com/cytopia/mysqldump-secure/blob/master/doc/SETUP.md) |
 Security |
 [Compression](https://github.com/cytopia/mysqldump-secure/blob/master/doc/COMPRESSION.md) |
@@ -16,9 +17,22 @@ Mysqldump-secure was built with many security aspects in mind which are explaine
 
 ## Database password stealing
 
-When you run `mysqldump` with `-p` or `--password` option from command line or automated via cron, it is possible for other users to see the specified password in cleartext inside the system's process list via `ps auxw`.
+When you run `mysqldump` with `-p` or `--password` option from command line or automated via cron it is possible for other users to grab the password.
 
-One mechanism to prevent this is to enable `hidepid` on the mounted `/proc` device which will then hide your processes to all other users.
+> ```shell
+> mysqldump --user=root --password=foo --host=localhost database > database.sql
+> ```
+**THIS IS REALLY DANGEROUS**
+
+Even if run inside a script, you can see the mysql password in cleartext in `ps aux`.
+You should always define your credentials in a my.cnf file with `chmod 400` or you can loose all your databases to everybody with access to that machine.
+
+> <sub>[MySQL End-User Guidelines for Password Security](https://dev.mysql.com/doc/refman/5.7/en/password-security-user.html)</sub>
+
+> <sub>Specifying a password on the command line should be considered insecure. You can use an option file to avoid giving the password on the command line.</sub>
+
+
+One other mechanism to prevent this is to enable `hidepid` on the mounted `/proc` device which will then hide your processes to all other users.
 
 [Linux Kernel commit](https://git.kernel.org/cgit/linux/kernel/git/stable/linux-stable.git/commit/?id=0499680a42141d86417a8fbaa8c8db806bea1201)
 >> hidepid=1 means users may not access any /proc/<pid>/ directories, but
