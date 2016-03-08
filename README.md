@@ -1,6 +1,6 @@
 # [![MDS](https://raw.githubusercontent.com/cytopia/mysqldump-secure/master/doc/img/logo.png)](http://mysqldump-secure.org)mysqldump-secure
 
-[Tested](https://github.com/cytopia/mysqldump-secure#1-tested-intensively) |
+[Penetrated](https://github.com/cytopia/mysqldump-secure#1-penetrated) |
 [Features](https://github.com/cytopia/mysqldump-secure#2-features) |
 [Installation](https://github.com/cytopia/mysqldump-secure#3-installation) |
 [Configuration](https://github.com/cytopia/mysqldump-secure#4-configuration) |
@@ -22,7 +22,7 @@ It will backup every available database (which is readable by the specified user
 Find the project website at [mysqldump-secure.org](http://mysqldump-secure.org)  
 Find the whole post at [www.everythingcli.org](http://www.everythingcli.org/index.php/2015/06/13/secure-mysqldump-script-with-encryption-and-compression/)
 
-##### Tested on
+##### Runs on
 [![FreeBSD](https://raw.githubusercontent.com/cytopia/icons/master/64x64/freebsd.png)](https://www.freebsd.org)
 [![RedHat](https://raw.githubusercontent.com/cytopia/icons/master/64x64/redhat.png)](https://www.redhat.com)
 [![CentOS](https://raw.githubusercontent.com/cytopia/icons/master/64x64/centos.png)](https://www.centos.org)
@@ -35,11 +35,13 @@ Find the whole post at [www.everythingcli.org](http://www.everythingcli.org/inde
 
 
 
-## 1. Tested intensively
+## 1. Penetrated
 
-Every push to `mysqldump-secure` triggers `travis-ci` which will run hundreds of all kinds of tests against the new code and stress the tool in every way. You can find the tests within the `.travis` folder including an automated setup to get a master-slave server with SSL encryption setup.
+Every push to `mysqldump-secure` triggers `travis-ci` which will run hundreds of all kinds of tests against the new code and stress the tool in every possible way with every possible config.
 
-See [travis-ci.org/cytopia/mysqldump-secure](travis-ci.org/cytopia/mysqldump-secure) for what is going on.
+You can find the tests within the `.travis` folder including an automated setup to get a master-slave server with SSL encryption setup. Thoses tests can also be run locally.
+
+See [travis-ci.org/cytopia/mysqldump-secure](https://travis-ci.org/cytopia/mysqldump-secure) for what is going on.
 
 
 ## 2. Features
