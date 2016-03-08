@@ -55,7 +55,7 @@ You should always define your credentials in a my.cnf file with `chmod 400` or y
 
 ### Primary Features
 
-* **Encryption** (hybrid encryption: private/public key and aes via `openssl smime`)
+* **Encryption** (hybrid encryption: `RSA` and `AES` via `openssl smime`)
 * **Compression** (`gzip`, `pigz`, `bzip2`, `pbzip2`, `lzop`, `lzma`, `xz`)
 * **Tmpwatch** integration (`tmpwatch` or `tmpreaper`)
 * **Transaction-safe** / **Consistent** backups across tables (for DBs with: InnoDB only, mixed and non-InnoDB tables)
@@ -124,39 +124,44 @@ For more detailed instructions go to the [Setup guidelines](https://github.com/c
 
 ### 5.1 Usage
 ```shell
-Usage: mysqldump-secure [--conf] [--cron] [--test] [--help] [--version]
-       mysqldump-secure [--conf]
+Usage: mysqldump-secure [--cron] [--test] [--conf] [-v[v]] [--help] [--version]
        mysqldump-secure --cron [--conf]
-       mysqldump-secure --test [--conf]
+       mysqldump-secure --test [--conf] [-v[v]]
+       mysqldump-secure [--conf] [-v[v]]
        mysqldump-secure --help
        mysqldump-secure --version
 
 When invoked without any arguments, it will start dumping databases as
 defined in mysqldump-secure.conf.
 
---conf            Pass different configuration file than the default one.
+  --conf          Pass different configuration file than the default one.
                   E.g.: --conf=/etc/mysqldump-secure-alt.conf
 
---cron            Use for cron run. It will only output errors and warnings
+  --cron          Use for cron run. It will only output errors and warnings
                   and will silence all debug output.
 
---test            Test requirements and exit.
+  --test          Test requirements and exit.
 
---help            Show this help screen.
+  -v              Show debug (and trace) output.
+                  Specify twice (-vv) to also show trace output.
+                  Can be combined with --conf  and --test
+                  E.g.: -v or -vv
 
---version         Show version information.
+  --help          Show this help screen.
+
+  --version       Show version information.
 ```
 
 ### 5.2 Default
 
 Test if everything is configured correctly:
 ```shell
-mysqldump-secure --test
+mysqldump-secure --test -vv
 ```
 
 Manual run from commmand line:
 ```shell
-mysqldump-secure
+mysqldump-secure -v
 ```
 
 Run from within cron
