@@ -35,20 +35,11 @@ Find the whole post at [www.everythingcli.org](http://www.everythingcli.org/inde
 
 
 
-## 1. General Warning
-Most mysqldump scripts I have seen out there do something like this:
-```shell
-mysqldump --user=root --password=foo --host=localhost database > database.sql
-```
-**THIS IS REALLY DANGEROUS**
+## 1. Tested intensively
 
-Even if run inside a script, you can see the mysql password in cleartext in `ps aux`.
-You should always define your credentials in a my.cnf file with `chmod 400` or you can loose all your databases to everybody with access to that machine.
+Every push to `mysqldump-secure` triggers `travis-ci` which will run hundreds of all kinds of tests against the new code and stress the tool in every way. You can find the tests within the `.travis` folder including an automated setup to get a master-slave server with SSL encryption setup.
 
-> <sub>[MySQL End-User Guidelines for Password Security](https://dev.mysql.com/doc/refman/5.7/en/password-security-user.html)</sub>
-
-> <sub>Specifying a password on the command line should be considered insecure. You can use an option file to avoid giving the password on the command line.</sub>
-
+See [travis-ci.org/cytopia/mysqldump-secure](travis-ci.org/cytopia/mysqldump-secure) for what is going on.
 
 
 ## 2. Features
