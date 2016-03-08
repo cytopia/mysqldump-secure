@@ -25,20 +25,30 @@ password = "verySecurePasswordWith$%&SpecialChars"
 Test if the connection settings are working
 
 ```shell
-$ mysql --defaults-extra-file=/etc/mysqldump-secure.cnf
+$ mysqldump-secure --test -v
 
-Welcome to the MariaDB monitor.  Commands end with ; or \g.
-Your MariaDB connection id is 405
-Server version: 10.1.9-MariaDB Homebrew
-
-Copyright (c) 2000, 2015, Oracle, MariaDB Corporation Ab and others.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-
-MariaDB [(none)]>
+[INFO]  (OPT): Logging enabled
+[DEBUG] (OPT): Log level: 1
+[DEBUG] (OPT): Logfile: /var/log/mysqldump-secure.log
+[DEBUG] (CFG): Destination dir: /var/mysqldump-secure
+[DEBUG] (CFG): Using file Prefix: 2016-03-08_15-09__
+[INFO]  (OPT): MySQL SSL connection enabled
+[DEBUG] (OPT): MySQL SSL arguments: --ssl-ca=/usr/local/etc/certs/mysql.ca.pem.
+[INFO]  (OPT): Compression enabled
+[DEBUG] (OPT): Compression arguments: gzip -9 --stdout
+[INFO]  (OPT): Encryption disabled
+[INFO]  (OPT): Deletion enabled
+[DEBUG] (OPT): Deleting files older than 30 days. Using: tmpwatch
+[INFO]  (OPT): Nagios log enabled
+[DEBUG] (OPT): Nagios logfile: /var/log/mysqldump-secure.nagios.log
+[DEBUG] (SRV): MySQL server connection: Localhost via UNIX socket
+[DEBUG] (SRV): MySQL server connection: Using SSL (Cipher in use is DHE-RSA-AES256-GCM-SHA384)
+[DEBUG] (SRV): MySQL server version:    MariaDB 10.1.11-MariaDB-log Homebrew
+[DEBUG] (SRV): MySQL server hostname:   mycoolhost:3306
+[DEBUG] (SRV): MySQL server rep type:   master
 ```
 
-If you see the mysql/mariadb prompt then everything went fine and you can continue configuring the program.
+If you see the mysql section and the script does no abort everything went fine and you can continue configuring the program.
 
 ## 1.2 Configure MySQLDump Options
 Configure the backup behavior in [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/blob/master/etc/mysqldump-secure.conf).
