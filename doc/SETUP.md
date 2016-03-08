@@ -1,5 +1,6 @@
 [Readme](https://github.com/cytopia/mysqldump-secure/blob/master/README.md) |
 [Installation](https://github.com/cytopia/mysqldump-secure/blob/master/doc/INSTALL.md) |
+[Requirements](https://github.com/cytopia/mysqldump-secure/blob/master/doc/REQUIREMENTS.md) |
 Configuration |
 [Security](https://github.com/cytopia/mysqldump-secure/blob/master/doc/SECURITY.md) |
 [Compression](https://github.com/cytopia/mysqldump-secure/blob/master/doc/COMPRESSION.md) |
