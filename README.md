@@ -1,6 +1,6 @@
 # [![MDS](https://raw.githubusercontent.com/cytopia/mysqldump-secure/master/doc/img/logo.png)](http://mysqldump-secure.org)mysqldump-secure
 
-[General Warning](https://github.com/cytopia/mysqldump-secure#1-general-warning) |
+[Tested](https://github.com/cytopia/mysqldump-secure#1-tested-intensively) |
 [Features](https://github.com/cytopia/mysqldump-secure#2-features) |
 [Installation](https://github.com/cytopia/mysqldump-secure#3-installation) |
 [Configuration](https://github.com/cytopia/mysqldump-secure#4-configuration) |
