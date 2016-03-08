@@ -1602,7 +1602,9 @@ if [ ! -w "${DUMP_PATH}" ]; then
 	debug  "err"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit 1
 fi
-debug "trace" "(CFG): Destination dir: ${DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
+# Show information
+debug "debug" "(CFG): Destination dir: ${DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 # Check $DUMP_FILE_PRE
@@ -1615,6 +1617,9 @@ elif [ -z "${DUMP_FILE_PRE}" ]; then
 	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_FILE_PRE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	DUMP_FILE_PRE=${_DEFAULT_DUMP_FILE_PRE}
 fi
+
+# Show information
+debug "debug" "(CFG): Using file Prefix: ${DUMP_FILE_PRE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 
