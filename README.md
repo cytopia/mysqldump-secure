@@ -53,18 +53,24 @@ You should always define your credentials in a my.cnf file with `chmod 400` or y
 
 ## 2. Features
 
-* Encryption (hybrid encryption: private/public key and aes via `openssl smime`)
-* Compression (`gzip`, `pigz`, `bzip2`, `pbzip2`, `lzop`, `lzma`, `xz`)
-* Tmpwatch integration (`tmpwatch` or `tmpreaper`)
-* Consistent dumps across tables (for DBs with: InnoDB only, mixed and non-InnoDB tables)
-* Conditional mysqldump options (e.g.: apply `--quick` on DBs > 200MB)
+### Primary Features
+
+* **Encryption** (hybrid encryption: private/public key and aes via `openssl smime`)
+* **Compression** (`gzip`, `pigz`, `bzip2`, `pbzip2`, `lzop`, `lzma`, `xz`)
+* **Tmpwatch** integration (`tmpwatch` or `tmpreaper`)
+* **Transaction-safe** / **Consistent** backups across tables (for DBs with: InnoDB only, mixed and non-InnoDB tables)
+* **Conditional mysqldump options** (e.g.: apply `--quick` on DBs > 200MB)
+* **Nagios** / **Icinga** integration ([check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure))
+
+### Secondary Features
+
 * Custom mysqldump options
+* Master/Slave recognition
 * Blacklisting
 * Whitelisting
 * File logging
-* Security validation
-* Self testing
-* Nagios/Icinga integration ([check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure))
+* Self validation
+* Rock stable (see travis for hundreds of checks)
 * 100% POSIX compliant
 
 
