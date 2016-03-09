@@ -258,8 +258,8 @@ $ mysqldump-secure -v
 
 | File | Description |
 |------|-------------|
-| [mysqldump-secure.org](http://mysqldump-secure.org) | Project homepage |
-| [www.everythingcli.org](http://www.everythingcli.org/secure-mysqldump-script-with-encryption-and-compression/) | Blog post: General thoughts and initial idea for this project. |
+| [http://mysqldump-secure.org](http://mysqldump-secure.org) | Project homepage |
+| [http://www.everythingcli.org](http://www.everythingcli.org/secure-mysqldump-script-with-encryption-and-compression/) | Blog post: General thoughts and initial idea for this project. |
 | [Installation](https://github.com/cytopia/mysqldump-secure/blob/master/doc/INSTALL.md) | Different ways to install mysqldump-secure |
 | [Requirements](https://github.com/cytopia/mysqldump-secure/blob/master/doc/REQUIREMENTS.md) | What tools are required to run mysqldump-secure |
 | [Configuration](https://github.com/cytopia/mysqldump-secure/blob/master/doc/SETUP.md) | How to configure mysqldump-secure |
