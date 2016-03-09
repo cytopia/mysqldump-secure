@@ -19,8 +19,8 @@ Mysqldump-secure is a POSIX compliant shell backup script for MySQL databases wi
 It will backup every available database (which is readable by the specified user) as a separate file with the possibility to opt out via blacklisting. Dumped databases can optionally be piped directly to gzip or openssl in order to compress and/or encrypt the backup. Encryption is done before the file is written to disk to avoid possible race conditions.
 
 
-Find the project website at [mysqldump-secure.org](http://mysqldump-secure.org)  
-Find the whole post at [www.everythingcli.org](http://www.everythingcli.org/index.php/2015/06/13/secure-mysqldump-script-with-encryption-and-compression/)
+Find the project website at [http://mysqldump-secure.org](http://mysqldump-secure.org)  
+Find the whole post at [http://www.everythingcli.org](http://www.everythingcli.org/index.php/2015/06/13/secure-mysqldump-script-with-encryption-and-compression/)
 
 ##### Runs on
 [![FreeBSD](https://raw.githubusercontent.com/cytopia/icons/master/64x64/freebsd.png)](https://www.freebsd.org)
