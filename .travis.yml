@@ -35,7 +35,7 @@ before_script:
 
 
   # Installs mysqldump-secure and MySQL as with as master and a slave server
-  - ./.travis/00-install.sh
+  - ./test/00-install.sh
   - sleep 10
 
 
@@ -69,17 +69,17 @@ script:
   #
   # --------------------------------------------------------------------------------
 
-  - ./.travis/01-check_normal-operation.sh
-  - ./.travis/02-check_output_dirs.sh
-  - ./.travis/03-check_connection_settings.sh
-  - ./.travis/04-check_mysqldump_settings.sh
-  - ./.travis/05-check_consistency_settings.sh
-  - ./.travis/06-check_logging.sh
-  - ./.travis/07-check_compression.sh
-  - ./.travis/08-check_encryption.sh
-  - ./.travis/09-check_deletion.sh
-  - ./.travis/10-check_nagios_log.sh
-  - ./.travis/11-check_misc_settings.sh
+  - ./test/01-check_normal-operation.sh
+  - ./test/02-check_output_dirs.sh
+  - ./test/03-check_connection_settings.sh
+  - ./test/04-check_mysqldump_settings.sh
+  - ./test/05-check_consistency_settings.sh
+  - ./test/06-check_logging.sh
+  - ./test/07-check_compression.sh
+  - ./test/08-check_encryption.sh
+  - ./test/09-check_deletion.sh
+  - ./test/10-check_nagios_log.sh
+  - ./test/11-check_misc_settings.sh
 
 
   # TODO:
