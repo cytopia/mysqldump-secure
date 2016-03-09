@@ -37,7 +37,7 @@ Find the whole post at [www.everythingcli.org](http://www.everythingcli.org/inde
 
 Every push to `mysqldump-secure` triggers `travis-ci` which will run hundreds of all kinds of tests against the new code and stress the tool in every possible way with every possible config.
 
-You can find the tests within the `.travis` folder including an automated setup to get a master-slave server with SSL encryption setup. Thoses tests can also be run locally.
+You can find the tests within the [test](test) folder including an automated setup to get a master-slave server with SSL encryption setup. Thoses tests can also be run locally.
 
 See [travis-ci.org/cytopia/mysqldump-secure](https://travis-ci.org/cytopia/mysqldump-secure) for what is going on.
 
