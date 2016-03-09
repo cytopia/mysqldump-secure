@@ -22,7 +22,8 @@ Contributing
 5. Extend the [Example](https://github.com/cytopia/mysqldump-secure/blob/master/doc/EXAMPLES.md) section
 
 
-## Repos
+## Repository integration
+
 Anybody willing to help me get this into
 
 1. [X] ~~brew (OSX homebrew)~~
@@ -31,4 +32,35 @@ Anybody willing to help me get this into
 4. [ ] apt (Ubuntu)
 5. [ ] pkg (FreeBSD)
 
+## Website / Documentation
+
+* Extend documentation
+* Improve project webpage
+* Fix grammatical errors
+* ...
+
+
+## Pull requests
+
+Whenever the code is changed or a pull-request is made, travis will trigger many hundred tests against the code and the program operation. All tests must pass without exception in order to accept the pull request.
+
+The first check will run `shellcheck` in the most strict POSIX mode, after this test has passed the following will be checked for every single combination of configuration setting:
+
+* Unbound variable tests (script runs with `#!/bin/sh -u`)
+* Syntax error tests
+* Abnormal program termination
+* Abnormal behaviour
+* Error handling and catching
+`
+Apart from this there are many more specific checks, some examples are:
+
+* Backups cannot be overwritten
+* Proper deletion (`tmpwatch` / `tpmreaper`)
+* Checks against encryption
+* basically all configuration directives are checked ...
+
+
+## Credits
+
+Credit goes where credit belongs. All contributors will be listed on the project homepage in the contributors section.
 
