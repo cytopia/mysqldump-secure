@@ -19,8 +19,8 @@ Mysqldump-secure is a POSIX compliant shell backup script for MySQL databases wi
 It will backup every available database (which is readable by the specified user) as a separate file with the possibility to opt out via blacklisting. Dumped databases can optionally be piped directly to gzip or openssl in order to compress and/or encrypt the backup. Encryption is done before the file is written to disk to avoid possible race conditions.
 
 
-Find the project website at [mysqldump-secure.org](http://mysqldump-secure.org)  
-Find the whole post at [www.everythingcli.org](http://www.everythingcli.org/index.php/2015/06/13/secure-mysqldump-script-with-encryption-and-compression/)
+Find the project website at [http://mysqldump-secure.org](http://mysqldump-secure.org)  
+Find the whole post at [http://www.everythingcli.org](http://www.everythingcli.org/index.php/2015/06/13/secure-mysqldump-script-with-encryption-and-compression/)
 
 ##### Runs on
 [![FreeBSD](https://raw.githubusercontent.com/cytopia/icons/master/64x64/freebsd.png)](https://www.freebsd.org)
@@ -37,9 +37,9 @@ Find the whole post at [www.everythingcli.org](http://www.everythingcli.org/inde
 
 Every push to `mysqldump-secure` triggers `travis-ci` which will run hundreds of all kinds of tests against the new code and stress the tool in every possible way with every possible config.
 
-You can find the tests within the `.travis` folder including an automated setup to get a master-slave server with SSL encryption setup. Thoses tests can also be run locally.
+You can find the tests within the [test](test) folder including an automated setup to get a master-slave server with SSL encryption setup. Thoses tests can also be run locally.
 
-See [travis-ci.org/cytopia/mysqldump-secure](https://travis-ci.org/cytopia/mysqldump-secure) for what is going on.
+See [https://travis-ci.org/cytopia/mysqldump-secure](https://travis-ci.org/cytopia/mysqldump-secure) for checks in action and [test](test) for a description about the tests.
 
 
 ## 1. Features
