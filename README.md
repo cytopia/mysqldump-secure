@@ -39,7 +39,7 @@ Every push to `mysqldump-secure` triggers `travis-ci` which will run hundreds of
 
 You can find the tests within the [test](test) folder including an automated setup to get a master-slave server with SSL encryption setup. Thoses tests can also be run locally.
 
-See [travis-ci.org/cytopia/mysqldump-secure](https://travis-ci.org/cytopia/mysqldump-secure) for what is going on.
+See [https://travis-ci.org/cytopia/mysqldump-secure](https://travis-ci.org/cytopia/mysqldump-secure) for checks in action and [test](test) for a description about the tests.
 
 
 ## 1. Features
