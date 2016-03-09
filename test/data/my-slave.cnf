@@ -1,0 +1,56 @@
+[mysqld]
+
+#
+# User
+#
+user		= root
+
+
+#
+# Networking
+#
+port		= ##SQL_SLAVE_PORT##
+bind-address= 0.0.0.0
+socket		= ##_INSTALL_PREFIX##/var/log/mysql-slave/mysql.sock
+
+
+#
+# Enable SSL
+#
+ssl
+ssl-ca		= ##_INSTALL_PREFIX##/etc/mysql.ca.pem
+ssl-cert	= ##_INSTALL_PREFIX##/etc/mysql.server-cert.pem
+ssl-key		= ##_INSTALL_PREFIX##/etc/mysql.server-key.pem
+
+
+#
+# Database files
+#
+datadir		= ##_INSTALL_PREFIX##/var/mysql-slave
+
+
+#
+# REPLICATION (SLAVE)
+#
+server-id	= 2
+log_bin		= ##_INSTALL_PREFIX##/var/log/mysql-slave/mysql-bin.log
+relay-log	= ##_INSTALL_PREFIX##/var/log/mysql-slave/mysql-relay-bin.log
+replicate-ignore-db = mysql
+replicate-ignore-db = test
+
+
+#
+# Logging
+#
+general_log_file				= ##_INSTALL_PREFIX##/var/log/mysql-slave/mysql.log
+slow-query-log-file				= ##_INSTALL_PREFIX##/var/log/mysql-slave/slow.log
+log-error						= ##_INSTALL_PREFIX##/var/log/mysql-slave/error.log
+log-queries-not-using-indexes	= 1
+long_query_time					= 1
+slow-query-log					= 1
+
+
+#
+# Misc
+#
+lower_case_table_names = 2

@@ -1,0 +1,398 @@
+#
+# Test install directory
+#
+_INSTALL_PREFIX="/opt/mysqldump-secure/tests"
+
+
+#
+# MySQL Ports
+#
+SQL_MASTER_PORT="13306"
+SQL_SLAVE_PORT="13307"
+
+
+#
+# 3 possible commands
+#
+CMD_CRON="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --cron"
+CMD_NORM="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure"
+CMD_VERB="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure -vv"
+CMD_HELP="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --help"
+CMD_TEST="sudo ${_INSTALL_PREFIX}/bin/mysqldump-secure --test"
+
+
+
+#
+# Some colors for the test output
+#
+txtgrn=$(tput setaf 2) # Green
+txtylw=$(tput setaf 3) # Yellow
+txtblu=$(tput setaf 4) # Blue
+txtpur=$(tput setaf 5) # Purple
+txtcyn=$(tput setaf 6) # Cyan
+txtwht=$(tput setaf 7) # White
+txtrst=$(tput sgr0)    # Text reset.
+
+
+
+#
+# Is it Debian-based? (tmpwatch or tmpreaper)
+#
+if command -v apt-get >/dev/null 2>&1; then
+	TMPWATCH="tmpreaper"
+else
+	TMPWATCH="tmpwatch"
+fi
+
+
+
+
+
+
+################################################################################
+#
+# Some repeating functions
+#
+################################################################################
+
+
+
+#
+# sed 's//g' wrapper
+#
+sed_change_config_file() {
+	_find="${1}"
+	_repl="${2}"
+
+	sudo sed -i'' "s|${_find}|${_repl}|" ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+}
+
+
+
+
+#
+#
+# TODO: Test database import!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# TODO: Test database import!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# TODO: Test database import!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+#
+
+
+#
+# This runs all the checks as fast as possible
+# One run for all checks.
+#
+check() {
+
+	_data_dir="${1}" # Recreate datadir?
+
+	# 1.) Run test
+	_run="${2}"	# Do run test? (1|0)
+	_ret="${3}" # Expected return (PASS|FAIL)
+
+	# 2.) Expect test
+	_exp="${4}"	# Check for expected string? (1|0)
+	_str="${5}" # String that must be found
+
+	# 3.) Unbound variable test
+	_var="${6}" # Do unbound variable test? (1|0)
+
+	# 4.) Syntax error test
+	_syn="${7}" # Do syntax error test? (1|0)
+
+	# 5.) Do end test (check if program run till the end)
+	_end="${8}" # Do end test? (1|0)
+
+	# Command to execute
+	_cmd="${@:9}"
+
+	# Count errors
+	_ERROR=0
+
+
+	#
+	# RECREATE DATADIR?
+	#
+	if [ "${_data_dir}" = "1" ]; then
+		if [ -d ${_INSTALL_PREFIX}/var/mysqldump-secure/ ]; then
+			sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+		fi
+	fi
+
+
+	# These files can only be deleted via tmpwatch/tmpreaper -f (--force)
+	sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-1.txt && sudo chmod 400 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-1.txt
+	sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-2.txt && sudo chmod 400 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-2.txt
+	sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-3.txt && sudo chmod 400 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-3.txt
+	sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-4.txt && sudo chmod 400 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-4.txt
+	sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-5.txt && sudo chmod 400 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-5.txt
+
+
+
+	#
+	# EXECUTE THE COMMAND
+	#
+	echo "\$ ${txtblu}${_cmd}${txtrst}"
+	_OUTPUT="$(${_cmd} 2>&1)"
+	_RETURN="$?"
+
+	# Get all errors and warnings
+	_OUTPUT_STDERR="$(echo "${_OUTPUT}" | grep '\[WARN\]\|\[ERR\]')"
+
+
+	#
+	# AND SHOW THE COMMAND
+	#
+	#echo -e -n "${_OUTPUT}"
+	echo
+	echo
+
+
+
+	#
+	# 1.) RUN TEST
+	#
+	if [ "${_run}" = "1" ]; then
+
+		echo "\$ ${txtblu}1. RUN TEST ...${txtrst}"
+		echo "${_OUTPUT_STDERR}"
+
+		# Program must succeed
+		if [ "${_ret}" = "PASS" ]; then
+			if [ "${_RETURN}" != "0" ]; then
+				echo
+				echo
+				echo "--------------- config output due to error: ---------------"
+				echo
+				sudo cat ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+				echo
+				echo
+				echo "--------------- run output due to error: ---------------"
+				echo
+				echo -e -n "${_OUTPUT}"
+				echo "${txtpur}===> [FAIL]${txtrst}"
+				echo "${txtpur}===> [FAIL] Unexpected exit code: ${_RETURN} (should have passed)${txtrst}"
+				echo "${txtpur}===> [FAIL]${txtrst}"
+				_ERROR=$((_ERROR+1));
+			else
+				echo "${txtgrn}===> [OK] Success${txtrst}"
+			fi
+		# Program must fail
+		elif [ "${_ret}" = "FAIL" ]; then
+			if [ "${_RETURN}" = "0" ]; then
+				echo
+				echo
+				echo "--------------- config output due to error: ---------------"
+				echo
+				sudo cat ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+				echo
+				echo
+				echo "--------------- run output due to error: ---------------"
+				echo
+				echo -e -n "${_OUTPUT}"
+				echo "${txtpur}===> [FAIL]${txtrst}"
+				echo "${txtpur}===> [FAIL] Unexpected OK (should have exited with error)${txtrst}"
+				echo "${txtpur}===> [FAIL]${txtrst}"
+				_ERROR=$((_ERROR+1));
+			else
+				echo "${txtgrn}===> [OK] Expected Error. Exit code: ${_RETURN}${txtrst}"
+			fi
+		# Something else happened
+		else
+			echo "${txtpur}===> [FAIL]${txtrst}"
+			echo "${txtgrn}===> [FAIL] Invalid usage for 'check()'${txtrst}"
+			echo "${txtpur}===> [FAIL]${txtrst}"
+			_ERROR=$((_ERROR+1));
+		fi
+		echo
+
+	fi
+
+	#
+	# 2.) EXPECT TEST (expect string)
+	#
+	if [ "${_exp}" = "1" ]; then
+
+		echo "\$ ${txtblu}2. EXPECTED ERROR TEST ...${txtrst}"
+
+		_found="$(echo "${_OUTPUT}" | grep '\[WARN\]\|\[ERR\]' | grep -A 1 -B 1 --color=always -e "${_str}")"
+
+		if [ "${_found}" = "" ]; then
+			echo "${txtpur}===> [FAIL]${txtrst}"
+			echo "${txtpur}===> [FAIL] Expected error string not found in stderr:${txtrst} ${txtblu}\"${_str}\"${txtrst}"
+			echo "${txtpur}===> [FAIL]${txtrst}"
+			_ERROR=$((_ERROR+1));
+		else
+			echo "${_found}"
+			echo "${txtgrn}===> [OK] Expected error string found in stderr:${txtrst} ${txtblu}\"${_str}\"${txtrst}"
+		fi
+		echo
+	fi
+
+	#
+	# 3.) UNBOUND VARIABLE TEST
+	#
+	if [ "${_var}" = "1" ]; then
+
+		echo "\$ ${txtblu}3. UNBOUND VARIABLE TEST ...${txtrst}"
+
+		_found="$(echo "${_OUTPUT}" | grep 'parameter not set')"
+
+		if [ "${_found}" != "" ]; then
+			echo "${unbound}"
+			echo "${txtpur}===> [FAIL]${txtrst}"
+			echo "${txtpur}===> [FAIL] Unbound variable found.${txtrst}"
+			echo "${txtpur}===> [FAIL]${txtrst}"
+			_ERROR=$((_ERROR+1));
+		else
+			echo "${txtgrn}===> [OK] No unbound variables found.${txtrst}"
+		fi
+		echo
+	fi
+
+	#
+	# 4.) SYNTAX ERROR TEST
+	#
+	if [ "${_syn}" = "1" ]; then
+
+		echo "\$ ${txtblu}4. SYNTAX ERROR TEST ...${txtrst}"
+
+		_unfound="$(echo "${_OUTPUT}" | grep -E '.*[0-9]*:.*: not found.*')"
+		_syntax="$(echo "${_OUTPUT}" | grep -E '.*[0-9]*:.*: Syntax error:.*')"
+
+		if [ "${_syntax}" != "" ]; then
+			if [ "${_unfound}" != "" ]; then
+				echo "${_unfound}"
+			fi
+			echo "${_syntax}"
+			echo "${txtpur}===> [FAIL]${txtrst}"
+			echo "${txtpur}===> [FAIL] Syntax error found.${txtrst}"
+			echo "${txtpur}===> [FAIL]${txtrst}"
+			_ERROR=$((_ERROR+1));
+		else
+
+			if [ "${_unfound}" != "" ]; then
+				echo "${_unfound}"
+				echo "${txtpur}===> [FAIL]${txtrst}"
+				echo "${txtpur}===> [FAIL] Syntax error found.${txtrst}"
+				echo "${txtpur}===> [FAIL]${txtrst}"
+				_ERROR=$((_ERROR+1));
+			else
+				echo "${txtgrn}===> [OK] No Syntax error found.${txtrst}"
+			fi
+		fi
+		echo
+	fi
+
+
+
+
+	#
+	# 5.) END TEST
+	#
+	if [ "${_end}" = "1" ]; then
+
+		echo "\$ ${txtblu}5. FINISH TEST ...${txtrst}"
+
+		_found="$(echo "${_OUTPUT}" | grep -E 'Aborting|Finished successfully|Finished with errors|invalid argument:')"
+
+		if [ "${_found}" = "" ]; then
+			echo "${_OUTPUT}" | tail -n5
+			echo "${txtpur}===> [FAIL]${txtrst}"
+			echo "${txtpur}===> [FAIL] Program aborted before it was finished.${txtrst}"
+			echo "${txtpur}===> [FAIL]${txtrst}"
+			_ERROR=$((_ERROR+1));
+		else
+			echo "${_OUTPUT}" | tail -n1
+			echo "${txtgrn}===> [OK] Program run till the very end.${txtrst}"
+		fi
+		echo
+	fi
+
+	return ${_ERROR}
+}
+
+
+
+
+#
+# Check nagios log with nagios plugin
+#
+check_nagios() {
+
+	# 1.) Run test
+	_run="${1}"	# Do run test? (1|0)
+	_arg="${2}"	# Command arguments to pass (string)
+	_ret="${3}" # Expected return (OK|WARN|ERR|UNKNOWN)
+
+	# 2.) Expect test
+	_exp="${4}"	# Check for expected string? (1|0)
+	_str="${5}" # String that must be found
+
+
+	# Count errors
+	_ERROR=0
+
+
+
+	_CMD="$("./nagios/check_mysqldump-secure -f${_INSTALL_PREFIX} ${_arg}")"
+
+	#
+	# EXECUTE THE COMMAND
+	#
+	echo "\$ ${txtblu}${_CMD}${txtrst}"
+	_OUTPUT="$(${_CMD} 2>&1)"
+	_RETURN="$?"
+
+
+	#
+	# AND SHOW THE COMMAND
+	#
+	#echo -e -n "${_OUTPUT}"
+	echo
+	echo
+
+
+
+
+
+}
+
+
+
+
+mds_remove_datadir() {
+	if [ -d ${_INSTALL_PREFIX}/var/mysqldump-secure/ ]; then
+		sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/
+		return $?
+	fi
+	return 0
+}
+
+
+
+mds_remove_logfiles() {
+	_exit=0
+
+	if [ -f ${_INSTALL_PREFIX}/var/log/mysqldump-secure.log ]; then
+		sudo rm -f ${_INSTALL_PREFIX}/var/log/mysqldump-secure.log
+		if [ "$?" != "0" ]; then _exit=1; fi
+	fi
+
+	if [ -f ${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log ]; then
+		sudo rm -f ${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log
+		if [ "$?" != "0" ]; then _exit=1; fi
+	fi
+
+	return $_exit
+}
+
+
+
+mds_recreate_datadir() {
+	if [ -d ${_INSTALL_PREFIX}/var/mysqldump-secure/ ]; then
+		sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+		return $?
+	fi
+	return 0
+}
