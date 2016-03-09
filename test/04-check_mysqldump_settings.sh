@@ -33,15 +33,15 @@ sed_change_config_file "^MYSQL_OPTS="  "#MYSQL_OPTS="
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "\$MYSQL_OPTS" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$MYSQL_OPTS" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "\$MYSQL_OPTS" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$MYSQL_OPTS" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "\$MYSQL_OPTS" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$MYSQL_OPTS" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^#MYSQL_OPTS="  "MYSQL_OPTS="
 
@@ -79,15 +79,15 @@ sed_change_config_file " --compress"  " --password"
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "FAIL" "1" "--password" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ABORT" "1" "--password" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "FAIL" "1" "--password" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ABORT" "1" "--password" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "FAIL" "1" "--password" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ABORT" "1" "--password" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file " --password"  " --compress"
 
@@ -102,15 +102,15 @@ sed_change_config_file " --compress"  " --password=foo"
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "FAIL" "1" "--password" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ABORT" "1" "--password" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "FAIL" "1" "--password" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ABORT" "1" "--password" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "FAIL" "1" "--password" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ABORT" "1" "--password" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file " --password=foo"  " --compress"
 
@@ -125,15 +125,15 @@ sed_change_config_file " --compress"  " --defaults-extra-file"
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "FAIL" "1" "--defaults-extra-file" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ABORT" "1" "--defaults-extra-file" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "FAIL" "1" "--defaults-extra-file" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ABORT" "1" "--defaults-extra-file" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "FAIL" "1" "--defaults-extra-file" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ABORT" "1" "--defaults-extra-file" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file " --defaults-extra-file"  " --compress"
 
@@ -148,15 +148,15 @@ sed_change_config_file " --compress"  " --defaults-extra-file=foo"
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "FAIL" "1" "--defaults-extra-file" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ABORT" "1" "--defaults-extra-file" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "FAIL" "1" "--defaults-extra-file" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ABORT" "1" "--defaults-extra-file" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "FAIL" "1" "--defaults-extra-file" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ABORT" "1" "--defaults-extra-file" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file " --defaults-extra-file=foo"  " --compress"
 
@@ -182,15 +182,15 @@ sed_change_config_file "^MYSQL_OPTS_QUICK_MIN_SIZE="  "#MYSQL_OPTS_QUICK_MIN_SIZ
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "\$MYSQL_OPTS_QUICK_MIN_SIZE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$MYSQL_OPTS_QUICK_MIN_SIZE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "\$MYSQL_OPTS_QUICK_MIN_SIZE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$MYSQL_OPTS_QUICK_MIN_SIZE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "\$MYSQL_OPTS_QUICK_MIN_SIZE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$MYSQL_OPTS_QUICK_MIN_SIZE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^#MYSQL_OPTS_QUICK_MIN_SIZE="  "MYSQL_OPTS_QUICK_MIN_SIZE="
 
@@ -205,15 +205,15 @@ sed_change_config_file "^MYSQL_OPTS_QUICK_MIN_SIZE=200"  "MYSQL_OPTS_QUICK_MIN_S
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "\$MYSQL_OPTS_QUICK_MIN_SIZE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ERR" "1" "\$MYSQL_OPTS_QUICK_MIN_SIZE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "\$MYSQL_OPTS_QUICK_MIN_SIZE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ERR" "1" "\$MYSQL_OPTS_QUICK_MIN_SIZE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "\$MYSQL_OPTS_QUICK_MIN_SIZE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ERR" "1" "\$MYSQL_OPTS_QUICK_MIN_SIZE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^MYSQL_OPTS_QUICK_MIN_SIZE=200abc"  "MYSQL_OPTS_QUICK_MIN_SIZE=200"
 
@@ -255,22 +255,22 @@ echo "--------------------------------------------------------------------------
 
 echo
 echo "----------------------------------------"
-echo " 4.4.1 #IGNORE=\"information_schema performance_schema\""
+echo " 4.3.1 #IGNORE=\"information_schema performance_schema\""
 echo "----------------------------------------"
 echo
 sed_change_config_file "^IGNORE=\"information_schema performance_schema\""  "#IGNORE=\"information_schema performance_schema\""
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$IGNORE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$IGNORE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$IGNORE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^#IGNORE=\"information_schema performance_schema\""  "IGNORE=\"information_schema performance_schema\""
 
@@ -278,7 +278,7 @@ sed_change_config_file "^#IGNORE=\"information_schema performance_schema\""  "IG
 
 echo
 echo "----------------------------------------"
-echo " 4.4.2 IGNORE=\"\""
+echo " 4.3.2 IGNORE=\"\""
 echo "----------------------------------------"
 echo
 sed_change_config_file "^IGNORE=\"information_schema performance_schema\""  "IGNORE=\"\""
@@ -301,7 +301,7 @@ sed_change_config_file "^IGNORE=\"\""  "IGNORE=\"information_schema performance_
 
 echo
 echo "----------------------------------------"
-echo " 4.4.3 IGNORE=\"notfound performance_schema\""
+echo " 4.3.3 IGNORE=\"notfound performance_schema\""
 echo "----------------------------------------"
 echo
 sed_change_config_file "^IGNORE=\"information_schema performance_schema\""  "IGNORE=\"DB_notfound *_schema\""
@@ -340,15 +340,15 @@ sed_change_config_file "^REQUIRE=\"mysql\""  "#REQUIRE=\"mysql\""
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "\$REQUIRE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$REQUIRE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "\$REQUIRE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$REQUIRE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "\$REQUIRE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$REQUIRE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^#REQUIRE=\"mysql\""  "REQUIRE=\"mysql\""
 

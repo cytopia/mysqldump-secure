@@ -66,7 +66,7 @@ echo "\$ ${txtblu}${CMD_VERB}${txtrst}"
 
 mds_remove_logfiles
 mds_remove_datadir
-if ! eval "${CMD_VERB}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; else echo "${txtgrn}===> [OK]${txtrst}"; fi
+if eval "${CMD_VERB}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED] Unexpected OK${txtrst}"; else echo "${txtgrn}===> [OK] Expected not OK${txtrst}"; fi
 
 
 
@@ -90,8 +90,8 @@ echo "\$ ${txtblu}${CMD_VERB}${txtrst}"
 mds_recreate_datadir
 sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-1.txt && sudo chmod 400 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-1.txt
 sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-2.txt && sudo chmod 400 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-2.txt
-sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-3.txt
-sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-4.txt
+sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-3.txt && sudo chmod 400 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-3.txt
+sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-4.txt && sudo chmod 400 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-4.txt
 sudo ls -la ${_INSTALL_PREFIX}/var/mysqldump-secure/
 if ! eval "${CMD_VERB}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; else echo "${txtgrn}===> [OK]${txtrst}"; fi
 sudo ls -la ${_INSTALL_PREFIX}/var/mysqldump-secure/
@@ -115,7 +115,7 @@ echo "----------------------------------------"
 
 mds_remove_logfiles
 mds_remove_datadir
-if ! eval "${CMD_CRON}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; else echo "${txtgrn}===> [OK]${txtrst}"; fi
+if eval "${CMD_CRON}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED] Unexpected OK${txtrst}"; else echo "${txtgrn}===> [OK] Expected not OK${txtrst}"; fi
 
 
 

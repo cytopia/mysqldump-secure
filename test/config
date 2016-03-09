@@ -114,13 +114,30 @@ check() {
 	# RECREATE DATADIR?
 	#
 	if [ "${_data_dir}" = "1" ]; then
+
 		if [ -d ${_INSTALL_PREFIX}/var/mysqldump-secure/ ]; then
-			sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/ && sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
+			sudo rm -rf ${_INSTALL_PREFIX}/var/mysqldump-secure/
 		fi
+
+		sudo mkdir -p ${_INSTALL_PREFIX}/var/mysqldump-secure/
+		sudo chmod 0700 ${_INSTALL_PREFIX}/var/mysqldump-secure/
 	fi
 
 
+	#
+	# RESET LOGGING FILE PERMISSIONS
+	#
+	if [ -f "${_INSTALL_PREFIX}/var/log/mysqldump-secure.log" ]; then
+		sudo chmod 0600 "${_INSTALL_PREFIX}/var/log/mysqldump-secure.log"
+	fi
+	if [ -f "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log" ]; then
+		sudo chmod 0644 "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log"
+	fi
+
+
+	#
 	# These files can only be deleted via tmpwatch/tmpreaper -f (--force)
+	#
 	sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-1.txt && sudo chmod 400 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-1.txt
 	sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-2.txt && sudo chmod 400 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-2.txt
 	sudo touch -a -m -t 201512180130.09 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-3.txt && sudo chmod 400 ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-3.txt
@@ -136,14 +153,27 @@ check() {
 	_OUTPUT="$(${_cmd} 2>&1)"
 	_RETURN="$?"
 
+
+	#
+	# Remove those files
+	#
+	sudo rm -f ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-1.txt
+	sudo rm -f ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-2.txt
+	sudo rm -f ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-3.txt
+	sudo rm -f ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-4.txt
+	sudo rm -f ${_INSTALL_PREFIX}/var/mysqldump-secure/delete-me-5.txt
+
+
+
+
 	# Get all errors and warnings
-	_OUTPUT_STDERR="$(echo "${_OUTPUT}" | grep '\[WARN\]\|\[ERR\]')"
+	_OUTPUT_STDERR="$(echo "${_OUTPUT}" | grep '\[WARN\]\|\[ERR\]\|\[FATAL\]')"
 
 
 	#
 	# AND SHOW THE COMMAND
 	#
-	#echo -e -n "${_OUTPUT}"
+	#echo "${_OUTPUT}"
 	echo
 	echo
 
@@ -169,17 +199,12 @@ check() {
 				echo
 				echo "--------------- run output due to error: ---------------"
 				echo
-				echo -e -n "${_OUTPUT}"
+				echo "${_OUTPUT}"
 				echo "${txtpur}===> [FAIL]${txtrst}"
-				echo "${txtpur}===> [FAIL] Unexpected exit code: ${_RETURN} (should have passed)${txtrst}"
+				echo "${txtpur}===> [FAIL] Failed with: ${_RETURN} (should have passed with 0)${txtrst}"
 				echo "${txtpur}===> [FAIL]${txtrst}"
 				_ERROR=$((_ERROR+1));
-			else
-				echo "${txtgrn}===> [OK] Success${txtrst}"
-			fi
-		# Program must fail
-		elif [ "${_ret}" = "FAIL" ]; then
-			if [ "${_RETURN}" = "0" ]; then
+			elif [ "${_OUTPUT_STDERR}" != "" ]; then
 				echo
 				echo
 				echo "--------------- config output due to error: ---------------"
@@ -189,13 +214,93 @@ check() {
 				echo
 				echo "--------------- run output due to error: ---------------"
 				echo
-				echo -e -n "${_OUTPUT}"
+				echo "${_OUTPUT}"
 				echo "${txtpur}===> [FAIL]${txtrst}"
-				echo "${txtpur}===> [FAIL] Unexpected OK (should have exited with error)${txtrst}"
+				echo "${txtpur}===> [FAIL] stderr output present, but should not be${txtrst}"
 				echo "${txtpur}===> [FAIL]${txtrst}"
 				_ERROR=$((_ERROR+1));
 			else
-				echo "${txtgrn}===> [OK] Expected Error. Exit code: ${_RETURN}${txtrst}"
+				echo "${txtgrn}===> [OK] Success${txtrst}"
+			fi
+		# Program must exit with warnings
+		elif [ "${_ret}" = "WARN" ]; then
+			if [ "${_RETURN}" != "1" ]; then
+				echo
+				echo
+				echo "--------------- config output due to error: ---------------"
+				echo
+				sudo cat ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+				echo
+				echo
+				echo "--------------- run output due to error: ---------------"
+				echo
+				echo "${_OUTPUT}"
+				echo "${txtpur}===> [FAIL]${txtrst}"
+				echo "${txtpur}===> [FAIL] Wrong exit code. Expected '1' (WARNING) got: '${_RETURN}'${txtrst}"
+				echo "${txtpur}===> [FAIL]${txtrst}"
+				_ERROR=$((_ERROR+1));
+			else
+				echo "${txtgrn}===> [OK] Expected exit with WARNING.${txtrst}"
+			fi
+		# Program must exit with errors
+		elif [ "${_ret}" = "ERR" ]; then
+			if [ "${_RETURN}" != "2" ]; then
+				echo
+				echo
+				echo "--------------- config output due to error: ---------------"
+				echo
+				sudo cat ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+				echo
+				echo
+				echo "--------------- run output due to error: ---------------"
+				echo
+				echo "${_OUTPUT}"
+				echo "${txtpur}===> [FAIL]${txtrst}"
+				echo "${txtpur}===> [FAIL] Wrong exit code. Expected '2' (ERROR) got: '${_RETURN}'${txtrst}"
+				echo "${txtpur}===> [FAIL]${txtrst}"
+				_ERROR=$((_ERROR+1));
+			else
+				echo "${txtgrn}===> [OK] Expected exit with ERROR.${txtrst}"
+			fi
+		# Program must fail
+		elif [ "${_ret}" = "FAIL" ]; then
+			if [ "${_RETURN}" != "3" ]; then
+				echo
+				echo
+				echo "--------------- config output due to error: ---------------"
+				echo
+				sudo cat ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+				echo
+				echo
+				echo "--------------- run output due to error: ---------------"
+				echo
+				echo "${_OUTPUT}"
+				echo "${txtpur}===> [FAIL]${txtrst}"
+				echo "${txtpur}===> [FAIL] Wrong exit code. Expected '3' (FAIL) got: '${_RETURN}'${txtrst}"
+				echo "${txtpur}===> [FAIL]${txtrst}"
+				_ERROR=$((_ERROR+1));
+			else
+				echo "${txtgrn}===> [OK] Expected exit with FAIL.${txtrst}"
+			fi
+		# Program must exit with errors
+		elif [ "${_ret}" = "ABORT" ]; then
+			if [ "${_RETURN}" != "4" ]; then
+				echo
+				echo
+				echo "--------------- config output due to error: ---------------"
+				echo
+				sudo cat ${_INSTALL_PREFIX}/etc/mysqldump-secure.conf
+				echo
+				echo
+				echo "--------------- run output due to error: ---------------"
+				echo
+				echo "${_OUTPUT}"
+				echo "${txtpur}===> [FAIL]${txtrst}"
+				echo "${txtpur}===> [FAIL] Wrong exit code. Expected '4' (ABORT) got: '${_RETURN}'${txtrst}"
+				echo "${txtpur}===> [FAIL]${txtrst}"
+				_ERROR=$((_ERROR+1));
+			else
+				echo "${txtgrn}===> [OK] Expected exit with ABORT.${txtrst}"
 			fi
 		# Something else happened
 		else
@@ -215,7 +320,7 @@ check() {
 
 		echo "\$ ${txtblu}2. EXPECTED ERROR TEST ...${txtrst}"
 
-		_found="$(echo "${_OUTPUT}" | grep '\[WARN\]\|\[ERR\]' | grep -A 1 -B 1 --color=always -e "${_str}")"
+		_found="$(echo "${_OUTPUT}" | grep '\[WARN\]\|\[ERR\]\|\[FATAL\]' | grep -A 1 -B 1 --color=always -e "${_str}")"
 
 		if [ "${_found}" = "" ]; then
 			echo "${txtpur}===> [FAIL]${txtrst}"
@@ -294,7 +399,7 @@ check() {
 
 		echo "\$ ${txtblu}5. FINISH TEST ...${txtrst}"
 
-		_found="$(echo "${_OUTPUT}" | grep -E 'Aborting|Finished successfully|Finished with errors|invalid argument:')"
+		_found="$(echo "${_OUTPUT}" | grep -E 'Aborting|Finished successfully|Finished with|invalid argument:')"
 
 		if [ "${_found}" = "" ]; then
 			echo "${_OUTPUT}" | tail -n5
@@ -348,7 +453,7 @@ check_nagios() {
 	#
 	# AND SHOW THE COMMAND
 	#
-	#echo -e -n "${_OUTPUT}"
+	#echo "${_OUTPUT}"
 	echo
 	echo
 

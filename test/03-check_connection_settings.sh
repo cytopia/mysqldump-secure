@@ -33,15 +33,15 @@ sed_change_config_file "^MYSQL_CNF_FILE="  "#MYSQL_CNF_FILE="
 
   echo "---------- CRON MODE ----------"
   CMD="${CMD_CRON}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_CNF_FILE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_CNF_FILE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
   echo "---------- NORMAL MODE ----------"
   CMD="${CMD_NORM}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_CNF_FILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_CNF_FILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
   echo "---------- NORMAL MODE VERBOSE ----------"
   CMD="${CMD_VERB}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_CNF_FILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_CNF_FILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^#MYSQL_CNF_FILE="  "MYSQL_CNF_FILE="
 
@@ -56,15 +56,15 @@ sed_change_config_file "mysqldump-secure.cnf"  "mysqldump-secure.cnf.notfound"
 
   echo "---------- CRON MODE ----------"
   CMD="${CMD_CRON}"
-  if ! check "1" "1" "FAIL" "1" "mysqldump-secure.cnf.notfound" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "mysqldump-secure.cnf.notfound" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
   echo "---------- NORMAL MODE ----------"
   CMD="${CMD_NORM}"
-  if ! check "1" "1" "FAIL" "1" "mysqldump-secure.cnf.notfound" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "mysqldump-secure.cnf.notfound" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
   echo "---------- NORMAL MODE VERBOSE ----------"
   CMD="${CMD_VERB}"
-  if ! check "1" "1" "FAIL" "1" "mysqldump-secure.cnf.notfound" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "mysqldump-secure.cnf.notfound" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "mysqldump-secure.cnf.notfound"  "mysqldump-secure.cnf"
 
@@ -79,15 +79,15 @@ sed_change_config_file "^MYSQL_CNF_FILE=\"${_INSTALL_PREFIX}/etc/mysqldump-secur
 
   echo "---------- CRON MODE ----------"
   CMD="${CMD_CRON}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_CNF_FILE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_CNF_FILE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
   echo "---------- NORMAL MODE ----------"
   CMD="${CMD_NORM}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_CNF_FILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_CNF_FILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
   echo "---------- NORMAL MODE VERBOSE ----------"
   CMD="${CMD_VERB}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_CNF_FILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_CNF_FILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^MYSQL_CNF_FILE=\"\""  "MYSQL_CNF_FILE=\"${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf\""
 
@@ -112,15 +112,15 @@ sed_change_config_file "^MYSQL_SSL_ENABLE="  "#MYSQL_SSL_ENABLE="
 
   echo "---------- CRON MODE ----------"
   CMD="${CMD_CRON}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
   echo "---------- NORMAL MODE ----------"
   CMD="${CMD_NORM}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
   echo "---------- NORMAL MODE VERBOSE ----------"
   CMD="${CMD_VERB}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^#MYSQL_SSL_ENABLE="  "MYSQL_SSL_ENABLE="
 
@@ -135,15 +135,15 @@ sed_change_config_file "^MYSQL_SSL_ENABLE=1"  "MYSQL_SSL_ENABLE=2"
 
   echo "---------- CRON MODE ----------"
   CMD="${CMD_CRON}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
   echo "---------- NORMAL MODE ----------"
   CMD="${CMD_NORM}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
   echo "---------- NORMAL MODE VERBOSE ----------"
   CMD="${CMD_VERB}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^MYSQL_SSL_ENABLE=2"  "MYSQL_SSL_ENABLE=1"
 
@@ -158,15 +158,15 @@ sed_change_config_file "^MYSQL_SSL_ENABLE=1"  "MYSQL_SSL_ENABLE="
 
   echo "---------- CRON MODE ----------"
   CMD="${CMD_CRON}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
   echo "---------- NORMAL MODE ----------"
   CMD="${CMD_NORM}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
   echo "---------- NORMAL MODE VERBOSE ----------"
   CMD="${CMD_VERB}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_SSL_ENABLE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^MYSQL_SSL_ENABLE="  "MYSQL_SSL_ENABLE=1"
 
@@ -211,15 +211,15 @@ sed_change_config_file "^MYSQL_SSL_CA_PEM"  "#MYSQL_SSL_CA_PEM"
 
   echo "---------- CRON MODE ----------"
   CMD="${CMD_CRON}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_CA_PEM" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_SSL_CA_PEM" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
   echo "---------- NORMAL MODE ----------"
   CMD="${CMD_NORM}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_CA_PEM" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_SSL_CA_PEM" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
   echo "---------- NORMAL MODE VERBOSE ----------"
   CMD="${CMD_VERB}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_CA_PEM" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_SSL_CA_PEM" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^#MYSQL_SSL_CA_PEM"  "MYSQL_SSL_CA_PEM"
 
@@ -235,15 +235,15 @@ sed_change_config_file "ca.pem"  "ca.pem.notfound"
 
   echo "---------- CRON MODE ----------"
   CMD="${CMD_CRON}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_CA_PEM" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_SSL_CA_PEM" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
   echo "---------- NORMAL MODE ----------"
   CMD="${CMD_NORM}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_CA_PEM" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_SSL_CA_PEM" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
   echo "---------- NORMAL MODE VERBOSE ----------"
   CMD="${CMD_VERB}"
-  if ! check "1" "1" "FAIL" "1" "\$MYSQL_SSL_CA_PEM" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+  if ! check "1" "1" "ABORT" "1" "\$MYSQL_SSL_CA_PEM" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "ca.pem.notfound"  "ca.pem"
 

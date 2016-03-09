@@ -33,15 +33,15 @@ sed_change_config_file "^NAGIOS_LOG=1"  "#NAGIOS_LOG=1"
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^#NAGIOS_LOG=1"  "NAGIOS_LOG=1"
 
@@ -56,15 +56,15 @@ sed_change_config_file "^NAGIOS_LOG=1"  "NAGIOS_LOG=2"
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ERR" "1" "\$NAGIOS_LOG" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ERR" "1" "\$NAGIOS_LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ERR" "1" "\$NAGIOS_LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^NAGIOS_LOG=2"  "NAGIOS_LOG=1"
 
@@ -79,15 +79,15 @@ sed_change_config_file "^NAGIOS_LOG=1"  "NAGIOS_LOG=\"wrong\""
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ERR" "1" "\$NAGIOS_LOG" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ERR" "1" "\$NAGIOS_LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ERR" "1" "\$NAGIOS_LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^NAGIOS_LOG=\"wrong\""  "NAGIOS_LOG=1"
 
@@ -102,15 +102,15 @@ sed_change_config_file "^NAGIOS_LOG=1"  "NAGIOS_LOG=\"\""
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^NAGIOS_LOG=\"\""  "NAGIOS_LOG=1"
 
@@ -157,15 +157,15 @@ sed_change_config_file "^NAGIOS_LOGFILE="  "#NAGIOS_LOGFILE="
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOGFILE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOGFILE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOGFILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOGFILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOGFILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOGFILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^#NAGIOS_LOGFILE="  "NAGIOS_LOGFILE="
 
@@ -179,15 +179,15 @@ sed_change_config_file "^NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-s
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOGFILE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOGFILE" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOGFILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOGFILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOGFILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOGFILE" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^NAGIOS_LOGFILE=\"\""  "NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""
 
@@ -201,17 +201,17 @@ sed_change_config_file "^NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-s
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "mysqldump-secure.nagios.log.notfound" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "mysqldump-secure.nagios.log.notfound" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 	sudo rm -rf "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound"
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "mysqldump-secure.nagios.log.notfound" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "mysqldump-secure.nagios.log.notfound" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 	sudo rm -rf "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound"
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "mysqldump-secure.nagios.log.notfound" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "mysqldump-secure.nagios.log.notfound" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 	sudo rm -rf "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound"
 
 sed_change_config_file "^NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound\""  "NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""
@@ -239,15 +239,15 @@ sed_change_config_file "^NAGIOS_LOG_CHMOD=\"0644\""  "#NAGIOS_LOG_CHMOD=\"0644\"
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^#NAGIOS_LOG_CHMOD=\"0644\""  "NAGIOS_LOG_CHMOD=\"0644\""
 
@@ -261,15 +261,15 @@ sed_change_config_file "^NAGIOS_LOG_CHMOD=\"0644\""  "NAGIOS_LOG_CHMOD=\"0644a\"
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ERR" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ERR" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ERR" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^NAGIOS_LOG_CHMOD=\"0644a\""  "NAGIOS_LOG_CHMOD=\"0644\""
 
@@ -282,15 +282,15 @@ sed_change_config_file "^NAGIOS_LOG_CHMOD=\"0644\""  "NAGIOS_LOG_CHMOD=\"abc\""
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ERR" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ERR" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "ERR" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^NAGIOS_LOG_CHMOD=\"abc\""  "NAGIOS_LOG_CHMOD=\"0644\""
 
@@ -304,15 +304,15 @@ sed_change_config_file "^NAGIOS_LOG_CHMOD=\"0644\""  "NAGIOS_LOG_CHMOD=\"\""
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG_CHMOD" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^NAGIOS_LOG_CHMOD=\"\""  "NAGIOS_LOG_CHMOD=\"0644\""
 
@@ -327,15 +327,15 @@ sed_change_config_file "^NAGIOS_LOG_CHMOD=\"0644\""  "NAGIOS_LOG_CHMOD=\"444\""
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "0" "" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "0" "" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^NAGIOS_LOG_CHMOD=\"444\""  "NAGIOS_LOG_CHMOD=\"0644\""
 
