@@ -183,6 +183,31 @@ Run from within cron
 mysqldump-secure --cron --config=/etc/mysqldump-secure.encrypted.conf
 ```
 
+### 4.4 Test run
+```shell
+$ mysqldump-secure --test -v
+[INFO]  (OPT): Logging enabled
+[DEBUG] (OPT): Log level: 3
+[DEBUG] (OPT): Logfile: /var/log/mysqldump-secure.log
+[DEBUG] (CFG): Destination dir: /var/mysqldump-secure
+[DEBUG] (CFG): Using file Prefix: 2016-03-09_10-07__
+[INFO]  (OPT): MySQL SSL connection enabled
+[DEBUG] (OPT): MySQL SSL arguments: --ssl-ca=/etc/mysql.ca.pem.
+[INFO]  (OPT): Compression enabled
+[DEBUG] (OPT): Compression arguments: gzip -9 --stdout
+[INFO]  (OPT): Encryption enabled
+[DEBUG] (OPT): Encryption algorithm: -aes256
+[INFO]  (OPT): Deletion enabled
+[DEBUG] (OPT): Deleting files older than 1 minute. Using: tmpwatch
+[INFO]  (OPT): Nagios log enabled
+[DEBUG] (OPT): Nagios logfile: /var/log/mysqldump-secure.nagios.log
+[DEBUG] (SRV): MySQL server connection: 127.0.0.1 via TCP/IP
+[DEBUG] (SRV): MySQL server connection: Using SSL (Cipher in use is DHE-RSA-AES256-GCM-SHA384)
+[DEBUG] (SRV): MySQL server version:    MariaDB 10.1.11-MariaDB-log Homebrew
+[DEBUG] (SRV): MySQL server hostname:   notebook.home.lan:13306
+[DEBUG] (SRV): MySQL server rep type:   master
+```
+
 
 ## 5. Documentation
 
