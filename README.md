@@ -1,14 +1,14 @@
-# [![MDS](https://raw.githubusercontent.com/cytopia/mysqldump-secure/master/doc/img/logo.png)](http://mysqldump-secure.org)mysqldump-secure
+# [![MySQLDumpSecure](https://raw.githubusercontent.com/cytopia/icons/master/64x64/mds.png)](http://mysqldump-secure.org) mysqldump-secure
 
-[Penetrated](https://github.com/cytopia/mysqldump-secure#1-penetrated) |
-[Features](https://github.com/cytopia/mysqldump-secure#2-features) |
-[Installation](https://github.com/cytopia/mysqldump-secure#3-installation) |
-[Configuration](https://github.com/cytopia/mysqldump-secure#4-configuration) |
-[Usage](https://github.com/cytopia/mysqldump-secure#5-usage) |
-[Documentation](https://github.com/cytopia/mysqldump-secure#6-documentation) |
-[Contribution](https://github.com/cytopia/mysqldump-secure#7-contribution) |
-[License](https://github.com/cytopia/mysqldump-secure#8-license) |
-[Version](https://github.com/cytopia/mysqldump-secure#9-version)
+
+[Features](https://github.com/cytopia/mysqldump-secure#1-features) |
+[Installation](https://github.com/cytopia/mysqldump-secure#2-installation) |
+[Configuration](https://github.com/cytopia/mysqldump-secure#3-configuration) |
+[Usage](https://github.com/cytopia/mysqldump-secure#4-usage) |
+[Documentation](https://github.com/cytopia/mysqldump-secure#5-documentation) |
+[Contribution](https://github.com/cytopia/mysqldump-secure#6-contribution) |
+[License](https://github.com/cytopia/mysqldump-secure#7-license) |
+[Version](https://github.com/cytopia/mysqldump-secure#8-version)
 
 [![Build Status](https://travis-ci.org/cytopia/mysqldump-secure.svg?branch=master)](https://travis-ci.org/cytopia/mysqldump-secure)
 [![Latest Stable Version](https://poser.pugx.org/cytopia/mysqldump-secure/v/stable)](https://packagist.org/packages/cytopia/mysqldump-secure) [![Total Downloads](https://poser.pugx.org/cytopia/mysqldump-secure/downloads)](https://packagist.org/packages/cytopia/mysqldump-secure) [![Latest Unstable Version](https://poser.pugx.org/cytopia/mysqldump-secure/v/unstable)](https://packagist.org/packages/cytopia/mysqldump-secure) [![License](https://poser.pugx.org/cytopia/mysqldump-secure/license)](http://opensource.org/licenses/MIT)
@@ -33,9 +33,7 @@ Find the whole post at [www.everythingcli.org](http://www.everythingcli.org/inde
 
 <sub>(If the script runs on any other system not mentioned here, please drop me a note.)</sub>
 
-
-
-## 1. Penetrated
+##### Rock-stable and well tested
 
 Every push to `mysqldump-secure` triggers `travis-ci` which will run hundreds of all kinds of tests against the new code and stress the tool in every possible way with every possible config.
 
@@ -44,16 +42,18 @@ You can find the tests within the `.travis` folder including an automated setup 
 See [travis-ci.org/cytopia/mysqldump-secure](https://travis-ci.org/cytopia/mysqldump-secure) for what is going on.
 
 
-## 2. Features
+## 1. Features
 
 ### Primary Features
 
 * **Encryption** (hybrid encryption: `RSA` and `AES` via `openssl smime`)
 * **Compression** (`gzip`, `pigz`, `bzip2`, `pbzip2`, `lzop`, `lzma`, `xz`)
 * **Tmpwatch** integration (`tmpwatch` or `tmpreaper`)
-* **Transaction-safe** / **Consistent** backups across tables (for DBs with: InnoDB only, mixed and non-InnoDB tables)
+* **Transaction-safe** / **Consistent** backups across tables (for DBs with: `InnoDB only`, `mixed tables` and `non-InnoDB tables`)
 * **Conditional mysqldump options** (e.g.: apply `--quick` on DBs > 200MB)
-* **Nagios** / **Icinga** integration ([check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure))
+* **Security** (various checks and precautions)
+* **SSL Remote Backups**
+* **Nagios** / **Icinga** monitoring integration (via [check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure))
 
 ### Secondary Features
 
@@ -67,9 +67,10 @@ See [travis-ci.org/cytopia/mysqldump-secure](https://travis-ci.org/cytopia/mysql
 * 100% POSIX compliant
 
 
-## 3. Installation
 
-### 3.1 Linux, BSD and OSX
+## 2. Installation
+
+### 2.1 Linux, BSD and OSX
 
 ```shell
 wget https://github.com/cytopia/mysqldump-secure/archive/0.15.tar.gz -O - | tar -xz
@@ -79,7 +80,7 @@ make
 sudo make install
 ```
 
-### 3.2 OSX
+### 2.2 OSX
 ```shell
 brew tap cytopia/tap
 brew install mysqldump-secure
@@ -89,7 +90,7 @@ brew install mysqldump-secure
 For more detailed instructions go to the **[Install guidelines](https://github.com/cytopia/mysqldump-secure/blob/master/doc/INSTALL.md)**
 
 
-## 4. Configuration
+## 3. Configuration
 
 There are two separate configuration files:
 
@@ -113,9 +114,9 @@ You do not need to worry about file permissions or directories. The script will 
 
 For more detailed instructions go to the [Setup guidelines](https://github.com/cytopia/mysqldump-secure/blob/master/doc/SETUP.md)
 
-## 5. Usage
+## 4. Usage
 
-### 5.1 Usage
+### 4.1 Usage
 ```shell
 Usage: mysqldump-secure [--cron] [--test] [--conf] [-v[v]] [--help] [--version]
        mysqldump-secure --cron [--conf]
@@ -145,7 +146,7 @@ defined in mysqldump-secure.conf.
   --version       Show version information.
 ```
 
-### 5.2 Default
+### 4.2 Default
 
 Test if everything is configured correctly:
 ```shell
@@ -162,7 +163,7 @@ Run from within cron
 mysqldump-secure --cron
 ```
 
-### 5.2 Custom config
+### 4.3 Custom config
 
 It is possible to have multiple instances of `mysqldump-secure` on your machine via different config files. Imagine the case you want to have some sensitive dumps encrypted and others should be dumped in plain. You can achieve this by using two configuration files and the `IGNORE` blocks of each respective config to exclude the other ones.
 
@@ -183,7 +184,7 @@ mysqldump-secure --cron --config=/etc/mysqldump-secure.encrypted.conf
 ```
 
 
-## 6. Documentation
+## 5. Documentation
 
 | File | Description |
 |------|-------------|
@@ -198,7 +199,7 @@ mysqldump-secure --cron --config=/etc/mysqldump-secure.encrypted.conf
 | [www.everythingcli.org](http://www.everythingcli.org/secure-mysqldump-script-with-encryption-and-compression/) | General thoughts and initial idea for this project. |
 
 
-## 7. Contribution
+## 6. Contribution
 Contributors are welcome.
 
 If the script runs on an operating system productively, which is currently not yet included at the top of this document, please let me know, so I can add it for reference.
@@ -208,8 +209,8 @@ If you use the script, star it or let me know somehow.
 If you like have a look at the [Contributing Guidelines](CONTRIBUTING.md) and see if there is anything you would like to take care of.
 
 
-## 8. License
+## 7. License
 [![license](https://poser.pugx.org/cytopia/mysqldump-secure/license)](http://opensource.org/licenses/mit)
 
-## 9. Version
+## 8. Version
 For a complete list of verion see [CHANGELOG](CHANGELOG.md)
