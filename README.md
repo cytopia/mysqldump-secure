@@ -49,9 +49,9 @@ See [travis-ci.org/cytopia/mysqldump-secure](https://travis-ci.org/cytopia/mysql
 * **Encryption** (hybrid encryption: `RSA` and `AES` via `openssl smime`)
 * **Compression** (`gzip`, `pigz`, `bzip2`, `pbzip2`, `lzop`, `lzma`, `xz`)
 * **Tmpwatch** integration (`tmpwatch` or `tmpreaper`)
-* **Transaction-safe** / **Consistent** backups across tables (for DBs with: `InnoDB only`, `mixed tables` and `non-InnoDB tables`)
-* **Conditional mysqldump options** (e.g.: apply `--quick` on DBs > 200MB)
-* **Security** (various checks and precautions)
+* **Transaction-safe** / **Consistent** backups across tables (for DBs with: `InnoDB only`-, `mixed`- and `non-InnoDB`- tables)
+* **Conditional mysqldump options** (e.g.: apply `--quick` only on DBs > 200MB)
+* **Security** (various built-in checks and precautions)
 * **SSL Remote Backups**
 * **Nagios** / **Icinga** monitoring integration (via [check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure))
 
