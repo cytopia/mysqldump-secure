@@ -198,7 +198,7 @@ $ mysqldump-secure --test -v
 [INFO]  (OPT): Encryption enabled
 [DEBUG] (OPT): Encryption algorithm: -aes256
 [INFO]  (OPT): Deletion enabled
-[DEBUG] (OPT): Deleting files older than 1 minute. Using: tmpwatch
+[DEBUG] (OPT): Deleting files older than 2 days. Using: tmpwatch
 [INFO]  (OPT): Nagios log enabled
 [DEBUG] (OPT): Nagios logfile: /var/log/mysqldump-secure.nagios.log
 [DEBUG] (SRV): MySQL server connection: 127.0.0.1 via TCP/IP
@@ -223,7 +223,7 @@ $ mysqldump-secure -v
 [INFO]  (OPT): Encryption enabled
 [DEBUG] (OPT): Encryption algorithm: -aes256
 [INFO]  (OPT): Deletion enabled
-[DEBUG] (OPT): Deleting files older than 1 minute. Using: tmpwatch
+[DEBUG] (OPT): Deleting files older than 2 days. Using: tmpwatch
 [INFO]  (OPT): Nagios log enabled
 [DEBUG] (OPT): Nagios logfile: /var/log/mysqldump-secure.nagios.log
 [DEBUG] (SRV): MySQL server connection: 127.0.0.1 via TCP/IP
@@ -244,7 +244,7 @@ $ mysqldump-secure -v
 [DEBUG] (RUN): Dumping finished (OK: 4 dbs, IGN: 5 dbs, ERR: 0, TOTAL: 9)
 [DEBUG] (RUN): Took 2 seconds
 [DEBUG] (RUN): Total size dumped: 40.42 MB
-[INFO]  (RUN): Deleting files older than 1 minute ... 4
+[INFO]  (RUN): Deleting files older than 2 days ... 4
 [INFO]  removing file /var/mysqldump-secure/2016-03-07_01-52__db_InnoDB_and_MyISAM.sql.gz.enc
 [INFO]  removing file /var/mysqldump-secure/2016-03-07_01-52__db_InnoDB_only.sql.gz.enc
 [INFO]  removing file /var/mysqldump-secure/2016-03-07_01-52__db_MyISAM_only.sql.gz.enc
