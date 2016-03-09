@@ -204,8 +204,53 @@ $ mysqldump-secure --test -v
 [DEBUG] (SRV): MySQL server connection: 127.0.0.1 via TCP/IP
 [DEBUG] (SRV): MySQL server connection: Using SSL (Cipher in use is DHE-RSA-AES256-GCM-SHA384)
 [DEBUG] (SRV): MySQL server version:    MariaDB 10.1.11-MariaDB-log Homebrew
-[DEBUG] (SRV): MySQL server hostname:   notebook.home.lan:13306
+[DEBUG] (SRV): MySQL server hostname:   notebook.home.lan:3306
 [DEBUG] (SRV): MySQL server rep type:   master
+```
+
+### 4.5 Example run
+```shell
+$ mysqldump-secure -v
+[INFO]  (OPT): Logging enabled
+[DEBUG] (OPT): Log level: 3
+[DEBUG] (OPT): Logfile: /var/log/mysqldump-secure.log
+[DEBUG] (CFG): Destination dir: /var/mysqldump-secure
+[DEBUG] (CFG): Using file Prefix: 2016-03-09_10-13__
+[INFO]  (OPT): MySQL SSL connection enabled
+[DEBUG] (OPT): MySQL SSL arguments: --ssl-ca=/etc/mysql.ca.pem.
+[INFO]  (OPT): Compression enabled
+[DEBUG] (OPT): Compression arguments: gzip -9 --stdout
+[INFO]  (OPT): Encryption enabled
+[DEBUG] (OPT): Encryption algorithm: -aes256
+[INFO]  (OPT): Deletion enabled
+[DEBUG] (OPT): Deleting files older than 1 minute. Using: tmpwatch
+[INFO]  (OPT): Nagios log enabled
+[DEBUG] (OPT): Nagios logfile: /var/log/mysqldump-secure.nagios.log
+[DEBUG] (SRV): MySQL server connection: 127.0.0.1 via TCP/IP
+[DEBUG] (SRV): MySQL server connection: Using SSL (Cipher in use is DHE-RSA-AES256-GCM-SHA384)
+[DEBUG] (SRV): MySQL server version:    MariaDB 10.1.11-MariaDB-log Homebrew
+[DEBUG] (SRV): MySQL server hostname:   notebook.home.lan:3306
+[DEBUG] (SRV): MySQL server rep type:   master
+[DEBUG] (SQL): Retrieving list of databases... 9
+[INFO]  (SQL): 1/9 Dumping:  db_InnoDB_and_MyISAM (19.90 MB) (compressed) (encrypted) (--lock-tables) (--skip-quick) 0 sec
+[INFO]  (SQL): 2/9 Dumping:  db_InnoDB_only (10.52 MB) (compressed) (encrypted) (--single-transaction) (--skip-quick) 1 sec
+[INFO]  (SQL): 3/9 Dumping:  db_MyISAM_only (9.38 MB) (compressed) (encrypted) (--lock-tables) (--skip-quick) 0 sec
+[INFO]  (SQL): 4/9 Skipping: information_schema (ignored)
+[INFO]  (SQL): 5/9 Skipping: my_empty_db1 (DB is empty)
+[INFO]  (SQL): 6/9 Skipping: my_empty_db2 (DB is empty)
+[INFO]  (SQL): 7/9 Dumping:  mysql (0.62 MB) (compressed) (encrypted) (--lock-tables) (--skip-quick) 0 sec
+[INFO]  (SQL): 8/9 Skipping: performance_schema (ignored)
+[INFO]  (SQL): 9/9 Skipping: test (DB is empty)
+[DEBUG] (RUN): Dumping finished (OK: 4 dbs, IGN: 5 dbs, ERR: 0, TOTAL: 9)
+[DEBUG] (RUN): Took 2 seconds
+[DEBUG] (RUN): Total size dumped: 40.42 MB
+[INFO]  (RUN): Deleting files older than 1 minute ... 4
+[INFO]  removing file /var/mysqldump-secure/2016-03-07_01-52__db_InnoDB_and_MyISAM.sql.gz.enc
+[INFO]  removing file /var/mysqldump-secure/2016-03-07_01-52__db_InnoDB_only.sql.gz.enc
+[INFO]  removing file /var/mysqldump-secure/2016-03-07_01-52__db_MyISAM_only.sql.gz.enc
+[INFO]  removing file /var/mysqldump-secure/2016-03-07_01-52__mysql.sql.gz.enc
+[DEBUG] (RUN): Writing nagios logfile
+[OK]    Finished successfully
 ```
 
 
