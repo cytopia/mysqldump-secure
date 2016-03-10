@@ -160,6 +160,7 @@ echo " 1.4.1 --help"
 echo "----------------------------------------"
 echo "\$ ${txtblu}${CMD_HELP}${txtrst}"
 
+# MUST PASS
 mds_recreate_datadir
 if ! eval "${CMD_HELP}"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; else echo "${txtgrn}===> [OK]${txtrst}"; fi
 
@@ -198,6 +199,107 @@ echo "\$ ${txtblu}${CMD_VERB} --wrong${txtrst}"
 # MUST FAIL
 mds_recreate_datadir
 if eval "${CMD_VERB} --wrong"; then ERROR=$((ERROR+1)); echo "${txtpur}===> [FAILED]${txtrst}"; else echo "${txtgrn}===> [OK] Expected error${txtrst}"; fi
+
+
+
+
+
+echo
+echo
+echo "--------------------------------------------------------------------------------"
+echo "-"
+echo "-  1.5 Importing files back into Database"
+echo "-"
+echo "--------------------------------------------------------------------------------"
+
+echo
+echo "----------------------------------------"
+echo " 1.5.1 Compressed & Encrypted"
+echo "----------------------------------------"
+echo
+
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "4" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "4" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "4" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+
+echo
+echo "----------------------------------------"
+echo " 1.5.2 Encrypted"
+echo "----------------------------------------"
+echo
+sed_change_config_file "^COMPRESS=1"  "COMPRESS=0"
+
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "3" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "3" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "3" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sed_change_config_file "^COMPRESS=0"  "COMPRESS=1"
+
+
+echo
+echo "----------------------------------------"
+echo " 1.5.3 Compressed"
+echo "----------------------------------------"
+echo
+sed_change_config_file "^ENCRYPT=1"  "ENCRYPT=0"
+
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "2" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "2" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "2" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sed_change_config_file "^ENCRYPT=0"  "ENCRYPT=1"
+
+
+echo
+echo "----------------------------------------"
+echo " 1.5.4 Plain"
+echo "----------------------------------------"
+echo
+sed_change_config_file "^COMPRESS=1"  "COMPRESS=0"
+sed_change_config_file "^ENCRYPT=1"  "ENCRYPT=0"
+
+  echo "---------- CRON MODE ----------"
+  CMD="${CMD_CRON}"
+  if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+  echo "---------- NORMAL MODE ----------"
+  CMD="${CMD_NORM}"
+  if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+  echo "---------- NORMAL MODE VERBOSE ----------"
+  CMD="${CMD_VERB}"
+  if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "1" "${CMD}"; then ERROR=$((ERROR+1)); fi
+
+sed_change_config_file "^ENCRYPT=0"  "ENCRYPT=1"
+sed_change_config_file "^COMPRESS=0"  "COMPRESS=1"
+
+
+
 
 
 

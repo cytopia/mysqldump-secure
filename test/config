@@ -103,8 +103,18 @@ check() {
 	# 5.) Do end test (check if program run till the end)
 	_end="${8}" # Do end test? (1|0)
 
+	# 6.) Import back into mysql
+	#
+	# Values:
+	# 0: Do not import
+	# 1: plain import
+	# 2: compressed import
+	# 3: encrypted import
+	# 4: compressed & encrypted import
+	_import="${9}" # (0|1|2|3|4)
+
 	# Command to execute
-	_cmd="${@:9}"
+	_cmd="${@:10}"
 
 	# Count errors
 	_ERROR=0
@@ -127,12 +137,15 @@ check() {
 	#
 	# RESET LOGGING FILE PERMISSIONS
 	#
-	if [ -f "${_INSTALL_PREFIX}/var/log/mysqldump-secure.log" ]; then
-		sudo chmod 0600 "${_INSTALL_PREFIX}/var/log/mysqldump-secure.log"
+	if [ ! -f "${_INSTALL_PREFIX}/var/log/mysqldump-secure.log" ]; then
+		sudo touch "${_INSTALL_PREFIX}/var/log/mysqldump-secure.log"
 	fi
-	if [ -f "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log" ]; then
-		sudo chmod 0644 "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log"
+	sudo chmod 0600 "${_INSTALL_PREFIX}/var/log/mysqldump-secure.log"
+
+	if [ ! -f "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log" ]; then
+		sudo touch "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log"
 	fi
+	sudo chmod 0644 "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log"
 
 
 	#
@@ -413,6 +426,139 @@ check() {
 		fi
 		echo
 	fi
+
+
+	#
+	# 6.) IMPORT TEST
+	#
+	if [ "${_import}" = "1" ] || [ "${_import}" = "2" ] || [ "${_import}" = "3" ] || [ "${_import}" = "4" ]; then
+
+		echo "\$ ${txtblu}6. IMPORT TEST (imoprt back into mysql server)...${txtrst}"
+
+
+		# Recreate database 'mds' for later testing
+		sudo mysql --defaults-file=${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf -e 'DROP DATABASE mds;'
+		sudo mysql --defaults-file=${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf -e 'CREATE DATABASE mds;'
+
+
+
+		for f in $(sudo ls -m "${_INSTALL_PREFIX}/var/mysqldump-secure/" |  sed "s/, / /g"); do
+
+			file="${_INSTALL_PREFIX}/var/mysqldump-secure/${f}"
+			db="$(echo "$f" | sed "s/^.*__//" | sed 's/\.sql.*$//')"
+
+			# Case 1: Plain *.sql file
+			if [ "${_import}" = "1" ]; then
+
+				echo "(${txtylw}plain${txtrst}) Importing ${f} ==> ${db}"
+
+				sudo cat "${file}" | sudo mysql --defaults-file=${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf $db
+
+				_exit="$?"
+				if [ "${_exit}" != "0" ]; then
+					echo "${txtpur}===> [FAIL]${txtrst}"
+					echo "${txtpur}===> [FAIL] Database import failed.${txtrst}"
+					echo "${txtpur}===> [FAIL]${txtrst}"
+					_ERROR=$((_ERROR+1));
+				else
+					echo "${txtgrn}===> [OK] Import success${txtrst}"
+				fi
+
+
+			# Case 2: Compressed *.sql.gz file
+			elif [ "${_import}" = "2" ]; then
+
+				echo "(${txtylw}compressed${txtrst}) Importing ${f} ==> ${db}"
+
+				sudo gzip --stdout --decompress "${file}" | sudo  mysql --defaults-file=${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf $db
+
+				_exits="${PIPESTATUS[*]}"
+				_good=1
+				for _exit in ${_exits}; do
+					if [ "${_exit}" != "0" ]; then
+						_good=0
+					fi
+				done
+				if [ "${_good}" != "1" ]; then
+					echo "${txtpur}===> [FAIL]${txtrst}"
+					echo "${txtpur}===> [FAIL] Database import failed.${txtrst}"
+					echo "${txtpur}===> [FAIL]${txtrst}"
+					_ERROR=$((_ERROR+1));
+				else
+					echo "${txtgrn}===> [OK] Import success${txtrst}"
+				fi
+
+
+			# Case 3: Encrypted *.sql.enc file
+			elif [ "${_import}" = "3" ]; then
+
+				echo "(${txtylw}encrypted${txtrst}) Importing ${f} ==> ${db}"
+
+				sudo openssl smime -decrypt	-in "${file}" -binary -inform DEM -inkey "${_INSTALL_PREFIX}/etc/mysqldump-secure.priv.pem" \
+					| sudo mysql --defaults-file=${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf $db
+
+				_exits="${PIPESTATUS[*]}"
+				_good=1
+				for _exit in ${_exits}; do
+					if [ "${_exit}" != "0" ]; then
+						_good=0
+					fi
+				done
+				if [ "${_good}" != "1" ]; then
+					echo "${txtpur}===> [FAIL]${txtrst}"
+					echo "${txtpur}===> [FAIL] Database import failed.${txtrst}"
+					echo "${txtpur}===> [FAIL]${txtrst}"
+					_ERROR=$((_ERROR+1));
+				else
+					echo "${txtgrn}===> [OK] Import success${txtrst}"
+				fi
+
+
+			# Case 4: Compressed and Encrypted *.sql.gz.enc file
+			elif [ "${_import}" = "4" ]; then
+
+				echo "(${txtylw}compressed${txtrst} & ${txtylw}encrypted${txtrst}) Importing ${f} ==> ${db}"
+
+				sudo openssl smime -decrypt -in "${file}" -binary -inform DEM -inkey "${_INSTALL_PREFIX}/etc/mysqldump-secure.priv.pem" \
+					| gunzip  | sudo mysql --defaults-file=${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf $db
+
+				_exits="${PIPESTATUS[*]}"
+				_good=1
+				for _exit in ${_exits}; do
+					if [ "${_exit}" != "0" ]; then
+						_good=0
+					fi
+				done
+				if [ "${_good}" != "1" ]; then
+					echo "${txtpur}===> [FAIL]${txtrst}"
+					echo "${txtpur}===> [FAIL] Database import failed.${txtrst}"
+					echo "${txtpur}===> [FAIL]${txtrst}"
+					_ERROR=$((_ERROR+1));
+				else
+					echo "${txtgrn}===> [OK] Import success${txtrst}"
+				fi
+
+			fi
+
+		done
+
+
+
+		# Check for string in database table field.
+		echo "Checking for value 'mysqldump-secure' in Database 'mds', Table 'names', Field: 'name'..."
+		value="$(sudo mysql --defaults-file=${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf --batch -e 'use mds; select name from names;' | tail -n1)"
+
+		if [ "${value}" = "mysqldump-secure" ]; then
+			echo "${txtgrn}===> [OK] Value 'mysqldump-secure' found${txtrst}"
+		else
+			echo "${txtpur}===> [FAIL]${txtrst}"
+			echo "${txtpur}===> [FAIL] Value 'mysqldump-secure' NOT FOUND${txtrst}"
+			echo "${txtpur}===> [FAIL]${txtrst}"
+			_ERROR=$((_ERROR+1));
+		fi
+		echo
+	fi
+
 
 	return ${_ERROR}
 }

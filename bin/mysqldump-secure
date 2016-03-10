@@ -104,6 +104,25 @@ EXIT_FAIL=3
 EXIT_ABORT=4
 
 
+
+#OK
+#WARN	Restorable
+#ERROR	Config changed
+#FAIL	error dumping
+#ABORT	exited before end
+#DEBUG
+#TRACE
+
+
+
+
+
+
+
+
+
+
+
 ############################################################
 # Warning/Error/Fail count
 ############################################################
@@ -1959,7 +1978,7 @@ done
 #
 # Merge custom and forced options
 #
-MYSQL_OPTS="${MYSQL_OPTS} ${MYSQL_FORCED_OPTS}"
+MYSQL_OPTS="${MYSQL_FORCED_OPTS} ${MYSQL_OPTS}"
 
 
 
@@ -2121,11 +2140,12 @@ elif [ "${COMPRESS}" = "1" ]; then
 		# COMPRESS_ARG
 		if ! set | grep '^COMPRESS_ARG=' >/dev/null 2>&1; then
 			debug "warn" "(CFG): \$COMPRESS_ARG variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "warn" "(RUN): Using no command line arguments for ${COMPRESS_BIN}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			COMPRESS_ARG=""
 			MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
 		# Can be empty
 		elif [ -z "${COMPRESS_ARG}" ]; then
-			debug "trace" "(CFG): No compression arguments specified" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "trace" "(CFG): No compression arguments specified for ${COMPRESS_BIN}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		fi
 	fi
 
@@ -2284,7 +2304,7 @@ elif [ "${DELETE}" = "1"  ]; then
 		DELETE_METHOD=""
 		MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
 	elif [ "${DELETE_METHOD}" != "tmpwatch" ] && [ "${DELETE_METHOD}" != 'tmpreaper' ]; then
-		debug "err"  "(CFG): \$DELETE_METHOD can only be 'tmpwatch' or 'tmpreaper', you got: ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "err"  "(CFG): \$DELETE_METHOD must be either 'tmpwatch' or 'tmpreaper' in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "err"  "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		DELETE=0
 		DELETE_METHOD=""
@@ -3060,15 +3080,15 @@ for db in ${DATABASES}; do
 			if [ "${MY_ERRORS}" != "" ]; then
 				TOTAL_ERR=$((TOTAL_ERR + 1))
 
-				debugn  "err" "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-				debug   "err"  "(RUN): Error dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debugn  "fatal" "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug   "fatal"  "(RUN): Error dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 				if [ "${MY_WARNINGS}" != "" ]; then
 					debugr "warn" "${MY_WARNINGS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 					MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
 				fi
 
-				debugr  "err"  "${MY_ERRORS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debugr  "fatal"  "${MY_ERRORS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 				MDS_FAIL_COUNT="$(incr "${MDS_FAIL_COUNT}")"
 
 

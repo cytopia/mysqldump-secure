@@ -203,6 +203,7 @@ sudo mysql --ssl-ca=${_INSTALL_PREFIX}/etc/mysql.ca.pem --user=root --host=127.0
 sudo mysql --ssl-ca=${_INSTALL_PREFIX}/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=${SQL_MASTER_PORT} -e 'create database db_InnoDB_only;'
 sudo mysql --ssl-ca=${_INSTALL_PREFIX}/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=${SQL_MASTER_PORT} -e 'create database db_MyISAM_only;'
 sudo mysql --ssl-ca=${_INSTALL_PREFIX}/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=${SQL_MASTER_PORT} -e 'create database db_InnoDB_and_MyISAM;'
+sudo mysql --ssl-ca=${_INSTALL_PREFIX}/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=${SQL_MASTER_PORT} -e 'create database mds;'
 
 #
 # Import databases (MASTER)
@@ -210,20 +211,21 @@ sudo mysql --ssl-ca=${_INSTALL_PREFIX}/etc/mysql.ca.pem --user=root --host=127.0
 bunzip2 < ${DIR}/data/db/db_InnoDB_only.sql.bz2       | sudo mysql --ssl-ca=${_INSTALL_PREFIX}/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=${SQL_MASTER_PORT} db_InnoDB_only
 bunzip2 < ${DIR}/data/db/db_MyISAM_only.sql.bz2       | sudo mysql --ssl-ca=${_INSTALL_PREFIX}/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=${SQL_MASTER_PORT} db_MyISAM_only
 bunzip2 < ${DIR}/data/db/db_InnoDB_and_MyISAM.sql.bz2 | sudo mysql --ssl-ca=${_INSTALL_PREFIX}/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=${SQL_MASTER_PORT} db_InnoDB_and_MyISAM
+bunzip2 < ${DIR}/data/db/db_mds.sql.bz2               | sudo mysql --ssl-ca=${_INSTALL_PREFIX}/etc/mysql.ca.pem --user=root --host=127.0.0.1 --port=${SQL_MASTER_PORT} mds
 
 
 
 #
 # Show listening ports
 #
-netstat -an | grep LISTEN
+#netstat -an | grep LISTEN
 
 
 #
 # Show database error logs
 #
-sudo cat ${_INSTALL_PREFIX}/var/log/mysql-master/error.log
-sudo cat ${_INSTALL_PREFIX}/var/log/mysql-slave/error.log
+#sudo cat ${_INSTALL_PREFIX}/var/log/mysql-master/error.log
+#sudo cat ${_INSTALL_PREFIX}/var/log/mysql-slave/error.log
 
 
 
