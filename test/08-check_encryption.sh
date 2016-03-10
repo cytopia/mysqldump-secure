@@ -125,15 +125,15 @@ sed_change_config_file "^ENCRYPT=1"  "ENCRYPT=0"
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "2" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "2" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "2" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^ENCRYPT=0"  "ENCRYPT=1"
 
@@ -239,15 +239,15 @@ sed_change_config_file "^OPENSSL_ALGO_ARG=\"-aes256\""  "#OPENSSL_ALGO_ARG=\"-ae
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "WARN" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "0" "4" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "4" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "WARN" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "4" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^#OPENSSL_ALGO_ARG=\"-aes256\""  "OPENSSL_ALGO_ARG=\"-aes256\""
 
@@ -262,15 +262,15 @@ sed_change_config_file "^OPENSSL_ALGO_ARG=\"-aes256\""  "OPENSSL_ALGO_ARG=\"\""
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "WARN" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "0" "4" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE ----------"
 	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "4" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "WARN" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "4" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^OPENSSL_ALGO_ARG=\"\""  "OPENSSL_ALGO_ARG=\"-aes256\""
 
