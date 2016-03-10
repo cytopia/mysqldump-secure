@@ -442,7 +442,7 @@ check() {
 
 
 
-		for f in $(sudo ls -m "${_INSTALL_PREFIX}/var/mysqldump-secure/" |  sed "s/, / /g"); do
+		for f in $(sudo ls -m "${_INSTALL_PREFIX}/var/mysqldump-secure/" |  sed "s/,/ /g"); do
 
 			file="${_INSTALL_PREFIX}/var/mysqldump-secure/${f}"
 			db="$(echo "$f" | sed "s/^.*__//" | sed 's/\.sql.*$//')"
