@@ -16,7 +16,7 @@
 [![Type](https://img.shields.io/badge/type-%2Fbin%2Fsh-red.svg)](https://en.wikipedia.org/?title=Bourne_shell)
 
 Mysqldump-secure is a POSIX compliant wrapper script for `mysqldump` with many features and very strong security in mind.
-It will backup every available database (which is readable by the specified user) as a separate file with the possibility to opt out via blacklisting. Dumped databases can optionally be piped directly to gzip or openssl in order to compress and/or encrypt the backup. Encryption is done before the file is written to disk to avoid possible race conditions.
+It will backup every available database (which is readable by the specified user) as a separate file with the possibility to opt out via blacklisting. Dumped databases can optionally be piped directly to gzip or openssl in order to compress and/or encrypt the backup. Encryption is done before the file is written to disk to avoid possible race conditions (See documentation for more info about security measurements).
 
 
 Find the project website at [http://mysqldump-secure.org](http://mysqldump-secure.org)  
