@@ -5,7 +5,9 @@
 # -r: restricted
 #
 #
+#
 # VARIABLE CONVENTIONS
+# ====================
 #
 # 1. Function variables
 # ----------------------
@@ -37,17 +39,22 @@
 # * Uppercase
 # * Prefixed with _TMP
 # Example: _TMP_RESULT
-
-
-
-
-################################################################################
 #
-# VERSION / CREDITS
 #
-################################################################################
-
 #
+# LOG LEVELS EXPLAINED
+# ====================
+# [FATAL]	Severe error, application cannot continue
+# [ERROR]	Error occured (e.g: dump failed, setting disabled <= wrong config)
+# [WARN]	Incorrect behavior/setting, but application can continue
+# [OK]		Action was done successfully
+# [INFO]	Normal operation output
+# [DEBUG]	Verbose output
+# [TRACE]	Detailed debugging output
+#
+#
+# VERSION INFORMATION
+# ===================
 # Some of this data is also written to the nagios logfile
 # in order to be able to check against latest/desired mysqldump-secure version.
 #
@@ -62,17 +69,26 @@ INFO_VERSION="0.16"
 
 
 
+
 ################################################################################
 #
-# AUTO-GENERATED
+# G L O B A L S
 #
 ################################################################################
 
+
+
+############################################################
+# Auto-generated
+############################################################
+
 # The following are auto-generated variables by the installer.
 # to determine where the script and its config files are installed.
+#
+# Those will become obsolete in the future (hopefully).
 _PREFIX_ETC=""
-#_PREFIX_BIN=""
-#_PREFIX_LOG=""
+#_PREFIX_BIN=""		# <-- unused at the monent
+#_PREFIX_LOG=""		# <-- unused at the monent
 
 
 
@@ -81,43 +97,31 @@ _PREFIX_ETC=""
 # Exit codes
 ############################################################
 
-# Everything went fine.
+# Everything was successfull.
 # No errors and no warnings.
 EXIT_OK=0
 
-# The database dump was successful, but some other
-# warnings occured.
+
+# The database dump was successful.
+# Some other warnings occured.
 # E.g.: tmpreaper/tmpwatch could not delete files, etc
 EXIT_WARNING=1
 
-# The database dump was successful, but some other
-# errors occured.
+
+# The database dump was successful.
+# Some other errors occured.
 # E.g.: Directories could not be created, etc
 EXIT_ERROR=2
+
 
 # The database dump had errors.
 # E.g.: File already existed, wrong mysqldump options, wrong compression options, etc
 EXIT_FAIL=3
 
+
 # The program terminated before it could do backups
 # E.g.: No database connection, wrong config settings, etc
 EXIT_ABORT=4
-
-
-
-#OK
-#WARN	Restorable
-#ERROR	Config changed
-#FAIL	error dumping
-#ABORT	exited before end
-#DEBUG
-#TRACE
-
-
-
-
-
-
 
 
 
@@ -129,31 +133,33 @@ EXIT_ABORT=4
 
 #
 # How many warnings occured
+# (Fixable/Recoverable events)
 #
 MDS_WARNING_COUNT=0
 
 #
 # How many errors occured
+# (Errors, but application can continue)
 #
 MDS_ERROR_COUNT=0
 
 
 #
 # How many failed database dumps occured
+# (Failed backups, but application can continue)
 #
 MDS_FAIL_COUNT=0
 
 
 
 
-################################################################################
-#
-# DEFAULT VARIABLES
-#
-################################################################################
+
+############################################################
+# Default values for config file
+############################################################
 
 #
-# Do not djust the following default variables!
+# Do not adjust the following default variables!
 # They can be overwritten inside mysqldump-secure.conf
 # or via command line arguments
 #
@@ -220,6 +226,10 @@ MYSQL_BAD_OPTS="${MYSQL_BAD_OPTS} --opt --skip-opt"
 # Handled conditionally
 MYSQL_BAD_OPTS="${MYSQL_BAD_OPTS} --quick -q --skip-quick"
 
+#
+# TODO: remove --opt/--skip-opt and add them as warnings
+#
+
 
 
 ################################################################################
@@ -230,19 +240,21 @@ MYSQL_BAD_OPTS="${MYSQL_BAD_OPTS} --quick -q --skip-quick"
 
 # If having a tty (console) use colors
 if [ -t 1 ]; then
-	CLR_OK="$(tput setf 2 2>/dev/null || tput setaf 2 2>/dev/null)"
 	CLR_FATAL="$(tput setf 4 2>/dev/null || tput setaf 1 2>/dev/null)"
 	CLR_ERROR="$(tput setf 4 2>/dev/null || tput setaf 1 2>/dev/null)"
 	CLR_WARNING="$(tput setf 6 2>/dev/null || tput setaf 3 2>/dev/null)"
+	CLR_OK="$(tput setf 2 2>/dev/null || tput setaf 2 2>/dev/null)"
+	CLR_INFO=""
 	CLR_DEBUG="$(tput setf 0 2>/dev/null || tput setaf 248 2>/dev/null)"
 	CLR_TRACE="$(tput setf 0 2>/dev/null || tput setaf 242 2>/dev/null)"
 	CLR_RESET="$(tput sgr0 2>/dev/null)"
 # Dump terminal (e.g.: via cron)
 else
-	CLR_OK=""
 	CLR_FATAL=""
 	CLR_ERROR=""
 	CLR_WARNING=""
+	CLR_OK=""
+	CLR_INFO=""
 	CLR_DEBUG=""
 	CLR_TRACE=""
 	CLR_RESET=""
@@ -256,9 +268,318 @@ fi
 #
 ################################################################################
 
+
+# Output to stdout/stderr and to file (with multiple lines).
+#
+# @param  string  _lvl	  Debug Level
+# @param  string  _msg	  Output message
+# @param  integer _log	  (0|1) 1: log to file | 0: do not log to file
+# @param  string  _file	  Full path to logfile
+# @param  integer _cron   (0|1) 1: Cron usage - do not print 'info' | 0: print all
+# @param  string  _debug  (0|1) 1: Show debug output | 0: do not show debug output
+# @return integer 0
+debug() {
+	_lvl="${1}"		# Loglevel: "trace", "debug", "ok", "info", "warn" or "err" "fatal"
+	_msg="${2}"		# Message to output
+	_deb="${3}"		# (0|1|2) Loglevel screen: (0: fatal,err,warn, 1: ok,info, 2: debug, 3: trace)
+	_log="${4}"		# (0|1|2) Loglevel file:   (0: off, 1: ok,info, 2: debug, 3: trace)
+	_file="${5}"	# Full path to logfile
+
+
+
+	# Format prefix for level output
+	_pre_lvl=""
+	[ "${_lvl}" = "trace" ] && _pre_lvl="[TRACE]"
+	[ "${_lvl}" = "debug" ] && _pre_lvl="[DEBUG]"
+	[ "${_lvl}" = "ok"    ] && _pre_lvl="[OK]   "
+	[ "${_lvl}" = "info"  ] && _pre_lvl="[INFO] "
+	[ "${_lvl}" = "warn"  ] && _pre_lvl="[WARN] "
+	[ "${_lvl}" = "err"   ] && _pre_lvl="[ERR]  "
+	[ "${_lvl}" = "fatal" ] && _pre_lvl="[FATAL]"
+
+	# Get prefix for color output
+	_pre_clr=""
+	[ "${_lvl}" = "trace" ] && _pre_clr="${CLR_TRAGE}"
+	[ "${_lvl}" = "debug" ] && _pre_clr="${CLR_DEBUG}"
+	[ "${_lvl}" = "ok"    ] && _pre_clr="${CLR_OK}"
+	[ "${_lvl}" = "info"  ] && _pre_clr="${CLR_INFO}"
+	[ "${_lvl}" = "warn"  ] && _pre_clr="${CLR_WARNING}"
+	[ "${_lvl}" = "err"   ] && _pre_clr="${CLR_ERROR}"
+	[ "${_lvl}" = "fatal" ] && _pre_clr="${CLR_FATAL}"
+
+	# Get suffix for color output
+	_suf_crl="${CLR_RESET}"
+
+	# Format prefix for date output
+	_pre_date="$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S') ${_pre_lvl}"
+
+
+
+	#
+	# OUTPUT!!!
+	#
+
+
+	# Warning, Error and Fatal are always shown
+	if [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "err" ] || [ "${_lvl}" = "fatal" ]; then
+		IFS='
+		'
+		for line in ${_msg}; do
+			printf "%s%s %s%s\n" "${_pre_clr}" "${_pre_lvl}" "${line}" "${_suf_crl}" 1>&2	# stdout -> stderr
+		done
+		unset IFS
+	fi
+
+	if [ "${_cron}" = "0" ] && ; then
+
+
+
+	# If not in cron mode, output all levels
+	if [ "${_cron}" = "0" ]; then
+
+		if [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "err" ] || [ "${_lvl}" = "fata" ]; then
+			IFS='
+			'
+			for line in ${_msg}; do
+				printf "%s%s %s%s\n" "${_pre_clr}" "${_pre_lvl}" "${line}" "${_suf_crl}" 1>&2	# stdout -> stderr
+			done
+			unset IFS
+		else
+			IFS='
+			'
+			for line in ${_msg}; do
+				printf "%s%s %s%s\n" "${_pre_clr}" "${_pre_lvl}" "${line}" "${_suf_crl}"		# normal stdout
+			done
+			unset IFS
+
+		fi
+
+	else
+
+		if [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "err" ] || [ "${_lvl}" = "fata" ]; then
+			IFS='
+			'
+			for line in ${_msg}; do
+				printf "%s%s %s%s\n" "${_pre_clr}" "${_pre_lvl}" "${line}" "${_suf_crl}" 1>&2	# stdout -> stderr
+			done
+			unset IFS
+		fi
+	fi
+
+
+
+	# [INFO]/[DEBUG] Hide info/debug output when in cron-mode
+	if [ "${_cron}" = "0" ]; then
+		# [OK]
+		if [ "${_lvl}" = "ok" ]; then
+			IFS='
+			'
+			for line in ${_msg}; do
+				printf "${CLR_OK}[OK]    %s\n${CLR_RESET}" "${line}"
+			done
+			unset IFS
+		fi
+		# [INFO]
+		if [ "${_lvl}" = "info" ]; then
+			IFS='
+			'
+			for line in ${_msg}; do
+				printf "[INFO]  %s\n" "${line}"
+			done
+			unset IFS
+		fi
+
+		# [DEBUG] Show debug output?
+		if [ "${_debug}" = "1" ]; then
+			if [ "${_lvl}" = "debug" ]; then
+				IFS='
+				'
+				for line in ${_msg}; do
+					printf "${CLR_DEBUG}[DEBUG] %s\n${CLR_RESET}" "${line}"
+				done
+				unset IFS
+			fi
+		# [TRACE]/[DEBUG] Show debug output?
+		elif [ "${_debug}" = "2" ]; then
+			if [ "${_lvl}" = "debug" ]; then
+				IFS='
+				'
+				for line in ${_msg}; do
+					printf "${CLR_DEBUG}[DEBUG] %s\n${CLR_RESET}" "${line}"
+				done
+				unset IFS
+			fi
+			if [ "${_lvl}" = "trace" ]; then
+				IFS='
+				'
+				for line in ${_msg}; do
+					printf "${CLR_TRACE}[TRACE] %s\n${CLR_RESET}" "${line}"
+				done
+				unset IFS
+			fi
+		elif [ "${_debug}" != "0" ]; then
+			echo "${_msg}"
+			echo "Internal Error: Invalid value for \$_debug: '${_debug}'"
+			echo "Please report this at github"
+			exit 1
+		fi
+	elif [ "${_cron}" != "0" ] && [ "${_cron}" != "1" ]; then
+		echo "${_msg}"
+		echo "Internal Error: Invalid value for \$_cron: '${_cron}'"
+		echo "Please report this at github"
+		exit 1
+	fi
+
+
+
+	# [WARN] Always show warn
+	if [ "${_lvl}" = "warn" ]; then
+		IFS='
+		'
+		for line in ${_msg}; do
+			printf "${CLR_WARNING}[WARN]  %s\n${CLR_RESET}" "${line}" 1>&2	# stdout -> stderr
+		done
+		unset IFS
+	fi
+
+	# [ERR] Always show error
+	if [ "${_lvl}" = "err" ]; then
+		IFS='
+		'
+		for line in ${_msg}; do
+			printf "${CLR_ERROR}[ERR]   %s\n${CLR_RESET}" "${line}" 1>&2	# stdout -> stderr
+		done
+		unset IFS
+	fi
+
+	# [FATAL] Always show fatal
+	if [ "${_lvl}" = "fatal" ]; then
+		IFS='
+		'
+		for line in ${_msg}; do
+			printf "${CLR_FATAL}[FATAL] %s\n${CLR_RESET}" "${line}" 1>&2	# stdout -> stderr
+		done
+		unset IFS
+	fi
+
+
+
+	# Log to file
+	_pre=""
+	[ "${_lvl}" = "trace" ] && _pre="[TRACE]"
+	[ "${_lvl}" = "debug" ] && _pre="[DEBUG]"
+	[ "${_lvl}" = "ok"    ] && _pre="[OK]   "
+	[ "${_lvl}" = "info"  ] && _pre="[INFO] "
+	[ "${_lvl}" = "warn"  ] && _pre="[WARN] "
+	[ "${_lvl}" = "err"   ] && _pre="[ERR]  "
+	[ "${_lvl}" = "fatal" ] && _pre="[FATAL]"
+
+
+	if [ "${_log}" = "1" ]; then
+		if [ "${_lvl}" = "fatal" ] || [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ]; then
+			IFS='
+			'
+			for line in ${_msg}; do
+				printf "%s %s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${line}" >> "${_file}"
+			done
+			unset IFS
+		fi
+	elif [ "${_log}" = "2" ]; then
+		if [ "${_lvl}" = "fatal" ] || [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "debug" ]; then
+			IFS='
+			'
+			for line in ${_msg}; do
+				printf "%s %s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${line}" >> "${_file}"
+			done
+			unset IFS
+		fi
+	elif [ "${_log}" = "3" ]; then
+		if [ "${_lvl}" = "fatal" ] || [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "debug" ] || [ "${_lvl}" = "trace" ]; then
+			IFS='
+			'
+			for line in ${_msg}; do
+				printf "%s %s %s %s\n" "$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S')" "${_pre}" "${line}" >> "${_file}"
+			done
+			unset IFS
+		fi
+	elif [ "${_log}" != "0" ]; then
+		echo "${_msg}"
+		echo "Internal Error: Invalid value for \$_log: '${_log}'"
+		echo "Please report this at github"
+		exit 1
+	fi
+
+	return 0
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ############################################################
 # Output wrapper
 ############################################################
+
+
+debug && debugr <== the same (always do debugr)
+
+debugi (no trailing '\n')
+debuga (append: no date)
+
+
+debug() {
+	_lvl="${1}"		# Loglevel: "trace", "debug", "info", "warn" or "err" "fatal"
+	_format="${2}"	# output format: "\n" : newline | "\d" : date | "\m" : multi-line (can be combined)
+	_msg="${3}"		# message to output
+	_log="${4}"		# (0|1) log to file?
+	_file="${5}"	# full path to logfile
+	_cron="${6}"	# (0|1) run for cron?
+	_debug="${7}"	# (0|1|2) run in debug (and trace) mode?
+
+	# format variables
+	# Determine if we
+	#  * prefix a date
+	#  * Write a newline at the end
+	#  * go for multiline
+	_prefix=""
+	_suffix=""
+	_multi=0
+
+	#
+	# Evaluate format
+	#
+	IFS="\\"; for i in ${_format}; do
+		if [ "${i}" = "d" ]; then
+			_prefix="$(date '+%Y-%m-%d')" "$(date '+%H:%M:%S') "
+		elif [ "${i}" = "n" ]; then
+			_suffix="\n"
+		elif [ "${i}" = "m" ]; then
+			_multi=1
+		fi
+	done; unset IFS
+
+n
+r
+n
+
+	_prefix=
+
+
+}
 
 # Output to stdout/stderr and to file (with newline).
 #
@@ -302,10 +623,10 @@ debug() {
 	fi
 
 
-	# Always show warn, error and fatal
+	# Always show warn, error, fatal and fail
 	[ "${_lvl}" = "warn"  ] && printf "${CLR_WARNING}[WARN]  %s\n${CLR_RESET}" "${_msg}" 1>&2	# stdout -> stderr
 	[ "${_lvl}" = "err"   ] && printf "${CLR_ERROR}[ERR]   %s\n${CLR_RESET}" "${_msg}" 1>&2		# stdout -> stderr
-	[ "${_lvl}" = "fatal" ] && printf "${CLR_FATAL}[FATAL] %s\n${CLR_RESET}" "${_msg}" 1>&2		# stdout -> stderr
+	[ "${_lvl}" = "fatal"  ] && printf "${CLR_FAIL}[FAIL]  %s\n${CLR_RESET}" "${_msg}" 1>&2		# stdout -> stderr
 
 
 	# Log to file
@@ -652,7 +973,7 @@ debugn() {
 	return 0
 }
 
-# Output to stdout/stderr and to file (simply output a newline).
+# Output a newline "\n" (stdout or stderr and/or to logfile).
 #
 # @param  string  _lvl	  Debug Level
 # @param  string  _msg	  Output message
