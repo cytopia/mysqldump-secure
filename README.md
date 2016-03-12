@@ -66,8 +66,6 @@ See [https://travis-ci.org/cytopia/mysqldump-secure](https://travis-ci.org/cytop
 * Rock stable (see travis for hundreds of checks)
 * 100% POSIX compliant
 
-
-
 ## 2. Installation
 
 ### 2.1 Linux, BSD and OSX
