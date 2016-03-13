@@ -1,5 +1,12 @@
 # [![MySQLDumpSecure](https://raw.githubusercontent.com/cytopia/icons/master/64x64/mds.png)](http://mysqldump-secure.org) mysqldump-secure
 
+----
+**GIT NOTE:** 
+
+WHEN CLONING VIA GIT, MAKE SURE TO ALWAYS CHECK OUT THE LATEST TAG. 
+THE `MASTER` BRANCH IS ALWAYS UNDER DEVELOPMENT AND THEREFORE UNSTABLE.
+
+----
 
 [Features](https://github.com/cytopia/mysqldump-secure#1-features) |
 [Installation](https://github.com/cytopia/mysqldump-secure#2-installation) |
@@ -65,8 +72,6 @@ See [https://travis-ci.org/cytopia/mysqldump-secure](https://travis-ci.org/cytop
 * Self validation
 * Rock stable (see travis for hundreds of checks)
 * 100% POSIX compliant
-
-
 
 ## 2. Installation
 
