@@ -3547,7 +3547,7 @@ for db in ${DATABASES}; do
 			#
 			# Build final MySQLDump arguments
 			#
-			#MYSQL_ARGUMENTS="--defaults-file=${MYSQL_CNF_FILE} ${MYSQL_SSL_ARGS}"
+			MYSQL_ARGUMENTS="--defaults-file=${MYSQL_CNF_FILE} ${MYSQL_SSL_ARGS}"
 			MYSQLDUMP_ARGUMENTS="${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} ${MYSQL_SPECIAL_OPTS} ${MYSQL_QUICK_OPT}"
 
 
@@ -3802,18 +3802,23 @@ for db in ${DATABASES}; do
 						echo "mysqldump  = ${MYSQLDUMP_ARGUMENTS}";
 						echo;
 						echo "[compression]";
-						echo "bin = ${COMPRESS_BIN}";
-						echo "arg = ${COMPRESS_ARG}";
+						echo "bin = $(if [ "${COMPRESS}" = "1" ]; then echo "${COMPRESS_BIN}"; fi)";
+						echo "arg = $(if [ "${COMPRESS}" = "1" ]; then echo "${COMPRESS_ARG}"; fi)";
 						echo;
 						echo "[encryption]";
-						echo "aes_arg = ${OPENSSL_ALGO_ARG}";
-						echo "rsa_pem = ${OPENSSL_PUBKEY_PEM}";
+						echo "aes_arg = $(if [ "${ENCRYPT}" ]; then echo "${OPENSSL_ALGO_ARG}"; fi)";
+						echo "rsa_pem = $(if [ "${ENCRYPT}" ]; then echo "${OPENSSL_PUBKEY_PEM}"; fi)";
+						echo;
+						echo "[connection]";
+						echo "protocol  = $( get_mysql_connection_type_info "${MYSQL_SERVER_STATUS}" )";
+						echo "secured   = $(if [ "${MYSQL_SSL_ENABLE}" = "1" ]; then echo "SSL: ${MYSQL_SSL_STATUS}"; else echo "No SSL"; fi )";
+						echo "arguments = ${MYSQL_ARGUMENTS}";
 						echo;
 						echo "[server]";
-						echo "host = ${MYSQL_HOST}";
-						echo "port = ${MYSQL_PORT}";
-						echo "type = ${MYSQL_SERVER_TYPE}";
-						echo "conn = $(if [ "${MYSQL_SSL_ENABLE}" = "1" ]; then echo "SSL: ${MYSQL_SSL_STATUS}"; else echo "No SSL"; fi )";
+						echo "host    = ${MYSQL_HOST}";
+						echo "port    = ${MYSQL_PORT}";
+						echo "type    = ${MYSQL_SERVER_TYPE}";
+						echo "version = $(if [ "${MYSQL_SERVER}" != "" ]; then echo "${MYSQL_SERVER} ";fi)${MYSQL_VERSION}";
 						echo;
 						echo "[database]";
 						echo "db_name = ${db}";
