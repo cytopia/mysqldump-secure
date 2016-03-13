@@ -2,14 +2,15 @@ Version 0.16 (unreleased)
 ------------
 
 - [Fix]		Show pipefail-emulation errors and warnings (now works as expected)
-- [Fix]		Using --defaults-file instead of --defaults-extra-file to make sure no unwanted options are loaded.
-- [Fix]     Wrong "finished with errors" on tmpwatch readonly files
+- [Fix]		Using `--defaults-file` instead of `--defaults-extra-file` to make sure no unwanted options are loaded.
+- [Fix]     Wrong "finished with errors" on `tmpwatch` readonly files
 - [Fix]		Exception Handling: Handle all unbound variables
 - [Fix]		Catch error in case of wrong values in all 0/1 variables
-- [Fix]     Catch tmpwatch/tmpreaper errors show warnings or errors accordingly
-- [Fix]		tmpreaper/tmpwatch values now also accept and validate units (m, h, d)
+- [Fix]     Catch `tmpwatch`/`tmpreaper` errors and show warn/err accordingly
+- [Fix]		`tmpreaper`/`tmpwatch` values now accept/validate units (m, h, d)
 - [Fix]		Output: stdout did not show all deleted files by tmpwatch/tmpreaper
 - [Fix]		Testing: Validate MYSQL_OPTS
+- [Enh]     Adding info files for each dump file (optionally).
 - [Enh]     Logleves for logging to file (0-3)
 - [Enh]     Adding info: Show SSL cyphers in use by server (If SSL is enabled)
 - [Enh]     Adding info: Show if Server is master or slave

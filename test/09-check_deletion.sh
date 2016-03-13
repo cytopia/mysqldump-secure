@@ -36,9 +36,11 @@ sed_change_config_file "^DELETE=1"  "#DELETE=1"
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$DELETE" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$DELETE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$DELETE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -58,9 +60,11 @@ sed_change_config_file "^DELETE=1"  "DELETE=2"
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "ERR" "1" "\$DELETE" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$DELETE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "ERR" "1" "\$DELETE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -80,9 +84,11 @@ sed_change_config_file "^DELETE=1"  "DELETE=\"wrong\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "ERR" "1" "\$DELETE" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$DELETE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "ERR" "1" "\$DELETE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -103,9 +109,11 @@ sed_change_config_file "^DELETE=1"  "DELETE=\"\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$DELETE" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$DELETE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$DELETE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -126,9 +134,11 @@ sed_change_config_file "^DELETE=1"  "DELETE=0"
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "PASS" "0" " " "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "0" " " "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "PASS" "0" " " "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -161,9 +171,11 @@ sed_change_config_file "^DELETE_METHOD=\"${TMPWATCH}\""  "#DELETE_METHOD=\"${TMP
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$DELETE_METHOD" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$DELETE_METHOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$DELETE_METHOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -182,9 +194,11 @@ sed_change_config_file "^DELETE_METHOD=\"${TMPWATCH}\""  "DELETE_METHOD=\"\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$DELETE_METHOD" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$DELETE_METHOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$DELETE_METHOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -203,9 +217,11 @@ sed_change_config_file "^DELETE_METHOD=\"${TMPWATCH}\""  "DELETE_METHOD=\"wrong\
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "ERR" "1" "\$DELETE_METHOD" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$DELETE_METHOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "ERR" "1" "\$DELETE_METHOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -224,9 +240,11 @@ sed_change_config_file "^DELETE_METHOD=\"${TMPWATCH}\""  "DELETE_METHOD=\"false\
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "ERR" "1" "\$DELETE_METHOD" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$DELETE_METHOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "ERR" "1" "\$DELETE_METHOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -260,9 +278,11 @@ sed_change_config_file "^DELETE_FORCE=1"  "#DELETE_FORCE=1"
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$DELETE_FORCE" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$DELETE_FORCE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$DELETE_FORCE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -282,9 +302,11 @@ sed_change_config_file "^DELETE_FORCE=1"  "DELETE_FORCE=2"
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "ERR" "1" "\$DELETE_FORCE" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$DELETE_FORCE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "ERR" "1" "\$DELETE_FORCE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -304,9 +326,11 @@ sed_change_config_file "^DELETE_FORCE=1"  "DELETE_FORCE=\"wrong\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "ERR" "1" "\$DELETE_FORCE" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$DELETE_FORCE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "ERR" "1" "\$DELETE_FORCE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -326,9 +350,11 @@ sed_change_config_file "^DELETE_FORCE=1"  "DELETE_FORCE=\"\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$DELETE_FORCE" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$DELETE_FORCE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$DELETE_FORCE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -348,9 +374,11 @@ sed_change_config_file "^DELETE_FORCE=1"  "DELETE_FORCE=0"
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" " skipped: " "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" " skipped: " "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" " skipped: " "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -381,9 +409,11 @@ sed_change_config_file "^DELETE_IF_OLDER=1m"  "#DELETE_IF_OLDER=1m"
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$DELETE_IF_OLDER" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$DELETE_IF_OLDER" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$DELETE_IF_OLDER" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -403,9 +433,11 @@ sed_change_config_file "^DELETE_IF_OLDER=1m"  "DELETE_IF_OLDER=0"
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "ERR" "1" "\$DELETE_IF_OLDER" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$DELETE_IF_OLDER" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "ERR" "1" "\$DELETE_IF_OLDER" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -425,9 +457,11 @@ sed_change_config_file "^DELETE_IF_OLDER=1m"  "DELETE_IF_OLDER=\"wrong\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "ERR" "1" "\$DELETE_IF_OLDER" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$DELETE_IF_OLDER" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "ERR" "1" "\$DELETE_IF_OLDER" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -447,9 +481,11 @@ sed_change_config_file "^DELETE_IF_OLDER=1m"  "DELETE_IF_OLDER=\"\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$DELETE_IF_OLDER" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$DELETE_IF_OLDER" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$DELETE_IF_OLDER" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"

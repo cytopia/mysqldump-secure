@@ -45,6 +45,14 @@ else
 fi
 
 
+#
+# What checks do we want to run
+# Tests 02-11:
+#
+RUN_CHECK_CRON=1	# Check for cron mode?
+RUN_CHECK_NORM=0	# Check for normal mode?
+RUN_CHECK_VERB=1	# Check for verbose mode?
+
 
 
 
@@ -68,14 +76,6 @@ sed_change_config_file() {
 }
 
 
-
-
-#
-#
-# TODO: Test database import!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# TODO: Test database import!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# TODO: Test database import!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#
 
 
 #
@@ -442,100 +442,106 @@ check() {
 
 
 
+
 		for f in $(sudo ls -m "${_INSTALL_PREFIX}/var/mysqldump-secure/" |  sed "s/,/ /g"); do
 
-			file="${_INSTALL_PREFIX}/var/mysqldump-secure/${f}"
-			db="$(echo "$f" | sed "s/^.*__//" | sed 's/\.sql.*$//')"
+			# Ignore *.info files
+				if echo "${f}" | grep -v '.info$' 2>/dev/null; then
 
-			# Case 1: Plain *.sql file
-			if [ "${_import}" = "1" ]; then
+				file="${_INSTALL_PREFIX}/var/mysqldump-secure/${f}"
+				db="$(echo "$f" | sed "s/^.*__//" | sed 's/\.sql.*$//')"
 
-				echo "(${txtylw}plain${txtrst}) Importing ${f} ==> ${db}"
+				# Case 1: Plain *.sql file
+				if [ "${_import}" = "1" ]; then
 
-				sudo cat "${file}" | sudo mysql --defaults-file=${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf $db
+					echo "(${txtylw}plain${txtrst}) Importing ${f} ==> ${db}"
 
-				_exit="$?"
-				if [ "${_exit}" != "0" ]; then
-					echo "${txtpur}===> [FAIL]${txtrst}"
-					echo "${txtpur}===> [FAIL] Database import failed.${txtrst}"
-					echo "${txtpur}===> [FAIL]${txtrst}"
-					_ERROR=$((_ERROR+1));
-				else
-					echo "${txtgrn}===> [OK] Import success${txtrst}"
-				fi
+					sudo cat "${file}" | sudo mysql --defaults-file=${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf $db
 
-
-			# Case 2: Compressed *.sql.gz file
-			elif [ "${_import}" = "2" ]; then
-
-				echo "(${txtylw}compressed${txtrst}) Importing ${f} ==> ${db}"
-
-				sudo gzip --stdout --decompress "${file}" | sudo  mysql --defaults-file=${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf $db
-
-				_exits="${PIPESTATUS[*]}"
-				_good=1
-				for _exit in ${_exits}; do
+					_exit="$?"
 					if [ "${_exit}" != "0" ]; then
-						_good=0
+						echo "${txtpur}===> [FAIL]${txtrst}"
+						echo "${txtpur}===> [FAIL] Database import failed.${txtrst}"
+						echo "${txtpur}===> [FAIL]${txtrst}"
+						_ERROR=$((_ERROR+1));
+					else
+						echo "${txtgrn}===> [OK] Import success${txtrst}"
 					fi
-				done
-				if [ "${_good}" != "1" ]; then
-					echo "${txtpur}===> [FAIL]${txtrst}"
-					echo "${txtpur}===> [FAIL] Database import failed.${txtrst}"
-					echo "${txtpur}===> [FAIL]${txtrst}"
-					_ERROR=$((_ERROR+1));
-				else
-					echo "${txtgrn}===> [OK] Import success${txtrst}"
-				fi
 
 
-			# Case 3: Encrypted *.sql.enc file
-			elif [ "${_import}" = "3" ]; then
+				# Case 2: Compressed *.sql.gz file
+				elif [ "${_import}" = "2" ]; then
 
-				echo "(${txtylw}encrypted${txtrst}) Importing ${f} ==> ${db}"
+					echo "(${txtylw}compressed${txtrst}) Importing ${f} ==> ${db}"
 
-				sudo openssl smime -decrypt	-in "${file}" -binary -inform DEM -inkey "${_INSTALL_PREFIX}/etc/mysqldump-secure.priv.pem" \
-					| sudo mysql --defaults-file=${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf $db
+					sudo gzip --stdout --decompress "${file}" | sudo  mysql --defaults-file=${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf $db
 
-				_exits="${PIPESTATUS[*]}"
-				_good=1
-				for _exit in ${_exits}; do
-					if [ "${_exit}" != "0" ]; then
-						_good=0
+					_exits="${PIPESTATUS[*]}"
+					_good=1
+					for _exit in ${_exits}; do
+						if [ "${_exit}" != "0" ]; then
+							_good=0
+						fi
+					done
+					if [ "${_good}" != "1" ]; then
+						echo "${txtpur}===> [FAIL]${txtrst}"
+						echo "${txtpur}===> [FAIL] Database import failed.${txtrst}"
+						echo "${txtpur}===> [FAIL]${txtrst}"
+						_ERROR=$((_ERROR+1));
+					else
+						echo "${txtgrn}===> [OK] Import success${txtrst}"
 					fi
-				done
-				if [ "${_good}" != "1" ]; then
-					echo "${txtpur}===> [FAIL]${txtrst}"
-					echo "${txtpur}===> [FAIL] Database import failed.${txtrst}"
-					echo "${txtpur}===> [FAIL]${txtrst}"
-					_ERROR=$((_ERROR+1));
-				else
-					echo "${txtgrn}===> [OK] Import success${txtrst}"
-				fi
 
 
-			# Case 4: Compressed and Encrypted *.sql.gz.enc file
-			elif [ "${_import}" = "4" ]; then
+				# Case 3: Encrypted *.sql.enc file
+				elif [ "${_import}" = "3" ]; then
 
-				echo "(${txtylw}compressed${txtrst} & ${txtylw}encrypted${txtrst}) Importing ${f} ==> ${db}"
+					echo "(${txtylw}encrypted${txtrst}) Importing ${f} ==> ${db}"
 
-				sudo openssl smime -decrypt -in "${file}" -binary -inform DEM -inkey "${_INSTALL_PREFIX}/etc/mysqldump-secure.priv.pem" \
-					| gunzip  | sudo mysql --defaults-file=${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf $db
+					sudo openssl smime -decrypt	-in "${file}" -binary -inform DEM -inkey "${_INSTALL_PREFIX}/etc/mysqldump-secure.priv.pem" \
+						| sudo mysql --defaults-file=${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf $db
 
-				_exits="${PIPESTATUS[*]}"
-				_good=1
-				for _exit in ${_exits}; do
-					if [ "${_exit}" != "0" ]; then
-						_good=0
+					_exits="${PIPESTATUS[*]}"
+					_good=1
+					for _exit in ${_exits}; do
+						if [ "${_exit}" != "0" ]; then
+							_good=0
+						fi
+					done
+					if [ "${_good}" != "1" ]; then
+						echo "${txtpur}===> [FAIL]${txtrst}"
+						echo "${txtpur}===> [FAIL] Database import failed.${txtrst}"
+						echo "${txtpur}===> [FAIL]${txtrst}"
+						_ERROR=$((_ERROR+1));
+					else
+						echo "${txtgrn}===> [OK] Import success${txtrst}"
 					fi
-				done
-				if [ "${_good}" != "1" ]; then
-					echo "${txtpur}===> [FAIL]${txtrst}"
-					echo "${txtpur}===> [FAIL] Database import failed.${txtrst}"
-					echo "${txtpur}===> [FAIL]${txtrst}"
-					_ERROR=$((_ERROR+1));
-				else
-					echo "${txtgrn}===> [OK] Import success${txtrst}"
+
+
+				# Case 4: Compressed and Encrypted *.sql.gz.enc file
+				elif [ "${_import}" = "4" ]; then
+
+					echo "(${txtylw}compressed${txtrst} & ${txtylw}encrypted${txtrst}) Importing ${f} ==> ${db}"
+
+					sudo openssl smime -decrypt -in "${file}" -binary -inform DEM -inkey "${_INSTALL_PREFIX}/etc/mysqldump-secure.priv.pem" \
+						| gunzip  | sudo mysql --defaults-file=${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf $db
+
+					_exits="${PIPESTATUS[*]}"
+					_good=1
+					for _exit in ${_exits}; do
+						if [ "${_exit}" != "0" ]; then
+							_good=0
+						fi
+					done
+					if [ "${_good}" != "1" ]; then
+						echo "${txtpur}===> [FAIL]${txtrst}"
+						echo "${txtpur}===> [FAIL] Database import failed.${txtrst}"
+						echo "${txtpur}===> [FAIL]${txtrst}"
+						_ERROR=$((_ERROR+1));
+					else
+						echo "${txtgrn}===> [OK] Import success${txtrst}"
+					fi
+
 				fi
 
 			fi

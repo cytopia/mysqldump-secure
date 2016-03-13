@@ -79,7 +79,8 @@ script:
   - ./test/08-check_encryption.sh
   - ./test/09-check_deletion.sh
   - ./test/10-check_nagios_log.sh
-  - ./test/11-check_misc_settings.sh
+  - ./test/11-check_info_file.sh
+  - ./test/12-check_misc_settings.sh
 
 
   # TODO:

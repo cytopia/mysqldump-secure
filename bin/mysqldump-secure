@@ -40,6 +40,14 @@
 
 
 
+####################################################################################################
+####################################################################################################
+##
+## GLOBAL VARIABLES
+##
+####################################################################################################
+####################################################################################################
+
 
 ################################################################################
 #
@@ -57,7 +65,7 @@ INFO_GPGKEY="0x28BF179F"
 INFO_LICENSE="MIT"
 INFO_URL="http://mysqldump-secure.org"
 INFO_REPO="https://github.com/cytopia/mysqldump-secure"
-INFO_DATE="2016-03-09"
+INFO_DATE="2016-03-13"
 INFO_VERSION="0.16"
 
 
@@ -105,22 +113,6 @@ EXIT_ABORT=4
 
 
 
-#OK
-#WARN	Restorable
-#ERROR	Config changed
-#FAIL	error dumping
-#ABORT	exited before end
-#DEBUG
-#TRACE
-
-
-
-
-
-
-
-
-
 
 
 ############################################################
@@ -163,28 +155,25 @@ _DEFAULT_CONFIG_FILE="${_PREFIX_ETC}/etc/mysqldump-secure.conf"
 _DEFAULT_CONFIG_CHMOD="0400"
 
 # Default output Variables
+_DEFAULT_DUMP_DIR="${_PREFIX_ETC}/var/mysqldump-secure"
+_DEFAULT_DUMP_DIR_CHMOD="0700"
+
 _DEFAULT_DUMP_FILE_PRE="$(date '+%Y-%m-%d')_$(date '+%H-%M')__"
 _DEFAULT_DUMP_FILE_CHMOD="0400"
-_DEFAULT_DUMP_DIR_CHMOD="0700"
-_DEFAULT_DUMP_PATH="${_PREFIX_ETC}/var/mysqldump-secure"
 
 
 # MySQL defaults
 _DEFAULT_MYSQL_CNF_CHMOD="0400"
-#_DEFAULT_MYSQL_CNF_FILE="${_PREFIX_ETC}/etc/mysqldump-secure.cnf"
 
 # Default minimum size (in MB) required to enable `--quick`
 _DEFAULT_MYSQL_OPTS_QUICK_MIN_SIZE=200
-
-# Default compression binary
-_DEFAULT_COMPRESS_BIN="gzip"
 
 # Default OpenSSL Variables
 _DEFAULT_OPENSSL_ALGO_ARG="-aes256"
 
 # Logging defaults
 _DEFAULT_LOG_CHMOD="0600"
-#_DEFAULT_LOGFILE="${_PREFIX_ETC}/var/log/mysqldump-secure.log"
+_DEFAULT_LOGFILE="${_PREFIX_ETC}/var/log/mysqldump-secure.log"
 
 # Default nagios variables
 _DEFAULT_NAGIOS_LOG_CHMOD="0644"
@@ -201,9 +190,6 @@ _DEFAULT_TMP_DIR="/tmp"
 ################################################################################
 
 
-# This option will be forced
-MYSQL_FORCED_OPTS="--skip-opt"
-
 # These command line arguments are considered insecure and can lead
 # to compromising your data
 MYSQL_EVIL_OPTS="--password -p --port -P --user -u --host -h --socket -s"
@@ -215,8 +201,6 @@ MYSQL_BAD_OPTS="--no-defaults --defaults-extra-file --defaults-file"
 MYSQL_BAD_OPTS="${MYSQL_BAD_OPTS} --ssl --ssl-ca --ssl-cert --ssl-key"
 # All Transaction Options (Consistency) are done via configuration
 MYSQL_BAD_OPTS="${MYSQL_BAD_OPTS} --single-transaction --lock-tables --skip-lock-tables"
-# They pull in too much options blacklisted above
-MYSQL_BAD_OPTS="${MYSQL_BAD_OPTS} --opt --skip-opt"
 # Handled conditionally
 MYSQL_BAD_OPTS="${MYSQL_BAD_OPTS} --quick -q --skip-quick"
 
@@ -250,14 +234,27 @@ fi
 
 
 
+
+
+
+####################################################################################################
+####################################################################################################
+##
+## GLOBAL FUNCTIONS
+##
+####################################################################################################
+####################################################################################################
+
+
+
 ################################################################################
 #
-# F U N C T I O N S
+#  F U N C T I O N S
 #
 ################################################################################
 
 ############################################################
-# Output wrapper
+# Logger functions
 ############################################################
 
 # Output to stdout/stderr and to file (with newline).
@@ -652,6 +649,78 @@ debugn() {
 	return 0
 }
 
+
+# Output to stdout/stderr and to file (No date output, No newline).
+#
+# @param  string  _lvl	  Debug Level
+# @param  string  _msg	  Output message
+# @param  integer _log	  (0|1) 1: log to file | 0: do not log to file
+# @param  string  _file	  Full path to logfile
+# @param  integer _cron   (0|1) 1: Cron usage - do not print 'info' | 0: print all
+# @param  string  _debug  (0|1) 1: Show debug output | 0: do not show debug output
+# @return integer 0
+debugni() {
+	_lvl="${1}"		# Loglevel: "trace", "debug", "info", "warn" or "err" "fatal"
+	_msg="${2}"		# message to output
+	_log="${3}"		# log to file?
+	_file="${4}"	# full path to logfile
+	_cron="${5}"	# run for cron?
+	_debug="${6}"	# run in debug mode?
+
+	# Hide info/debug output when in cron-mode
+	if [ "${_cron}" = "0" ]; then
+		[ "${_lvl}" = "ok" ]   && printf "${CLR_OK}%s${CLR_RESET}" "${_msg}"
+		[ "${_lvl}" = "info" ] && printf "%s" "${_msg}"
+
+		# Show debug output?
+		if [ "${_debug}" = "1" ]; then
+			[ "${_lvl}" = "debug" ] && printf "${CLR_DEBUG}%s${CLR_RESET}" "${_msg}"
+		elif [ "${_debug}" = "2" ]; then
+			[ "${_lvl}" = "debug" ] && printf "${CLR_DEBUG}%s${CLR_RESET}" "${_msg}"
+			[ "${_lvl}" = "trace" ] && printf "${CLR_TRACE}%s${CLR_RESET}" "${_msg}"
+		elif [ "${_debug}" != "0" ]; then
+			echo "${_msg}"
+			echo "Internal Error: Invalid value for \$_debug: '${_debug}'"
+			echo "Please report this at github"
+			exit 1
+		fi
+	elif [ "${_cron}" != "0" ] && [ "${_cron}" != "1" ]; then
+		echo "${_msg}"
+		echo "Internal Error: Invalid value for \$_cron: '${_cron}'"
+		echo "Please report this at github"
+		exit 1
+	fi
+
+
+	# Always show warn, error and fatal
+	[ "${_lvl}" = "warn"  ] && printf "${CLR_WARNING}%s${CLR_RESET}" "${_msg}" 1>&2	# stdout -> stderr
+	[ "${_lvl}" = "err"   ] && printf "${CLR_ERROR}%s${CLR_RESET}" "${_msg}" 1>&2	# stdout -> stderr
+	[ "${_lvl}" = "fatal" ] && printf "${CLR_FATAL}%s${CLR_RESET}" "${_msg}" 1>&2	# stdout -> stderr
+
+	# Log to file
+	if [ "${_log}" = "1" ]; then
+		if [ "${_lvl}" = "fatal" ] || [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ]; then
+			printf "%s" "${_msg}" >> "${_file}"
+		fi
+	elif [ "${_log}" = "2" ]; then
+		if [ "${_lvl}" = "fatal" ] || [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "debug" ]; then
+			printf "%s" "${_msg}" >> "${_file}"
+		fi
+	elif [ "${_log}" = "3" ]; then
+		if [ "${_lvl}" = "fatal" ] || [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "debug" ] || [ "${_lvl}" = "trace" ]; then
+			printf "%s" "${_msg}" >> "${_file}"
+		fi
+	elif [ "${_log}" != "0" ]; then
+		echo "${_msg}"
+		echo "Internal Error: Invalid value for \$_log: '${_log}'"
+		echo "Please report this at github"
+		exit 1
+	fi
+
+	return 0
+}
+
+
 # Output to stdout/stderr and to file (simply output a newline).
 #
 # @param  string  _lvl	  Debug Level
@@ -751,13 +820,27 @@ sub() {
 	echo  | awk -v "a=${1}" -v "b=${2}" '{print a - b}'
 }
 
-
-# Increment a number by one
+# Divide two numbers.
 #
 # @param  integer
+# @param  integer
 # @return integer
-incr() {
-	echo  | awk -v "a=${1}" '{print a + 1}'
+div() {
+	echo  | awk -v "a=${1}" -v "b=${2}" '{print a / b}'
+}
+
+
+
+# Round a number
+#
+# @param  integer	Number to round
+# @param  integer	Decimal places
+# @return integer
+round() {
+	_number="${1}"
+	_precision="${2}"
+	printf '%.*f\n' "${_precision}" "${_number}"
+	return 0
 }
 
 
@@ -770,24 +853,110 @@ str_len() {
 	echo "${1}" | awk '{print length() }'
 }
 
+
+
+
+
+
 ############################################################
-# Security checker
+# File information functions
 ############################################################
+
+
+# Get file size in bytes of file or directory.
+#
+# @param  string	path to file/folder
+# @param  char	    Unit: 'b': Bytes, 'k': KB, 'm': MB, 'g': GB (defaults to 'b')
+# @output integer	File size in bytes
+# @return integer	Return code
+get_file_size() {
+	_file="${1}"
+	_unit="${2}"
+	_size="0"
+	_exit=1
+
+	_size="$($(which ls) -l "${_file}" 2>/dev/null)"
+	_exit=$?
+	_size="$(echo "${_size}" | awk '{print $5}')"
+
+	if [ "${_unit}" = "k" ]; then
+		_size="$( div "${_size}" "1024" )"
+		_size="$( round "${_size}" "2" )"
+	elif [ "${_unit}" = "m" ]; then
+		_size="$( div "${_size}" "1024" )"
+		_size="$( div "${_size}" "1024" )"
+		_size="$( round "${_size}" "2" )"
+	elif [ "${_unit}" = "g" ]; then
+		_size="$( div "${_size}" "1024" )"
+		_size="$( div "${_size}" "1024" )"
+		_size="$( div "${_size}" "1024" )"
+		_size="$( round "${_size}" "2" )"
+	fi
+
+	echo "${_size}"
+	return ${_exit}
+}
+
+
+# Get md5/sha256 hash of file or directory.
+#
+# @param  string	path to file/folder
+# @param  string	algo: 'md5' or 'sha256' (defaults to md5)
+# @output string	Hash
+# @return integer	Return code
+get_file_hash() {
+	_file="${1}"
+	_algo="${2}"
+	_hash="unknown"
+	_exit=1
+
+	if [ "${_algo}" = "sha256" ]; then
+		if command -v shasum > /dev/null 2>&1 ; then
+			_hash="$($(which shasum) -a 256 "${_file}" 2>/dev/null)"
+			_exit=$?
+			_hash="$(echo "${_hash}" | awk '{print $1}')"
+		elif command -v sha256sum > /dev/null 2>&1 ; then
+			_hash="$($(which sha256sum) "${_file}" 2>/dev/null)"
+			_exit=$?
+			_hash="$(echo "${_hash}" | awk '{print $1}')"
+		fi
+	else
+		if command -v md5 > /dev/null 2>&1 ; then
+			_hash="$($(which md5) "${_file}" 2>/dev/null)"
+			_exit=$?
+			_hash="$(echo "${_hash}" | awk -F '=' '{print $2}' | awk '{print $1}')"
+		elif command -v md5sum > /dev/null 2>&1 ; then
+			_hash="$($(which md5sum) "${_file}" 2>/dev/null)"
+			_exit=$?
+			_hash="$(echo "${_hash}" | awk '{print $1}')"
+		fi
+	fi
+
+
+	echo "${_hash}"
+	return ${_exit}
+}
+
 
 # Get Operating system independent numerical 4-digit chmod value.
 #
-# @param  string	path to file/folderhttp://www.nowvideo.sx/premium.php
-# @return string	numerical chmod (4-digit format)
-permission() {
+# @param  string	path to file/folder
+# @output string	numerical chmod (4-digit format)
+# @return integer	Return code
+get_file_chmod() {
 	_file="${1}"
+	_perm="000"
+	_exit=1
 
 	# e.g. 640
 	if [ "$(uname)" = "Linux" ]; then
 		# If no special permissions are set (no sticky bit...), linux will
 		# only output the 3 digit number
-		_perm="$(stat --format '%a' "${_file}")"
-	else # Darwin or FreeBSD
-		_perm="$(stat -f "%Mp%Lp" "${_file}")"
+		_perm="$(stat --format '%a' "${_file}" 2>/dev/null)"
+		_exit=$?
+	else # Darwin or FreeBSD, OpenBSD, NetBSD
+		_perm="$(stat -f "%Mp%Lp" "${_file}" 2>/dev/null)"
+		_exit=$?
 	fi
 
 	# For special cases check the length and add a leading 0
@@ -797,8 +966,39 @@ permission() {
 	fi
 
 	echo "${_perm}"
-	return 0
+	return ${_exit}
 }
+
+
+
+# Get the real path of a file/folder if it is a symlink
+#
+# @param  string	path (file, folder or symlink)
+# @output string	New path
+# @return integer	Success
+get_file_realpath() {
+	_file="${1}"
+	_exit=1
+
+	_path="$(realpath "${_file}" 2>/dev/null)"
+	_exit=$?
+
+	# If path not found, return the original specified path
+	if [ "${_exit}" != "0" ]; then
+		_path="${_file}"
+	fi
+
+	echo "${_path}"
+	return "${_exit}"
+}
+
+
+
+
+############################################################
+# chmod/umask validator/converter
+############################################################
+
 
 # Validate chmod value.
 #
@@ -918,7 +1118,8 @@ compare_chmod() {
 # Convert 3-digit or 4-digit chmod to 3-digit umask
 #
 # @param  string	numerical chmod (3 or 4 digit)
-# @return string	3-digit umask
+# @output string	3-digit umask
+# @return integer	0
 chmod_2_umask() {
 	_chmod="${1}"
 	_len="$(echo "${_chmod}" | awk '{ print length()   }')"
@@ -941,23 +1142,6 @@ chmod_2_umask() {
 }
 
 
-# Get the real path of a file if it is a symlink
-# @param  string	path (file, folder or symlink)
-# @return integer	Success
-_realpath() {
-	_path="$(realpath "${1}" 2>/dev/null)"
-	_code="$?"
-
-	# Return found path
-	if [ "${_code}" = "0" ]; then
-		echo "${_path}"
-		return 0
-	# Return original path (with error code)
-	else
-		echo "${_path}"
-		return "${_code}"
-	fi
-}
 
 ############################################################
 # tmpwatch/tmpreaper checker/helper
@@ -1002,22 +1186,31 @@ valid_tmpwatch() {
 # Get numerical value for tmpwatch/tmpreaper deletions
 #
 # @param  string    tmpwatch/tmpreaper deletion value (1, 1m, 1h, 1d)
-# @return integer   value
+# @output integer   Value
+# @return integer	Success
 get_tmpwatch_value() {
 	_val="${1}"
 
 	# No unit (auto-defaults to hours)
 	if echo "${_val}" | grep -Eq '^[0-9]+$'; then
 		echo "${_val}"
+		return 0
 	# 'm' for minutes
 	elif echo "${_val}" | grep -Eq '^[0-9]+m$'; then
 		echo "${_val}" | sed 's/m//g'
+		return 0
 	# 'h' for hours
 	elif echo "${_val}" | grep -Eq '^[0-9]+h$'; then
 		echo "${_val}" | sed 's/h//g'
+		return 0
 	# 'd' for days
 	elif echo "${_val}" | grep -Eq '^[0-9]+d$'; then
 		echo "${_val}" | sed 's/d//g'
+		return 0
+	else
+		echo "Internal Error: [get_tmpwatch_value] Invalid value for \$_val: '${_val}'"
+		echo "Please report this at github."
+		exit 1
 	fi
 }
 
@@ -1059,6 +1252,10 @@ get_tmpwatch_unit_name() {
 		else
 			echo "day"
 		fi
+	else
+		echo "Internal Error: [get_tmpwatch_unit_name] Invalid value for \$_val: '${_val}'"
+		echo "Please report this at github."
+		exit 1
 	fi
 }
 
@@ -1069,14 +1266,15 @@ get_tmpwatch_unit_name() {
 ############################################################
 
 # Aggregate nagios exit code.
+#
 # OK < Warning < Error < Unknown
 # @param  integer The current exit code.
 # @param  integer The new exit code
 # @output integer The combined exit code
 # @return integer The combined exit code
 merge_exit_codes() {
-	_curr_exit="$1"
-	_next_exit="$2"
+	_curr_exit="${1}"
+	_next_exit="${2}"
 
 	# OK
 	if [ "${_curr_exit}" = "0" ]; then
@@ -1113,12 +1311,113 @@ merge_exit_codes() {
 
 
 
+
+
+################################################################################
+#
+#  M Y S Q L   F U N C T I O N S
+#
+################################################################################
+
+
 ############################################################
-# MySQL Helper
+# MySQL Connection Helper
 ############################################################
 
 
+# Test if connection to the server is successful.
+#
+# @param  string  Credentials file (mysqldump-secure.cnf).
+# @param  string  SSL connection options.
+# @output string  Error message
+# @return integer Success (0: OK | 1: Error)
+mysql_test_connection() {
+	_cnf_file="${1}"
+	_ssl_opts="${2}"
+	_error=""
+	_errno=0
 
+	# Redirect stderr into stdout and both into variable
+	_error="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" -e exit 2>&1 )"
+	_errno=$?
+
+	if [ "${_errno}" != "0" ] || [ "${_error}" != "" ]; then
+		echo "${_error}"
+		return 1
+	else
+		return 0
+	fi
+}
+
+
+############################################################
+# MySQL Server Info Helper
+############################################################
+
+# Get MySQL server status 'status;'
+#
+# @param  string  Credentials file (mysqldump-secure.cnf).
+# @param  string  SSL connection options.
+# @output string  MySQL 'status;'
+# @return integer Success (0: OK | 1: Error)
+get_mysql_server_status() {
+	_cnf_file="${1}"
+	_ssl_opts="${2}"
+	_exit=1
+
+	_query="status;"
+	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_exit=$?
+
+	echo "${_result}"
+	return ${_exit}
+}
+
+# Get MySQL server hostname
+#
+# @param  string  Credentials file (mysqldump-secure.cnf).
+# @param  string  SSL connection options.
+# @output string  Hostname
+# @return integer Success (0: OK | 1: Error)
+get_mysql_server_hostname() {
+	_cnf_file="${1}"
+	_ssl_opts="${2}"
+	_exit=1
+
+	_query="SHOW GLOBAL VARIABLES LIKE 'HOSTNAME';"
+
+	# Redirect stderr into stdout and both into variable
+	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_exit=$?
+
+	_result="$( echo "${_result}" | tail -n1 | sed 's/hostname\s*//g' )"
+
+	echo "${_result}"
+	return ${_exit}
+}
+
+# Get MySQL server port
+#
+# @param  string  Credentials file (mysqldump-secure.cnf).
+# @param  string  SSL connection options.
+# @output string  Port
+# @return integer Success (0: OK | 1: Error)
+get_mysql_server_port() {
+	_cnf_file="${1}"
+	_ssl_opts="${2}"
+	_exit=1
+
+	_query="SHOW GLOBAL VARIABLES LIKE 'PORT';"
+
+	# Redirect stderr into stdout and both into variable
+	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_exit=$?
+
+	_result="$( echo "${_result}" | tail -n1 | sed 's/port\s*//g' )"
+
+	echo "${_result}"
+	return ${_exit}
+}
 
 # Determines wheter the server connected to
 # is
@@ -1131,23 +1430,27 @@ merge_exit_codes() {
 # @param  string  SSL connection options.
 # @output string  Type (unknown|master|slave)
 # @return integer Success (0: OK | 1: Error)
-_mysql_replication_type() {
+get_mysql_server_replication_type() {
 	_cnf_file="${1}"
 	_ssl_opts="${2}"
+	_exit=1
 
 	_query="select COUNT(1) SlaveThreads from information_schema.processlist where user = 'system user';"
+	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_exit=$?
 
+	_result="$( echo "${_result}" | tail -n1 )"
 
-	if ! _result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" | tail -n1 )"; then
+	if [ "${_exit}" != "0" ]; then
 		echo "unknown"
-		return 1
+		return ${_exit}
 	else
 		if [ "${_result}" = "0" ]; then
 			echo "master"
-			return 0
+			return ${_exit}
 		elif  [ "${_result}" -gt "0" ]; then
 			echo "slave"
-			return 0
+			return ${_exit}
 		else
 			echo "unknown"
 			return 1
@@ -1155,7 +1458,317 @@ _mysql_replication_type() {
 	fi
 }
 
+# Get MySQL Server Version
+#
+# @param  string  MySQL server 'status;' output
+# @output string  Server Version
+# @return integer 0
+get_mysql_server_version() {
+	_mysql_server_status="${1}"
 
+	echo "${_mysql_server_status}" | grep -E '^Server version:.*' | sed 's/Server version:\s*//g'
+	return 0
+}
+
+# Get MySQL Server Name (MySQL or MariaDB)
+#
+# @param  string  MySQL server 'status;' output
+# @output string  Server name
+# @return integer 0
+get_mysql_server_name() {
+	_mysql_server_status="${1}"
+
+	echo "${_mysql_server_status}" | grep -E '^Server:.*' | sed 's/Server:\s*//g'
+	return 0
+}
+
+
+############################################################
+# MySQL Connection Info Helper
+############################################################
+
+# Get MySQL connection info (TCP/IP or Socket)
+#
+# @param  string  MySQL server 'status;' output
+# @output string  Connection type (TCP/IP or Socket)
+# @return integer 0
+get_mysql_connection_type_info() {
+	_mysql_server_status="${1}"
+
+	echo "${_mysql_server_status}" | grep -E '^Connection:.*' | sed 's/Connection:\s*//g'
+	return 0
+}
+
+# Get MySQL connection info about SSL status
+#
+# @param  string  MySQL server 'status;' output
+# @output string  SSL Connection info
+# @return integer 0
+get_mysql_connection_ssl_info() {
+	_mysql_server_status="${1}"
+
+	echo "${_mysql_server_status}" | grep -E '^SSL:.*' | sed 's/SSL:\s*//g'
+	return 0
+}
+
+
+
+############################################################
+# MySQL Database Helper
+############################################################
+
+
+# Get all databas names
+#
+# @param  string  Credentials file (mysqldump-secure.cnf).
+# @param  string  SSL connection options.
+# @output string  All databases (including empty ones)
+# @return integer Success (0: OK | 1: Error)
+get_mysql_databases() {
+	_cnf_file="${1}"
+	_ssl_opts="${2}"
+	_exit=1
+
+	_query="show databases;"
+	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_exit=$?
+
+	# Only gets databases which have content (tables)
+	#DATABASES="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" --no-auto-rehash --skip-column-names -e 'SELECT DISTINCT table_schema FROM information_schema.tables;')"
+
+	# Remove first column (is sql column name)
+	_result="$( echo "${_result}" | sed 1d )"
+
+	# output all databases on success
+	if [ "${_exit}" = "0" ]; then
+		echo "${_result}"
+	fi
+
+	return "${_exit}"
+}
+
+# Get number of databases
+#
+# @param  string  Credentials file (mysqldump-secure.cnf).
+# @param  string  SSL connection options.
+# @output integer Number of databases
+# @return integer 0
+get_mysql_database_count() {
+	_databases="${1}"
+	echo "${_databases}" | wc -l | tr -d ' '
+	return 0
+}
+
+# Get database size in btyes
+#
+# @param  string  Credentials file (mysqldump-secure.cnf).
+# @param  string  SSL connection options.
+# @output integer Database size in bytes
+# @return integer Success (0: OK | 1: Error)
+get_mysql_database_size() {
+	_cnf_file="${1}"
+	_ssl_opts="${2}"
+	_database="${3}"
+	_exit=1
+
+	_query="SELECT SUM(DATA_LENGTH + INDEX_LENGTH) AS Size
+				FROM INFORMATION_SCHEMA.TABLES
+				WHERE TABLE_SCHEMA = '${_database}';"
+
+
+	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_exit=$?
+
+	_result="$( echo "${_result}" | tail -n1 )"
+
+	echo "${_result}"
+	return ${_exit}
+}
+
+# Determines whether database is empty
+#
+# @param  string  Credentials file (mysqldump-secure.cnf).
+# @param  string  SSL connection options.
+# @return integer 0: Empty | 1: Not empty
+mysql_database_is_empty() {
+	_cnf_file="${1}"
+	_ssl_opts="${2}"
+	_database="${3}"
+
+
+	# If a database does not show up in information_schema.tables, it means it
+	# has no tables yet and is therefore empty.
+	# If count == 0, return '0', else '1'
+	_query="SELECT IF(COUNT(*) = 0, '0', '1') AS empty
+				FROM INFORMATION_SCHEMA.TABLES
+				WHERE TABLE_SCHEMA = '${_database}';"
+
+	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_result="$( echo "${_result}" | tail -n1 )"
+
+	return "${_result}"
+}
+
+
+
+# Get all table names and table-engines
+# as a multiline string, separated by a custom
+# separator
+#
+# @param  string  Credentials file (mysqldump-secure.cnf).
+# @param  string  SSL connection options.
+# @param  string  Database.
+# @param  char    Separator
+# @return integer 0: Empty | 1: Not empty
+get_mysql_database_table_names_and_engines() {
+	_cnf_file="${1}"
+	_ssl_opts="${2}"
+	_database="${3}"
+	_separator="${4}"
+	_exit=1
+
+
+	# Get NAME<sep>ENGINE list for given database
+	_query="SELECT CONCAT(TABLE_NAME, '${_separator}',ENGINE) AS t
+				FROM information_schema.TABLES
+				WHERE TABLE_SCHEMA = '${_database}';"
+
+	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_exit=$?
+	_result="$( echo "${_result}" | grep -E "^.*[${_separator}].*$")"
+
+
+	echo "${_result}"
+	return ${_exit}
+}
+
+
+
+################################################################################
+#
+#  D A T A B A S E   I G N O R E / R E Q U I R E   H E L P E R
+#
+################################################################################
+
+# Check if the specified database should be ignored
+# This can either be by the full name or a wildcard with '*'
+#
+# @param  string  Ignore list
+# @param  string  Database name
+# @output string  Ignore pattern
+# @return integer 0: ignored, 1: not ignored
+database_is_ignored() {
+	_ignore_list="${1}"
+	_database="${2}"
+
+	# Default exit with 1, which means
+	# it was not found.
+	_exit=1
+
+	# The ignore pattern if it was ignored
+	_pattern=""
+
+	# We need to disable "variable globbing" (set -f) here,
+	# because if there is only a '*' inside '$IGNORE'
+	# then
+	#       'for ign_db in ${IGNORE}; do'
+	# would list all files in the current directory.
+	set -f
+	for _ignore_pattern in ${_ignore_list}; do
+
+		# Replace '*' with '.*' to create a regex pattern
+		_regex="$(echo "${_ignore_pattern}" | sed 's/\*/\.\*/')"
+
+		# Check if the pattern matches the complete db name
+		_found="$(echo "${_database}" | grep -oe "${_regex}")"
+
+		if [ "${_found}" = "${_database}" ]; then
+
+			# Assign new ignore pattern
+			_pattern="${_ignore_pattern}"
+
+			# Return with 0 to indicate it was found
+			_exit=0
+
+			# Stop the loop
+			break
+		fi
+	done
+	set +f
+
+	echo "${_pattern}"
+	return ${_exit}
+}
+
+# Check if the specified database is required.
+#
+# @param  string  Require list
+# @param  string  Database name
+# @return integer 0: required, 1: not required
+database_is_required() {
+	_require_list="${1}"
+	_database="${2}"
+
+	# Now check if the ignored db is actually a required db inside $REQUIRE
+	for _db_required in ${_require_list}; do
+		# Required database found?
+		if [ "${_database}" = "${_db_required}" ]; then
+			# Returning 0 indicates it is required
+			return 0
+		fi
+	done
+
+	# Returning invalid return code indicates it is not required
+	return 1
+
+}
+
+
+################################################################################
+#
+#  M I S C   F U N C T I O N S
+#
+################################################################################
+
+
+
+
+# Determine the file extension
+# based on encrypted/compressed files
+#
+# @param  integer _encrypt       Encryption enabled? (0: off | 1: on)
+# @param  integer _compress      Compression enabled? (0: off | 1: on)
+# @param  string  _compress_ext  Compression extension (e.g.: gz)
+# @output string   File extension
+get_file_extension() {
+	_encrypt="${1}"
+	_compress="${2}"
+	_compress_ext="${3}"
+
+	# Get file extension
+	if [ "${_compress}" = "1" ]; then
+		if [ "${_encrypt}" = "1" ]; then
+			echo ".sql.${_compress_ext}.enc"
+		else
+			echo ".sql.${_compress_ext}"
+		fi
+	else
+		if [ "${_encrypt}" = "1" ]; then
+			echo ".sql.enc"
+		else
+			echo ".sql"
+		fi
+	fi
+}
+
+
+
+
+################################################################################
+#
+#  U S A G E   F U N CT I O N S
+#
+################################################################################
 
 
 
@@ -1229,9 +1842,26 @@ print_version() {
 }
 
 
+
+
+
+
+
+
+
+####################################################################################################
+####################################################################################################
+##
+##  M A I N   E N T R Y   P O I N T
+##
+####################################################################################################
+####################################################################################################
+
+
+
 ################################################################################
 #
-# ENTRY POINT: ERROR CHECKING
+# COMMAND LINE ARGUMENTS
 #
 ################################################################################
 
@@ -1400,7 +2030,7 @@ if [ ! -f "${CONFIG_FILE}" ]; then
 	exit $EXIT_ABORT
 fi
 if [ -L "${CONFIG_FILE}" ]; then
-	if _TMP="$(_realpath "${CONFIG_FILE}")" >/dev/null 2>&1; then
+	if _TMP="$(get_file_realpath "${CONFIG_FILE}")" >/dev/null 2>&1; then
 		debug "trace" "(RUN): \$CONFIG_FILE is a symlink. Setting target to: ${_TMP}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		CONFIG_FILE="${_TMP}"
 	else
@@ -1414,10 +2044,10 @@ if [ ! -r "${CONFIG_FILE}" ]; then
 	debug "fatal" "Aborting" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit $EXIT_ABORT
 fi
-if ! compare_chmod "$(permission "${CONFIG_FILE}")" "${_DEFAULT_CONFIG_CHMOD}" > /dev/null 2>&1 ; then
-	debug  "warn" "(RUN): Configuration file ${CONFIG_FILE} has dangerous permissions: $(permission "${CONFIG_FILE}"), should be: ${_DEFAULT_CONFIG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+if ! compare_chmod "$(get_file_chmod "${CONFIG_FILE}")" "${_DEFAULT_CONFIG_CHMOD}" > /dev/null 2>&1 ; then
+	debug  "warn" "(RUN): Configuration file ${CONFIG_FILE} has dangerous permissions: $(get_file_chmod "${CONFIG_FILE}"), should be: ${_DEFAULT_CONFIG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	debugi "warn" "(RUN): Trying to chmod to ${_DEFAULT_CONFIG_CHMOD}..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 
 	if ! chmod ${_DEFAULT_CONFIG_CHMOD} "${CONFIG_FILE}" > /dev/null 2>&1 ; then
 		debugn "fatal" "Failed" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1443,6 +2073,14 @@ fi
 
 
 
+
+################################################################################
+#
+# EVALUATE CONFIG FILE
+#
+################################################################################
+
+
 ############################################################
 # Logging Options
 ############################################################
@@ -1455,72 +2093,72 @@ if ! set | grep '^LOG=' >/dev/null 2>&1; then
 	debug "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	LOG=0
 	LOGFILE=""
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ -z "${LOG}" ]; then
 	debug "warn" "(CFG): \$LOG variable should not be empty" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	LOG=0
 	LOGFILE=""
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ "${LOG}" = "1" ] || [ "${LOG}" = "2" ] || [ "${LOG}" = "3" ]; then
+
 	# Check chmod variable
 	if ! set | grep '^LOG_CHMOD=' >/dev/null 2>&1; then
 		debug "warn" "(CFG): \$LOG_CHMOD variable is not defined" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "warn" "(CFG): Setting default to: ${_DEFAULT_LOG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		LOG_CHMOD="${_DEFAULT_LOG_CHMOD}"
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 	elif [ -z "${LOG_CHMOD}" ]; then
 		debug "warn" "(CFG): \$LOG_CHMOD variable should not be empty" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "warn" "(CFG): Setting default to: ${_DEFAULT_LOG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		LOG_CHMOD="${_DEFAULT_LOG_CHMOD}"
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 	elif ! valid_chmod "${LOG_CHMOD}" > /dev/null 2>&1; then
-		debug "err"  "(CFG): Invalid value for \$LOG_CHMOD: ${LOG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "err"  "(CFG): Setting default to: ${_DEFAULT_LOG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(CFG): Invalid value for \$LOG_CHMOD: ${LOG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "warn" "(CFG): Setting default to: ${_DEFAULT_LOG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 		LOG_CHMOD="${_DEFAULT_LOG_CHMOD}"
-		MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 	fi
 
 	# Check logfile variable
 	if ! set | grep '^LOGFILE=' >/dev/null 2>&1; then
 		debug "warn" "(CFG): \$LOGFILE variable is not defined" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		LOG=0
-		LOGFILE=""
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		debug "warn" "(OPT): Setting default to: ${_DEFAULT_LOGFILE}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		LOGFILE="${_DEFAULT_LOGFILE}"
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 	elif [ -z "${LOGFILE}" ]; then
 		debug "warn" "(CFG): \$LOGFILE variable should not be empty" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-		LOG=0
-		LOGFILE=""
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		debug "warn" "(OPT): Setting default to: ${_DEFAULT_LOGFILE}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		LOGFILE="${_DEFAULT_LOGFILE}"
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 	fi
 
 	# Resolve symlink?
 	if [ -L "${LOGFILE}" ]; then
-		if _TMP="$(_realpath "${LOGFILE}")" >/dev/null 2>&1; then
+		if _TMP="$(get_file_realpath "${LOGFILE}")" >/dev/null 2>&1; then
 			debug "trace" "(RUN): \$LOGFILE is a symlink. Setting target to: ${_TMP}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			LOGFILE="${_TMP}"
 		else
-			debug "fatal" "(RUN): Cannot resolve symlink of: $LOGFILE" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-			debug "fatal" "Aborting" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-			exit $EXIT_ABORT
+			debug "err" "(RUN): Cannot resolve symlink of: $LOGFILE" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+			LOG=0
+			MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
 		fi
 	fi
 
-
+	# Check if logfile exists
 	if [ ! -f "${LOGFILE}" ]; then
 		# Check if logging directory exists
 		if [ ! -d "$(dirname "${LOGFILE}")" ]; then
 			debug  "warn" "(RUN): Logfile directory does not exist in $(dirname "${LOGFILE}")" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			debugi "warn" "(RUN): Trying to create..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-			MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+			MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 			if ! mkdir -p "$(dirname "${LOGFILE}")" > /dev/null 2>&1 ; then
 				debugn "err" "Failed" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				debug  "err" "(RUN): Failed to create directoy: $(dirname "${LOGFILE}")" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				debug  "err" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				LOG=0
-				MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+				MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
 			else
 				debugn "warn" "OK" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			fi
@@ -1529,14 +2167,14 @@ elif [ "${LOG}" = "1" ] || [ "${LOG}" = "2" ] || [ "${LOG}" = "3" ]; then
 		if [ "${LOG}" != "0" ]; then
 			debug  "warn" "(RUN): Logfile does not exist in ${LOGFILE}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			debugi "warn" "(RUN): Trying to create..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-			MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+			MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 
 			if ! touch "${LOGFILE}" > /dev/null 2>&1 ; then
 				debugn "err"  "Failed" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				debug  "err"  "(RUN): Failed to create file: ${LOGFILE}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				debug  "err"  "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				LOG=0
-				MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+				MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
 			else
 				debugn "warn" "OK" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			fi
@@ -1546,17 +2184,17 @@ elif [ "${LOG}" = "1" ] || [ "${LOG}" = "2" ] || [ "${LOG}" = "3" ]; then
 	# Logging still on?
 	# Check for permissions
 	if [ "${LOG}" != "0" ]; then
-		if ! compare_chmod "$(permission "${LOGFILE}")" "${LOG_CHMOD}" > /dev/null 2>&1 ; then
-			debug  "warn" "(RUN): Logfile has wrong permissions: $(permission "${LOGFILE}"), should be: ${LOG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+		if ! compare_chmod "$(get_file_chmod "${LOGFILE}")" "${LOG_CHMOD}" > /dev/null 2>&1 ; then
+			debug  "warn" "(RUN): Logfile has wrong permissions: $(get_file_chmod "${LOGFILE}"), should be: ${LOG_CHMOD}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			debugi "warn" "(RUN): Trying to chmod to ${LOG_CHMOD}..." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-			MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+			MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 
 			if ! chmod ${LOG_CHMOD} "${LOGFILE}" > /dev/null 2>&1 ; then
 				debugn "err"  "Failed" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				debug  "err"  "(RUN): Failed to chmod ${LOG_CHMOD} ${LOGFILE}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				debug  "err"  "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 				LOG=0
-				MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+				MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
 			else
 				debugn "warn" "OK" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			fi
@@ -1572,18 +2210,18 @@ elif [ "${LOG}" = "1" ] || [ "${LOG}" = "2" ] || [ "${LOG}" = "3" ]; then
 			debug  "err" "(RUN): Logfile ${LOGFILE} not writeable. Check \$LOG_CHMOD value inf config." "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug  "err" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 			LOG=0
-			MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+			MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
 		fi
 	fi
 elif [ "${LOG}" = "0" ]; then
 	debug "info" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	LOGFILE=""
 else
-	debug "err"  "(CFG): Invalid value for \$LOG: ${LOG}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "err"  "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Invalid value for \$LOG: ${LOG}" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(OPT): Logging disabled" "0" "" "${_ARG_CRON}" "${_ARG_VERB}"
 	LOG=0
 	LOGFILE=""
-	MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 fi
 
 # Is logging still enabled after all checks?
@@ -1626,17 +2264,25 @@ fi
 # Tmp folder
 ############################################################
 
-# Check $DUMP_DIR_CHMOD
+
+# Check if mktemp exits
+if ! command -v mktemp > /dev/null 2>&1 ; then
+	debug "fatal" "(RUN): 'mktemp' not found" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "fatal" "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	exit $EXIT_ABORT
+fi
+
+# Check $TMP_DIR variable
 if ! set | grep '^TMP_DIR=' >/dev/null 2>&1; then
 	debug "warn" "(CFG): \$TMP_DIR variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(CFG): Setting default to: ${_DEFAULT_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	TMP_DIR=${_DEFAULT_TMP_DIR}
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ -z "${TMP_DIR}" ]; then
 	debug "warn" "(CFG): \$TMP_DIR variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(CFG): Setting default to: ${_DEFAULT_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	TMP_DIR=${_DEFAULT_TMP_DIR}
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 fi
 
 # Check directory
@@ -1665,17 +2311,17 @@ if ! set | grep '^DUMP_DIR_CHMOD=' >/dev/null 2>&1; then
 	debug "warn" "(CFG): \$DUMP_DIR_CHMOD variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_DIR_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	DUMP_DIR_CHMOD=${_DEFAULT_DUMP_DIR_CHMOD}
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ -z "${DUMP_DIR_CHMOD}" ]; then
 	debug "warn" "(CFG): \$DUMP_DIR_CHMOD variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_DIR_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	DUMP_DIR_CHMOD=${_DEFAULT_DUMP_DIR_CHMOD}
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif ! valid_chmod "${DUMP_DIR_CHMOD}" > /dev/null 2>&1; then
-	debug "err"  "(CFG): Invalid value for \$DUMP_DIR_CHMOD: ${DUMP_DIR_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "err"  "(CFG): Setting default to: ${_DEFAULT_DUMP_DIR_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Invalid value for \$DUMP_DIR_CHMOD: ${DUMP_DIR_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_DIR_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	DUMP_DIR_CHMOD="${_DEFAULT_DUMP_DIR_CHMOD}"
-	MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 fi
 
 # Check $DUMP_FILE_CHMOD
@@ -1683,57 +2329,57 @@ if ! set | grep '^DUMP_FILE_CHMOD=' >/dev/null 2>&1; then
 	debug "warn" "(CFG): \$DUMP_FILE_CHMOD variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_FILE_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	DUMP_FILE_CHMOD=${_DEFAULT_DUMP_DIR_CHMOD}
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ -z "${DUMP_FILE_CHMOD}" ]; then
 	debug "warn" "(CFG): \$DUMP_FILE_CHMOD variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_FILE_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	DUMP_FILE_CHMOD=${_DEFAULT_DUMP_DIR_CHMOD}
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif ! valid_chmod "${DUMP_FILE_CHMOD}" > /dev/null 2>&1; then
-	debug "err"  "(CFG): Invalid value for \$DUMP_FILE_CHMOD: ${DUMP_FILE_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "err"  "(CFG): Setting default to: ${_DEFAULT_DUMP_FILE_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Invalid value for \$DUMP_FILE_CHMOD: ${DUMP_FILE_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_FILE_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	DUMP_FILE_CHMOD="${_DEFAULT_DUMP_DIR_CHMOD}"
-	MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 fi
 
-# Check $DUMP_PATH
-if ! set | grep '^DUMP_PATH=' >/dev/null 2>&1; then
-	debug "warn" "(CFG): \$DUMP_PATH variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	DUMP_PATH=${_DEFAULT_DUMP_PATH}
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
-elif [ -z "${DUMP_PATH}" ]; then
-	debug "warn" "(CFG): \$DUMP_PATH variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	DUMP_PATH=${_DEFAULT_DUMP_PATH}
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+# Check $DUMP_DIR
+if ! set | grep '^DUMP_DIR=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$DUMP_DIR variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	DUMP_DIR=${_DEFAULT_DUMP_DIR}
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
+elif [ -z "${DUMP_DIR}" ]; then
+	debug "warn" "(CFG): \$DUMP_DIR variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	DUMP_DIR=${_DEFAULT_DUMP_DIR}
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 fi
 
 # Resolve symlink?
-if [ -L "${DUMP_PATH}" ]; then
-	if _TMP="$(_realpath "${DUMP_PATH}")" >/dev/null 2>&1; then
-		debug "trace" "(RUN): \$DUMP_PATH is a symlink. Setting target to: ${_TMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		DUMP_PATH="${_TMP}"
+if [ -L "${DUMP_DIR}" ]; then
+	if _TMP="$(get_file_realpath "${DUMP_DIR}")" >/dev/null 2>&1; then
+		debug "trace" "(RUN): \$DUMP_DIR is a symlink. Setting target to: ${_TMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		DUMP_DIR="${_TMP}"
 	else
-		debug "fatal" "(RUN): Cannot resolve symlink of: $DUMP_PATH" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "fatal" "(RUN): Cannot resolve symlink of: $DUMP_DIR" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "fatal" "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit $EXIT_ABORT
 	fi
 fi
 
-if [ ! -d "${DUMP_PATH}" ]; then
-	debug  "warn" "(RUN): Destination dir does not exist: ${DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+if [ ! -d "${DUMP_DIR}" ]; then
+	debug  "warn" "(RUN): Destination dir does not exist: ${DUMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debugi "warn" "(RUN): Trying to create... " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 
-	if ! mkdir -p "${DUMP_PATH}" > /dev/null 2>&1 ; then
+	if ! mkdir -p "${DUMP_DIR}" > /dev/null 2>&1 ; then
 		debugn "fatal"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug  "fatal"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit $EXIT_ABORT
 	else
 		debugn "warn" "Done" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debugi "warn" "(RUN): Trying to chmod to: ${DUMP_DIR_CHMOD}..." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		if ! chmod ${DUMP_DIR_CHMOD} "${DUMP_PATH}" >/dev/null 2>&1; then
+		if ! chmod ${DUMP_DIR_CHMOD} "${DUMP_DIR}" >/dev/null 2>&1; then
 			debugn "fatal"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug  "fatal"  "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			exit $EXIT_ABORT
@@ -1744,12 +2390,12 @@ if [ ! -d "${DUMP_PATH}" ]; then
 fi
 
 # Check correct permissions of destination dir
-if ! compare_chmod "$(permission "${DUMP_PATH}")" "${DUMP_DIR_CHMOD}" > /dev/null 2>&1 ; then
-	debug  "warn" "(RUN): Destination dir has wrong permissions: $(permission "${DUMP_PATH}"), but should ${DUMP_DIR_CHMOD}." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+if ! compare_chmod "$(get_file_chmod "${DUMP_DIR}")" "${DUMP_DIR_CHMOD}" > /dev/null 2>&1 ; then
+	debug  "warn" "(RUN): Destination dir has wrong permissions: $(get_file_chmod "${DUMP_DIR}"), but should ${DUMP_DIR_CHMOD}." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debugi "warn" "(RUN): Trying to chmod to ${DUMP_DIR_CHMOD}... " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 
-	if ! chmod "${DUMP_DIR_CHMOD}" "${DUMP_PATH}" > /dev/null 2>&1 ; then
+	if ! chmod "${DUMP_DIR_CHMOD}" "${DUMP_DIR}" > /dev/null 2>&1 ; then
 		debugn "fatal" "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug  "fatal" "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit $EXIT_ABORT
@@ -1758,15 +2404,15 @@ if ! compare_chmod "$(permission "${DUMP_PATH}")" "${DUMP_DIR_CHMOD}" > /dev/nul
 	fi
 fi
 # Check if destination dir is writeable
-if [ ! -w "${DUMP_PATH}" ]; then
-	debug  "fatal" "(RUN): Destination dir ${DUMP_PATH} is not writeable" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+if [ ! -w "${DUMP_DIR}" ]; then
+	debug  "fatal" "(RUN): Destination dir ${DUMP_DIR} is not writeable" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debugi "fatal" "(HLP): Fix your configured permissions" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug  "fatal" "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit $EXIT_ABORT
 fi
 
 # Show information
-debug "debug" "(CFG): Destination dir: ${DUMP_PATH}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "debug" "(CFG): Destination dir: ${DUMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 # Check $DUMP_FILE_PRE
@@ -1774,12 +2420,12 @@ if ! set | grep '^DUMP_FILE_PRE=' >/dev/null 2>&1; then
 	debug "warn" "(CFG): \$DUMP_FILE_PRE variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_FILE_PRE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	DUMP_FILE_PRE=${_DEFAULT_DUMP_FILE_PRE}
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ -z "${DUMP_FILE_PRE}" ]; then
 	debug "warn" "(CFG): \$DUMP_FILE_PRE variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(CFG): Setting default to: ${_DEFAULT_DUMP_FILE_PRE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	DUMP_FILE_PRE=${_DEFAULT_DUMP_FILE_PRE}
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 fi
 
 # Show information
@@ -1816,7 +2462,7 @@ fi
 
 # Resolve symlink?
 if [ -L "${MYSQL_CNF_FILE}" ]; then
-	if _TMP="$(_realpath "${MYSQL_CNF_FILE}")" >/dev/null 2>&1; then
+	if _TMP="$(get_file_realpath "${MYSQL_CNF_FILE}")" >/dev/null 2>&1; then
 		debug "trace" "(RUN): \$MYSQL_CNF_FILE is a symlink. Setting target to: ${_TMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		MYSQL_CNF_FILE="${_TMP}"
 	else
@@ -1834,8 +2480,8 @@ elif [ ! -r "${MYSQL_CNF_FILE}" ]; then
 	debug "fatal" "(RUN): MySQL CNF file is not readable: ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "fatal" "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit $EXIT_ABORT
-elif ! compare_chmod "$(permission "${MYSQL_CNF_FILE}")" "${_DEFAULT_MYSQL_CNF_CHMOD}" > /dev/null 2>&1 ; then
-	debug "fatal" "(RUN): MySQL CNF file has dangerous permissions: $(permission "${MYSQL_CNF_FILE}")." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+elif ! compare_chmod "$(get_file_chmod "${MYSQL_CNF_FILE}")" "${_DEFAULT_MYSQL_CNF_CHMOD}" > /dev/null 2>&1 ; then
+	debug "fatal" "(RUN): MySQL CNF file has dangerous permissions: $(get_file_chmod "${MYSQL_CNF_FILE}")." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "fatal" "(HLP): Fix it to ${_DEFAULT_MYSQL_CNF_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "fatal" "(HLP): If you are not alone on the machine, the password inside could have been compromised by now." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "fatal" "(HLP): If so, change your database password." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1918,16 +2564,15 @@ fi
 # MYSQL_OPTS
 if ! set | grep '^MYSQL_OPTS=' >/dev/null 2>&1; then
 	debug "warn" "(CFG): \$MYSQL_OPTS variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn" "(RUN): Disabling custom mysqldump options" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(RUN): Setting default to no custom mysqldump options" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	MYSQL_OPTS=""
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ -z "${MYSQL_SSL_ENABLE}" ]; then
 	debug "trace" "(CFG): \$MYSQL_OPTS is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	MYSQL_OPTS=""
 fi
 
 debug "trace"  "(CFG): mysqldump custom options: ${MYSQL_OPTS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-debug "trace"  "(CFG): mysqldump forced options: ${MYSQL_FORCED_OPTS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 # MYSQL_OPTS_QUICK_MIN_SIZE
@@ -1935,17 +2580,17 @@ if ! set | grep '^MYSQL_OPTS_QUICK_MIN_SIZE=' >/dev/null 2>&1; then
 	debug "warn" "(CFG): \$MYSQL_OPTS_QUICK_MIN_SIZE variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(CFG): Setting default to: ${_DEFAULT_MYSQL_OPTS_QUICK_MIN_SIZE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	MYSQL_OPTS_QUICK_MIN_SIZE=${_DEFAULT_MYSQL_OPTS_QUICK_MIN_SIZE}
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ -z "${MYSQL_OPTS_QUICK_MIN_SIZE}" ]; then
 	debug "warn" "(CFG): \$MYSQL_OPTS_QUICK_MIN_SIZE is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(CFG): Setting default to: ${_DEFAULT_MYSQL_OPTS_QUICK_MIN_SIZE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	MYSQL_OPTS_QUICK_MIN_SIZE=${_DEFAULT_MYSQL_OPTS_QUICK_MIN_SIZE}
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif ! isint "${MYSQL_OPTS_QUICK_MIN_SIZE}" >/dev/null 2>&1; then
-	debug "err"  "(CFG): Wrong integer value for \$MYSQL_OPTS_QUICK_MIN_SIZE: ${MYSQL_OPTS_QUICK_MIN_SIZE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "err"  "(CFG): Setting default to: ${_DEFAULT_MYSQL_OPTS_QUICK_MIN_SIZE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Wrong integer value for \$MYSQL_OPTS_QUICK_MIN_SIZE: ${MYSQL_OPTS_QUICK_MIN_SIZE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Setting default to: ${_DEFAULT_MYSQL_OPTS_QUICK_MIN_SIZE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	MYSQL_OPTS_QUICK_MIN_SIZE=${_DEFAULT_MYSQL_OPTS_QUICK_MIN_SIZE}
-	MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 fi
 debug "trace"  "(CFG): mysqldump '--quick':      Applied to DB's >= ${MYSQL_OPTS_QUICK_MIN_SIZE} MB" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 debug "trace"  "(CFG): mysqldump '--skip-quick': Applied to DB's  < ${MYSQL_OPTS_QUICK_MIN_SIZE} MB" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -1975,10 +2620,6 @@ for opt in ${MYSQL_OPTS}; do
 	done
 done
 
-#
-# Merge custom and forced options
-#
-MYSQL_OPTS="${MYSQL_FORCED_OPTS} ${MYSQL_OPTS}"
 
 
 
@@ -1987,73 +2628,72 @@ MYSQL_OPTS="${MYSQL_FORCED_OPTS} ${MYSQL_OPTS}"
 # Consistency/Transactions
 ############################################################
 
-
 # CONSISTENT_DUMP_ONLY_INNODB
 if ! set | grep '^CONSISTENT_DUMP_ONLY_INNODB=' >/dev/null 2>&1; then
 	debug "warn"  "(CFG): \$CONSISTENT_DUMP_ONLY_INNODB variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn"  "(RUN): InnoDB-only:  Not dumping consistently across tables (using '--skip-lock-tables') [unsafe]" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	CONSISTENT_DUMP_ONLY_INNODB=0
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	debug "warn"  "(RUN): Setting default to: 1 (using '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	CONSISTENT_DUMP_ONLY_INNODB="1"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ -z "${CONSISTENT_DUMP_ONLY_INNODB}" ]; then
 	debug "warn"  "(CFG): \$CONSISTENT_DUMP_ONLY_INNODB variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn"  "(RUN): InnoDB-only:  Not dumping consistently across tables (using '--skip-lock-tables') [unsafe]" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	CONSISTENT_DUMP_ONLY_INNODB=0
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	debug "warn"  "(RUN): Setting default to: 1 (using '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	CONSISTENT_DUMP_ONLY_INNODB="1"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ "${CONSISTENT_DUMP_ONLY_INNODB}" = "1" ]; then
 	debug "trace" "(CFG): InnoDB-only:  Dumping consistently across tables (using '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 elif [ "${CONSISTENT_DUMP_ONLY_INNODB}" = "0" ]; then
 	debug "trace" "(CFG): InnoDB-only:  Not dumping consistently across tables (using '--skip-lock-tables') [unsafe]" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "err"   "(CFG): \$CONSISTENT_DUMP_ONLY_INNODB variable has an invalid value: ${CONSISTENT_DUMP_ONLY_INNODB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "err"   "(RUN): InnoDB-only:  Not dumping consistently across tables (using '--skip-lock-tables') [unsafe]" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	CONSISTENT_DUMP_ONLY_INNODB=0
-	MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+	debug "warn"  "(CFG): \$CONSISTENT_DUMP_ONLY_INNODB variable has an invalid value: ${CONSISTENT_DUMP_ONLY_INNODB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"  "(RUN): Setting default to: 1 (using '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	CONSISTENT_DUMP_ONLY_INNODB="1"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 fi
 
 # CONSISTENT_DUMP_NO_INNODB
 if ! set | grep '^CONSISTENT_DUMP_NO_INNODB=' >/dev/null 2>&1; then
-	debug "warn"    "(CFG): \$CONSISTENT_DUMP_NO_INNODB variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn"    "(RUN): InnoDB-none:  Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	CONSISTENT_DUMP_NO_INNODB=0
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	debug "warn"  "(CFG): \$CONSISTENT_DUMP_NO_INNODB variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"  "(RUN): Setting default to: 1 (using '--lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	CONSISTENT_DUMP_NO_INNODB="1"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ -z "${CONSISTENT_DUMP_NO_INNODB}" ]; then
-	debug "warn"    "(CFG): \$CONSISTENT_DUMP_NO_INNODB variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn"    "(RUN): InnoDB-none:  Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	CONSISTENT_DUMP_NO_INNODB=0
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	debug "warn"  "(CFG): \$CONSISTENT_DUMP_NO_INNODB variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"  "(RUN): Setting default to: 1 (using '--lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	CONSISTENT_DUMP_NO_INNODB="1"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ "${CONSISTENT_DUMP_NO_INNODB}" = "1" ]; then
 	debug "trace" "(CFG): InnoDB-none:  Dumping consistently across tables (using '--lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 elif [ "${CONSISTENT_DUMP_NO_INNODB}" = "0" ]; then
-	debug "trace" "(CFG): InnoDB-none:  Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "trace" "(CFG): InnoDB-none:  Not dumping consistently across tables (using '--skip-lock-tables') [unsafe]" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "err"     "(CFG): \$CONSISTENT_DUMP_NO_INNODB variable has an invalid value: ${CONSISTENT_DUMP_NO_INNODB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "err"     "(RUN): InnoDB-none:  Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	CONSISTENT_DUMP_NO_INNODB=0
-	MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+	debug "warn"  "(CFG): \$CONSISTENT_DUMP_NO_INNODB variable has an invalid value: ${CONSISTENT_DUMP_NO_INNODB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"  "(RUN): Setting default to: 1 (using '--lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	CONSISTENT_DUMP_NO_INNODB="1"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 fi
 
 # CONSISTENT_DUMP_MIXED_INNODB
 if ! set | grep '^CONSISTENT_DUMP_MIXED_INNODB=' >/dev/null 2>&1; then
-	debug "warn"    "(CFG): \$CONSISTENT_DUMP_MIXED_INNODB variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn"    "(RUN): InnoDB-mixed: Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	CONSISTENT_DUMP_MIXED_INNODB=0
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	debug "warn"  "(CFG): \$CONSISTENT_DUMP_MIXED_INNODB variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"  "(RUN): Setting default to: 1 (using '--lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	CONSISTENT_DUMP_MIXED_INNODB="1"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ -z "${CONSISTENT_DUMP_MIXED_INNODB}" ]; then
 	debug "warn" "(CFG): \$CONSISTENT_DUMP_MIXED_INNODB variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "warn"    "(RUN): InnoDB-mixed: Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	CONSISTENT_DUMP_MIXED_INNODB=0
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	debug "warn"  "(RUN): Setting default to: 1 (using '--lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	CONSISTENT_DUMP_MIXED_INNODB="1"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "1" ]; then
 	debug "trace" "(CFG): InnoDB-mixed: Dumping consistently across tables (using '--lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "2" ]; then
-	debug "trace" "(CFG): InnoDB-mixed: Dumping consistently across tables (using '--single-transaction')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "trace" "(CFG): InnoDB-mixed: Dumping consistently across tables (using '--single-transaction') [unsafe]" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "0" ]; then
-	debug "trace" "(CFG): InnoDB-mixed: Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "trace" "(CFG): InnoDB-mixed: Not dumping consistently across tables (using '--skip-lock-tables') [unsafe]" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "err"    "(CFG): \$CONSISTENT_DUMP_MIXED_INNODB variable has an invalid value: ${CONSISTENT_DUMP_MIXED_INNODB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "err"    "(RUN): InnoDB-mixed: Not dumping consistently across tables (using '--skip-lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	CONSISTENT_DUMP_MIXED_INNODB=0
-	MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+	debug "warn"  "(CFG): \$CONSISTENT_DUMP_MIXED_INNODB variable has an invalid value: ${CONSISTENT_DUMP_MIXED_INNODB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn"  "(RUN): Setting default to: 1 (using '--lock-tables')" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	CONSISTENT_DUMP_MIXED_INNODB="1"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 fi
 
 
@@ -2069,7 +2709,7 @@ if ! set | grep '^IGNORE=' >/dev/null 2>&1; then
 	debug "warn" "(HLP): Define \$IGNORE in your config to get rid of this warning" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(RUN): No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	IGNORE=""
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ -z "${IGNORE}" ]; then
 	debug "trace" "(CFG): \$IGNORE variable is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "trace" "(RUN): No database will be ignored" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2084,7 +2724,7 @@ if ! set | grep '^REQUIRE=' >/dev/null 2>&1; then
 	debug "warn" "(HLP): Define \$REQUIRE in your config to get rid of this warning" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(RUN): No database will be required" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	REQUIRE=""
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ -z "${REQUIRE}" ]; then
 	debug "trace" "(CFG): \$REQUIRE variable is empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "trace" "(RUN): No database will explicitly be required" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2105,34 +2745,39 @@ if ! set | grep '^COMPRESS=' >/dev/null 2>&1; then
 	debug "warn" "(CFG): \$COMPRESS variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	COMPRESS=0
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ -z "${COMPRESS}" ]; then
 	debug "warn" "(CFG): \$COMPRESS variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	COMPRESS=0
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ "${COMPRESS}" = "1" ]; then
 
 	# COMPRESS_BIN
 	if ! set | grep '^COMPRESS_BIN=' >/dev/null 2>&1; then
 		debug "warn" "(CFG): \$COMPRESS_BIN variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "(OPT): Setting default to: ${_DEFAULT_COMPRESS_BIN}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		COMPRESS_BIN="${_DEFAULT_COMPRESS_BIN}"
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		debug "warn" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		COMPRESS=0
+		COMPRESS_BIN=""
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 	elif [ -z "${COMPRESS_BIN}" ]; then
 		debug "warn" "(CFG): \$COMPRESS_BIN variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "warn" "(OPT): Setting default to: ${_DEFAULT_COMPRESS_BIN}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		COMPRESS_BIN="${_DEFAULT_COMPRESS_BIN}"
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		debug "warn" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		COMPRESS=0
+		COMPRESS_BIN=""
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 	fi
 
-	# Does COMPRESS_BIN binary exist?
-	if ! command -v "${COMPRESS_BIN}" > /dev/null 2>&1 ; then
-		debug "err" "(CFG): ${COMPRESS_BIN} not found. Fix \$COMPRESS_BIN" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "err" "(HLP): Fix \$COMPRESS_BIN" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		debug "err" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		COMPRESS=0
-		MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+	# If compression is still enabled
+	if [ "${COMPRESS}" = "1" ]; then
+		# Does COMPRESS_BIN binary exist?
+		if ! command -v "${COMPRESS_BIN}" > /dev/null 2>&1 ; then
+			debug "err" "(CFG): ${COMPRESS_BIN} not found. Fix \$COMPRESS_BIN" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err" "(HLP): Fix \$COMPRESS_BIN" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			COMPRESS=0
+			MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
+		fi
 	fi
 
 	# If compression is still enabled
@@ -2142,7 +2787,7 @@ elif [ "${COMPRESS}" = "1" ]; then
 			debug "warn" "(CFG): \$COMPRESS_ARG variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "warn" "(RUN): Using no command line arguments for ${COMPRESS_BIN}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			COMPRESS_ARG=""
-			MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+			MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 		# Can be empty
 		elif [ -z "${COMPRESS_ARG}" ]; then
 			debug "trace" "(CFG): No compression arguments specified for ${COMPRESS_BIN}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2156,12 +2801,12 @@ elif [ "${COMPRESS}" = "1" ]; then
 			debug "warn" "(CFG): \$COMPRESS_EXT variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "warn" "(RUN): Using 'compressed' as file extension." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			COMPRESS_EXT="compressed"
-			MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+			MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 		elif [ -z "${COMPRESS_EXT}" ]; then
 			debug "warn" "(CFG): \$COMPRESS_EXT variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "warn" "(RUN): Using 'compressed' as file extension." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			COMPRESS_EXT="compressed"
-			MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+			MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 		fi
 	fi
 
@@ -2174,10 +2819,10 @@ elif [ "${COMPRESS}" = "1" ]; then
 elif [ "${COMPRESS}" = "0" ]; then
 	debug "info" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
-	debug "err" "(CFG): Invalid value for \$COMPRESS: ${COMPRESS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug "err" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(CFG): Invalid value for \$COMPRESS: ${COMPRESS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(OPT): Compression disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	COMPRESS=0
-	MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 fi
 
 
@@ -2221,12 +2866,12 @@ elif [ "${ENCRYPT}" = "1" ]; then
 		debug "warn" "(CFG): \$OPENSSL_ALGO_ARG variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "warn" "(RUN): Encryption defaults to: ${_DEFAULT_OPENSSL_ALGO_ARG}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		OPENSSL_ALGO_ARG="${_DEFAULT_OPENSSL_ALGO_ARG}"
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 	elif [ -z "${OPENSSL_ALGO_ARG}" ]; then
 		debug "warn" "(CFG): \$OPENSSL_ALGO_ARG variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "warn" "(RUN): Encryption defaults to: ${_DEFAULT_OPENSSL_ALGO_ARG}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		OPENSSL_ALGO_ARG="${_DEFAULT_OPENSSL_ALGO_ARG}"
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 	fi
 
 	# Test OpenSSL
@@ -2261,21 +2906,16 @@ fi
 # Deletion
 ############################################################
 
-#
-# TODO: Make tmpwatch testrun for validation
-#
-
-
 if ! set | grep '^DELETE=' >/dev/null 2>&1; then
 	debug "warn" "(CFG): \$DELETE variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	DELETE=0
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ -z "${DELETE}" ]; then
 	debug "warn" "(CFG): \$DELETE variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	DELETE=0
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ "${DELETE}" = "1"  ]; then
 
 	# DELETE_METHOD
@@ -2284,31 +2924,31 @@ elif [ "${DELETE}" = "1"  ]; then
 		debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		DELETE=0
 		DELETE_METHOD=""
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 	elif [ -z "${DELETE_METHOD}" ]; then
 		debug "warn" "(CFG): \$DELETE_METHOD variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		DELETE=0
 		DELETE_METHOD=""
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 	elif [ "${DELETE_METHOD}" = "tmpwatch" ] && ! command -v tmpwatch > /dev/null 2>&1 ; then
 		debug "err"  "(RUN): 'tmpwatch' not found" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "err"  "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		DELETE=0
 		DELETE_METHOD=""
-		MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+		MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
 	elif [ "${DELETE_METHOD}" = "tmpreaper" ] && ! command -v tmpreaper > /dev/null 2>&1 ; then
 		debug "err"  "(RUN): 'tmpreaper' not found" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "err"  "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		DELETE=0
 		DELETE_METHOD=""
-		MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+		MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
 	elif [ "${DELETE_METHOD}" != "tmpwatch" ] && [ "${DELETE_METHOD}" != 'tmpreaper' ]; then
 		debug "err"  "(CFG): \$DELETE_METHOD must be either 'tmpwatch' or 'tmpreaper' in ${CONFIG_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "err"  "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		DELETE=0
 		DELETE_METHOD=""
-		MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+		MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
 	else
 
 		# DELETE_IF_OLDER
@@ -2316,18 +2956,18 @@ elif [ "${DELETE}" = "1"  ]; then
 			debug "warn" "(CFG): \$DELETE_IF_OLDER variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			DELETE=0
-			MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+			MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 		elif [ -z "${DELETE_IF_OLDER}" ]; then
 			debug "warn" "(CFG): \$DELETE_IF_OLDER variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "warn" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			DELETE=0
-			MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+			MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 		elif ! valid_tmpwatch "${DELETE_IF_OLDER}" > /dev/null 2>&1 ; then
 			debug "err"  "(CFG): \$DELETE_IF_OLDER does not have a valid ${DELETE_METHOD} value: ${DELETE_IF_OLDER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "err"  "(HLP): See: man ${DELETE_METHOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "err"  "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			DELETE=0
-			MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+			MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
 		fi
 	fi
 
@@ -2342,12 +2982,12 @@ elif [ "${DELETE}" = "1"  ]; then
 			debug "warn" "(CFG): \$DELETE_FORCE variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "warn" "(RUN): Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			DELETE_FORCE=0
-			MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+			MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 		elif [ -z "${DELETE_FORCE}" ]; then
 			debug "warn" "(CFG): \$DELETE_FORCE variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "warn" "(RUN): Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			DELETE_FORCE=0
-			MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+			MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 		elif [ "${DELETE_FORCE}" = "1"  ]; then
 			debug "trace" "(CFG): ${DELETE_METHOD}: Using '--force' option (deleting read-only files)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		elif [ "${DELETE_FORCE}" = "0"  ]; then
@@ -2356,7 +2996,7 @@ elif [ "${DELETE}" = "1"  ]; then
 			debug "err" "(CFG): Invalid value for \$DELETE_FORCE: ${DELETE_FORCE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "err" "(RUN): Setting \$DELETE_FORCE = 0" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			DELETE_FORCE=0
-			MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+			MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
 		fi
 	fi
 
@@ -2366,7 +3006,7 @@ else
 	debug "err" "(CFG): Invalid value for \$DELETE: ${DELETE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err" "(OPT): Deletion disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	DELETE=0
-	MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+	MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
 fi
 
 
@@ -2381,12 +3021,12 @@ if ! set | grep '^NAGIOS_LOG=' >/dev/null 2>&1; then
 	debug "warn" "(CFG): \$NAGIOS_LOG variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	NAGIOS_LOG=0
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ -z "${NAGIOS_LOG}" ]; then
 	debug "warn" "(CFG): \$NAGIOS_LOG variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "warn" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	NAGIOS_LOG=0
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 elif [ "${NAGIOS_LOG}" = "1"  ]; then
 
 	# NAGIOS_LOG_CHMOD
@@ -2394,17 +3034,17 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 		debug "warn" "(CFG): \$NAGIOS_LOG_CHMOD variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "warn" "(RUN): Setting default to ${_DEFAULT_NAGIOS_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		NAGIOS_LOG_CHMOD="${_DEFAULT_NAGIOS_LOG_CHMOD}"
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 	elif [ -z "${NAGIOS_LOG_CHMOD}" ]; then
 		debug "warn" "(CFG): \$NAGIOS_LOG_CHMOD variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "warn" "(RUN): Setting default to ${_DEFAULT_NAGIOS_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		NAGIOS_LOG_CHMOD="${_DEFAULT_NAGIOS_LOG_CHMOD}"
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 	elif ! valid_chmod "${NAGIOS_LOG_CHMOD}" > /dev/null 2>&1; then
 		debug "err"  "(CFG): Invalid chmod value for \$NAGIOS_LOG_CHMOD: ${NAGIOS_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "err"  "(RUN): Setting default to ${_DEFAULT_NAGIOS_LOG_CHMOD}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		NAGIOS_LOG_CHMOD="${_DEFAULT_NAGIOS_LOG_CHMOD}"
-		MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+		MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
 	fi
 
 	# NAGIOS_LOGFILE
@@ -2412,51 +3052,51 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 		debug "warn" "(CFG): \$NAGIOS_LOGFILE variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "warn" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		NAGIOS_LOG=0
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 	elif [ -z "${NAGIOS_LOGFILE}" ]; then
 		debug "warn" "(CFG): \$NAGIOS_LOGFILE variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "warn" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		NAGIOS_LOG=0
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 	elif [ ! -f "${NAGIOS_LOGFILE}" ]; then
 		debug  "warn" "(RUN): ${NAGIOS_LOGFILE} not found" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debugi "warn" "(RUN): Trying to create..." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 
 		if ! touch "${NAGIOS_LOGFILE}" > /dev/null 2>&1 ; then
 			debugn "err" "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug  "err" "(RUN): Failed to create file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug  "err" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			NAGIOS_LOG=0
-			MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+			MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
 		else
 			debugn "warn" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug  "warn" "(RUN): Created file ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debugi "warn" "(RUN): Trying to chmod to ${NAGIOS_LOG_CHMOD}..." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-			MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+			MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 
 			if ! chmod ${NAGIOS_LOG_CHMOD} "${NAGIOS_LOGFILE}" > /dev/null 2>&1 ; then
 				debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 				debug  "err"  "(RUN): Failed to chmod ${NAGIOS_LOG_CHMOD} ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 				debug  "err"  "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 				NAGIOS_LOG=0
-				MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+				MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
 			else
 				debugn "warn" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			fi
 		fi
 	# Check if it has wrong permissions
-	elif ! compare_chmod "$(permission "${NAGIOS_LOGFILE}")" "${NAGIOS_LOG_CHMOD}" > /dev/null 2>&1 ; then
-		debug  "warn" "(RUN): Nagios logfile has wrong permissions: $(permission "${NAGIOS_LOGFILE}"), but should be: ${NAGIOS_LOG_CHMOD} " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	elif ! compare_chmod "$(get_file_chmod "${NAGIOS_LOGFILE}")" "${NAGIOS_LOG_CHMOD}" > /dev/null 2>&1 ; then
+		debug  "warn" "(RUN): Nagios logfile has wrong permissions: $(get_file_chmod "${NAGIOS_LOGFILE}"), but should be: ${NAGIOS_LOG_CHMOD} " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debugi "warn" "(RUN): Trying to chmod to ${NAGIOS_LOG_CHMOD}... " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 
 		if ! chmod "${NAGIOS_LOG_CHMOD}" "${NAGIOS_LOGFILE}" > /dev/null 2>&1 ; then
 			debugn "err"  "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug  "err"  "(RUN): Failed to chmod ${NAGIOS_LOG_CHMOD} ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug  "err"  "(OPT): Nagios plugin log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			NAGIOS_LOG=0
-			MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+			MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
 		else
 			debugn "warn" "OK" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		fi
@@ -2469,13 +3109,13 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 			debug "warn" "(HLP): FIX \NAGIOS_LOG_CHMOD value in config" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "warn" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			NAGIOS_LOG=0
-			MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+			MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 		elif [ ! -w "${NAGIOS_LOGFILE}" ]; then
 			debug "warn" "(RUN): ${NAGIOS_LOGFILE} not writeable" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "warn" "(HLP): FIX \NAGIOS_LOG_CHMOD value in config" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "warn" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			NAGIOS_LOG=0
-			MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+			MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 		else
 			debug "info"  "(OPT): Nagios log enabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			debug "debug" "(OPT): Nagios logfile: ${NAGIOS_LOGFILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2484,12 +3124,39 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 
 elif [ "${NAGIOS_LOG}" = "0"  ]; then
 	debug "info" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	NAGIOS_LOG="0"
 else
 	debug "err" "(CFG): Invalid value for \$NAGIOS_LOG: ${NAGIOS_LOG}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "err" "(OPT): Nagios log disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	DELETE=0
-	MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+	MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
+fi
+
+
+
+
+############################################################
+# Info file
+############################################################
+
+if ! set | grep '^DUMP_FILE_INFO=' >/dev/null 2>&1; then
+	debug "warn" "(CFG): \$DUMP_FILE_INFO variable is not defined" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(OPT): Info files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	DUMP_FILE_INFO=0
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
+elif [ -z "${DUMP_FILE_INFO}" ]; then
+	debug "warn" "(CFG): \$DUMP_FILE_INFO variable should not be empty" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(OPT): Info files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	DUMP_FILE_INFO=0
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
+elif [ "${DUMP_FILE_INFO}" = "1"  ]; then
+	debug "info" "(OPT): Info files enabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+elif [ "${DUMP_FILE_INFO}" = "0"  ]; then
+	debug "info" "(OPT): Info files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+else
+	debug "warn" "(CFG): Invalid value for \$DUMP_FILE_INFO: ${DUMP_FILE_INFO}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "warn" "(OPT): Info files disabled" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	DUMP_FILE_INFO=0
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 fi
 
 
@@ -2502,8 +3169,8 @@ fi
 ############################################################
 
 
-# Testing MySQL connection
-if ! _CONN_ERR="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e exit 2>&1)"; then
+# Testing MySQL Connection
+if ! _CONN_ERR="$( mysql_test_connection "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" )"; then
 	debug  "fatal" "(RUN): Cannot connect to mysql database." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debugr "fatal" "(RUN): Via: $(which mysql) --defaults-file=${MYSQL_CNF_FILE} ${MYSQL_SSL_ARGS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debugr "fatal" "(RUN): SQL: ${_CONN_ERR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2515,23 +3182,25 @@ else
 fi
 
 
-# Getting server status
-if ! MYSQL_SERVER_STATUS="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e 'status;' 2>&1)"; then
+# Getting MySQL Server Status
+if ! MYSQL_SERVER_STATUS="$( get_mysql_server_status "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" )"; then
 	debug "fatal" "(SRV): Cannot retrieve MySQL server status" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "fatal" "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit $EXIT_ABORT
 fi
 
-# Testing MySQL for IP/Socket connection
-MYSQL_CONN_STATUS="$( echo "${MYSQL_SERVER_STATUS}" | grep -E '^Connection:.*' | sed 's/Connection:\s*//g')"
-debug "debug"  "(SRV): MySQL server connection: ${MYSQL_CONN_STATUS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
+# MySQL TCP/IP or Socket connection
+debug "debug"  "(SRV): MySQL server connection: $( get_mysql_connection_type_info "${MYSQL_SERVER_STATUS}" )" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 # Testing MySQL for SSL connection
-MYSQL_SSL_STATUS="$( echo "${MYSQL_SERVER_STATUS}" | grep -E '^SSL:.*' | sed 's/SSL:\s*//g')"
+MYSQL_SSL_STATUS="$( get_mysql_connection_ssl_info "${MYSQL_SERVER_STATUS}" )"
 if [ "${MYSQL_SSL_STATUS}" = "Not in use" ]; then
 	if [ "${MYSQL_SSL_ENABLE}" = "1" ]; then
 		debug "fatal" "(SRV): MySQL server connection: Not using SSL, but demanded." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "fatal" "(HLP): We have already made some plain-text connections" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		debug "fatal" "(HLP): It is advised to change your password immediately" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debug "fatal" "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		exit $EXIT_ABORT
 	else
@@ -2541,25 +3210,28 @@ else
 	debug "debug" "(SRV): MySQL server connection: Using SSL (${MYSQL_SSL_STATUS})" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
 
-# Testing MySQL for Name and version
-MYSQL_SERVER="$( echo "${MYSQL_SERVER_STATUS}" | grep -E '^Server:.*' | sed 's/Server:\s*//g')"
-MYSQL_VERSION="$( echo "${MYSQL_SERVER_STATUS}" | grep -E '^Server version:.*' | sed 's/Server version:\s*//g')"
-debug "debug" "(SRV): MySQL server version:    $( [ "${MYSQL_SERVER}" != "" ] && echo "${MYSQL_SERVER} " )${MYSQL_VERSION}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-
-# Testing MySQL for Hostname/Port
-MYSQL_PORT="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e "SHOW GLOBAL VARIABLES LIKE 'PORT';" 2>&1 | tail -n1 | sed 's/port\s*//g')"
-MYSQL_HOST="$($(which mysql) --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" -e "SHOW GLOBAL VARIABLES LIKE 'HOSTNAME';" 2>&1 | tail -n1 | sed 's/hostname\s*//g')"
-debug "debug" "(SRV): MySQL server hostname:   ${MYSQL_HOST}:${MYSQL_PORT}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-
-
-# Testing for Master slave connection
-if ! MYSQL_SERVER_TYPE="$(_mysql_replication_type "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}")"; then
+# Testing MySQL for Master or Slave
+if ! MYSQL_SERVER_TYPE="$(get_mysql_server_replication_type "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}")"; then
 	debug "fatal" "(RUN): Connection error" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "fatal" "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit $EXIT_ABORT
 else
 	debug "debug" "(SRV): MySQL server rep type:   ${MYSQL_SERVER_TYPE}"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 fi
+
+
+# Get MySQL Name and Version
+MYSQL_SERVER="$( get_mysql_server_name "${MYSQL_SERVER_STATUS}" )"
+MYSQL_VERSION="$( get_mysql_server_version "${MYSQL_SERVER_STATUS}" )"
+
+# Get MySQL Server Hostname and Port
+MYSQL_HOST="$( get_mysql_server_hostname "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" )"
+MYSQL_PORT="$( get_mysql_server_port "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" )"
+
+debug "debug" "(SRV): MySQL server version:    $( [ "${MYSQL_SERVER}" != "" ] && echo "${MYSQL_SERVER} " )${MYSQL_VERSION}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+debug "debug" "(SRV): MySQL server hostname:   ${MYSQL_HOST}:${MYSQL_PORT}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
+
 
 
 
@@ -2585,10 +3257,11 @@ fi
 ################################################################################
 
 # Binaries
-MYSQL="$(which mysql 2>/dev/null)"
+#MYSQL="$(which mysql 2>/dev/null)"
 MYSQLDUMP="$(which mysqldump 2>/dev/null)"
 OPENSSL="$(which openssl 2>/dev/null)"
 TMPWATCH="$(which "${DELETE_METHOD}" 2>/dev/null)"	# This can be tmpwatch or tmpreaper
+MKTEMP="$(which mktemp 2>/dev/null)"
 
 # Error code for nagios
 ERROR=0
@@ -2600,7 +3273,7 @@ ERROR=0
 ############################################################
 
 # New temporary directory
-if MY_TMP_DIR="$( mktemp -d ${TMP_DIR}/mysqldump-secure.XXXXXXXXXX 2>/dev/null)"; then
+if MY_TMP_DIR="$( ${MKTEMP} -d ${TMP_DIR}/mysqldump-secure.XXXXXXXXXX 2>/dev/null)"; then
 	debug "trace"  "(RUN): Creating tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "fatal" "(RUN): Cannot create tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2609,7 +3282,7 @@ else
 fi
 
 # Temp file 'mysqldump'
-if MY_TMP_FILE_DUMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
+if MY_TMP_FILE_DUMP="$( ${MKTEMP} "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
 	debug "trace"  "(RUN): Creating tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "fatal" "(RUN): Cannot create tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2618,7 +3291,7 @@ else
 fi
 
 # Temp file 'compression'
-if MY_TMP_FILE_COMP="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
+if MY_TMP_FILE_COMP="$( ${MKTEMP} "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
 	debug "trace"  "(RUN): Creating tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "fatal" "(RUN): Cannot create tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2627,7 +3300,7 @@ else
 fi
 
 # Temp file 'encryption'
-if MY_TMP_FILE_ENCR="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
+if MY_TMP_FILE_ENCR="$( ${MKTEMP} "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
 	debug "trace"  "(RUN): Creating tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 else
 	debug "fatal" "(RUN): Cannot create tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2637,7 +3310,7 @@ fi
 
 if [ "${DELETE}" = "1" ]; then
 	# Temp file 'tmpwatch/tmpreaper'
-	if MY_TMP_FILE_DEL="$( mktemp "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
+	if MY_TMP_FILE_DEL="$( ${MKTEMP} "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
 		debug "trace"  "(RUN): Creating tmp file: ${MY_TMP_FILE_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	else
 		debug "fatal" "(RUN): Cannot create tmp file: ${MY_TMP_FILE_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2654,18 +3327,11 @@ fi
 # Get a list of all databases
 debugi "debug" "(SQL): Retrieving list of databases... " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
-# gets all databases (even empty ones)
-DATABASES="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" --batch -e 'show databases;' | sed 1d )"
-#
-# TODO: Error check this (above)
-#
+# Get all databases
+DATABASES="$( get_mysql_databases "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" )"
+NUM_DB="$( get_mysql_database_count "${DATABASES}" )"
 
-# Only gets databases which have content (tables)
-#DATABASES="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" --no-auto-rehash --skip-column-names -e 'SELECT DISTINCT table_schema FROM information_schema.tables;')"
-
-NUM_DB="$(echo "${DATABASES}" | wc -l | tr -d ' ')"
 debugn "debug" "${NUM_DB}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-
 
 
 ############################################################
@@ -2689,98 +3355,72 @@ i=0
 
 for db in ${DATABASES}; do
 
-	i="$(sum "${i}" 1)"
+
+	# Increment Loop counter
+	i=$((i + 1))
+
+
+
+	# Show progress
+	# At which database are we right now?
+	# Left-space-padded " 1/10" counter
 	_cnt="$(printf "%$(str_len "${NUM_DB}")d/%d" "${i}" "${NUM_DB}")"
-	#
+
+
 	# SKIPPING DATABASES
-	#
+	skip_empty=0
+	skip_ignored=0
 
-	# Reset skip flag
-	skip=0
-
-
-	#
 	# Empty databases
-	#
+	if mysql_database_is_empty "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}"; then
+		skip_empty=1
+	fi
 
-	# If a database does not show up in information_schema.tables, it means it
-	# has no tables yet and is therefore empty.
-	EMPTY="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" --batch \
-		-e "SELECT IF(COUNT(*) = 0, 'yes', 'no') AS empty
-			FROM INFORMATION_SCHEMA.TABLES
-			WHERE TABLE_SCHEMA = '${db}';" | tail -n1 )"
+	# Ignored database
+	if _ignore_pattern="$( database_is_ignored "${IGNORE}" "${db}" )"; then
+		skip_ignored=1
+		debug "trace" "(CFG): ${_cnt} Ignoring DB: \"${db}\" by wildcard: \"${_ignore_pattern}\""  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
-	if [ "${EMPTY}" = "yes" ]; then
-		skip=1
+		# Only if ignored database is not required, we can ignore it.
+		if database_is_required "${REQUIRE}" "${db}"; then
+			skip_ignored=0
+			debug "trace" "(CFG): ${_cnt} Required DB: \"${db}\" un-ignored as it was found in \$REQUIRE"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		fi
 	fi
 
 
 	#
-	# Ignored databases
+	# Main case 1 (skipping)
 	#
-
-	# We need to disable "variable globbing" (set -f) here,
-	# because if there is only a '*' inside '$IGNORE'
-	# then
-	#       'for ign_db in ${IGNORE}; do'
-	# would list all files in the current directory.
-	set -f
-	for ign_db in ${IGNORE}; do
-		# Replace '*' with '.*' to create a regex pattern
-		_regex="$(echo "${ign_db}" | sed 's/\*/\.\*/')"
-		# Check if the pattern matches the complete db name
-		_found="$(echo "${db}" | grep -oe "${_regex}")"
-		if [ "${_found}" = "${db}" ]; then
-
-			_required=0
-
-			# Now check if the ignored db is actually a required db inside $REQUIRE
-			for _req in ${REQUIRE}; do
-				# Required database found?
-				# Remove from variable
-				if [ "${db}" = "${_req}" ]; then
-					_required=1
-					break
-				fi
-			done
-
-			debug "trace" "(CFG): Ignoring DB: \"${db}\" by wildcard: \"${ign_db}\" (regex: \"${_regex}\")"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-			skip=2
-
-			if [ "${_required}" = "1" ]; then
-				debug "trace" "(CFG): Required DB: \"${db}\" re-enabled by \$REQUIRE variable from config"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-				skip=0
-			else
-				skip=2
-			fi
-		fi
-	done
-	set +f
+	if [ "${skip_empty}" = "1" ] || [ "${skip_ignored}" = "1" ]; then
 
 
-	#
-	# Evaluate SKIP
-	#
-	if [ ${skip} -eq 0 ]; then
-
-		# Get file extension
-		if [ ${COMPRESS} -eq 1 ]; then
-			if [ ${ENCRYPT} -eq 1 ]; then
-				ext=".sql.${COMPRESS_EXT}.enc"
-			else
-				ext=".sql.${COMPRESS_EXT}"
-			fi
+		# Empty AND Ignored
+		if [ "${skip_empty}" = "1" ] && [ "${skip_ignored}" = "1" ]; then
+			debug "info" "(SQL): ${_cnt} Skipping: ${db} (DB is empty and ignored)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		# Empty
+		elif [ "${skip_empty}" = "1" ]; then
+			debug "info" "(SQL): ${_cnt} Skipping: ${db} (DB is empty)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+		# Ignored
 		else
-			if [ ${ENCRYPT} -eq 1 ]; then
-				ext=".sql.enc"
-			else
-				ext=".sql"
-			fi
+			debug "info" "(SQL): ${_cnt} Skipping: ${db} (DB is ignored)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		fi
+
+		TOTAL_IGN=$((TOTAL_IGN + 1))
+		[ "${NAGIOS_DB_IGNORED}" = "" ] && NAGIOS_DB_IGNORED="${db}" || NAGIOS_DB_IGNORED="${NAGIOS_DB_IGNORED},${db}"
+
+
+	#
+	# Main case 2 (dumping)
+	#
+	else
+
+		# Determine which file extension to use (.sql, .sql.gz, .sql.gz.enc or .sql.enc)
+		ext="$( get_file_extension "${ENCRYPT}" "${COMPRESS}" "${COMPRESS_EXT}" )"
 
 
 		# File already exists on disk?
-		if [ -f "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" ]; then
+		if [ -f "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" ]; then
 
 			# Increment total dbs error count
 			TOTAL_ERR=$((TOTAL_ERR + 1))
@@ -2788,23 +3428,13 @@ for db in ${DATABASES}; do
 			# Add failed db to nagios log
 			[ "${NAGIOS_DB_ERROR}" = "" ] && NAGIOS_DB_ERROR="${db}" || NAGIOS_DB_ERROR="${NAGIOS_DB_ERROR},${db}"
 
-			debug "err" "(RUN): ${db} cannot be written to disk (file exists: ${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext})" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+			debug "err" "(RUN): ${_cnt} Failed:   ${db} cannot be written to disk (file exists: ${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext})" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 			ERROR="$(merge_exit_codes "${ERROR}" 2)"
-			MDS_FAIL_COUNT="$(incr "${MDS_FAIL_COUNT}")"
+			MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
 
 		# All Good, file can be written
 		else
 
-			#
-			# REQUIRED DATABASES
-			#
-			for req in ${REQUIRE}; do
-				# Required database found?
-				# Remove from variable
-				if [ "${db}" = "${req}" ]; then
-					REQUIRE="$( echo "${REQUIRE}" | sed "s/${db}//" )"
-				fi
-			done
 
 
 			#
@@ -2814,18 +3444,17 @@ for db in ${DATABASES}; do
 			_TABLES_OTHER=""
 			MYSQL_LOCK_OPTS="--skip-lock-tables"
 
-			# Gather all table engines.
-			TBL_ENGINES="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} --batch \
-				-e "SELECT CONCAT(TABLE_NAME, '#',ENGINE) AS t
-					FROM information_schema.TABLES
-					WHERE TABLE_SCHEMA = '${db}';" | grep -E '^.*[#].*$')"
+
+			# Get all table names and engines separated with '#'.
+			# E.g: "test_table#InnoDB"
+			TBL_ENGINES="$( get_mysql_database_table_names_and_engines "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" "=" )"
 			IFS='
 			'
 
 			# Assign Dump options to table engines.
 			for _line in ${TBL_ENGINES}; do
-				_table="$(echo "${_line}" | awk -F '#' '{print $1}')"
-				_engine="$(echo "${_line}" | awk -F '#' '{print $2}')"
+				_table="$(echo "${_line}" | awk -F '=' '{print $1}')"
+				_engine="$(echo "${_line}" | awk -F '=' '{print $2}')"
 
 				if [ "${_engine}" = "InnoDB" ]; then
 					[ -z "${_TABLES_INNODB}" ] && _TABLES_INNODB="${_table}" || _TABLES_INNODB="$( printf "%s %s" "${_TABLES_INNODB}" "${_table}")"
@@ -2841,29 +3470,28 @@ for db in ${DATABASES}; do
 
 				# Apply consistency to InnoDB
 				if [ "${CONSISTENT_DUMP_ONLY_INNODB}" = "1" ] && [ "${_TABLES_OTHER}" = "" ]; then
-					debug "trace" "(RUN): All tables use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
-					debug "trace" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "trace" "(RUN): ${_cnt} All tables use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 					MYSQL_LOCK_OPTS="--single-transaction"
 				elif [ "${CONSISTENT_DUMP_NO_INNODB}" = "1" ] && [ "${_TABLES_INNODB}" = "" ]; then
-					debug "trace" "(RUN): No tables use InnoDB. Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
-					debug "trace" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "trace" "(RUN): ${_cnt} No tables use InnoDB. Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "trace" "(RUN): ${_cnt} Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 					MYSQL_LOCK_OPTS="--lock-tables"
 				elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "1" ] && [ "${_TABLES_INNODB}" != "" ] && [ "${_TABLES_OTHER}" != "" ]; then
-					debug "trace" "(RUN): Some tables don't use InnoDB. Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
-					debug "trace" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "trace" "(RUN): ${_cnt} Some tables don't use InnoDB. Dumping with --lock-tables" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "trace" "(RUN): ${_cnt} Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 					MYSQL_LOCK_OPTS="--lock-tables"
 				elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "2" ] && [ "${_TABLES_INNODB}" != "" ] && [ "${_TABLES_OTHER}" != "" ]; then
-					debug "trace" "(RUN): Some tables don't use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
-					debug "trace" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "trace" "(RUN): ${_cnt} Some tables don't use InnoDB. Dumping with --single-transaction" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "trace" "(RUN): ${_cnt} Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 					MYSQL_LOCK_OPTS="--single-transaction"
 				else
-					debug "trace" "(RUN): \"${db}\": Not dumping consistently with '--lock-tables' or '--single-transaction'." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
-					debug "trace" "(RUN): Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "trace" "(RUN): ${_cnt} \"${db}\": Not dumping consistently with '--lock-tables' or '--single-transaction'." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+					debug "trace" "(RUN): ${_cnt} Non InnoDB tables: ${_TABLES_OTHER}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 					MYSQL_LOCK_OPTS="--skip-lock-tables"
 				fi
 
 			else
-				debug "trace" "(RUN): \"${db}\" is special and needs '--skip-lock-tables'" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+				debug "trace" "(RUN): ${_cnt} \"${db}\" is special and needs '--skip-lock-tables'" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 				MYSQL_LOCK_OPTS="--skip-lock-tables"
 			fi
 
@@ -2878,7 +3506,7 @@ for db in ${DATABASES}; do
 			# Performance schema does not allow to dump events
 			# mysqldump: mysqldump  Couldn't execute 'show events'  Access denied for user 'root'@'localhost' to database 'performance_schema' (1044)
 			if [ "${db}" = "performance_schema" ]; then
-				debug "trace" "(RUN): \"${db}\" cannot be dumped with --events. Adding --skip-events" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
+				debug "trace" "(RUN): ${_cnt} \"${db}\" cannot be dumped with --events. Adding --skip-events" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 				MYSQL_SPECIAL_OPTS="--skip-events"
 			fi
 
@@ -2886,17 +3514,18 @@ for db in ${DATABASES}; do
 			#
 			# DATABASE SIZE
 			#
-			DB_SIZE="$( ${MYSQL} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} --batch \
-				-e "SELECT SUM(ROUND(((DATA_LENGTH + INDEX_LENGTH ) / 1024 / 1024),2)) AS Size
-					FROM INFORMATION_SCHEMA.TABLES
-					WHERE TABLE_SCHEMA = '${db}';" | tail -n1 )"
+			DB_SIZE_B="$( get_mysql_database_size "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
+			DB_SIZE_KB="$( div "${DB_SIZE_B}" "1024" )"
+			DB_SIZE_MB="$( div "${DB_SIZE_KB}" "1024" )"
+			DB_SIZE_MB="$( round "${DB_SIZE_MB}" "2" )"
 
-			TOTAL_SIZE=$( sum "${TOTAL_SIZE}" "${DB_SIZE}" )
+
+			TOTAL_SIZE=$( sum "${TOTAL_SIZE}" "${DB_SIZE_MB}" )
 
 			#
 			# MYSQL --quick/--skip-quick OPTION
 			#
-			MYSQL_QUICK_OPT="$(echo "${DB_SIZE} ${MYSQL_OPTS_QUICK_MIN_SIZE}" | awk '{print ($1 >= $2) ? "--quick" : "--skip-quick" }')"
+			MYSQL_QUICK_OPT="$(echo "${DB_SIZE_MB} ${MYSQL_OPTS_QUICK_MIN_SIZE}" | awk '{print ($1 >= $2) ? "--quick" : "--skip-quick" }')"
 
 
 			#
@@ -2914,18 +3543,29 @@ for db in ${DATABASES}; do
 			#
 			# GO GO GO!
 			#
-			if [ ${COMPRESS} -eq 1 ]; then
+
+			#
+			# Build final MySQLDump arguments
+			#
+			#MYSQL_ARGUMENTS="--defaults-file=${MYSQL_CNF_FILE} ${MYSQL_SSL_ARGS}"
+			MYSQLDUMP_ARGUMENTS="${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} ${MYSQL_SPECIAL_OPTS} ${MYSQL_QUICK_OPT}"
+
+
+			if [ "${COMPRESS}" = "1" ]; then
+
+				debugi "info" "(SQL): ${_cnt} Dumping:  ${db} (${DB_SIZE_MB} MB) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
 				#
 				# Case 1/4 Compressed & Encrypted
 				#
-				if [ ${ENCRYPT} -eq 1 ]; then
+				if [ "${ENCRYPT}" = "1" ]; then
 					ext=".sql.${COMPRESS_EXT}.enc"
 
 					#
 					# TODO: sync debug output and actual commmand (maybe via eval), so that it is made suer
 					#       we are doing what we are showing.
 
-					debugi "info"  "(SQL): ${_cnt} Dumping:  ${db} (${DB_SIZE} MB) (compressed) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) " )$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugni "debug"  "(compressed) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) " )$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 					# Set umask prior writing
@@ -2944,7 +3584,8 @@ for db in ${DATABASES}; do
 							${COMPRESS_BIN} ${COMPRESS_ARG} 2> "${MY_TMP_FILE_COMP}";
 							echo "1:$?:$(head -n1 "${MY_TMP_FILE_COMP}")" >&3;
 						) |
-						(${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" 2> "${MY_TMP_FILE_ENCR}";
+						(
+							${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" 2> "${MY_TMP_FILE_ENCR}";
 							echo "2:$?:$(head -n1 "${MY_TMP_FILE_ENCR}")" >&3;
 						)
 					) 3>&1 >&4)"
@@ -2954,7 +3595,7 @@ for db in ${DATABASES}; do
 				#
 				else
 					ext=".sql.${COMPRESS_EXT}"
-					debugi "info" "(SQL): ${_cnt} Dumping:  ${db} (${DB_SIZE} MB) (compressed) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugni "debug"  "(compressed) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")"
@@ -2969,7 +3610,7 @@ for db in ${DATABASES}; do
 							echo "0:$?:$(head -n1 "${MY_TMP_FILE_DUMP}")" >&3;
 						) |
 						(
-							${COMPRESS_BIN} ${COMPRESS_ARG} 2> "${MY_TMP_FILE_COMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}";
+							${COMPRESS_BIN} ${COMPRESS_ARG} 2> "${MY_TMP_FILE_COMP}" > "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}";
 							echo "1:$?:$(head -n1 "${MY_TMP_FILE_COMP}")" >&3;
 						)
 					) 3>&1 >&4)"
@@ -2980,9 +3621,9 @@ for db in ${DATABASES}; do
 				#
 				# Case 3/4 Encrypted Only
 				#
-				if [ ${ENCRYPT} -eq 1 ]; then
+				if [ "${ENCRYPT}" = "1" ]; then
 					ext=".sql.enc"
-					debugi "info" "(SQL): ${_cnt} Dumping:  ${db} (${DB_SIZE} MB) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugni "debug"  "(encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
@@ -2997,7 +3638,7 @@ for db in ${DATABASES}; do
 							echo "0:$?:$(head -n1 "${MY_TMP_FILE_DUMP}")" >&3;
 						) |
 						(
-							${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" 2> "${MY_TMP_FILE_ENCR}";
+							${OPENSSL} smime -encrypt -binary -text -outform DER ${OPENSSL_ALGO_ARG} -out "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "${OPENSSL_PUBKEY_PEM}" 2> "${MY_TMP_FILE_ENCR}";
 							echo "2:$?:$(head -n1 "${MY_TMP_FILE_ENCR}")" >&3;
 						)
 					) 3>&1 >&4)"
@@ -3007,7 +3648,7 @@ for db in ${DATABASES}; do
 				#
 				else
 					ext=".sql"
-					debugi "info" "(SQL): ${_cnt} Dumping:  ${db} (${DB_SIZE} MB) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debugni "debug"  "$( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
@@ -3018,7 +3659,7 @@ for db in ${DATABASES}; do
 					# shellcheck disable=SC2086
 					error_statuses="$( (
 						(
-							${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} ${MYSQL_SPECIAL_OPTS} ${MYSQL_QUICK_OPT} "${db}" 2> "${MY_TMP_FILE_DUMP}" > "${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}";
+							${MYSQLDUMP} --defaults-file="${MYSQL_CNF_FILE}" ${MYSQL_SSL_ARGS} ${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} ${MYSQL_SPECIAL_OPTS} ${MYSQL_QUICK_OPT} "${db}" 2> "${MY_TMP_FILE_DUMP}" > "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}";
 							echo "0:$?:$(head -n1 "${MY_TMP_FILE_DUMP}")" >&3;
 						)
 					) 3>&1 >&4)"
@@ -3043,6 +3684,12 @@ for db in ${DATABASES}; do
 			#  3. Error code != 0                             => Error
 			MY_ERRORS=""
 			MY_WARNINGS=""
+
+
+			#
+			# TODO: functionalize
+			# pipefail_errors() {} <-- or so?
+			#
 
 			IFS='
 			'
@@ -3081,15 +3728,15 @@ for db in ${DATABASES}; do
 				TOTAL_ERR=$((TOTAL_ERR + 1))
 
 				debugn  "fatal" "Failed" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-				debug   "fatal"  "(RUN): Error dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug   "fatal" "(RUN): ${_cnt} Error dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 				if [ "${MY_WARNINGS}" != "" ]; then
 					debugr "warn" "${MY_WARNINGS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-					MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+					MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 				fi
 
 				debugr  "fatal"  "${MY_ERRORS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-				MDS_FAIL_COUNT="$(incr "${MDS_FAIL_COUNT}")"
+				MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
 
 
 				ERROR="$(merge_exit_codes "${ERROR}" 2)"
@@ -3098,32 +3745,91 @@ for db in ${DATABASES}; do
 				TOTAL_DBS=$((TOTAL_DBS + 1))
 				endtime=$(date +%s)
 
-				debugn "ok"    "$((endtime - starttime)) sec" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-				debug  "trace" "(RUN): File: ${DUMP_PATH}/${DUMP_FILE_PRE}${db}${ext}"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debugn "ok"    "$((endtime - starttime)) sec ($(get_file_size "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "m") MB)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+				debug  "trace" "(RUN): ${_cnt} Dump File: ${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}"  $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 				[ "${NAGIOS_DB_DUMPED}" = "" ] && NAGIOS_DB_DUMPED="${db}" || NAGIOS_DB_DUMPED="${NAGIOS_DB_DUMPED},${db}"
 
 				if [ "${MY_WARNINGS}" != "" ]; then
-					debug  "warn" "(RUN): Warning dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+					debug  "warn" "(RUN): ${_cnt} Warning dumping ${db}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 					debugr "warn" "${MY_WARNINGS}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-					MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+					MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 				fi
+
+
+				# If all was good, remove required db from list
+				# REQUIRED DATABASES
+				#
+				for req in ${REQUIRE}; do
+					# Required database found?
+					# Remove from variable
+					if [ "${db}" = "${req}" ]; then
+						REQUIRE="$( echo "${REQUIRE}" | sed "s/${db}//" )"
+					fi
+				done
+
+
+
+				#
+				# Write file info?
+				#
+				if [ "${DUMP_FILE_INFO}" = "1" ]; then
+					debug "trace" "(RUN): ${_cnt} Info File: ${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}.info" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+
+					# Set umask prior writing
+					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
+
+					# Create file
+					{
+						echo "; mysqldump-secure backup record";
+						echo "; Do not alter this file!";
+						echo "; Creation of this file can be turned off via config file.";
+						echo "[general]";
+						echo "date = $( date '+%Y-%m-%d' )";
+						echo "time = $( date '+%H-%M-%S' )";
+						echo;
+						echo "[file]";
+						echo "file_path = ${DUMP_DIR}";
+						echo "file_name = ${DUMP_FILE_PRE}${db}${ext}";
+						echo "file_size = $( get_file_size "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "b" ) Bytes ($( get_file_size "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "m" ) MB)";
+						echo "file_md5  = $( get_file_hash "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "md5" )";
+						echo "file_sha  = $( get_file_hash "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "sha256" )";
+						echo;
+						echo "[settings]";
+						echo "encrypted  = ${ENCRYPT}";
+						echo "compressed = ${COMPRESS}";
+						echo "mysqldump  = ${MYSQLDUMP_ARGUMENTS}";
+						echo;
+						echo "[compression]";
+						echo "bin = ${COMPRESS_BIN}";
+						echo "arg = ${COMPRESS_ARG}";
+						echo;
+						echo "[encryption]";
+						echo "aes_arg = ${OPENSSL_ALGO_ARG}";
+						echo "rsa_pem = ${OPENSSL_PUBKEY_PEM}";
+						echo;
+						echo "[server]";
+						echo "host = ${MYSQL_HOST}";
+						echo "port = ${MYSQL_PORT}";
+						echo "type = ${MYSQL_SERVER_TYPE}";
+						echo "conn = $(if [ "${MYSQL_SSL_ENABLE}" = "1" ]; then echo "SSL: ${MYSQL_SSL_STATUS}"; else echo "No SSL"; fi )";
+						echo;
+						echo "[database]";
+						echo "db_name = ${db}";
+						echo "db_size = ${DB_SIZE_B} Bytes (${DB_SIZE_MB} MB)";
+						echo "tbl_cnt = $( echo "${TBL_ENGINES}" | grep -c '' )";
+						echo;
+						echo "[tables]";
+						echo "${TBL_ENGINES}" | sed 's/=/ = /g';
+						echo;
+					} > "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}.info"
+				fi
+
 			fi
 
-			# Commented, because it is to much output
-			# Debug output.
-			# debugr "trace" "${error_statuses}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 		fi
 
-	elif [ ${skip} -eq 1 ]; then
-		debug "info" "(SQL): ${_cnt} Skipping: ${db} (DB is empty)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		TOTAL_IGN=$((TOTAL_IGN + 1))
-		[ "${NAGIOS_DB_IGNORED}" = "" ] && NAGIOS_DB_IGNORED="${db}" || NAGIOS_DB_IGNORED="${NAGIOS_DB_IGNORED},${db}"
-	else
-		debug "info" "(SQL): ${_cnt} Skipping: ${db} (ignored)" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		TOTAL_IGN=$((TOTAL_IGN + 1))
-		[ "${NAGIOS_DB_IGNORED}" = "" ] && NAGIOS_DB_IGNORED="${db}" || NAGIOS_DB_IGNORED="${NAGIOS_DB_IGNORED},${db}"
 	fi
 
 done
@@ -3132,7 +3838,7 @@ TOTAL_ENDTIME=$(date +%s)
 
 for req in ${REQUIRE}; do
 	debug "err" "(RUN): Required database: \"${req}\" has not been dumped." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	MDS_FAIL_COUNT="$(incr "${MDS_FAIL_COUNT}")"
+	MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
 	ERROR="$(merge_exit_codes "${ERROR}" 2)"
 done
 
@@ -3151,7 +3857,8 @@ debug "debug" "(RUN): Total size dumped: ${TOTAL_SIZE} MB" $LOG "${LOGFILE}" "${
 TMPWATCH_NUM_DEL="0"
 TMPWATCH_NUM_IGN="0"
 
-if [ ${DELETE} -eq 1 ]; then
+
+if [ "${DELETE}" = "1" ]; then
 
 	# Force deletion?
 	if [ "${DELETE_FORCE}" = "1" ]; then FORCE_ARG="--force"; else FORCE_ARG=""; fi
@@ -3160,19 +3867,19 @@ if [ ${DELETE} -eq 1 ]; then
 	if [ "${DELETE_METHOD}" = "tmpwatch" ]; then TMPWATCH_OPTS="-vv"; else TMPWATCH_OPTS="--verbose=3 --showdeleted"; fi
 
 
-	TMPWATCH_RUN="$(${TMPWATCH} ${FORCE_ARG} -m "${DELETE_IF_OLDER}" "${TMPWATCH_OPTS}" "${DUMP_PATH}/" 2> "${MY_TMP_FILE_DEL}")"
+	TMPWATCH_RUN="$(${TMPWATCH} ${FORCE_ARG} -m "${DELETE_IF_OLDER}" "${TMPWATCH_OPTS}" "${DUMP_DIR}/" 2> "${MY_TMP_FILE_DEL}")"
 	TMPWATCH_ERRNO="$?"
 	TMPWATCH_ERROR="$( cat "${MY_TMP_FILE_DEL}" )"
 
 	if [ "${TMPWATCH_ERRNO}" != "0" ]; then
 		debug  "err"  "(RUN): ${DELETE_METHOD} exit code: ${TMPWATCH_ERRNO}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debugr "err"  "(RUN): ${DELETE_METHOD} error: ${TMPWATCH_ERROR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		MDS_ERROR_COUNT="$(incr "${MDS_ERROR_COUNT}")"
+		MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
 		ERROR="$(merge_exit_codes "${ERROR}" 1)"
 	elif [ "${TMPWATCH_ERROR}" != "" ]; then
 		debug  "warn" "(RUN): ${DELETE_METHOD} exit code: ${TMPWATCH_ERRNO}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debugr "warn" "(RUN): ${DELETE_METHOD} error: ${TMPWATCH_ERROR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 		ERROR="$(merge_exit_codes "${ERROR}" 1)"
 	fi
 
@@ -3188,14 +3895,14 @@ if [ ${DELETE} -eq 1 ]; then
 
 	# Number of deleted files and the command itself
 	debug  "info"  "(RUN): Deleting files older than $(get_tmpwatch_value "${DELETE_IF_OLDER}") $(get_tmpwatch_unit_name "${DELETE_IF_OLDER}") ... ${TMPWATCH_NUM_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	debug  "trace" "${TMPWATCH} ${FORCE_ARG} -m ${DELETE_IF_OLDER} ${TMPWATCH_OPTS} ${DUMP_PATH}/" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug  "trace" "${TMPWATCH} ${FORCE_ARG} -m ${DELETE_IF_OLDER} ${TMPWATCH_OPTS} ${DUMP_DIR}/" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
 
 	# Some files have been skipped!
 	if [ "${TMPWATCH_NUM_IGN}" != "0" ] || [ "${TMPWATCH_TXT_IGN}" != "" ]; then
 		debug  "warn" "(RUN): ${DELETE_METHOD}: ${TMPWATCH_NUM_IGN} files could not be deleted:" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 		debugr "warn" "${TMPWATCH_TXT_IGN}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 		ERROR="$(merge_exit_codes "${ERROR}" 1)"
 	fi
 
@@ -3282,7 +3989,7 @@ if [ "${DELETE}" = "1" ]; then
 		debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 	else
 		debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_DEL}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-		MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 	fi
 fi
 
@@ -3290,28 +3997,28 @@ if rm "${MY_TMP_FILE_DUMP}" 2>/dev/null; then
 	debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 else
 	debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_DUMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 fi
 
 if rm "${MY_TMP_FILE_COMP}" 2>/dev/null; then
 	debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 else
 	debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_COMP}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 fi
 
 if rm "${MY_TMP_FILE_ENCR}" 2>/dev/null; then
 	debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 else
 	debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_ENCR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 fi
 
 if rm -rf "${MY_TMP_DIR}" 2>/dev/null; then
 	debug "trace" "(RUN): Deleting tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}" "${_ARG_VERB}"
 else
 	debug "warn"  "(RUN): Cannot delete tmp dir:  ${MY_TMP_DIR}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
-	MDS_WARNING_COUNT="$(incr "${MDS_WARNING_COUNT}")"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 fi
 
 

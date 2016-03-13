@@ -35,9 +35,11 @@ sed_change_config_file "^COMPRESS=1"  "#COMPRESS=1"
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$COMPRESS" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$COMPRESS" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$COMPRESS" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -56,15 +58,17 @@ sed_change_config_file "^COMPRESS=1"  "COMPRESS=2"
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "ERR" "1" "\$COMPRESS" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$COMPRESS" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$COMPRESS" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$COMPRESS" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "ERR" "1" "\$COMPRESS" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$COMPRESS" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^COMPRESS=2"  "COMPRESS=1"
 
@@ -79,15 +83,17 @@ sed_change_config_file "^COMPRESS=1"  "COMPRESS=\"wrong\""
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "ERR" "1" "\$COMPRESS" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$COMPRESS" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$COMPRESS" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$COMPRESS" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "ERR" "1" "\$COMPRESS" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$COMPRESS" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^COMPRESS=\"wrong\""  "COMPRESS=1"
 
@@ -104,9 +110,11 @@ sed_change_config_file "^COMPRESS=1"  "COMPRESS=\"\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$COMPRESS" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$COMPRESS" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$COMPRESS" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -127,9 +135,11 @@ sed_change_config_file "^COMPRESS=1"  "COMPRESS=0"
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -162,9 +172,11 @@ sed_change_config_file "^COMPRESS_BIN=\"gzip\""  "#COMPRESS_BIN=\"gzip\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$COMPRESS_BIN" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$COMPRESS_BIN" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$COMPRESS_BIN" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -186,9 +198,11 @@ sed_change_config_file "^COMPRESS_BIN=\"gzip\""  "COMPRESS_BIN=\"\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$COMPRESS_BIN" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$COMPRESS_BIN" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$COMPRESS_BIN" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -209,9 +223,11 @@ sed_change_config_file "^COMPRESS_BIN=\"gzip\""  "COMPRESS_BIN=\"wrong\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "ERR" "1" "\$COMPRESS_BIN" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$COMPRESS_BIN" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "ERR" "1" "\$COMPRESS_BIN" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -232,9 +248,11 @@ sed_change_config_file "^COMPRESS_BIN=\"gzip\""  "COMPRESS_BIN=\"false\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -265,9 +283,11 @@ sed_change_config_file "^COMPRESS_ARG=\"-9 --stdout\""  "#COMPRESS_ARG=\"-9 --st
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$COMPRESS_ARG" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$COMPRESS_ARG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$COMPRESS_ARG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -288,9 +308,11 @@ sed_change_config_file "^COMPRESS_ARG=\"-9 --stdout\""  "COMPRESS_ARG=\"\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -311,9 +333,11 @@ sed_change_config_file "^COMPRESS_ARG=\"-9 --stdout\""  "COMPRESS_ARG=\"wrong\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -335,9 +359,11 @@ sed_change_config_file "^COMPRESS_ARG=\"-9 --stdout\""  "COMPRESS_ARG=\"wrong\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -360,9 +386,11 @@ sed_change_config_file "^COMPRESS_ARG=\"-9 --stdout\""  "COMPRESS_ARG=\"--wrong\
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -384,9 +412,11 @@ sed_change_config_file "^COMPRESS_ARG=\"-9 --stdout\""  "COMPRESS_ARG=\"--wrong\
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -421,9 +451,11 @@ sed_change_config_file "^COMPRESS_EXT=\"gz\"\$"  "#COMPRESS_EXT=\"gz\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$COMPRESS_EXT" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$COMPRESS_EXT" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$COMPRESS_EXT" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -444,9 +476,11 @@ sed_change_config_file "^COMPRESS_EXT=\"gz\"\$"  "COMPRESS_EXT=\"\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$COMPRESS_EXT" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$COMPRESS_EXT" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$COMPRESS_EXT" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -467,9 +501,11 @@ sed_change_config_file "^COMPRESS_EXT=\"gz\"\$"  "COMPRESS_EXT=\"www/test\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -491,9 +527,11 @@ sed_change_config_file "^COMPRESS_EXT=\"gz\"\$"  "COMPRESS_EXT=\"www/test\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "FAIL" "1" "compression:" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"

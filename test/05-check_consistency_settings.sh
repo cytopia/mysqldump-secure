@@ -35,9 +35,11 @@ sed_change_config_file "^CONSISTENT_DUMP_ONLY_INNODB=1"  "#CONSISTENT_DUMP_ONLY_
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -56,15 +58,17 @@ sed_change_config_file "^CONSISTENT_DUMP_ONLY_INNODB=1"  "CONSISTENT_DUMP_ONLY_I
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "ERR" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "ERR" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^CONSISTENT_DUMP_ONLY_INNODB=2"  "CONSISTENT_DUMP_ONLY_INNODB=1"
 
@@ -81,9 +85,11 @@ sed_change_config_file "^CONSISTENT_DUMP_ONLY_INNODB=1"  "CONSISTENT_DUMP_ONLY_I
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -102,15 +108,17 @@ sed_change_config_file "^CONSISTENT_DUMP_ONLY_INNODB=1"  "CONSISTENT_DUMP_ONLY_I
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "ERR" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "ERR" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_ONLY_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^CONSISTENT_DUMP_ONLY_INNODB=\"wrong\""  "CONSISTENT_DUMP_ONLY_INNODB=1"
 
@@ -140,9 +148,11 @@ sed_change_config_file "^CONSISTENT_DUMP_NO_INNODB=1"  "#CONSISTENT_DUMP_NO_INNO
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -161,15 +171,17 @@ sed_change_config_file "^CONSISTENT_DUMP_NO_INNODB=1"  "CONSISTENT_DUMP_NO_INNOD
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "ERR" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "ERR" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^CONSISTENT_DUMP_NO_INNODB=2"  "CONSISTENT_DUMP_NO_INNODB=1"
 
@@ -186,9 +198,11 @@ sed_change_config_file "^CONSISTENT_DUMP_NO_INNODB=1"  "CONSISTENT_DUMP_NO_INNOD
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -207,15 +221,17 @@ sed_change_config_file "^CONSISTENT_DUMP_NO_INNODB=1"  "CONSISTENT_DUMP_NO_INNOD
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "ERR" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "ERR" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_NO_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^CONSISTENT_DUMP_NO_INNODB=\"wrong\""  "CONSISTENT_DUMP_NO_INNODB=1"
 
@@ -248,9 +264,11 @@ sed_change_config_file "^CONSISTENT_DUMP_MIXED_INNODB=1"  "#CONSISTENT_DUMP_MIXE
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_MIXED_INNODB" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_MIXED_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_MIXED_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -271,9 +289,11 @@ sed_change_config_file "^CONSISTENT_DUMP_MIXED_INNODB=1"  "CONSISTENT_DUMP_MIXED
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -294,9 +314,11 @@ sed_change_config_file "^CONSISTENT_DUMP_MIXED_INNODB=1"  "CONSISTENT_DUMP_MIXED
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -315,15 +337,17 @@ sed_change_config_file "^CONSISTENT_DUMP_MIXED_INNODB=1"  "CONSISTENT_DUMP_MIXED
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "ERR" "1" "\$CONSISTENT_DUMP_MIXED_INNODB" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_MIXED_INNODB" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$CONSISTENT_DUMP_MIXED_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_MIXED_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "ERR" "1" "\$CONSISTENT_DUMP_MIXED_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$CONSISTENT_DUMP_MIXED_INNODB" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^CONSISTENT_DUMP_MIXED_INNODB=\"wrong\""  "CONSISTENT_DUMP_MIXED_INNODB=1"
 

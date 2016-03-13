@@ -35,9 +35,11 @@ sed_change_config_file "^LOG=2"  "#LOG=2"
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$LOG" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$LOG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$LOG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -56,15 +58,17 @@ sed_change_config_file "^LOG=2"  "LOG=4"
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "ERR" "1" "\$LOG" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$LOG" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$LOG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$LOG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "ERR" "1" "\$LOG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$LOG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^LOG=4"  "LOG=2"
 
@@ -79,15 +83,17 @@ sed_change_config_file "^LOG=2"  "LOG=\"wrong\""
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "ERR" "1" "\$LOG" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$LOG" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$LOG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$LOG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "ERR" "1" "\$LOG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$LOG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^LOG=\"wrong\""  "LOG=2"
 
@@ -104,9 +110,11 @@ sed_change_config_file "^LOG=2"  "LOG=0"
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -136,9 +144,11 @@ sed_change_config_file "^LOG_CHMOD=\"0600\""  "#LOG_CHMOD=\"0600\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$LOG_CHMOD" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$LOG_CHMOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$LOG_CHMOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -157,15 +167,17 @@ sed_change_config_file "^LOG_CHMOD=\"0600\""  "LOG_CHMOD=\"0600a\""
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "ERR" "1" "\$LOG_CHMOD" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$LOG_CHMOD" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$LOG_CHMOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$LOG_CHMOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "ERR" "1" "\$LOG_CHMOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$LOG_CHMOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^LOG_CHMOD=\"0600a\""  "LOG_CHMOD=\"0600\""
 
@@ -180,15 +192,17 @@ sed_change_config_file "^LOG_CHMOD=\"0600\""  "LOG_CHMOD=\"wrong\""
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "ERR" "1" "\$LOG_CHMOD" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$LOG_CHMOD" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ERR" "1" "\$LOG_CHMOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$LOG_CHMOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "ERR" "1" "\$LOG_CHMOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$LOG_CHMOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 sed_change_config_file "^LOG_CHMOD=\"wrong\""  "LOG_CHMOD=\"0600\""
 
@@ -205,9 +219,11 @@ sed_change_config_file "^LOG_CHMOD=\"0600\""  "LOG_CHMOD=\"\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$LOG_CHMOD" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$LOG_CHMOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$LOG_CHMOD" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -240,9 +256,11 @@ sed_change_config_file "^LOGFILE="  "#LOGFILE="
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$LOGFILE" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$LOGFILE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$LOGFILE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -264,10 +282,12 @@ sed_change_config_file "/var/log/mysqldump-secure.log"  "/var/log/mysqldump-secu
 	if ! check "1" "1" "WARN" "1" "Logfile does not exist" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 	sudo rm ${_INSTALL_PREFIX}/var/log/mysqldump-secure.log.wrong
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "Logfile does not exist" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
-	sudo rm ${_INSTALL_PREFIX}/var/log/mysqldump-secure.log.wrong
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "Logfile does not exist" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+		sudo rm ${_INSTALL_PREFIX}/var/log/mysqldump-secure.log.wrong
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -290,10 +310,12 @@ sed_change_config_file "/var/log/mysqldump-secure.log"  "/var/log/dir1/dir2/mysq
 	if ! check "1" "1" "WARN" "1" "/var/log/dir1/dir2/mysqldump-secure.log" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 	sudo rm -rf ${_INSTALL_PREFIX}/var/log/dir1
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "/var/log/dir1/dir2/mysqldump-secure.log" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
-	sudo rm -rf ${_INSTALL_PREFIX}/var/log/dir1
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "/var/log/dir1/dir2/mysqldump-secure.log" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+		sudo rm -rf ${_INSTALL_PREFIX}/var/log/dir1
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"

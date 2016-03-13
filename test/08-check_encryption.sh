@@ -35,9 +35,11 @@ sed_change_config_file "^ENCRYPT=1"  "#ENCRYPT=1"
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "ABORT" "1" "\$ENCRYPT" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ABORT" "1" "\$ENCRYPT" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "ABORT" "1" "\$ENCRYPT" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -58,9 +60,11 @@ sed_change_config_file "^ENCRYPT=1"  "ENCRYPT=2"
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "ABORT" "1" "\$ENCRYPT" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ABORT" "1" "\$ENCRYPT" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "ABORT" "1" "\$ENCRYPT" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -81,9 +85,11 @@ sed_change_config_file "^ENCRYPT=1"  "ENCRYPT=\"wrong\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "ABORT" "1" "\$ENCRYPT" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ABORT" "1" "\$ENCRYPT" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "ABORT" "1" "\$ENCRYPT" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -104,9 +110,11 @@ sed_change_config_file "^ENCRYPT=1"  "ENCRYPT=\"\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "ABORT" "1" "\$ENCRYPT" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ABORT" "1" "\$ENCRYPT" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "ABORT" "1" "\$ENCRYPT" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -127,9 +135,11 @@ sed_change_config_file "^ENCRYPT=1"  "ENCRYPT=0"
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "PASS" "0" "" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "PASS" "0" "" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -163,9 +173,11 @@ sed_change_config_file "^OPENSSL_PUBKEY_PEM="  "#OPENSSL_PUBKEY_PEM="
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "ABORT" "1" "\$OPENSSL_PUBKEY_PEM" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ABORT" "1" "\$OPENSSL_PUBKEY_PEM" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "ABORT" "1" "\$OPENSSL_PUBKEY_PEM" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -185,9 +197,11 @@ sed_change_config_file "^OPENSSL_PUBKEY_PEM=\"${_INSTALL_PREFIX}/etc/mysqldump-s
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "ABORT" "1" "\$OPENSSL_PUBKEY_PEM" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ABORT" "1" "\$OPENSSL_PUBKEY_PEM" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "ABORT" "1" "\$OPENSSL_PUBKEY_PEM" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -208,9 +222,11 @@ sed_change_config_file "^OPENSSL_PUBKEY_PEM=\"${_INSTALL_PREFIX}/etc/mysqldump-s
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "ABORT" "1" "etc/mysqldump-secure.pub.pem.notfound" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ABORT" "1" "etc/mysqldump-secure.pub.pem.notfound" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "ABORT" "1" "etc/mysqldump-secure.pub.pem.notfound" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -241,9 +257,11 @@ sed_change_config_file "^OPENSSL_ALGO_ARG=\"-aes256\""  "#OPENSSL_ALGO_ARG=\"-ae
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -264,9 +282,11 @@ sed_change_config_file "^OPENSSL_ALGO_ARG=\"-aes256\""  "OPENSSL_ALGO_ARG=\"\""
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "WARN" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "WARN" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "WARN" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
@@ -287,9 +307,11 @@ sed_change_config_file "^OPENSSL_ALGO_ARG=\"-aes256\""  "OPENSSL_ALGO_ARG=\"wron
 	CMD="${CMD_CRON}"
 	if ! check "1" "1" "ABORT" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-	echo "---------- NORMAL MODE ----------"
-	CMD="${CMD_NORM}"
-	if ! check "1" "1" "ABORT" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if [ "${RUN_CHECK_NORM}" = "1" ]; then
+		echo "---------- NORMAL MODE ----------"
+		CMD="${CMD_NORM}"
+		if ! check "1" "1" "ABORT" "1" "\$OPENSSL_ALGO_ARG" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
