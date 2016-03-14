@@ -1052,6 +1052,52 @@ get_file_chmod() {
 }
 
 
+# Get Operating system independent owner of file
+#
+# @param  string	path to file/folder
+# @output string	Owner
+# @return integer	Return code
+get_file_owner() {
+	_file="${1}"
+	_owner="unknown"
+	_exit=0
+
+	# Linux version
+	if ! _owner="$(stat -c %U "${_file}" 2>/dev/null)"; then
+		# OSX/BSD version
+		if ! _owner="$(stat -f %Su "${_file}" 2>/dev/null)"; then
+			_owner="unknown"
+			_exit=1
+		fi
+	fi
+
+	echo "${_owner}"
+	return ${_exit}
+}
+
+# Get Operating system independent group of file
+#
+# @param  string	path to file/folder
+# @output string	Owner
+# @return integer	Return code
+get_file_group() {
+	_file="${1}"
+	_group="unknown"
+	_exit=0
+
+	# Linux version
+	if ! _group="$(stat -c %G "${_file}" 2>/dev/null)"; then
+		# OSX/BSD version
+		if ! _group="$(stat -f %Sg "${_file}" 2>/dev/null)"; then
+			_group="unknown"
+			_exit=1
+		fi
+	fi
+
+	echo "${_group}"
+	return ${_exit}
+}
+
 
 # Get the real path of a file/folder if it is a symlink
 #
@@ -3968,6 +4014,9 @@ for db in ${DATABASES}; do
 						echo "file_path  = ${DUMP_DIR}";
 						echo "file_name  = ${DUMP_FILE_PRE}${db}${ext}";
 						echo "file_size  = $( get_file_size "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "b" ) Bytes ($( get_file_size "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "m" ) MB)";
+						echo "file_chmod = $( get_file_chmod "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" )";
+						echo "file_owner = $( get_file_owner "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" )";
+						echo "file_group = $( get_file_group "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" )";
 						echo "file_mtime = ${mtime} (${mtime_h})";
 						echo "file_md5   = $( get_file_hash "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "md5" )";
 						echo "file_sha   = $( get_file_hash "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "sha256" )";
