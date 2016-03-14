@@ -53,7 +53,7 @@ See [https://travis-ci.org/cytopia/mysqldump-secure](https://travis-ci.org/cytop
 
 ### Primary Features
 
-* **Encryption** (hybrid encryption: `RSA` and `AES` via `openssl smime`)
+* **Encryption** (hybrid encryption: `RSA` and `AES` via `openssl smime` - no password needed)
 * **Compression** (`gzip`, `pigz`, `bzip2`, `pbzip2`, `lzop`, `lzma`, `xz`)
 * **Tmpwatch** integration (`tmpwatch` or `tmpreaper`)
 * **Transaction-safe** / **Consistent** backups across tables (for DBs with: `InnoDB only`-, `mixed`- and `non-InnoDB`- tables)
