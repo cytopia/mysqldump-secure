@@ -136,6 +136,18 @@ Open [/etc/mysqldump-secure.conf](https://github.com/cytopia/mysqldump-secure/bl
 IGNORE="information_schema performance_schema"
 ```
 
+You can also use the wildcard character `*` to ignore patterns:
+```shell
+IGNORE="*_schema db*"
+```
+
+With patterns you can even ignore all databases (at first)
+```shell
+IGNORE="*"
+```
+
+and then selectively add them via `REQUIRE` (see below).
+
 ### 1.2.4 Whitelisting (Requiring)
 If you need to make sure that a specific (or many specific) database(s) must be dumped regardless, add it space-separated to this variable. If the specified databases cannot be dumped (no access rights, missing, whatever reason), the dump script will throw an error which is catchable by cron as well as by the included nagios script.
 
@@ -144,6 +156,11 @@ This option is here to make sure you will be informed, that your desired databas
 REQUIRED="mysql databaseX databaseY"
 #REQUIRED=""
 ```
+
+**Note**: All databases that have been ignored by `IGNORE` and are specified in `REQUIRE` will be dumped explicitly.
+This has the advantage that you can also tell *mysqldump-secure* to dump nothing by default and only choose which database to backup.
+
+
 
 ### 1.2.5 Tmpwatch/Tmpreaper integration
 If you have [tmpwatch](http://linux.die.net/man/8/tmpwatch) or [tmpreaper](http://manpages.ubuntu.com/manpages/hardy/man8/tmpreaper.8.html) installed you can specify to automatically delete backups older than X hours.
@@ -176,6 +193,12 @@ Delete files older than X hours
 DELETE=720 # 720 hours
 ```
 
+All valid *tmpwatch*/*tmpreaper* unit values can be used (and are validated). You could also write the following to delete everything older than 30 days:
+```shell
+DELETE=30d
+```
+
+
 
 ### 1.2.6 File logging
 Mysqldump-secure includes a mechanism to log every action (debug, info, warn and error) to file. The script also follows the practise of sending proper exit codes (0 for everything went fine and >0 for I had some errors).
@@ -195,7 +218,34 @@ MYSQL_OPTS='--events --triggers --routines --single-transaction --opt'
 ```
 See [mysqldump](https://dev.mysql.com/doc/refman/5.0/en/mysqldump.html) for all possible parameters.
 
-### 1.2.8 Nagios output log
+### 1.2.8 Conditional mysqldump options
+
+You can conditionally decide when to apply mysqldump `--quick` option depending on the database size. The default is to only apply `--quick` to databases equal to or greater than 200 MB. (Note: the value is specified in MegaBytes):
+```shell
+MYSQL_OPTS_QUICK_MIN_SIZE=200
+```
+
+Also all consistency/transactional arguments are specified per case.
+
+**Case 1: DB contains only InnoDB tables engines**
+
+1. use `--single-transaction`
+2. use nothing
+
+**Case 2: DB contains InnoDB and other table-engines**
+
+1. use `--single-transaction`
+2. use `--lock-tables`
+3. use nothing
+
+**Case 3: DB contains no InnoDB table-engines at all**
+
+1. use `--lock-tables`
+2. use nothing
+
+
+
+### 1.2.9 Nagios output log
 It is possible to fully integrate the backup procedure into a nagios/icinga environment. For that to use you will need to enable Nagios Logging, which will then create a special logfile that is overwritten every time the dump is triggered.
 The Nagios Log file can be used by [check_mysqldump-secure](https://github.com/cytopia/check_mysqldump-secure) to integrate the current state into nagios.
 
@@ -206,6 +256,67 @@ NAGIOS_LOGFILE="/var/log/mysqldump-secure.nagios.log"
 ```
 See [Plugin Readme](https://github.com/cytopia/check_mysqldump-secure) for further instructions and a variety of screenshots.
 
+### 1.2.10 Info file per database
+You can enable/disable (enabled by default) the creation of info files. They are stored in the same location as the dumps with the same filename suffixed with `.info`. Those files contain the following information:
+```shell
+; mysqldump-secure backup record
+; Do not alter this file!
+; Creation of this file can be turned off via config file.
+
+; Information about the info file
+[info]
+unix = 1457917635
+tz   = CET (+0100)
+date = 2016-03-14
+time = 02:07:15
+host = db.mysqldump-secure.org
+user = root
+
+[file]
+file_path  = /var/mysqldump-secure
+file_name  = 2016-03-14_02-07__mysql.sql
+file_size  = 482878 Bytes (0.46 MB)
+file_mtime = 1457917635 (2016-03-14 02:07:15 CET [+0100])
+file_ctime = 1457917635 (2016-03-14 02:07:15 CET [+0100])
+file_md5   = f28959ab9488ae1f9e9a06b25c4b0b27
+file_sha   = 7ed5e78127686479f3ee6f65d3993634a93221d6497f9694b9d82b65edcdded6
+
+[settings]
+encrypted  = 0
+compressed = 0
+mysqldump  = --opt --default-character-set=utf8 --events --triggers --routines --hex-blob --complete-insert --extended-insert --compress --lock-tables  --skip-quick
+
+[compression]
+bin =
+arg =
+
+[encryption]
+aes_arg =
+rsa_pem =
+
+[connection]
+protocol  = 127.0.0.1 via TCP/IP
+secured   = SSL: Cipher in use is DHE-RSA-AES256-GCM-SHA384
+arguments = --defaults-file=/etc/mysqldump-secure.cnf --ssl-ca=/etc/mysql.ca.pem
+
+[server]
+host    = MD51001627.md-ber.lan
+port    = 13306
+type    = master
+version = MariaDB 10.1.11-MariaDB-log Homebrew
+
+[database]
+db_name = mysql
+db_size = 685890 Bytes (0.65 MB)
+tbl_cnt = 30
+
+[tables]
+column_stats = MyISAM
+columns_priv = MyISAM
+# ...
+# all tables with their corresponding engine
+# output cutted to safe space
+```
 
 
 ## 1.3 Setup Cronjob
