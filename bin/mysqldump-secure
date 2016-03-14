@@ -3943,13 +3943,8 @@ for db in ${DATABASES}; do
 				if [ "${DUMP_FILE_INFO}" = "1" ]; then
 					debug "trace" "(RUN): ${_cnt} Info File: ${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}.info" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
-					now="$( date +'%s')"
-
 					mtime="$( get_file_mtime "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" )"
-					ctime="$( get_file_ctime "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" )"
-
 					mtime_h="$( formatted_timestamp "${mtime}" "%Y-%m-%d %H:%M:%S %Z [%z]" )"
-					ctime_h="$( formatted_timestamp "${mtime}" "%Y-%m-%d %H:%M:%S %Z [%z]" )"
 
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
@@ -3960,28 +3955,28 @@ for db in ${DATABASES}; do
 						echo "; Do not alter this file!";
 						echo "; Creation of this file can be turned off via config file.";
 						echo;
-						echo "; Information about the info file"
-						echo "[info]";
-						echo "unix = ${now}";
-						echo "tz   = $( formatted_timestamp "${now}" "%Z (%z)" )";
-						echo "date = $( formatted_timestamp "${now}" "%Y-%m-%d" )";
-						echo "time = $( formatted_timestamp "${now}" "%H:%M:%S" )";
-						echo "host = $( hostname )"
-						echo "user = $( whoami )"
+						echo "[mysqldump-secure]";
+						echo "version = ${INFO_VERSION}";
+						echo "date    = ${INFO_DATE}";
+						echo "config  =";
+						echo;
+						echo "[system]";
+						echo "host = $( hostname )";
+						echo "user = $( whoami )";
 						echo;
 						echo "[file]";
 						echo "file_path  = ${DUMP_DIR}";
 						echo "file_name  = ${DUMP_FILE_PRE}${db}${ext}";
 						echo "file_size  = $( get_file_size "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "b" ) Bytes ($( get_file_size "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "m" ) MB)";
 						echo "file_mtime = ${mtime} (${mtime_h})";
-						echo "file_ctime = ${ctime} (${ctime_h})";
 						echo "file_md5   = $( get_file_hash "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "md5" )";
 						echo "file_sha   = $( get_file_hash "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "sha256" )";
 						echo;
-						echo "[settings]";
+						echo "[mysqldump]";
 						echo "encrypted  = ${ENCRYPT}";
 						echo "compressed = ${COMPRESS}";
 						echo "mysqldump  = ${MYSQLDUMP_ARGUMENTS}";
+						echo "duration   = $((endtime - starttime)) sec"
 						echo;
 						echo "[compression]";
 						echo "bin = $(if [ "${COMPRESS}" = "1" ]; then echo "${COMPRESS_BIN}"; fi)";
