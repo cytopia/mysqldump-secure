@@ -1982,10 +1982,7 @@ validate_cnf_file() {
 #
 print_usage() {
 #	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cnf] [--cron] [-v[v]] [--test] [--info] [--help] [--version]"
-	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--cron] [--test] [--conf] [-v[v]] [--help] [--version]"
-	printf "%s %s %s\n" "      " "${INFO_NAME}" "--cron [--conf]"
-	printf "%s %s %s\n" "      " "${INFO_NAME}" "--test [--conf] [-v[v]]"
-	printf "%s %s %s\n" "      " "${INFO_NAME}" "[--conf] [-v[v]]"
+	printf "%s %s %s\n" "Usage:" "${INFO_NAME}" "[--conf] [--cron] [--test] [-v[v]]"
 #	printf "%s %s %s\n" "      " "${INFO_NAME}" "--info"
 	printf "%s %s %s\n" "      " "${INFO_NAME}" "--help"
 	printf "%s %s %s\n" "      " "${INFO_NAME}" "--version"
@@ -2001,27 +1998,40 @@ print_help() {
 	echo "When invoked without any arguments, it will start dumping databases as"
 	echo "defined in mysqldump-secure.conf."
 	echo
-	echo "  --conf          Pass different configuration file than the default one."
+	echo "  --conf          Pass a different configuration file than the default one."
 	echo "                  E.g.: --conf=/etc/mysqldump-secure-alt.conf"
 	echo
 #	echo "  --cnf           Pass different mysql cnf credentials file than the default one."
 #	echo "                  E.g.: --cnf=/etc/mysqldump-secure-slave.cnf"
 #	echo
 	echo "  --cron          Use for cron run. It will only output errors and warnings"
-	echo "                  and will silence all debug output."
+	echo "                  and will silence all info, debug and trace output."
 	echo
 	echo "  --test          Test requirements and exit."
+	echo "                  Combine with -v or -vv for more verbose output."
 	echo
-	echo "  -v              Show debug (and trace) output."
+	echo "  -v              Show debug output."
 	echo "                  Specify twice (-vv) to also show trace output."
 	echo "                  Can be combined with --conf  and --test"
-	echo "                  E.g.: -v or -vv"
+	echo
+	echo "  -vv             Show debug and trace output."
+	echo "                  Can be combined with --conf  and --test"
 	echo
 #	echo "  --info          Show settings and exit."
 #	echo
 	echo "  --help          Show this help screen."
 	echo
 	echo "  --version       Show version information."
+	echo
+	echo
+	echo "Exit codes"
+	echo
+	echo "  0               All fine, no fatals, no errors and no warnings occured."
+	echo "  1               Warnings occured, but all dumps were successfull."
+	echo "  2               Errors occured, but all dumps were successfull."
+	echo "  3               Failed. Mysqldump encountered errors."
+	echo "  4               Abort. The program aborted, due to missing requirements,"
+	echo "                  wrong arguments or a misconfiguration."
 }
 # TODO:
 # --------
@@ -4003,7 +4013,7 @@ for db in ${DATABASES}; do
 						echo;
 						echo "[mysqldump-secure]";
 						echo "version = ${INFO_VERSION}";
-						echo "date    = ${INFO_DATE}";
+						echo "vdate   = ${INFO_DATE}";
 						echo "config  = ${CONFIG_FILE}";
 						echo;
 						echo "[system]";

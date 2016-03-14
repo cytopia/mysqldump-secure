@@ -1,19 +1,15 @@
-.TH mysqldump-secure 1 "05 February 2016" "version 0.15"
+.TH mysqldump-secure 1 "14 Match 2016" "version 0.16"
 .SH NAME
-mysqldump-secure - secure mysqldump with encryption
+mysqldump-secure - secure mysqldump wrapper with encryption
 .SH SYNOPSIS
  mysqldump-secure
 .BR
- mysqldump-secure [--conf] [--cron] [--test] [--help] [--version]
+ mysqldump-secure [--conf] [--cron] [--test] [-v[-v]] [--help] [--version]
 .SH DESCRIPTION
 .PP
-Mysqldump-secure is a POSIX compliant shell backup script for MySQL databases with strong security in mind. It will backup every available database (which is readable by the specified user) as a separate file with the possibility to opt out via blacklisting. Dumped databases can optionally be piped directly to gzip or openssl in order to compress and/or encrypt the backup. Encryption is done before the file is written to disk to avoid possible race conditions.
+Mysqldump-secure is a POSIX compliant shell wrapper for \fBmysqldump\fR(1) with strong security in mind. It will backup every available database (which is readable by the specified user) as a separate file with the possibility to opt out via blacklisting. Dumped databases can optionally be piped directly to gzip or openssl in order to compress and/or encrypt the backup. Encryption is done before the file is written to disk to avoid possible race conditions.
 .SH OPTIONS
-Usage: mysqldump-secure [--conf]
-.BR
-       mysqldump-secure --cron [--conf]
-.BR
-       mysqldump-secure --test [--conf]
+Usage: mysqldump-secure [--conf] [--cron] [--test] [-v[v]]
 .BR
        mysqldump-secure --help
 .BR
@@ -23,9 +19,13 @@ When invoked without any arguments, it will start dumping databases as defined i
 .PP
 --conf      Pass different configuration file than the default one. E.g.: --conf=/etc/mysqldump-secure-alt.conf
 .PP
---cron      Use for cron run. It will only output errors and warnings and will silence all debug output.
+--cron      Use for cron run. It will only output errors and warnings and will silence all info, debug and trace output.
 .PP
---test      Test requirements and exit.
+--test      Test requirements and exit. Combine with -v or -vv for more verbose output.
+.PP
+-v          Show debug output. Can be combined with --conf  and --test
+.PP
+-vv         Show debug and trace output. Can be combined with --conf  and --test
 .PP
 --help      Show help screen.
 .PP
@@ -37,11 +37,54 @@ When invoked without any arguments, it will start dumping databases as defined i
 .PP
  /etc/mysqldump-secure.conf
     Main configuration file.
+.SH EXAMPLE
+.PP
+Prior using mysqldump-secure to backup databases, you should run the test mode in order to make sure everything is setup correctly. Running the test mode directly after installation should give you an error about the MySQL connection.
+.PP
+    > mysqldump-secure --test
+.PP
+    [INFO]  (OPT): Logging enabled
+    [INFO]  (OPT): MySQL SSL connection disabled
+    [INFO]  (OPT): Compression enabled
+    [INFO]  (OPT): Encryption disabled
+    [INFO]  (OPT): Deletion disabled
+    [INFO]  (OPT): Nagios log enabled
+    [INFO]  (OPT): Info files enabled
+    [FATAL] (RUN): Cannot connect to mysql database.
+    [FATAL] (RUN): Via: /usr/bin/mysql --defaults-file=/etc/mysqldump-secure.cnf
+    [FATAL] (RUN): SQL: ERROR 1045 (28000): Access denied for user 'readonlyuser'@'localhost' (using password: YES)
+    [FATAL] (HLP): Fix credentials in: /etc/mysqldump-secure.cnf
+    [FATAL] Aborting
+.PP
+So in order to fix that, you should change credentials in /etc/mysqldump-secure.cnf. Once done, the output should look like this:
+.PP
+    > mysqldump-secure --test
+.PP
+    [INFO]  (OPT): Logging enabled
+    [INFO]  (OPT): MySQL SSL connection disabled
+    [INFO]  (OPT): Compression enabled
+    [INFO]  (OPT): Encryption disabled
+    [INFO]  (OPT): Deletion disabled
+    [INFO]  (OPT): Nagios log enabled
+    [INFO]  (OPT): Info files enabled
+.PP
+If no errors or warnigs are shown and the program exits with 0, you are ready to go.
+.PP
+Add the verbose flag to get more information. Either use -v for debug or -vv for debug and trace output.
+
+.SH EXIT STATUS
+ 0          All fine, no fatals, no errors and no warnings occured.
+ 1          Warnings occured, but all dumps were successfull.
+ 2          Errors occured, but all dumps were successfull.
+ 3          Failed. Mysqldump encountered errors.
+ 4          Abort. The program aborted, due to missing requirements, wrong arguments or a misconfiguration.
 .SH BUGS
 Please report all bugs to https://github.com/cytopia/mysqldump-secure/issues
 .SH "SEE ALSO"
-For more information, please refer to the mysqldump github page, available online at https://github.com/cytopia/mysqldump-secure
 .sp
 \fBmysqldump\fR(1), \fBmysql\fR(1)
 .SH AUTHOR
 Patrick Plocke (patrick@plocke.de)
+.PP
+http://mysqldump-secure.org
+
