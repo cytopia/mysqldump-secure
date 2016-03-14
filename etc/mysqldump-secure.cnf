@@ -1,6 +1,17 @@
+; Mysqldump-secure database connection configuration
+;
+; Allowed sections: '[client]'
+; Allowed directives: 'host', 'port', 'user', 'password' and 'socket'
+; All other configuration is done via mysqldump-secure.conf
+;
+; Make sure to change user and password!
 [client]
 host = localhost
 port = 3306
 user = readonlyrootuser
 password = "verySecurePasswordWith$%&SpecialChars"
+
+; When you want to connect via socket,
+; make sure to comment host and port and
+; specify the correct path to mysql.sock
 #socket = /var/lib/mysql/mysql.sock

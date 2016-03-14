@@ -65,7 +65,7 @@ INFO_GPGKEY="0x28BF179F"
 INFO_LICENSE="MIT"
 INFO_URL="http://mysqldump-secure.org"
 INFO_REPO="https://github.com/cytopia/mysqldump-secure"
-INFO_DATE="2016-03-13"
+INFO_DATE="2016-03-14"
 INFO_VERSION="0.16"
 
 
@@ -1866,8 +1866,9 @@ validate_cnf_file() {
 	# Get contents
 	cnf="$(cat "${_file_path}")"
 
-	# Remove comments
-	cnf="$(echo "${cnf}" | sed 's/[[:space:]]*#.*$//g')"
+	# Remove line comments ('#' and ';')
+	cnf="$(echo "${cnf}" | sed 's/^[[:space:]]*#.*$//g')"
+	cnf="$(echo "${cnf}" | sed 's/^[[:space:]]*;.*$//g')"
 
 	# Remove empty lines
 	cnf="$(echo "${cnf}" | sed '/^$/d')"

@@ -42,9 +42,13 @@ sudo make install
 ################################################################################
 
 #
-# Create credentials file (MASTER server)
+# Adjust credentials file (MASTER server)
 #
-printf "[client]\nhost = 127.0.0.1\nport = ${SQL_MASTER_PORT}\nuser = root\npassword =\n" | sudo tee ${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf
+sudo sed -i'' "s/^host.*$/host = 127.0.0.1/" ${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf
+sudo sed -i'' "s/^port.*$/port = ${SQL_MASTER_PORT}/" ${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf
+sudo sed -i'' "s/^user.*$/user = root/" ${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf
+sudo sed -i'' "s/^password.*$/password = /" ${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf
+#printf "[client]\nhost = 127.0.0.1\nport = ${SQL_MASTER_PORT}\nuser = root\npassword =\n" | sudo tee ${_INSTALL_PREFIX}/etc/mysqldump-secure.cnf
 
 #
 # Copy public/private keys
