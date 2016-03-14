@@ -3958,7 +3958,7 @@ for db in ${DATABASES}; do
 						echo "[mysqldump-secure]";
 						echo "version = ${INFO_VERSION}";
 						echo "date    = ${INFO_DATE}";
-						echo "config  =";
+						echo "config  = ${CONFIG_FILE}";
 						echo;
 						echo "[system]";
 						echo "host = $( hostname )";
