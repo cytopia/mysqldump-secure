@@ -1472,7 +1472,7 @@ get_mysql_server_hostname() {
 	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
 	_exit=$?
 
-	_result="$( echo "${_result}" | tail -n1 | sed 's/hostname\s*//g' )"
+	_result="$( echo "${_result}" | tail -n1 | sed 's/hostname[[:space:]]*//g' )"
 
 	echo "${_result}"
 	return ${_exit}
@@ -1495,7 +1495,7 @@ get_mysql_server_port() {
 	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
 	_exit=$?
 
-	_result="$( echo "${_result}" | tail -n1 | sed 's/port\s*//g' )"
+	_result="$( echo "${_result}" | tail -n1 | sed 's/port[[:space:]]*//g' )"
 
 	echo "${_result}"
 	return ${_exit}
@@ -1548,7 +1548,7 @@ get_mysql_server_replication_type() {
 get_mysql_server_version() {
 	_mysql_server_status="${1}"
 
-	echo "${_mysql_server_status}" | grep -E '^Server version:.*' | sed 's/Server version:\s*//g'
+	echo "${_mysql_server_status}" | grep -E '^Server version:.*' | sed 's/Server version:[[:space:]]*//g'
 	return 0
 }
 
@@ -1560,7 +1560,7 @@ get_mysql_server_version() {
 get_mysql_server_name() {
 	_mysql_server_status="${1}"
 
-	echo "${_mysql_server_status}" | grep -E '^Server:.*' | sed 's/Server:\s*//g'
+	echo "${_mysql_server_status}" | grep -E '^Server:.*' | sed 's/Server:[[:space:]]*//g'
 	return 0
 }
 
@@ -1577,7 +1577,7 @@ get_mysql_server_name() {
 get_mysql_connection_type_info() {
 	_mysql_server_status="${1}"
 
-	echo "${_mysql_server_status}" | grep -E '^Connection:.*' | sed 's/Connection:\s*//g'
+	echo "${_mysql_server_status}" | grep -E '^Connection:.*' | sed 's/Connection:[[:space:]]*//g'
 	return 0
 }
 
@@ -1589,7 +1589,7 @@ get_mysql_connection_type_info() {
 get_mysql_connection_ssl_info() {
 	_mysql_server_status="${1}"
 
-	echo "${_mysql_server_status}" | grep -E '^SSL:.*' | sed 's/SSL:\s*//g'
+	echo "${_mysql_server_status}" | grep -E '^SSL:.*' | sed 's/SSL:[[:space:]]*//g'
 	return 0
 }
 
@@ -1867,16 +1867,16 @@ validate_cnf_file() {
 	cnf="$(cat "${_file_path}")"
 
 	# Remove comments
-	cnf="$(echo "${cnf}" | sed 's/\s*#.*$//g')"
+	cnf="$(echo "${cnf}" | sed 's/[[:space:]]*#.*$//g')"
 
 	# Remove empty lines
 	cnf="$(echo "${cnf}" | sed '/^$/d')"
 
 	# Remove leading spaces
-	cnf="$(echo "${cnf}" | sed 's/^\s*//g')"
+	cnf="$(echo "${cnf}" | sed 's/^[[:space:]]*//g')"
 
 	# Remove trailing spaces
-	cnf="$(echo "${cnf}" | sed 's/\s*$//g')"
+	cnf="$(echo "${cnf}" | sed 's/[[:space:]]*$//g')"
 
 	IFS='
 	'
@@ -1887,7 +1887,7 @@ validate_cnf_file() {
 
 		# Everything before the '=' is the actual directive to check against
 		# E.g: "host = localhost" results in "host"
-		_directive="$(echo "${_line}" | awk -F '=' '{print $1}' | sed 's/^\s*//g' | sed 's/\s*$//g')"
+		_directive="$(echo "${_line}" | awk -F '=' '{print $1}' | sed 's/^[[:space:]]*//g' | sed 's/[[:space:]]*$//g')"
 
 		# Check for '[client]' in the first non-commented line
 		if [ "${i}" = "1" ] && [ "${_line}" != "[client]" ]; then
