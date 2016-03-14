@@ -855,12 +855,94 @@ str_len() {
 
 
 
+############################################################
+# Date helper
+############################################################
+
+
+# Timestamp to formated date.
+#
+# @param  integer  Timestamp
+# @param  string   Format (e.g.: '%Y-%m-%d %H:%M:%S %Z [%z')
+# @output string   Formated date
+# @return integer  0:success, 1:fail
+formatted_timestamp() {
+	_timestamp="${1}"
+	_format="${2}"
+
+	# BSD / OSX date function
+	if date -r 1457171267 >/dev/null 2>&1; then
+		date -r "${_timestamp}" +"${_format}"
+		return 0
+	# Linux date
+	elif date -d @1457171267 >/dev/null 2>&1; then
+		date -d @"${_timestamp}" +"${_format}"
+		return 0
+	fi
+	echo "${_timestamp}"
+
+	return 1
+}
 
 
 
 ############################################################
 # File information functions
 ############################################################
+
+
+# Get the file mtime
+# When file is modified
+#
+# @param  string	path to file/folder
+# @output integer	File mtime (timestamp)
+# @return integer	Return code
+get_file_mtime() {
+	_file="${1}"
+	_mtime="0"
+	_exit=0
+
+	# Linux version
+	if ! _mtime="$(stat -c %Y "${_file}" 2>/dev/null)"; then
+		# OSX/BSD version
+		if ! _mtime="$(stat -f %m "${_file}" 2>/dev/null)"; then
+			# Try date
+			if ! _mtime="$(date -r "${_file}" +%s 2>/dev/null)"; then
+				_mtime="0"
+				_exit=1
+			fi
+		fi
+	fi
+
+	echo "${_mtime}"
+	return ${_exit}
+}
+
+
+# Get the file ctime
+# When file is modified or when inode changes (chown/chmod)
+#
+# @param  string	path to file/folder
+# @output integer	File mtime (timestamp)
+# @return integer	Return code
+get_file_ctime() {
+	_file="${1}"
+	_ctime="0"
+	_exit=0
+
+	# Linux version
+	if ! _ctime="$(stat -c %Z "${_file}" 2>/dev/null)"; then
+		# OSX/BSD version
+		if ! _ctime="$(stat -f %c "${_file}" 2>/dev/null)"; then
+			_ctime="0"
+			_exit=1
+		fi
+	fi
+
+	echo "${_ctime}"
+	return ${_exit}
+}
+
 
 
 # Get file size in bytes of file or directory.
@@ -1740,7 +1822,7 @@ database_is_required() {
 # @param  integer _compress      Compression enabled? (0: off | 1: on)
 # @param  string  _compress_ext  Compression extension (e.g.: gz)
 # @output string   File extension
-get_file_extension() {
+build_file_extension() {
 	_encrypt="${1}"
 	_compress="${2}"
 	_compress_ext="${3}"
@@ -1760,6 +1842,78 @@ get_file_extension() {
 		fi
 	fi
 }
+
+
+
+# Validate mysqldump-secure.cnf file
+#
+# The only allowed directives are:
+#   [client]
+#   socket =
+#   host =
+#   port =
+#   user =
+#   password =
+# "[client]" must also be the first non-commented
+# directive.
+#
+# @param  string  mysqldump-secure.cnf file path
+# @output string  Error message
+# @return integer 0: valid | 1: invalid
+validate_cnf_file() {
+	_file_path="${1}"
+
+	# Get contents
+	cnf="$(cat "${_file_path}")"
+
+	# Remove comments
+	cnf="$(echo "${cnf}" | sed 's/\s*#.*$//g')"
+
+	# Remove empty lines
+	cnf="$(echo "${cnf}" | sed '/^$/d')"
+
+	# Remove leading spaces
+	cnf="$(echo "${cnf}" | sed 's/^\s*//g')"
+
+	# Remove trailing spaces
+	cnf="$(echo "${cnf}" | sed 's/\s*$//g')"
+
+	IFS='
+	'
+	i=0
+	set -f
+	for _line in ${cnf}; do
+		i=$((i + 1))
+
+		# Everything before the '=' is the actual directive to check against
+		# E.g: "host = localhost" results in "host"
+		_directive="$(echo "${_line}" | awk -F '=' '{print $1}' | sed 's/^\s*//g' | sed 's/\s*$//g')"
+
+		# Check for '[client]' in the first non-commented line
+		if [ "${i}" = "1" ] && [ "${_line}" != "[client]" ]; then
+			echo "The first non-commented line must contain a \"[client]\" directive"
+			return 1
+		fi
+
+		# Only allow the following directives
+		if  [ "${_directive}" != "[client]" ] &&
+			[ "${_directive}" != "socket" ] &&
+			[ "${_directive}" != "host" ] &&
+			[ "${_directive}" != "port" ] &&
+			[ "${_directive}" != "user" ] &&
+			[ "${_directive}" != "password" ]; then
+			echo "Invalid directive found: \"${_directive}\""
+			return 1
+		fi
+
+	done
+	set +f
+	unset IFS
+
+	# All fine, nothing bad found.
+	return 0
+}
+
 
 
 
@@ -2472,6 +2626,7 @@ if [ -L "${MYSQL_CNF_FILE}" ]; then
 	fi
 fi
 
+# Check access and chmod
 if [ ! -f "${MYSQL_CNF_FILE}" ]; then
 	debug "fatal" "(RUN): MySQL CNF file not found: ${MYSQL_CNF_FILE}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	debug "fatal" "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
@@ -2488,6 +2643,16 @@ elif ! compare_chmod "$(get_file_chmod "${MYSQL_CNF_FILE}")" "${_DEFAULT_MYSQL_C
 	debug "fatal" "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit $EXIT_ABORT
 fi
+
+# Validate contents
+if ! _MSG="$(validate_cnf_file "${MYSQL_CNF_FILE}")"; then
+	debug "fatal" "(RUN): Invalid cnf file." $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "fatal" "(HLP): ${_MSG}" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "fatal" "Aborting" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	exit $EXIT_ABORT
+fi
+
+
 
 # Check MYSQL_SSL_ENABLE
 if ! set | grep '^MYSQL_SSL_ENABLE=' >/dev/null 2>&1; then
@@ -3416,7 +3581,7 @@ for db in ${DATABASES}; do
 	else
 
 		# Determine which file extension to use (.sql, .sql.gz, .sql.gz.enc or .sql.enc)
-		ext="$( get_file_extension "${ENCRYPT}" "${COMPRESS}" "${COMPRESS_EXT}" )"
+		ext="$( build_file_extension "${ENCRYPT}" "${COMPRESS}" "${COMPRESS_EXT}" )"
 
 
 		# File already exists on disk?
@@ -3777,6 +3942,14 @@ for db in ${DATABASES}; do
 				if [ "${DUMP_FILE_INFO}" = "1" ]; then
 					debug "trace" "(RUN): ${_cnt} Info File: ${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}.info" $LOG "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 
+					now="$( date +'%s')"
+
+					mtime="$( get_file_mtime "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" )"
+					ctime="$( get_file_ctime "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" )"
+
+					mtime_h="$( formatted_timestamp "${mtime}" "%Y-%m-%d %H:%M:%S %Z [%z]" )"
+					ctime_h="$( formatted_timestamp "${mtime}" "%Y-%m-%d %H:%M:%S %Z [%z]" )"
+
 					# Set umask prior writing
 					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
 
@@ -3785,16 +3958,24 @@ for db in ${DATABASES}; do
 						echo "; mysqldump-secure backup record";
 						echo "; Do not alter this file!";
 						echo "; Creation of this file can be turned off via config file.";
-						echo "[general]";
-						echo "date = $( date '+%Y-%m-%d' )";
-						echo "time = $( date '+%H-%M-%S' )";
+						echo;
+						echo "; Information about the info file"
+						echo "[info]";
+						echo "unix = ${now}";
+						echo "tz   = $( formatted_timestamp "${now}" "%Z (%z)" )";
+						echo "date = $( formatted_timestamp "${now}" "%Y-%m-%d" )";
+						echo "time = $( formatted_timestamp "${now}" "%H:%M:%S" )";
+						echo "host = $( hostname )"
+						echo "user = $( whoami )"
 						echo;
 						echo "[file]";
-						echo "file_path = ${DUMP_DIR}";
-						echo "file_name = ${DUMP_FILE_PRE}${db}${ext}";
-						echo "file_size = $( get_file_size "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "b" ) Bytes ($( get_file_size "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "m" ) MB)";
-						echo "file_md5  = $( get_file_hash "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "md5" )";
-						echo "file_sha  = $( get_file_hash "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "sha256" )";
+						echo "file_path  = ${DUMP_DIR}";
+						echo "file_name  = ${DUMP_FILE_PRE}${db}${ext}";
+						echo "file_size  = $( get_file_size "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "b" ) Bytes ($( get_file_size "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "m" ) MB)";
+						echo "file_mtime = ${mtime} (${mtime_h})";
+						echo "file_ctime = ${ctime} (${ctime_h})";
+						echo "file_md5   = $( get_file_hash "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "md5" )";
+						echo "file_sha   = $( get_file_hash "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "sha256" )";
 						echo;
 						echo "[settings]";
 						echo "encrypted  = ${ENCRYPT}";
