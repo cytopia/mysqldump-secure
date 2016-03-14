@@ -2011,7 +2011,6 @@ print_help() {
 	echo "                  Combine with -v or -vv for more verbose output."
 	echo
 	echo "  -v              Show debug output."
-	echo "                  Specify twice (-vv) to also show trace output."
 	echo "                  Can be combined with --conf  and --test"
 	echo
 	echo "  -vv             Show debug and trace output."
@@ -2032,6 +2031,11 @@ print_help() {
 	echo "  3               Failed. Mysqldump encountered errors."
 	echo "  4               Abort. The program aborted, due to missing requirements,"
 	echo "                  wrong arguments or a misconfiguration."
+	echo
+	echo "Further reading"
+	echo
+	echo "See 'man mysqldump-secure' for more help."
+	echo "Visist http://mysqldump-secure.org and browse documentation."
 }
 # TODO:
 # --------
