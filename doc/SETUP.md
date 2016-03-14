@@ -269,7 +269,7 @@ unix = 1457917635
 tz   = CET (+0100)
 date = 2016-03-14
 time = 02:07:15
-host = db.mysqldump-secure.org
+host = macbook.local
 user = root
 
 [file]
@@ -300,7 +300,7 @@ secured   = SSL: Cipher in use is DHE-RSA-AES256-GCM-SHA384
 arguments = --defaults-file=/etc/mysqldump-secure.cnf --ssl-ca=/etc/mysql.ca.pem
 
 [server]
-host    = MD51001627.md-ber.lan
+host    = macbook.local
 port    = 13306
 type    = master
 version = MariaDB 10.1.11-MariaDB-log Homebrew
