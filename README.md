@@ -78,7 +78,7 @@ See [https://travis-ci.org/cytopia/mysqldump-secure](https://travis-ci.org/cytop
 ### 2.1 Linux, BSD and OSX
 
 ```shell
-wget https://github.com/cytopia/mysqldump-secure/archive/0.15.tar.gz -O - | tar -xz
+wget https://github.com/cytopia/mysqldump-secure/archive/0.16.tar.gz -O - | tar -xz
 cd mysqldump-secure
 ./configure
 make

@@ -1,4 +1,8 @@
-Version 0.16 (unreleased)
+Version 0.17 (unreleased)
+------------
+
+
+Version 0.16
 ------------
 
 - [Fix]		Show pipefail-emulation errors and warnings (now works as expected)
