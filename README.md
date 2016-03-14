@@ -123,32 +123,47 @@ For more detailed instructions go to the [Setup guidelines](https://github.com/c
 
 ### 4.1 Usage
 ```shell
-Usage: mysqldump-secure [--cron] [--test] [--conf] [-v[v]] [--help] [--version]
-       mysqldump-secure --cron [--conf]
-       mysqldump-secure --test [--conf] [-v[v]]
-       mysqldump-secure [--conf] [-v[v]]
+Usage: mysqldump-secure [--conf] [--cron] [--test] [-v[v]]
        mysqldump-secure --help
        mysqldump-secure --version
 
 When invoked without any arguments, it will start dumping databases as
 defined in mysqldump-secure.conf.
 
-  --conf          Pass different configuration file than the default one.
+  --conf          Pass a different configuration file than the default one.
                   E.g.: --conf=/etc/mysqldump-secure-alt.conf
 
   --cron          Use for cron run. It will only output errors and warnings
-                  and will silence all debug output.
+                  and will silence all info, debug and trace output.
 
   --test          Test requirements and exit.
+                  Combine with -v or -vv for more verbose output.
 
-  -v              Show debug (and trace) output.
+  -v              Show debug output.
                   Specify twice (-vv) to also show trace output.
                   Can be combined with --conf  and --test
-                  E.g.: -v or -vv
+
+  -vv             Show debug and trace output.
+                  Can be combined with --conf  and --test
 
   --help          Show this help screen.
 
   --version       Show version information.
+
+
+Exit codes
+
+  0               All fine, no fatals, no errors and no warnings occured.
+  1               Warnings occured, but all dumps were successfull.
+  2               Errors occured, but all dumps were successfull.
+  3               Failed. Mysqldump encountered errors.
+  4               Abort. The program aborted, due to missing requirements,
+                  wrong arguments or a misconfiguration.
+
+Further reading
+
+See 'man mysqldump-secure' for more help.
+Visist http://mysqldump-secure.org and browse documentation.
 ```
 
 ### 4.2 Default
