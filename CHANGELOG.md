@@ -1,6 +1,7 @@
 Version 0.17 (unreleased)
 ------------
 
+- [Fix]     Fixed bug on systems with locales that use commas for floats
 - [Fix]		Fixed configure to not stop when target directory does not exist
 
 
