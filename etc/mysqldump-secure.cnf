@@ -11,7 +11,7 @@ port = 3306
 user = readonlyrootuser
 password = "verySecurePasswordWith$%&SpecialChars"
 
-; When you want to connect via socket,
-; make sure to comment host and port and
-; specify the correct path to mysql.sock
+; When you connect through localhost (via sockets)
+; you can specify an alternative path of the
+; mysql.sock (If it is not in the default location)
 #socket = /var/lib/mysql/mysql.sock
