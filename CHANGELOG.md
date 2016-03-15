@@ -1,6 +1,8 @@
 Version 0.17 (unreleased)
 ------------
 
+- [Fix]		Fixed configure to not stop when target directory does not exist
+
 
 Version 0.16
 ------------
