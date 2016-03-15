@@ -28,11 +28,6 @@ while [ $# -gt 0  ]; do
 			CUSTOM_PREFIX="$(echo "$1" | $(which sed) 's/^--prefix=//g')"
 			# Remove trailing slash
 			CUSTOM_PREFIX="/$(echo "${CUSTOM_PREFIX}" | $(which sed) 's#/*$##;s#^/*##')"
-			if [ ! -d "${CUSTOM_PREFIX}" ]; then
-				echo "Prefix: \"${CUSTOM_PREFIX}\" is not a directory"
-				echo "If you wish to install it into a custom location, make sure to create the directory first."
-				exit 1
-			fi
 			PREFIX="${CUSTOM_PREFIX}"
 			;;
 
