@@ -3471,7 +3471,7 @@ debug "debug" "(SRV): MySQL server hostname:   ${MYSQL_HOST}:${MYSQL_PORT}" $LOG
 # Test mode
 ############################################################
 if [ "${_ARG_TEST}" = "1" ]; then
-	debug "trace" "(ARG): Exiting program from test mode (--test)."  ${LOG} "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
+	debug "info" "Exiting program from test mode (--test)."  ${LOG} "${LOGFILE}" "${_ARG_CRON}" "${_ARG_VERB}"
 	exit $EXIT_OK
 fi
 
