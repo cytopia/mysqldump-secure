@@ -155,63 +155,63 @@ echo
 echo
 echo "--------------------------------------------------------------------------------"
 echo "-"
-echo "-  10.2 \$NAGIOS_LOGFILE"
+echo "-  10.2 \$NAGIOS_LOG_FILE"
 echo "-"
 echo "--------------------------------------------------------------------------------"
 
 echo
 echo "----------------------------------------"
-echo " 10.2.1 #NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""
+echo " 10.2.1 #NAGIOS_LOG_FILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""
 echo "----------------------------------------"
-sed_change_config_file "^NAGIOS_LOGFILE="  "#NAGIOS_LOGFILE="
+sed_change_config_file "^NAGIOS_LOG_FILE="  "#NAGIOS_LOG_FILE="
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOGFILE" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG_FILE" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	if [ "${RUN_CHECK_NORM}" = "1" ]; then
 		echo "---------- NORMAL MODE ----------"
 		CMD="${CMD_NORM}"
-		if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOGFILE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+		if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG_FILE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOGFILE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG_FILE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sed_change_config_file "^#NAGIOS_LOGFILE="  "NAGIOS_LOGFILE="
+sed_change_config_file "^#NAGIOS_LOG_FILE="  "NAGIOS_LOG_FILE="
 
 
 
 echo
 echo "----------------------------------------"
-echo " 10.2.2 NAGIOS_LOGFILE=\"\""
+echo " 10.2.2 NAGIOS_LOG_FILE=\"\""
 echo "----------------------------------------"
-sed_change_config_file "^NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""  "NAGIOS_LOGFILE=\"\""
+sed_change_config_file "^NAGIOS_LOG_FILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""  "NAGIOS_LOG_FILE=\"\""
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOGFILE" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG_FILE" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	if [ "${RUN_CHECK_NORM}" = "1" ]; then
 		echo "---------- NORMAL MODE ----------"
 		CMD="${CMD_NORM}"
-		if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOGFILE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+		if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG_FILE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOGFILE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG_FILE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sed_change_config_file "^NAGIOS_LOGFILE=\"\""  "NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""
+sed_change_config_file "^NAGIOS_LOG_FILE=\"\""  "NAGIOS_LOG_FILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""
 
 
 
 echo
 echo "----------------------------------------"
-echo " 10.2.3 NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound\""
+echo " 10.2.3 NAGIOS_LOG_FILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound\""
 echo "----------------------------------------"
-sed_change_config_file "^NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""  "NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound\""
+sed_change_config_file "^NAGIOS_LOG_FILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""  "NAGIOS_LOG_FILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound\""
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
@@ -230,7 +230,7 @@ sed_change_config_file "^NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-s
 	if ! check "1" "1" "WARN" "1" "mysqldump-secure.nagios.log.notfound" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 	sudo rm -rf "${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound"
 
-sed_change_config_file "^NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound\""  "NAGIOS_LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""
+sed_change_config_file "^NAGIOS_LOG_FILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log.notfound\""  "NAGIOS_LOG_FILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""
 
 
 
