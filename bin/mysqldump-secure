@@ -4477,8 +4477,8 @@ for db in ${DATABASES}; do
 			TOTAL_SIZE=$( sum "${TOTAL_SIZE}" "${DB_SIZE_MB}" )
 
 			# Number of tables
-			_TBL_CNT_TOTAL="$( count_total_tables ${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
-			_TBL_CNT_INNODB="$( count_innodb_tables "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
+			_TBL_CNT_TOTAL="$(  count_total_tables      "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
+			_TBL_CNT_INNODB="$( count_innodb_tables     "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
 			_TBL_CNT_OTHERS="$( count_non_innodb_tables "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
 
 
