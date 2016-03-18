@@ -3107,7 +3107,7 @@ elif [ "${LOG}" = "1" ] || [ "${LOG}" = "2" ] || [ "${LOG}" = "3" ]; then
 	if [ ! -f "${LOG_FILE}" ]; then
 		# Check if logging directory exists
 		if [ ! -d "$(dirname "${LOG_FILE}")" ]; then
-			debug    "warn" "(RUN): Logfile directory does not exist in $(dirname "${LOG_FILE}")" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" ""
+			debug    "warn" "(RUN): Log directory does not exist in $(dirname "${LOG_FILE}")" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" ""
 			debug_pi "warn" "(RUN): Trying to create..." "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" ""
 			MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 			if ! mkdir -p "$(dirname "${LOG_FILE}")" > /dev/null 2>&1 ; then
@@ -3122,7 +3122,7 @@ elif [ "${LOG}" = "1" ] || [ "${LOG}" = "2" ] || [ "${LOG}" = "3" ]; then
 		fi
 		# If logging is still OK (dir exists), check if the file can be created
 		if [ "${LOG}" != "0" ]; then
-			debug    "warn" "(RUN): Logfile does not exist in ${LOG_FILE}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" ""
+			debug    "warn" "(RUN): Log file does not exist in ${LOG_FILE}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" ""
 			debug_pi "warn" "(RUN): Trying to create..." "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" ""
 			MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 
@@ -3142,7 +3142,7 @@ elif [ "${LOG}" = "1" ] || [ "${LOG}" = "2" ] || [ "${LOG}" = "3" ]; then
 	# Check for permissions
 	if [ "${LOG}" != "0" ]; then
 		if ! compare_chmod "$(get_file_chmod "${LOG_FILE}")" "${LOG_CHMOD}" > /dev/null 2>&1 ; then
-			debug    "warn" "(RUN): Logfile has wrong permissions: $(get_file_chmod "${LOG_FILE}"), should be: ${LOG_CHMOD}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" ""
+			debug    "warn" "(RUN): Log file has wrong permissions: $(get_file_chmod "${LOG_FILE}"), should be: ${LOG_CHMOD}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" ""
 			debug_pi "warn" "(RUN): Trying to chmod to ${LOG_CHMOD}..." "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" ""
 			MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 
@@ -3164,7 +3164,7 @@ elif [ "${LOG}" = "1" ] || [ "${LOG}" = "2" ] || [ "${LOG}" = "3" ]; then
 
 		# Logfile not writeable
 		if [ ! -w "${LOG_FILE}" ]; then
-			debug  "err" "(RUN): Logfile ${LOG_FILE} not writeable. Check \$LOG_CHMOD value inf config." "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" ""
+			debug  "err" "(RUN): Log file ${LOG_FILE} not writeable. Check \$LOG_CHMOD value inf config." "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" ""
 			debug  "err" "(OPT): Logging disabled" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" ""
 			LOG=0
 			MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
@@ -3196,7 +3196,7 @@ if [ "${LOG}" != "0" ]; then
 	debug "trace" "(CFG): Using config: ${CONFIG_FILE}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 	debug "info"  "(OPT): Logging enabled" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 	debug "debug" "(OPT): Log level: ${LOG}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-	debug "debug" "(OPT): Logfile: ${LOG_FILE}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+	debug "debug" "(OPT): Log file: ${LOG_FILE}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 else
 	debug "trace" "(CFG): Using config: ${CONFIG_FILE}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 fi
@@ -4061,7 +4061,7 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 		fi
 	# Check if it has wrong permissions
 	elif ! compare_chmod "$(get_file_chmod "${NAGIOS_LOG_FILE}")" "${NAGIOS_LOG_CHMOD}" > /dev/null 2>&1 ; then
-		debug    "warn" "(RUN): Nagios logfile has wrong permissions: $(get_file_chmod "${NAGIOS_LOG_FILE}"), but should be: ${NAGIOS_LOG_CHMOD} " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+		debug    "warn" "(RUN): Nagios log file has wrong permissions: $(get_file_chmod "${NAGIOS_LOG_FILE}"), but should be: ${NAGIOS_LOG_CHMOD} " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		debug_pi "warn" "(RUN): Trying to chmod to ${NAGIOS_LOG_CHMOD}... " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 
@@ -4092,7 +4092,7 @@ elif [ "${NAGIOS_LOG}" = "1"  ]; then
 			MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 		else
 			debug "info"  "(OPT): Nagios log enabled" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-			debug "debug" "(OPT): Nagios logfile: ${NAGIOS_LOG_FILE}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+			debug "debug" "(OPT): Nagios log file: ${NAGIOS_LOG_FILE}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		fi
 	fi
 
@@ -4792,7 +4792,7 @@ fi
 if [ "${NAGIOS_LOG}" = "1" ]; then
 
 
-	debug "debug" "(RUN): Writing nagios logfile" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+	debug "debug" "(RUN): Writing nagios log file" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
 	{
 		echo "[state]";

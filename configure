@@ -64,7 +64,7 @@ $(which sed) -i'' -e "s|^DUMP_DIR=\"/var/mysqldump-secure\"|DUMP_DIR=\"${PREFIX}
 $(which sed) -i'' -e "s|^MYSQL_CNF_FILE=\"/etc/mysqldump-secure.cnf\"|MYSQL_CNF_FILE=\"${PREFIX}/etc/mysqldump-secure.cnf\"|g" build/mysqldump-secure.conf
 $(which sed) -i'' -e "s|^LOG_FILE=\"/var/log/mysqldump-secure.log\"|LOG_FILE=\"${PREFIX}/var/log/mysqldump-secure.log\"|g" build/mysqldump-secure.conf
 $(which sed) -i'' -e "s|^OPENSSL_PUBKEY_PEM=\"/etc/mysqldump-secure.pub.pem\"|OPENSSL_PUBKEY_PEM=\"${PREFIX}/etc/mysqldump-secure.pub.pem\"|g" build/mysqldump-secure.conf
-$(which sed) -i'' -e "s|^NAGIOS_LOG_FILELE=\"/var/log/mysqldump-secure.nagios.log\"|NAGIOS_LOG_FILELE=\"${PREFIX}/var/log/mysqldump-secure.nagios.log\"|g" build/mysqldump-secure.conf
+$(which sed) -i'' -e "s|^NAGIOS_LOG_FILE=\"/var/log/mysqldump-secure.nagios.log\"|NAGIOS_LOG_FILE=\"${PREFIX}/var/log/mysqldump-secure.nagios.log\"|g" build/mysqldump-secure.conf
 
 if [ -z "${PREFIX}" ]; then
 	ETCDIR="/etc"

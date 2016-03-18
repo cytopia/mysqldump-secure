@@ -163,7 +163,7 @@ echo
 echo "----------------------------------------"
 echo " 10.2.1 #NAGIOS_LOG_FILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""
 echo "----------------------------------------"
-sed_change_config_file "^NAGIOS_LOG_FILE="  "#NAGIOS_LOG_FILE="
+sed_change_config_file "^NAGIOS_LOG_FILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""  "#NAGIOS_LOG_FILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
@@ -179,7 +179,7 @@ sed_change_config_file "^NAGIOS_LOG_FILE="  "#NAGIOS_LOG_FILE="
 	CMD="${CMD_VERB}"
 	if ! check "1" "1" "WARN" "1" "\$NAGIOS_LOG_FILE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sed_change_config_file "^#NAGIOS_LOG_FILE="  "NAGIOS_LOG_FILE="
+sed_change_config_file "^#NAGIOS_LOG_FILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""  "NAGIOS_LOG_FILE=#NAGIOS_LOG_FILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.nagios.log\""
 
 
 
