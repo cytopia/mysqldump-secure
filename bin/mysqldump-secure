@@ -3679,7 +3679,7 @@ fi
 
 # Ignored databases
 if ! set | grep '^IGNORE=' >/dev/null 2>&1; then
-	debug "warn" "(CFG): \$IGNORE variable is not defined" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
+	debug "warn" "(CFG): \$IGNORE variable is not defined" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 	debug "warn" "(HLP): Define \$IGNORE in your config to get rid of this warning" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 	debug "warn" "(RUN): No database will be ignored" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 	IGNORE=""
@@ -4252,9 +4252,6 @@ fi
 #
 ################################################################################
 
-RUN_XXX1=""
-RUN_XXX2=""
-RUN_XXX3=""
 
 #
 # TODO:
@@ -4489,10 +4486,13 @@ for db in ${DATABASES}; do
 		_TBL_CNT_OTHERS="$( count_non_innodb_tables "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
 
 
-		debug "trace" "(RUN): ${_cnt} Number of total tables:       ${_TBL_CNT_TOTAL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
-		debug "trace" "(RUN): ${_cnt} Number of InnoDB tables:      ${_TBL_CNT_INNODB}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
-		debug "trace" "(RUN): ${_cnt} Number of non-InnoDB tables:  ${_TBL_CNT_OTHERS}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
+		debug "trace" "(RUN): ${_cnt} Number of total tables:       ${_TBL_CNT_TOTAL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+		debug "trace" "(RUN): ${_cnt} Number of InnoDB tables:      ${_TBL_CNT_INNODB}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+		debug "trace" "(RUN): ${_cnt} Number of non-InnoDB tables:  ${_TBL_CNT_OTHERS}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
+
+		##########################################################
+		# MYSQLDUMP OPTIONS
 
 		#
 		# CONSISTENCY OPTIONS (By Table Engines)
@@ -4500,10 +4500,10 @@ for db in ${DATABASES}; do
 		# information_schema and performance schema are special tables, which do not allow locking
 		if [ "${db}" != "information_schema" ] && [ "${db}" != "performance_schema" ]; then
 			MYSQL_LOCK_OPTS="$( get_consistency_opts "${CONSISTENT_DUMP_ONLY_INNODB}" "${CONSISTENT_DUMP_MIXED_INNODB}" "${CONSISTENT_DUMP_NO_INNODB}" "${_TBL_CNT_INNODB}" "${_TBL_CNT_OTHERS}" )"
-			debug "trace" "(RUN): ${_cnt} Applying consistency setting: ${MYSQL_LOCK_OPTS}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
+			debug "trace" "(RUN): ${_cnt} Applying consistency setting: ${MYSQL_LOCK_OPTS}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		else
 			MYSQL_LOCK_OPTS="--skip-lock-tables"
-			debug "trace" "(RUN): ${_cnt} \"${db}\" is special and needs '--skip-lock-tables'" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
+			debug "trace" "(RUN): ${_cnt} \"${db}\" is special and needs '--skip-lock-tables'" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		fi
 
 		#
@@ -4514,7 +4514,7 @@ for db in ${DATABASES}; do
 		# Performance schema does not allow to dump events
 		# mysqldump: mysqldump  Couldn't execute 'show events'  Access denied for user 'root'@'localhost' to database 'performance_schema' (1044)
 		if [ "${db}" = "performance_schema" ]; then
-			debug "trace" "(RUN): ${_cnt} \"${db}\" cannot be dumped with --events. Adding --skip-events" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
+			debug "trace" "(RUN): ${_cnt} \"${db}\" cannot be dumped with --events. Adding --skip-events" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 			MYSQL_SPECIAL_OPTS="--skip-events"
 		fi
 
@@ -4531,10 +4531,11 @@ for db in ${DATABASES}; do
 
 
 
+
+		##########################################################
+		# MAKE THE BACKUPS
+
 		debug_pi "info" "(SQL): ${_cnt} Dumping:  ${db} (${DB_SIZE_MB} MB) " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-
-
-		# TRACK TIME
 		starttime=$(date +%s)
 
 
@@ -4543,7 +4544,6 @@ for db in ${DATABASES}; do
 		#
 		if [ "${COMPRESS}" = "0" ] && [ "${ENCRYPT}" = "0" ];  then
 
-			ext=".sql"
 			debug_i "debug"  "$( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
 			# Run Compressed & Encrypted
@@ -4558,7 +4558,6 @@ for db in ${DATABASES}; do
 		#
 		elif [ "${COMPRESS}" = "1" ] && [ "${ENCRYPT}" = "0" ];  then
 
-			ext=".sql.${COMPRESS_EXT}"
 			debug_i "debug"  "(compressed) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
 			# Run Compressed & Encrypted
@@ -4573,7 +4572,6 @@ for db in ${DATABASES}; do
 		#
 		elif [ "${COMPRESS}" = "0" ] && [ "${ENCRYPT}" = "1" ];  then
 
-			ext=".sql.enc"
 			debug_i "debug"  "(encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
 			# Run Compressed & Encrypted
@@ -4588,7 +4586,6 @@ for db in ${DATABASES}; do
 		#
 		elif [ "${COMPRESS}" = "1" ] && [ "${ENCRYPT}" = "1" ];  then
 
-			ext=".sql.${COMPRESS_EXT}.enc"
 			debug_i "debug"  "(compressed) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) " )$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}}) ")(${MYSQL_QUICK_OPT}) " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
 			# Run Compressed & Encrypted
@@ -4860,7 +4857,7 @@ fi
 
 if [ "${DELETE}" = "1" ]; then
 	if rm "${MY_TMP_FILE_DEL}" 2>/dev/null; then
-		debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_DEL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
+		debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_DEL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 	else
 		debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_DEL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
@@ -4868,28 +4865,28 @@ if [ "${DELETE}" = "1" ]; then
 fi
 
 #if rm "${MY_TMP_FILE_DUMP}" 2>/dev/null; then
-#	debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_DUMP}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
+#	debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_DUMP}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 #else
 #	debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_DUMP}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 #	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 #fi
 #
 #if rm "${MY_TMP_FILE_COMP}" 2>/dev/null; then
-#	debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_COMP}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
+#	debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_COMP}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 #else
 #	debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_COMP}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 #	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 #fi
 #
 #if rm "${MY_TMP_FILE_ENCR}" 2>/dev/null; then
-#	debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_ENCR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
+#	debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_ENCR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 #else
 #	debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_ENCR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 #	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 #fi
 #
 if rm -rf "${MY_TMP_DIR}" 2>/dev/null; then
-	debug "trace" "(RUN): Deleting tmp dir:  ${MY_TMP_DIR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
+	debug "trace" "(RUN): Deleting tmp dir:  ${MY_TMP_DIR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 else
 	debug "warn"  "(RUN): Cannot delete tmp dir:  ${MY_TMP_DIR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
