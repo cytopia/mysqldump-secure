@@ -2037,6 +2037,7 @@ run_mysqldump() {
 	#
 	# TODO: Subshell is not necessary!!!!!!!!!!!!!!!!!!!!!
 	#
+	# TODO: Add deletion errors (6,7,8)
 
 	#
 	# TODO: Handle error on non-writable tmpfiles!!!
@@ -2296,6 +2297,260 @@ run_mysqldump() {
 		fi
 
 	fi
+}
+
+
+
+
+mysqldump_pipefail_errors() {
+	_error_statuses="${1}"
+
+	_errors=""
+	_errno="0"
+
+	IFS='
+	'
+	for _err in ${_error_statuses}; do
+		_type="$( echo "${_err}" | awk -F ':' '{print $1}' )"
+		_exit="$( echo "${_err}" | awk -F ':' '{print $2}' )"
+		_msg="$(  echo "${_err}" | awk -F ':' '{for (i=3; i<NF; i++) printf $i " "; print $NF}' )"
+
+		# ---- dumping
+		if [ "${_type}" = "0" ]; then
+			if [ "${_exit}" != "0" ]; then
+				[ -z "${_errors}" ] && _errors="mysqldump: ${_msg}" || _errors="$( printf "%s\nmysqldump: %s" "${_errors}" "${_msg}")"
+				_errno=$((errno + 1))
+			fi
+		elif [ "${_type}" = "1" ]; then
+			if [ "${_exit}" != "0" ]; then
+				[ -z "${_errors}" ] && _errors="compression: ${_msg}" || _errors="$( printf "%s\ncompression: %s" "${_errors}" "${_msg}")"
+				_errno=$((errno + 1))
+			fi
+		elif [ "${_type}" = "2" ]; then
+			if [ "${_exit}" != "0" ]; then
+				[ -z "${_errors}" ] && _errors="encryption: ${_msg}" || _errors="$( printf "%s\nencryption: %s" "${_errors}" "${_msg}")"
+				_errno=$((errno + 1))
+			fi
+		# ---- file creation
+		elif [ "${_type}" = "3" ]; then
+			if [ "${_exit}" != "0" ]; then
+				[ -z "${_errors}" ] && _errors="tmpfile creation: ${_msg}" || _errors="$( printf "%s\ntmpfile creation: %s" "${_errors}" "${_msg}")"
+				_errno=$((errno + 1))
+			fi
+		elif [ "${_type}" = "4" ]; then
+			if [ "${_exit}" != "0" ]; then
+				[ -z "${_errors}" ] && _errors="tmpfile creation: ${_msg}" || _errors="$( printf "%s\ntmpfile creation: %s" "${_errors}" "${_msg}")"
+				_errno=$((errno + 1))
+			fi
+		elif [ "${_type}" = "5" ]; then
+			if [ "${_exit}" != "0" ]; then
+				[ -z "${_errors}" ] && _errors="tmpfile creation: ${_msg}" || _errors="$( printf "%s\ntmpfile creation: %s" "${_errors}" "${_msg}")"
+				_errno=$((errno + 1))
+			fi
+		# ---- file deletion
+		elif [ "${_type}" = "6" ]; then
+			if [ "${_exit}" != "0" ]; then
+				[ -z "${_errors}" ] && _errors="tmpfile deletion: ${_msg}" || _errors="$( printf "%s\ntmpfile deletion: %s" "${_errors}" "${_msg}")"
+				_errno=$((errno + 1))
+			fi
+		elif [ "${_type}" = "7" ]; then
+			if [ "${_exit}" != "0" ]; then
+				[ -z "${_errors}" ] && _errors="tmpfile deletion: ${_msg}" || _errors="$( printf "%s\ntmpfile deletion: %s" "${_errors}" "${_msg}")"
+				_errno=$((errno + 1))
+			fi
+		elif [ "${_type}" = "8" ]; then
+			if [ "${_exit}" != "0" ]; then
+				[ -z "${_errors}" ] && _errors="tmpfile deletion: ${_msg}" || _errors="$( printf "%s\ntmpfile deletion: %s" "${_errors}" "${_msg}")"
+				_errno=$((errno + 1))
+			fi
+		fi
+	done
+	unset IFS
+
+	echo "${_errors}"
+	return ${_errno}
+}
+
+
+mysqldump_pipefail_warnings() {
+	_error_statuses="${1}"
+
+	_warnings=""
+	_errno="0"
+
+	IFS='
+	'
+	for _err in ${_error_statuses}; do
+		_type="$( echo "${_err}" | awk -F ':' '{print $1}' )"
+		_exit="$( echo "${_err}" | awk -F ':' '{print $2}' )"
+		_msg="$(  echo "${_err}" | awk -F ':' '{for (i=3; i<NF; i++) printf $i " "; print $NF}' )"
+
+		# ---- dumping
+		if [ "${_type}" = "0" ]; then
+			if [ "${_msg}" != "" ]; then
+				[ -z "${_warnings}" ] && _warnings="mysqldump: ${_msg}" || _warnings="$( printf "%s\nmysqldump: %s" "${_warnings}" "${_msg}")"
+				_errno=$((errno + 1))
+			fi
+		elif [ "${_type}" = "1" ]; then
+			if [ "${_msg}" != "" ]; then
+				[ -z "${_warnings}" ] && _warnings="compression: ${_msg}" || _warnings="$( printf "%s\ncompression: %s" "${_warnings}" "${_msg}")"
+				_errno=$((errno + 1))
+			fi
+		elif [ "${_type}" = "2" ]; then
+			if [ "${_msg}" != "" ]; then
+				[ -z "${_warnings}" ] && _warnings="encryption: ${_msg}" || _warnings="$( printf "%s\nencryption: %s" "${_warnings}" "${_msg}")"
+				_errno=$((errno + 1))
+			fi
+		# ---- file creation
+		elif [ "${_type}" = "3" ]; then
+			if [ "${_msg}" != "" ]; then
+				[ -z "${_warnings}" ] && _warnings="tmpfile creation: ${_msg}" || _warnings="$( printf "%s\ntmpfile creation: %s" "${_warnings}" "${_msg}")"
+				_errno=$((errno + 1))
+			fi
+		elif [ "${_type}" = "4" ]; then
+			if [ "${_msg}" != "" ]; then
+				[ -z "${_warnings}" ] && _warnings="tmpfile creation: ${_msg}" || _warnings="$( printf "%s\ntmpfile creation: %s" "${_warnings}" "${_msg}")"
+				_errno=$((errno + 1))
+			fi
+		elif [ "${_type}" = "5" ]; then
+			if [ "${_msg}" != "" ]; then
+				[ -z "${_warnings}" ] && _warnings="tmpfile creation: ${_msg}" || _warnings="$( printf "%s\ntmpfile creation: %s" "${_warnings}" "${_msg}")"
+				_errno=$((errno + 1))
+			fi
+		# ---- file deletion
+		elif [ "${_type}" = "6" ]; then
+			if [ "${_msg}" != "" ]; then
+				[ -z "${_warnings}" ] && _warnings="tmpfile deletion: ${_msg}" || _warnings="$( printf "%s\ntmpfile deletion: %s" "${_warnings}" "${_msg}")"
+				_errno=$((errno + 1))
+			fi
+		elif [ "${_type}" = "7" ]; then
+			if [ "${_msg}" != "" ]; then
+				[ -z "${_warnings}" ] && _warnings="tmpfile deletion: ${_msg}" || _warnings="$( printf "%s\ntmpfile deletion: %s" "${_warnings}" "${_msg}")"
+				_errno=$((errno + 1))
+			fi
+		elif [ "${_type}" = "8" ]; then
+			if [ "${_msg}" != "" ]; then
+				[ -z "${_warnings}" ] && _warnings="tmpfile deletion: ${_msg}" || _warnings="$( printf "%s\ntmpfile deletion: %s" "${_warnings}" "${_msg}")"
+				_errno=$((errno + 1))
+			fi
+		fi
+	done
+	unset IFS
+
+	echo "${_warnings}"
+	return ${_errno}
+}
+
+
+
+
+write_info_file() {
+	# File arguments
+	_file_path="${1}"
+	_file_name="${2}"
+	_file_chmod="${3}"
+	# Database arguments
+	_db_name="${4}"
+	_db_size="${5}"
+	_db_tbl_cnt="${6}"
+	_db_dump_args="${7}"
+	_db_dump_time="${8}"
+	# Compression arguments
+	_compress_opt="${9}"
+	_compress_bin="${10}"
+	_compress_arg="${11}"
+	# Encryption arguments
+	_encrypt_opt="${12}"
+	_encrypt_alg="${13}"
+	_encrypt_pem="${14}"
+	# MySQL arguments
+	_mysql_args="${15}"
+	_mysql_ssl_opt="${16}"
+	_mysql_ssl_status="${17}"
+	# MySQL Server Info arguments
+	_mysql_server_status="${18}"
+	_mysql_host="${19}"
+	_mysql_port="${20}"
+	_mysql_repl_type="${21}"
+	_mysql_server="${22}"
+	_mysql_version="${23}"
+
+
+
+	_mtime="$( get_file_mtime "${_file_path}/${_file_name}" )"
+	_mtime_h="$( formatted_timestamp "${_mtime}" "%Y-%m-%d %H:%M:%S %Z [%z]" )"
+
+	_db_size_kb="$( div "${_db_size}" "1024" )"
+	_db_size_mb="$( div "${_db_size_kb}" "1024" )"
+	_db_size_mb="$( round "${_db_size_mb}" "2" )"
+
+	#
+	# Set umask prior writing.
+	# (Use the same chmod as the dumps itself)
+	#
+	umask "$(chmod_2_umask "${_file_chmod}")";
+
+	# Create file
+	{
+		echo "; ${INFO_NAME} backup record";
+		echo "; Do not alter this file!";
+		echo "; Creation of this file can be turned off via config file.";
+		echo;
+		echo "[${INFO_NAME}]";
+		echo "version = ${INFO_VERSION}";
+		echo "vdate   = ${INFO_DATE}";
+		echo "config  = ${CONFIG_FILE}";
+		echo;
+		echo "[system]";
+		echo "host = $( hostname )";
+		echo "user = $( whoami )";
+		echo;
+		echo "[file]";
+		echo "file_path  = ${_file_path}";
+		echo "file_name  = ${_file_name}";
+		echo "file_size  = $( get_file_size  "${_file_path}/${_file_name}" "b" ) Bytes ($( get_file_size "${_file_path}/${_file_name}" "m" ) MB)";
+		echo "file_chmod = $( get_file_chmod "${_file_path}/${_file_name}" )";
+		echo "file_owner = $( get_file_owner "${_file_path}/${_file_name}" )";
+		echo "file_group = $( get_file_group "${_file_path}/${_file_name}" )";
+		echo "file_mtime = ${_mtime} (${_mtime_h})";
+		echo "file_md5   = $( get_file_hash "${_file_path}/${_file_name}" "md5" )";
+		echo "file_sha   = $( get_file_hash "${_file_path}/${_file_name}" "sha256" )";
+		echo;
+		echo "[mysqldump]";
+		echo "encrypted   = ${_encrypt_opt}";
+		echo "compressed  = ${_compress_opt}";
+		echo "mysqldump   = ${_db_dump_args}";
+		echo "duration    = ${_db_dump_time} sec"
+		echo;
+		echo "[compression]";
+		echo "bin = $(if [ "${_compress_opt}" = "1" ]; then echo "${_compress_bin}"; fi)";
+		echo "arg = $(if [ "${_compress_opt}" = "1" ]; then echo "${_compress_arg}"; fi)";
+		echo;
+		echo "[encryption]";
+		echo "aes_arg = $(if [ "${_encrypt_opt}" = "1" ]; then echo "${_encrypt_alg}"; fi)";
+		echo "rsa_pem = $(if [ "${_encrypt_opt}" = "1" ]; then echo "${_encrypt_pem}"; fi)";
+		echo;
+		echo "[connection]";
+		echo "protocol  = $( get_mysql_connection_type_info "${_mysql_server_status}" )";
+		echo "secured   = $(if [ "${_mysql_ssl_opt}" = "1" ]; then echo "SSL: ${_mysql_ssl_status}"; else echo "No SSL"; fi )";
+		echo "arguments = ${_mysql_args}";
+		echo;
+		echo "[server]";
+		echo "host    = ${_mysql_host}";
+		echo "port    = ${_mysql_port}";
+		echo "type    = ${_mysql_repl_type}";
+		echo "version = $(if [ "${_mysql_server}" != "" ]; then echo "${_mysql_server} ";fi)${_mysql_version}";
+		echo;
+		echo "[database]";
+		echo "db_name = ${_db_name}";
+		echo "db_size = ${_db_size} Bytes (${_db_size_mb} MB)";
+		echo "tbl_cnt = ${_db_tbl_cnt}";
+		echo;
+	} 2>/dev/null > "${_file_path}/${_file_name}.info"
+
+	_exit="$?"
+
+	return ${_exit}
 }
 
 
@@ -4216,75 +4471,85 @@ for db in ${DATABASES}; do
 			MYSQLDUMP_ARGUMENTS="${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} ${MYSQL_SPECIAL_OPTS} ${MYSQL_QUICK_OPT}"
 
 
-			if [ "${COMPRESS}" = "1" ]; then
+			debug_pi "info" "(SQL): ${_cnt} Dumping:  ${db} (${DB_SIZE_MB} MB) " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
-				debug_pi "info" "(SQL): ${_cnt} Dumping:  ${db} (${DB_SIZE_MB} MB) " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+			#
+			# Case 1/4 Plain
+			#
+			if [ "${COMPRESS}" = "0" ] && [ "${ENCRYPT}" = "0" ];  then
 
-				#
-				# Case 1/4 Compressed & Encrypted
-				#
-				if [ "${ENCRYPT}" = "1" ]; then
-					ext=".sql.${COMPRESS_EXT}.enc"
+				ext=".sql"
+				debug_i "debug"  "$( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
-					debug_i "debug"  "(compressed) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) " )$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}}) ")(${MYSQL_QUICK_OPT}) " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+				# Run Compressed & Encrypted
+				error_statuses="$(run_mysqldump "0" "${MYSQL_ARGUMENTS} ${MYSQLDUMP_ARGUMENTS}" "${db}" \
+					"${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "${DUMP_FILE_CHMOD}" \
+					"${COMPRESS_BIN}" "${COMPRESS_ARG}" \
+					"${OPENSSL_ALGO_ARG}" "${OPENSSL_PUBKEY_PEM}" \
+					"${MY_TMP_DIR}"
+				)"
 
-					# Run Compressed & Encrypted
-					error_statuses="$(run_mysqldump "3" "${MYSQL_ARGUMENTS} ${MYSQLDUMP_ARGUMENTS}" "${db}" \
-						"${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "${DUMP_FILE_CHMOD}" \
-						"${COMPRESS_BIN}" "${COMPRESS_ARG}" \
-						"${OPENSSL_ALGO_ARG}" "${OPENSSL_PUBKEY_PEM}" \
-						"${MY_TMP_DIR}"
-					)"
+			#
+			# Case 2/4 Compressed
+			#
+			elif [ "${COMPRESS}" = "1" ] && [ "${ENCRYPT}" = "0" ];  then
 
-				#
-				# Case 2/4 Compressed Only
-				#
-				else
-					ext=".sql.${COMPRESS_EXT}"
-					debug_i "debug"  "(compressed) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+				ext=".sql.${COMPRESS_EXT}"
+				debug_i "debug"  "(compressed) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
-					# Run Compressed & Encrypted
-					error_statuses="$(run_mysqldump "1" "${MYSQL_ARGUMENTS} ${MYSQLDUMP_ARGUMENTS}" "${db}" \
-						"${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "${DUMP_FILE_CHMOD}" \
-						"${COMPRESS_BIN}" "${COMPRESS_ARG}" \
-						"${OPENSSL_ALGO_ARG}" "${OPENSSL_PUBKEY_PEM}" \
-						"${MY_TMP_DIR}"
-					)"
-					echo "${error_statuses}"
+				# Run Compressed & Encrypted
+				error_statuses="$(run_mysqldump "1" "${MYSQL_ARGUMENTS} ${MYSQLDUMP_ARGUMENTS}" "${db}" \
+					"${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "${DUMP_FILE_CHMOD}" \
+					"${COMPRESS_BIN}" "${COMPRESS_ARG}" \
+					"${OPENSSL_ALGO_ARG}" "${OPENSSL_PUBKEY_PEM}" \
+					"${MY_TMP_DIR}"
+				)"
 
-				fi
+
+			#
+			# Case 3/4 Encrypted
+			#
+			elif [ "${COMPRESS}" = "0" ] && [ "${ENCRYPT}" = "1" ];  then
+
+				ext=".sql.enc"
+				debug_i "debug"  "(encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+
+				# Run Compressed & Encrypted
+				error_statuses="$(run_mysqldump "2" "${MYSQL_ARGUMENTS} ${MYSQLDUMP_ARGUMENTS}" "${db}" \
+					"${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "${DUMP_FILE_CHMOD}" \
+					"${COMPRESS_BIN}" "${COMPRESS_ARG}" \
+					"${OPENSSL_ALGO_ARG}" "${OPENSSL_PUBKEY_PEM}" \
+					"${MY_TMP_DIR}"
+				)"
+
+			#
+			# Case 4/4 Compressed && Encrypted
+			#
+			elif [ "${COMPRESS}" = "1" ] && [ "${ENCRYPT}" = "1" ];  then
+
+
+				ext=".sql.${COMPRESS_EXT}.enc"
+
+				debug_i "debug"  "(compressed) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) " )$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}}) ")(${MYSQL_QUICK_OPT}) " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+
+				# Run Compressed & Encrypted
+				error_statuses="$(run_mysqldump "3" "${MYSQL_ARGUMENTS} ${MYSQLDUMP_ARGUMENTS}" "${db}" \
+					"${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "${DUMP_FILE_CHMOD}" \
+					"${COMPRESS_BIN}" "${COMPRESS_ARG}" \
+					"${OPENSSL_ALGO_ARG}" "${OPENSSL_PUBKEY_PEM}" \
+					"${MY_TMP_DIR}"
+				)"
+
+			#
+			# WRONG OPTIONS
+			#
 			else
-				#
-				# Case 3/4 Encrypted Only
-				#
-				if [ "${ENCRYPT}" = "1" ]; then
-					ext=".sql.enc"
-					debug_i "debug"  "(encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-
-					# Run Compressed & Encrypted
-					error_statuses="$(run_mysqldump "2" "${MYSQL_ARGUMENTS} ${MYSQLDUMP_ARGUMENTS}" "${db}" \
-						"${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "${DUMP_FILE_CHMOD}" \
-						"${COMPRESS_BIN}" "${COMPRESS_ARG}" \
-						"${OPENSSL_ALGO_ARG}" "${OPENSSL_PUBKEY_PEM}" \
-						"${MY_TMP_DIR}"
-					)"
-				#
-				# Case 4/4 Plain
-				#
-				else
-					ext=".sql"
-					debug_i "debug"  "$( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) ")$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}) ")(${MYSQL_QUICK_OPT}) " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-
-					# Run Compressed & Encrypted
-					error_statuses="$(run_mysqldump "0" "${MYSQL_ARGUMENTS} ${MYSQLDUMP_ARGUMENTS}" "${db}" \
-						"${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "${DUMP_FILE_CHMOD}" \
-						"${COMPRESS_BIN}" "${COMPRESS_ARG}" \
-						"${OPENSSL_ALGO_ARG}" "${OPENSSL_PUBKEY_PEM}" \
-						"${MY_TMP_DIR}"
-					)"
-
-				fi
+				# TODO: Also log to file here
+				_abort_on_internal_error
 			fi
+
+
+
 
 
 			#
@@ -4301,55 +4566,18 @@ for db in ${DATABASES}; do
 			#  1. Error code == 0 and <stderr msg> empty      => OK
 			#  2. Error code == 0 and <stderr msg> not empty  => Warning
 			#  3. Error code != 0                             => Error
-			MY_ERRORS=""
-			MY_WARNINGS=""
-
-
-			#
-			# TODO: functionalize
-			# pipefail_errors() {} <-- or so?
-			#
-
-			IFS='
-			'
-			for _err in ${error_statuses}; do
-				_type="$( echo "${_err}" | awk -F ':' '{print $1}' )"
-				_exit="$( echo "${_err}" | awk -F ':' '{print $2}' )"
-				_msg="$(  echo "${_err}" | awk -F ':' '{for (i=3; i<NF; i++) printf $i " "; print $NF}' )"
-
-				if [ "${_type}" = "0" ]; then
-					if [ "${_exit}" != "0" ]; then
-						[ -z "${MY_ERRORS}" ] && MY_ERRORS="mysqldump: ${_msg}" || MY_ERRORS="$( printf "%s\nmysqldump: %s" "${MY_ERRORS}" "${_msg}")"
-					elif [ "${_msg}" != "" ]; then
-						[ -z "${MY_WARNINGS}" ] && MY_WARNINGS="mysqldump: ${_msg}" || MY_WARNINGS="$( printf "%s\nmysqldump: %s" "${MY_WARNINGS}" "${_msg}")"
-					fi
-				elif [ "${_type}" = "1" ]; then
-					if [ "${_exit}" != "0" ]; then
-						[ -z "${MY_ERRORS}" ] && MY_ERRORS="compression: ${_msg}" || MY_ERRORS="$( printf "%s\ncompression: %s" "${MY_ERRORS}" "${_msg}")"
-					elif [ "${_msg}" != "" ]; then
-						[ -z "${MY_WARNINGS}" ] && MY_WARNINGS="compression: ${_msg}" || MY_WARNINGS="$( printf "%s\ncompression: %s" "${MY_WARNINGS}" "${_msg}")"
-					fi
-				elif [ "${_type}" = "2" ]; then
-					if [ "${_exit}" != "0" ]; then
-						[ -z "${MY_ERRORS}" ] && MY_ERRORS="encryption: ${_msg}" || MY_ERRORS="$( printf "%s\nencryption: %s" "${MY_ERRORS}" "${_msg}")"
-					elif [ "${_msg}" != "" ]; then
-						[ -z "${MY_WARNINGS}" ] && MY_WARNINGS="encryption: ${_msg}" || MY_WARNINGS="$( printf "%s\nencryption: %s" "${MY_WARNINGS}" "${_msg}")"
-					fi
-				fi
-			done
-			unset IFS
-
 
 			#
 			# Error Evaluation
 			#
-			if [ "${MY_ERRORS}" != "" ]; then
+			if ! MY_ERRORS="$(mysqldump_pipefail_errors "${error_statuses}")"; then
+
 				TOTAL_ERR=$((TOTAL_ERR + 1))
 
 				debug_i "fatal" "Failed\n" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 				debug   "fatal" "(RUN): ${_cnt} Error dumping ${db}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
-				if [ "${MY_WARNINGS}" != "" ]; then
+				if ! MY_WARNINGS="$(mysqldump_pipefail_warnings "${error_statuses}")"; then
 					debug "warn" "${MY_WARNINGS}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 					MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 				fi
@@ -4370,7 +4598,7 @@ for db in ${DATABASES}; do
 
 				[ "${NAGIOS_DB_DUMPED}" = "" ] && NAGIOS_DB_DUMPED="${db}" || NAGIOS_DB_DUMPED="${NAGIOS_DB_DUMPED},${db}"
 
-				if [ "${MY_WARNINGS}" != "" ]; then
+				if ! MY_WARNINGS="$(mysqldump_pipefail_warnings "${error_statuses}")"; then
 					debug  "warn" "(RUN): ${_cnt} Warning dumping ${db}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 					debug "warn" "${MY_WARNINGS}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 					MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
@@ -4390,98 +4618,27 @@ for db in ${DATABASES}; do
 
 
 
-
-
-
-
-
-
-
-				#
-				#
-				#
-				#
-				# TODO: FUNCTIONALIZE!!!!!!!!!!!!!!!
-				#
-				#
-				#
-
-
-
 				#
 				# Write file info?
 				#
 				if [ "${DUMP_FILE_INFO}" = "1" ]; then
-					debug "trace" "(RUN): ${_cnt} Info File: ${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}.info" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
-					mtime="$( get_file_mtime "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" )"
-					mtime_h="$( formatted_timestamp "${mtime}" "%Y-%m-%d %H:%M:%S %Z [%z]" )"
+					write_info_file "${DUMP_DIR}" "${DUMP_FILE_PRE}${db}${ext}" "${DUMP_FILE_CHMOD}" \
+						"${db}" "${DB_SIZE_B}" "TODO:TABLE_CNT" "${MYSQLDUMP_ARGUMENTS}" "$((endtime - starttime))" \
+						"${COMPRESS}" "${COMPRESS_BIN}" "${COMPRESS_ARG}" \
+						"${ENCRYPT}" "${OPENSSL_ALGO_ARG}" "${OPENSSL_PUBKEY_PEM}" \
+						"${MYSQL_ARGUMENTS}" "${MYSQL_SSL_ENABLE}" "${MYSQL_SSL_STATUS}" \
+						"${MYSQL_SERVER_STATUS}" "${MYSQL_HOST}" "${MYSQL_PORT}" "${MYSQL_SERVER_TYPE}" "${MYSQL_SERVER}" "${MYSQL_VERSION}"
 
-					# Set umask prior writing
-					#
-					umask "$(chmod_2_umask "${DUMP_FILE_CHMOD}")";
+					if [ "$?" != "0" ]; then
+						debug "err" "(RUN)" "${_cnt} Could not write info File: ${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}.info" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+					else
+						debug "trace" "(RUN): ${_cnt} Info File: ${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}.info" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+					fi
 
-					# Create file
-					{
-						echo "; mysqldump-secure backup record";
-						echo "; Do not alter this file!";
-						echo "; Creation of this file can be turned off via config file.";
-						echo;
-						echo "[mysqldump-secure]";
-						echo "version = ${INFO_VERSION}";
-						echo "vdate   = ${INFO_DATE}";
-						echo "config  = ${CONFIG_FILE}";
-						echo;
-						echo "[system]";
-						echo "host = $( hostname )";
-						echo "user = $( whoami )";
-						echo;
-						echo "[file]";
-						echo "file_path  = ${DUMP_DIR}";
-						echo "file_name  = ${DUMP_FILE_PRE}${db}${ext}";
-						echo "file_size  = $( get_file_size "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "b" ) Bytes ($( get_file_size "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "m" ) MB)";
-						echo "file_chmod = $( get_file_chmod "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" )";
-						echo "file_owner = $( get_file_owner "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" )";
-						echo "file_group = $( get_file_group "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" )";
-						echo "file_mtime = ${mtime} (${mtime_h})";
-						echo "file_md5   = $( get_file_hash "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "md5" )";
-						echo "file_sha   = $( get_file_hash "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "sha256" )";
-						echo;
-						echo "[mysqldump]";
-						echo "encrypted  = ${ENCRYPT}";
-						echo "compressed = ${COMPRESS}";
-						echo "mysqldump  = ${MYSQLDUMP_ARGUMENTS}";
-						echo "duration   = $((endtime - starttime)) sec"
-						echo;
-						echo "[compression]";
-						echo "bin = $(if [ "${COMPRESS}" = "1" ]; then echo "${COMPRESS_BIN}"; fi)";
-						echo "arg = $(if [ "${COMPRESS}" = "1" ]; then echo "${COMPRESS_ARG}"; fi)";
-						echo;
-						echo "[encryption]";
-						echo "aes_arg = $(if [ "${ENCRYPT}" = "1" ]; then echo "${OPENSSL_ALGO_ARG}"; fi)";
-						echo "rsa_pem = $(if [ "${ENCRYPT}" = "1" ]; then echo "${OPENSSL_PUBKEY_PEM}"; fi)";
-						echo;
-						echo "[connection]";
-						echo "protocol  = $( get_mysql_connection_type_info "${MYSQL_SERVER_STATUS}" )";
-						echo "secured   = $(if [ "${MYSQL_SSL_ENABLE}" = "1" ]; then echo "SSL: ${MYSQL_SSL_STATUS}"; else echo "No SSL"; fi )";
-						echo "arguments = ${MYSQL_ARGUMENTS}";
-						echo;
-						echo "[server]";
-						echo "host    = ${MYSQL_HOST}";
-						echo "port    = ${MYSQL_PORT}";
-						echo "type    = ${MYSQL_SERVER_TYPE}";
-						echo "version = $(if [ "${MYSQL_SERVER}" != "" ]; then echo "${MYSQL_SERVER} ";fi)${MYSQL_VERSION}";
-						echo;
-						echo "[database]";
-						echo "db_name = ${db}";
-						echo "db_size = ${DB_SIZE_B} Bytes (${DB_SIZE_MB} MB)";
-						echo "tbl_cnt = $( echo "${TBL_ENGINES}" | grep -c '' )";
-						echo;
-						echo "[tables]";
-						echo "${TBL_ENGINES}" | sed 's/=/ = /g';
-						echo;
-					} > "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}.info"
 				fi
+
+
 
 			fi
 
@@ -4588,6 +4745,8 @@ fi
 #
 #
 if [ "${NAGIOS_LOG}" = "1" ]; then
+
+
 	debug "debug" "(RUN): Writing nagios logfile" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
 	{
