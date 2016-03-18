@@ -895,6 +895,13 @@ round() {
 }
 
 
+################################################################################
+#
+#  S T R I N G   F U N C T I O N S
+#
+################################################################################
+
+
 #
 # Get the length of a string.
 #
@@ -904,6 +911,32 @@ str_len() {
 	echo "${1}" | awk '{print length()}'
 }
 
+
+# Concatenate two strings with a glue (separator).
+# Do not add separator if first string is empty.
+#
+# @param  string  First string
+# @param  string  Glue
+# @param  string  Second string
+# @output string  Final string
+str_join() {
+	_first="${1}"
+	_glue="${2}"
+	_last="${3}"
+
+	if [ "${_first}" = "" ]; then
+		echo "${_last}";
+		return 0
+	elif [ "${_last}" = "" ]; then
+		echo "${_first}";
+		return 0
+	fi
+
+	# Make sure $_glue is within the placeholder part of printf
+	# this way it can also use '\n' and make a real newline
+	printf "%s${_glue}%s" "${_first}" "${_last}"
+	return
+}
 
 
 ################################################################################
@@ -4395,7 +4428,7 @@ for db in ${DATABASES}; do
 		fi
 
 		TOTAL_IGN=$((TOTAL_IGN + 1))
-		[ "${NAGIOS_DB_IGNORED}" = "" ] && NAGIOS_DB_IGNORED="${db}" || NAGIOS_DB_IGNORED="${NAGIOS_DB_IGNORED},${db}"
+		NAGIOS_DB_IGNORED="$( str_join "${NAGIOS_DB_IGNORED}" "${db}" ","  )"
 
 	#
 	# Main case 2 (file exists on disk)
@@ -4406,7 +4439,7 @@ for db in ${DATABASES}; do
 		TOTAL_ERR=$((TOTAL_ERR + 1))
 
 		# Add failed db to nagios log
-		[ "${NAGIOS_DB_ERROR}" = "" ] && NAGIOS_DB_ERROR="${db}" || NAGIOS_DB_ERROR="${NAGIOS_DB_ERROR},${db}"
+		NAGIOS_DB_ERROR="$( str_join "${NAGIOS_DB_ERROR}" "${db}" ","  )"
 
 		debug "err" "(RUN): ${_cnt} Failed:   ${db} cannot be written to disk (file exists: ${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext})" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 2)"
@@ -4589,7 +4622,8 @@ for db in ${DATABASES}; do
 			TOTAL_ERR=$((TOTAL_ERR + 1))
 			MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
 			NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 2)"
-			[ "${NAGIOS_DB_ERROR}" = "" ] && NAGIOS_DB_ERROR="${db}" || NAGIOS_DB_ERROR="${NAGIOS_DB_ERROR},${db}"
+			NAGIOS_DB_ERROR="$( str_join "${NAGIOS_DB_ERROR}" "${db}" ","  )"
+
 		else
 			TOTAL_DBS=$((TOTAL_DBS + 1))
 			endtime=$(date +%s)
@@ -4597,11 +4631,10 @@ for db in ${DATABASES}; do
 			debug_i "ok"    "$((endtime - starttime)) sec ($(get_file_size "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "m") MB)\n" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 			debug   "trace" "(RUN): ${_cnt} Dump File: ${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}"  "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
-
-			[ "${NAGIOS_DB_DUMPED}" = "" ] && NAGIOS_DB_DUMPED="${db}" || NAGIOS_DB_DUMPED="${NAGIOS_DB_DUMPED},${db}"
+			NAGIOS_DB_DUMPED="$( str_join "${NAGIOS_DB_DUMPED}" "${db}" ","  )"
 
 			if ! MY_WARNINGS="$(mysqldump_pipefail_warnings "${error_statuses}")"; then
-				debug  "warn" "(RUN): ${_cnt} Warning dumping ${db}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+				debug "warn" "(RUN): ${_cnt} Warning dumping ${db}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 				debug "warn" "${MY_WARNINGS}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 				MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 			fi
