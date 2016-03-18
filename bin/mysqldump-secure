@@ -4272,8 +4272,8 @@ fi
 
 # Binaries
 #MYSQL="$(which mysql 2>/dev/null)"
-MYSQLDUMP="$(which mysqldump 2>/dev/null)"
-OPENSSL="$(which openssl 2>/dev/null)"
+#MYSQLDUMP="$(which mysqldump 2>/dev/null)"
+#OPENSSL="$(which openssl 2>/dev/null)"
 TMPWATCH="$(which "${DELETE_METHOD}" 2>/dev/null)"	# This can be tmpwatch or tmpreaper
 MKTEMP="$(which mktemp 2>/dev/null)"
 
