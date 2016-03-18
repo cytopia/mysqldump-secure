@@ -1786,6 +1786,74 @@ mysql_database_is_empty() {
 	return "${_result}"
 }
 
+############################################################
+# Table Helper Helper
+############################################################
+
+# Count all InnoDB tables
+#
+# @param  string  Credentials file (mysqldump-secure.cnf).
+# @param  string  SSL connection options.
+# @param  string  Database.
+count_innodb_tables() {
+	_cnf_file="${1}"
+	_ssl_opts="${2}"
+	_database="${3}"
+	_exit=1
+
+	_query="SELECT COUNT(TABLE_NAME) AS cnt
+				FROM information_schema.TABLES
+				WHERE ENGINE = 'InnoDB'
+				AND TABLE_SCHEMA = '${_database}';"
+
+	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_result="$( echo "${_result}" | tail -n1 )"
+
+	return "${_result}"
+}
+
+# Count all InnoDB tables
+#
+# @param  string  Credentials file (mysqldump-secure.cnf).
+# @param  string  SSL connection options.
+# @param  string  Database.
+count_non_innodb_tables() {
+	_cnf_file="${1}"
+	_ssl_opts="${2}"
+	_database="${3}"
+	_exit=1
+
+	_query="SELECT COUNT(TABLE_NAME) AS cnt
+				FROM information_schema.TABLES
+				WHERE ENGINE <> 'InnoDB'
+				AND TABLE_SCHEMA = '${_database}';"
+
+	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_result="$( echo "${_result}" | tail -n1 )"
+
+	return "${_result}"
+}
+
+# Count all tables
+#
+# @param  string  Credentials file (mysqldump-secure.cnf).
+# @param  string  SSL connection options.
+# @param  string  Database.
+count_total_tables() {
+	_cnf_file="${1}"
+	_ssl_opts="${2}"
+	_database="${3}"
+	_exit=1
+
+	_query="SELECT COUNT(TABLE_NAME) AS cnt
+				FROM information_schema.TABLES
+				WHERE TABLE_SCHEMA = '${_database}';"
+
+	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_result="$( echo "${_result}" | tail -n1 )"
+
+	return "${_result}"
+}
 
 
 # Get all table names and table-engines
@@ -2018,6 +2086,58 @@ validate_cnf_file() {
 #
 ################################################################################
 
+
+get_consistency_opts() {
+	_consistent_dump_only_innodb="${1}"
+	_consistent_dump_mixed_innodb="${2}"
+	_consistent_dump_no_innodb="${3}"
+	_tbl_cnt_innodb="${4}"
+	_tbl_cnt_others="${5}"
+
+	_lock_opts="--skip-lock-tables"
+
+	#
+	# Case 1: Only InnoDB Tables
+	#
+	if [ "${_tbl_cnt_others}" = "0" ]; then
+		# Apply consistency to InnoDB
+		if [ "${_consistent_dump_only_innodb}" = "1" ]; then
+			_lock_opts="--single-transaction"
+		else
+			_lock_opts="--skip-lock-tables"
+		fi
+	#
+	# Case 2: InnoDB + Other Tables
+	#
+	elif [ "${_tbl_cnt_innodb}" != "0" ] && [ "${_tbl_cnt_others}" != "0" ]; then
+		# Apply consistency to InnoDB
+		if [ "${_consistent_dump_mixed_innodb}" = "1" ]; then
+			_lock_opts="--lock-tables"
+		elif [ "${_consistent_dump_mixed_innodb}" = "2" ]; then
+			_lock_opts="--single-transaction"
+		else
+			_lock_opts="--skip-lock-tables"
+		fi
+	#
+	# Case 3: No InnoDB Tables
+	#
+	elif [ "${_tbl_cnt_innodb}" = "0" ]; then
+		# Apply consistency to InnoDB
+		if [ "${_consistent_dump_no_innodb}" = "1" ]; then
+			_lock_opts="--lock-tables"
+		else
+			_lock_opts="--skip-lock-tables"
+		fi
+	#
+	# Case 4: FALLBACK
+	#
+	else
+		_lock_opts="--skip-lock-tables"
+	fi
+
+	echo "${_lock_opts}"
+	return 0
+}
 
 
 run_mysqldump() {
@@ -4347,79 +4467,40 @@ for db in ${DATABASES}; do
 		# All Good, file can be written
 		else
 
+			# Database size
+			DB_SIZE_B="$( get_mysql_database_size "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
+			DB_SIZE_KB="$( div "${DB_SIZE_B}" "1024" )"
+			DB_SIZE_MB="$( div "${DB_SIZE_KB}" "1024" )"
+			DB_SIZE_MB="$( round "${DB_SIZE_MB}" "2" )"
+
+			# Total Database size (aggregated db size)
+			TOTAL_SIZE=$( sum "${TOTAL_SIZE}" "${DB_SIZE_MB}" )
+
+			# Number of tables
+			_TBL_CNT_TOTAL="$( count_total_tables ${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
+			_TBL_CNT_INNODB="$( count_innodb_tables "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
+			_TBL_CNT_OTHERS="$( count_non_innodb_tables "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
+
+
+			debug "trace" "(RUN): ${_cnt} Number of total tables:       ${_TBL_CNT_TOTAL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
+			debug "trace" "(RUN): ${_cnt} Number of InnoDB tables:      ${_TBL_CNT_INNODB}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
+			debug "trace" "(RUN): ${_cnt} Number of non-InnoDB tables:  ${_TBL_CNT_OTHERS}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
 
 
 			#
-			# TODO: FUNCTIONALIZE
-			#  (Get MYSQLDUMP options)
+			# CONSISTENCY OPTIONS (By Table Engines)
 			#
-			#
-			#
-
-
-			#
-			# TABLE ENGINES
-			#
-			_TABLES_INNODB=""
-			_TABLES_OTHER=""
-			MYSQL_LOCK_OPTS="--skip-lock-tables"
-
-
-			# Get all table names and engines separated with '#'.
-			# E.g: "test_table#InnoDB"
-			TBL_ENGINES="$( get_mysql_database_table_names_and_engines "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" "=" )"
-			IFS='
-			'
-
-			# Assign Dump options to table engines.
-			for _line in ${TBL_ENGINES}; do
-				_table="$(echo "${_line}" | awk -F '=' '{print $1}')"
-				_engine="$(echo "${_line}" | awk -F '=' '{print $2}')"
-
-				if [ "${_engine}" = "InnoDB" ]; then
-					[ -z "${_TABLES_INNODB}" ] && _TABLES_INNODB="${_table}" || _TABLES_INNODB="$( printf "%s %s" "${_TABLES_INNODB}" "${_table}")"
-				else
-					[ -z "${_TABLES_OTHER}"  ] && _TABLES_OTHER="${_table}"  || _TABLES_OTHER="$( printf "%s %s" "${_TABLES_OTHER}" "${_table}")"
-				fi
-			done
-			unset IFS
-
-
 			# information_schema and performance schema are special tables, which do not allow locking
 			if [ "${db}" != "information_schema" ] && [ "${db}" != "performance_schema" ]; then
-
-				# Apply consistency to InnoDB
-				if [ "${CONSISTENT_DUMP_ONLY_INNODB}" = "1" ] && [ "${_TABLES_OTHER}" = "" ]; then
-					debug "trace" "(RUN): ${_cnt} All tables use InnoDB. Dumping with --single-transaction" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
-					MYSQL_LOCK_OPTS="--single-transaction"
-				elif [ "${CONSISTENT_DUMP_NO_INNODB}" = "1" ] && [ "${_TABLES_INNODB}" = "" ]; then
-					debug "trace" "(RUN): ${_cnt} No tables use InnoDB. Dumping with --lock-tables" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
-					debug "trace" "(RUN): ${_cnt} Non InnoDB tables: ${_TABLES_OTHER}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
-					MYSQL_LOCK_OPTS="--lock-tables"
-				elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "1" ] && [ "${_TABLES_INNODB}" != "" ] && [ "${_TABLES_OTHER}" != "" ]; then
-					debug "trace" "(RUN): ${_cnt} Some tables don't use InnoDB. Dumping with --lock-tables" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
-					debug "trace" "(RUN): ${_cnt} Non InnoDB tables: ${_TABLES_OTHER}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
-					MYSQL_LOCK_OPTS="--lock-tables"
-				elif [ "${CONSISTENT_DUMP_MIXED_INNODB}" = "2" ] && [ "${_TABLES_INNODB}" != "" ] && [ "${_TABLES_OTHER}" != "" ]; then
-					debug "trace" "(RUN): ${_cnt} Some tables don't use InnoDB. Dumping with --single-transaction" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
-					debug "trace" "(RUN): ${_cnt} Non InnoDB tables: ${_TABLES_OTHER}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
-					MYSQL_LOCK_OPTS="--single-transaction"
-				else
-					debug "trace" "(RUN): ${_cnt} \"${db}\": Not dumping consistently with '--lock-tables' or '--single-transaction'." "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
-					debug "trace" "(RUN): ${_cnt} Non InnoDB tables: ${_TABLES_OTHER}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
-					MYSQL_LOCK_OPTS="--skip-lock-tables"
-				fi
-
+				MYSQL_LOCK_OPTS="$( get_consistency_opts "${CONSISTENT_DUMP_ONLY_INNODB}" "${CONSISTENT_DUMP_MIXED_INNODB}" "${CONSISTENT_DUMP_NO_INNODB}" "${_TBL_CNT_INNODB}" "${_TBL_CNT_OTHERS}" )"
+				debug "trace" "(RUN): ${_cnt} Applying consistency setting: ${MYSQL_LOCK_OPTS}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
 			else
-				debug "trace" "(RUN): ${_cnt} \"${db}\" is special and needs '--skip-lock-tables'" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
 				MYSQL_LOCK_OPTS="--skip-lock-tables"
+				debug "trace" "(RUN): ${_cnt} \"${db}\" is special and needs '--skip-lock-tables'" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}" "${_ARG_VERB}"
 			fi
 
-
-
-
 			#
-			# VIRTUAL DATABASES
+			# SPECIAL OPTIONS (By Virtual Databases)
 			#
 			MYSQL_SPECIAL_OPTS=""
 
@@ -4430,48 +4511,25 @@ for db in ${DATABASES}; do
 				MYSQL_SPECIAL_OPTS="--skip-events"
 			fi
 
-
 			#
-			# DATABASE SIZE
-			#
-			DB_SIZE_B="$( get_mysql_database_size "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
-			DB_SIZE_KB="$( div "${DB_SIZE_B}" "1024" )"
-			DB_SIZE_MB="$( div "${DB_SIZE_KB}" "1024" )"
-			DB_SIZE_MB="$( round "${DB_SIZE_MB}" "2" )"
-
-
-			TOTAL_SIZE=$( sum "${TOTAL_SIZE}" "${DB_SIZE_MB}" )
-
-			#
-			# MYSQL --quick/--skip-quick OPTION
+			# QUICK OPTION (--quick/--skip-quick dependent on size)
 			#
 			MYSQL_QUICK_OPT="$(echo "${DB_SIZE_MB} ${MYSQL_OPTS_QUICK_MIN_SIZE}" | awk '{print ($1 >= $2) ? "--quick" : "--skip-quick" }')"
 
-
 			#
-			# RESET pipefail VARIABLE
-			#
-			error_statuses=""
-
-
-			#
-			# TRACK TIME
-			#
-			starttime=$(date +%s)
-
-
-			#
-			# GO GO GO!
-			#
-
-			#
-			# Build final MySQLDump arguments
+			# FINAL OPTIONS (Build final MySQLDump arguments)
 			#
 			MYSQL_ARGUMENTS="--defaults-file=${MYSQL_CNF_FILE} ${MYSQL_SSL_ARGS}"
 			MYSQLDUMP_ARGUMENTS="${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} ${MYSQL_SPECIAL_OPTS} ${MYSQL_QUICK_OPT}"
 
 
+
 			debug_pi "info" "(SQL): ${_cnt} Dumping:  ${db} (${DB_SIZE_MB} MB) " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+
+
+			# TRACK TIME
+			starttime=$(date +%s)
+
 
 			#
 			# Case 1/4 Plain
@@ -4488,7 +4546,6 @@ for db in ${DATABASES}; do
 					"${OPENSSL_ALGO_ARG}" "${OPENSSL_PUBKEY_PEM}" \
 					"${MY_TMP_DIR}"
 				)"
-
 			#
 			# Case 2/4 Compressed
 			#
@@ -4504,8 +4561,6 @@ for db in ${DATABASES}; do
 					"${OPENSSL_ALGO_ARG}" "${OPENSSL_PUBKEY_PEM}" \
 					"${MY_TMP_DIR}"
 				)"
-
-
 			#
 			# Case 3/4 Encrypted
 			#
@@ -4521,15 +4576,12 @@ for db in ${DATABASES}; do
 					"${OPENSSL_ALGO_ARG}" "${OPENSSL_PUBKEY_PEM}" \
 					"${MY_TMP_DIR}"
 				)"
-
 			#
 			# Case 4/4 Compressed && Encrypted
 			#
 			elif [ "${COMPRESS}" = "1" ] && [ "${ENCRYPT}" = "1" ];  then
 
-
 				ext=".sql.${COMPRESS_EXT}.enc"
-
 				debug_i "debug"  "(compressed) (encrypted) $( [ "${MYSQL_LOCK_OPTS}" != "" ] && echo "(${MYSQL_LOCK_OPTS}) " )$( [ "${MYSQL_SPECIAL_OPTS}" != "" ] && echo "(${MYSQL_SPECIAL_OPTS}}) ")(${MYSQL_QUICK_OPT}) " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
 				# Run Compressed & Encrypted
@@ -4539,9 +4591,8 @@ for db in ${DATABASES}; do
 					"${OPENSSL_ALGO_ARG}" "${OPENSSL_PUBKEY_PEM}" \
 					"${MY_TMP_DIR}"
 				)"
-
 			#
-			# WRONG OPTIONS
+			# Case 5/4: WRONG OPTIONS
 			#
 			else
 				# TODO: Also log to file here
@@ -4604,9 +4655,8 @@ for db in ${DATABASES}; do
 					MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 				fi
 
-
+				#
 				# If all was good, remove required db from list
-				# REQUIRED DATABASES
 				#
 				for req in ${REQUIRE}; do
 					# Required database found?
@@ -4616,36 +4666,31 @@ for db in ${DATABASES}; do
 					fi
 				done
 
-
-
 				#
 				# Write file info?
 				#
 				if [ "${DUMP_FILE_INFO}" = "1" ]; then
 
 					write_info_file "${DUMP_DIR}" "${DUMP_FILE_PRE}${db}${ext}" "${DUMP_FILE_CHMOD}" \
-						"${db}" "${DB_SIZE_B}" "TODO:TABLE_CNT" "${MYSQLDUMP_ARGUMENTS}" "$((endtime - starttime))" \
+						"${db}" "${DB_SIZE_B}" "${_TBL_CNT_TOTAL}" "${MYSQLDUMP_ARGUMENTS}" "$((endtime - starttime))" \
 						"${COMPRESS}" "${COMPRESS_BIN}" "${COMPRESS_ARG}" \
 						"${ENCRYPT}" "${OPENSSL_ALGO_ARG}" "${OPENSSL_PUBKEY_PEM}" \
 						"${MYSQL_ARGUMENTS}" "${MYSQL_SSL_ENABLE}" "${MYSQL_SSL_STATUS}" \
 						"${MYSQL_SERVER_STATUS}" "${MYSQL_HOST}" "${MYSQL_PORT}" "${MYSQL_SERVER_TYPE}" "${MYSQL_SERVER}" "${MYSQL_VERSION}"
 
 					if [ "$?" != "0" ]; then
-						debug "err" "(RUN)" "${_cnt} Could not write info File: ${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}.info" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+						debug "err"   "(RUN): ${_cnt} Could not write info File: ${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}.info" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 					else
 						debug "trace" "(RUN): ${_cnt} Info File: ${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}.info" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 					fi
 
 				fi
 
-
-
 			fi
 
 		fi
 
 	fi
-
 done
 TOTAL_ENDTIME=$(date +%s)
 

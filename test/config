@@ -375,31 +375,34 @@ check() {
 
 		echo "\$ ${txtblu}4. SYNTAX ERROR TEST ...${txtrst}"
 
+		_err="0"
 		_unfound="$(echo "${_OUTPUT}" | grep -E '.*[0-9]*:.*: not found.*')"
 		_syntax="$(echo "${_OUTPUT}" | grep -E '.*[0-9]*:.*: Syntax error:.*')"
+		_file="$(echo "${_OUTPUT}" | grep -E '^.*: line [0-9]*:[[:space:]].*:.*')"
 
 		if [ "${_syntax}" != "" ]; then
-			if [ "${_unfound}" != "" ]; then
-				echo "${_unfound}"
-			fi
 			echo "${_syntax}"
+			_err="1"
+			_ERROR=$((_ERROR+1));
+		fi
+		if [ "${_unfound}" != "" ]; then
+			echo "${_unfound}"
+			_err="1"
+			_ERROR=$((_ERROR+1));
+		fi
+		if [ "${_file}" != "" ]; then
+			echo "${_file}"
+			_err="1"
+			_ERROR=$((_ERROR+1));
+		fi
+
+		if [ "${_err}" != "0" ]; then
 			echo "${txtpur}===> [FAIL]${txtrst}"
 			echo "${txtpur}===> [FAIL] Syntax error found.${txtrst}"
 			echo "${txtpur}===> [FAIL]${txtrst}"
-			_ERROR=$((_ERROR+1));
 		else
-
-			if [ "${_unfound}" != "" ]; then
-				echo "${_unfound}"
-				echo "${txtpur}===> [FAIL]${txtrst}"
-				echo "${txtpur}===> [FAIL] Syntax error found.${txtrst}"
-				echo "${txtpur}===> [FAIL]${txtrst}"
-				_ERROR=$((_ERROR+1));
-			else
-				echo "${txtgrn}===> [OK] No Syntax error found.${txtrst}"
-			fi
+			echo "${txtgrn}===> [OK] No Syntax error found.${txtrst}"
 		fi
-		echo
 	fi
 
 
