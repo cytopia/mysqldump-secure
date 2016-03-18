@@ -92,9 +92,11 @@ _PREFIX_VAR=""
 
 
 
-############################################################
-# Exit codes
-############################################################
+################################################################################
+#
+# EXIT CODES
+#
+################################################################################
 
 # Everything went fine.
 # No errors and no warnings.
@@ -127,9 +129,11 @@ EXIT_INT_ERR=5
 
 
 
-############################################################
-# Warning/Error/Fail count
-############################################################
+################################################################################
+#
+# WARNING, ERROR, FAIL COUNTER
+#
+################################################################################
 
 #
 # How many warnings occured
@@ -204,23 +208,23 @@ _DEFAULT_TMP_DIR="/tmp"
 
 # These command line arguments are considered insecure and can lead
 # to compromising your data
-MYSQL_EVIL_OPTS="--password -p --port -P --user -u --host -h --socket -s"
+MDS_MYSQL_EVIL_OPTS="--password -p --port -P --user -u --host -h --socket -s"
 
 # Do not allow to read any other MySQL configuration file
 # than the one specified in the configuration.
-MYSQL_BAD_OPTS="--no-defaults --defaults-extra-file --defaults-file"
+MDS_MYSQL_BAD_OPTS="--no-defaults --defaults-extra-file --defaults-file"
 # All SSL Options are done via configuration
-MYSQL_BAD_OPTS="${MYSQL_BAD_OPTS} --ssl --ssl-ca --ssl-cert --ssl-key"
+MDS_MYSQL_BAD_OPTS="${MDS_MYSQL_BAD_OPTS} --ssl --ssl-ca --ssl-cert --ssl-key"
 # All Transaction Options (Consistency) are done via configuration
-MYSQL_BAD_OPTS="${MYSQL_BAD_OPTS} --single-transaction --lock-tables --skip-lock-tables"
+MDS_MYSQL_BAD_OPTS="${MDS_MYSQL_BAD_OPTS} --single-transaction --lock-tables --skip-lock-tables"
 # Handled conditionally
-MYSQL_BAD_OPTS="${MYSQL_BAD_OPTS} --quick -q --skip-quick"
+MDS_MYSQL_BAD_OPTS="${MDS_MYSQL_BAD_OPTS} --quick -q --skip-quick"
 
 
 
 ################################################################################
 #
-# T E R M I N A L   C O L O R S
+# TERMINAL COLORS
 #
 ################################################################################
 
@@ -253,11 +257,26 @@ fi
 ####################################################################################################
 ####################################################################################################
 ##
-## GLOBAL FUNCTIONS
+##  G L O B A L   F U N C T I O N S
 ##
 ####################################################################################################
 ####################################################################################################
 
+
+#
+# Naming convention:
+# ------------------
+# Functions starting with '_name' are considered private and should only
+# be called from within other functions.
+#
+
+
+
+################################################################################
+#
+# ABORT
+#
+################################################################################
 
 # This function is used to abort
 # the whole script if internal errors occured.
@@ -882,7 +901,7 @@ round() {
 # @param  string
 # @output integer Length
 str_len() {
-	echo "${1}" | awk '{print length() }'
+	echo "${1}" | awk '{print length()}'
 }
 
 
@@ -1001,13 +1020,10 @@ get_file_size() {
 		_size="$( div "${_size}" "1024" )"
 		_size="$( round "${_size}" "2" )"
 	elif [ "${_unit}" = "m" ]; then
-		_size="$( div "${_size}" "1024" )"
-		_size="$( div "${_size}" "1024" )"
+		_size="$( div "${_size}" "1048576" )"
 		_size="$( round "${_size}" "2" )"
 	elif [ "${_unit}" = "g" ]; then
-		_size="$( div "${_size}" "1024" )"
-		_size="$( div "${_size}" "1024" )"
-		_size="$( div "${_size}" "1024" )"
+		_size="$( div "${_size}" "1073741824" )"
 		_size="$( round "${_size}" "2" )"
 	fi
 
@@ -1049,7 +1065,6 @@ get_file_hash() {
 			_hash="$(echo "${_hash}" | awk '{print $1}')"
 		fi
 	fi
-
 
 	echo "${_hash}"
 	return ${_exit}
@@ -1156,6 +1171,46 @@ get_file_realpath() {
 	return "${_exit}"
 }
 
+# Create a temporary directory using mktemp
+#
+# @param  string	Path where the file should be created
+# @param  string	Chmod of file
+# @output string	Full path of the created temp file
+# @return integer	Success
+create_tmp_dir() {
+	_path="${1}"
+	_chmod="${2}"
+
+	umask "$(chmod_2_umask "${_chmod}")";
+	if ! _dir="$( $(which mktemp) -d "${_path}" 2>/dev/null )"; then
+		return $?
+	else
+		echo "${_dir}"
+	fi
+
+	return 0
+}
+
+
+# Create a temporary file using mktemp
+#
+# @param  string	Path where the file should be created
+# @param  string	Chmod of file
+# @output string	Full path of the created temp file
+# @return integer	Success
+create_tmp_file() {
+	_path="${1}"
+	_chmod="${2}"
+
+	umask "$(chmod_2_umask "${_chmod}")";
+	if ! _file="$( $(which mktemp) "${_path}" 2>/dev/null )"; then
+		return $?
+	else
+		echo "${_file}"
+	fi
+
+	return 0
+}
 
 
 
@@ -1191,7 +1246,7 @@ valid_chmod() {
 			return 1
 		fi
 
-
+		# Error out
 		if [ "$r" -lt 0 ] || [ "$r" -gt 7 ]; then
 			return 1
 		fi
@@ -1222,7 +1277,7 @@ valid_chmod() {
 			return 1
 		fi
 
-
+		# Error out
 		if [ "$s" -lt 0 ] || [ "$s" -gt 7 ]; then
 			return 1
 		fi
@@ -1288,7 +1343,7 @@ compare_chmod() {
 # @return integer	0
 chmod_2_umask() {
 	_chmod="${1}"
-	_len="$(echo "${_chmod}" | awk '{ print length()   }')"
+	_len="$(echo "${_chmod}" | awk '{print length()}')"
 
 	if [ "${_len}" = "3" ]; then
 		r=$(echo "${_chmod}" | awk '{print substr($0,1,1)}')
@@ -1856,38 +1911,6 @@ count_total_tables() {
 }
 
 
-# Get all table names and table-engines
-# as a multiline string, separated by a custom
-# separator
-#
-# @param  string  Credentials file (mysqldump-secure.cnf).
-# @param  string  SSL connection options.
-# @param  string  Database.
-# @param  char    Separator
-# @return integer 0: Empty | 1: Not empty
-get_mysql_database_table_names_and_engines() {
-	_cnf_file="${1}"
-	_ssl_opts="${2}"
-	_database="${3}"
-	_separator="${4}"
-	_exit=1
-
-
-	# Get NAME<sep>ENGINE list for given database
-	_query="SELECT CONCAT(TABLE_NAME, '${_separator}',ENGINE) AS t
-				FROM information_schema.TABLES
-				WHERE TABLE_SCHEMA = '${_database}';"
-
-	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
-	_exit=$?
-	_result="$( echo "${_result}" | grep -E "^.*[${_separator}].*$")"
-
-
-	echo "${_result}"
-	return ${_exit}
-}
-
-
 
 ################################################################################
 #
@@ -2153,16 +2176,7 @@ run_mysqldump() {
 	_tmp_dir="${10}"
 
 
-
-	#
-	# TODO: Subshell is not necessary!!!!!!!!!!!!!!!!!!!!!
-	#
-	# TODO: Add deletion errors (6,7,8)
-
-	#
-	# TODO: Handle error on non-writable tmpfiles!!!
-	# (Remove subshell and just output 1:1:Could not create tmpfile)
-	#
+	_error_statuses=""
 
 	#
 	# 0: Plain
@@ -2172,39 +2186,33 @@ run_mysqldump() {
 		# Temp file 'mysqldump'
 		_err_tmp_file_dump="0:"
 		_ern_tmp_file_dump="0"
-		umask "$(chmod_2_umask "0600")";
-		if ! _tmp_file_dump="$( $(which mktemp) "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" 2>/dev/null)"; then
+		if ! _tmp_file_dump="$( create_tmp_file "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" "0600" 2>/dev/null)"; then
 			_err_tmp_file_dump="1:Could not create tmp file in: ${_tmp_dir}"
 			_ern_tmp_file_dump="1"
 		fi
 
-		# Creating a subshell, so umask does not affect the whole script
-		(
-			# Set umask prior writing, so we get the correct chmod just at the time of writing to disk
-			umask "$(chmod_2_umask "${_file_chmod}")";
+		# Set umask prior writing, so we get the correct chmod just at the time of writing to disk
+		umask "$(chmod_2_umask "${_file_chmod}")";
 
-			# POSIX pipefail emulation
-			exec 4>&1
-
-			# Ignore ${_mysql_arg} to be quoted
-			# shellcheck disable=SC2086
-			_error_statuses="$( (
-				(
-					$(which mysqldump) ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}" > "${_file_name}";
-					printf "%s\n%s\n" \
-						"0:$?:$(head -n1 "${_tmp_file_dump}")" \
-						"3:${_err_tmp_file_dump}" >&3;
-				)
-			) 3>&1 >&4)"
-			exec 4>&-
-
-			# Output the error statuses
-			echo "${_error_statuses}"
-		)
+		# POSIX pipefail emulation
+		exec 4>&1
+		# Ignore ${_mysql_arg} to be quoted
+		# shellcheck disable=SC2086
+		_error_statuses="$( (
+			(
+				$(which mysqldump) ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}" > "${_file_name}";
+				printf "%s\n%s\n" \
+					"0:$?:$(head -n1 "${_tmp_file_dump}")" \
+					"3:${_err_tmp_file_dump}" >&3;
+			)
+		) 3>&1 >&4)"
+		exec 4>&-
 
 		# Delete tmp file
 		if [ "${_ern_tmp_file_dump}" = "0" ]; then
-			rm "${_tmp_file_dump}" 2>/dev/null;
+			if ! rm "${_tmp_file_dump}" 2>/dev/null; then
+				_error_statuses="$( printf "${_error_statuses}\n%s" "6:1:Could not delete tmp file in: ${_tmp_file_dump}" )"
+			fi
 		fi
 
 
@@ -2216,57 +2224,52 @@ run_mysqldump() {
 		# Temp file 'mysqldump'
 		_err_tmp_file_dump="0:"
 		_ern_tmp_file_dump="0"
-		umask "$(chmod_2_umask "0600")";
-		if ! _tmp_file_dump="$( $(which mktemp) "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" 2>/dev/null)"; then
+		if ! _tmp_file_dump="$( create_tmp_file "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" "0600" 2>/dev/null)"; then
 			_err_tmp_file_dump="1:Could not create tmp file in: ${_tmp_dir}"
 			_ern_tmp_file_dump="1"
 		fi
 		# Temp file 'compress'
 		_err_tmp_file_comp="0:"
 		_ern_tmp_file_comp="0"
-		umask "$(chmod_2_umask "0600")";
-		if ! _tmp_file_comp="$( $(which mktemp) "${_tmp_dir}/.comp_XXXXXXXXXXXXXXX" 2>/dev/null)"; then
+		if ! _tmp_file_comp="$( create_tmp_file "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" "0600" 2>/dev/null)"; then
 			_err_tmp_file_comp="1:Could not create tmp file in: ${_tmp_dir}"
 			_ern_tmp_file_comp="1"
 		fi
 
-		# Creating a subshell, so umask does not affect the whole script
-		(
-			# Set umask prior writing, so we get the correct chmod just at the time of writing to disk
-			umask "$(chmod_2_umask "${_file_chmod}")";
+		# Set umask prior writing, so we get the correct chmod just at the time of writing to disk
+		umask "$(chmod_2_umask "${_file_chmod}")";
 
-			# POSIX pipefail emulation
-			exec 4>&1
-
-			# Ignore ${_mysql_arg} to be quoted
-			# shellcheck disable=SC2086
-			_error_statuses="$( (
-				(
-					$(which mysqldump) ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}";
-					printf "%s\n%s\n" \
-						"0:$?:$(head -n1 "${_tmp_file_dump}")" \
-						"3:${_err_tmp_file_dump}" >&3;
-				) |
-				(
-					${_compress_bin} ${_compress_arg} 2> "${_tmp_file_comp}" > "${_file_name}";
-					printf "%s\n%s\n" \
-						"1:$?:$(head -n1 "${_tmp_file_comp}")" \
-						"4:${_err_tmp_file_comp}" >&3;
-				)
-			) 3>&1 >&4)"
-			exec 4>&-
-
-			# Output the error statuses
-			echo "${_error_statuses}"
-		)
+		# POSIX pipefail emulation
+		exec 4>&1
+		# Ignore ${_mysql_arg} to be quoted
+		# shellcheck disable=SC2086
+		_error_statuses="$( (
+			(
+				$(which mysqldump) ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}";
+				printf "%s\n%s\n" \
+					"0:$?:$(head -n1 "${_tmp_file_dump}")" \
+					"3:${_err_tmp_file_dump}" >&3;
+			) |
+			(
+				${_compress_bin} ${_compress_arg} 2> "${_tmp_file_comp}" > "${_file_name}";
+				printf "%s\n%s\n" \
+					"1:$?:$(head -n1 "${_tmp_file_comp}")" \
+					"4:${_err_tmp_file_comp}" >&3;
+			)
+		) 3>&1 >&4)"
+		exec 4>&-
 
 		# Delete tmp file
 		if [ "${_ern_tmp_file_dump}" = "0" ]; then
-			rm "${_tmp_file_dump}" 2>/dev/null;
+			if ! rm "${_tmp_file_dump}" 2>/dev/null; then
+				_error_statuses="$( printf "${_error_statuses}\n%s" "6:1:Could not delete tmp file in: ${_tmp_file_dump}" )"
+			fi
 		fi
 		# Delete tmp file
 		if [ "${_ern_tmp_file_comp}" = "0" ]; then
-			rm "${_tmp_file_comp}" 2>/dev/null;
+			if ! rm "${_tmp_file_comp}" 2>/dev/null; then
+				_error_statuses="$( printf "${_error_statuses}\n%s" "7:1:Could not delete tmp file in: ${_tmp_file_comp}" )"
+			fi
 		fi
 
 
@@ -2278,62 +2281,56 @@ run_mysqldump() {
 		# Temp file 'mysqldump'
 		_err_tmp_file_dump="0:"
 		_ern_tmp_file_dump="0"
-		umask "$(chmod_2_umask "0600")";
-		if ! _tmp_file_dump="$( $(which mktemp) "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" 2>/dev/null)"; then
+		if ! _tmp_file_dump="$( create_tmp_file "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" "0600" 2>/dev/null)"; then
 			_err_tmp_file_dump="1:Could not create tmp file in: ${_tmp_dir}"
 			_ern_tmp_file_dump="1"
 		fi
 		# Temp file 'encrypt'
 		_err_tmp_file_encr="0:"
 		_ern_tmp_file_encr="0"
-		umask "$(chmod_2_umask "0600")";
-		if ! _tmp_file_encr="$( $(which mktemp) "${_tmp_dir}/.encr_XXXXXXXXXXXXXXX" 2>/dev/null)"; then
+		if ! _tmp_file_encr="$( create_tmp_file "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" "0600" 2>/dev/null)"; then
 			_err_tmp_file_encr="1:Could not create tmp file in: ${_tmp_dir}"
 			_ern_tmp_file_encr="1"
 		fi
 
+		# Set umask prior writing, so we get the correct chmod just at the time of writing to disk
+		umask "$(chmod_2_umask "${_file_chmod}")";
 
-		# Creating a subshell, so umask does not affect the whole script
-		(
-			# Set umask prior writing, so we get the correct chmod just at the time of writing to disk
-			umask "$(chmod_2_umask "${_file_chmod}")";
+		# POSIX pipefail emulation
+		exec 4>&1
 
-			# POSIX pipefail emulation
-			exec 4>&1
+		# Ignore ${_mysql_arg} to be quoted
+		# shellcheck disable=SC2086
+		_error_statuses="$( (
+			(
+				$(which mysqldump) ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}";
+				printf "%s\n%s\n" \
+					"0:$?:$(head -n1 "${_tmp_file_dump}")" \
+					"3:${_err_tmp_file_dump}" >&3;
 
-			# Ignore ${_mysql_arg} to be quoted
-			# shellcheck disable=SC2086
-			_error_statuses="$( (
-				(
-					$(which mysqldump) ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}";
-					printf "%s\n%s\n" \
-						"0:$?:$(head -n1 "${_tmp_file_dump}")" \
-						"3:${_err_tmp_file_dump}" >&3;
+			) |
+			(
+				$(which openssl) smime -encrypt -binary -text -outform DER ${_openssl_algo} -out "${_file_name}" "${_openssl_cert}" 2> "${_tmp_file_encr}";
+				printf "%s\n%s\n" \
+					"2:$?:$(head -n1 "${_tmp_file_encr}")" \
+					"5:${_err_tmp_file_encr}" >&3;
+			)
 
-				) |
-				(
-					$(which openssl) smime -encrypt -binary -text -outform DER ${_openssl_algo} -out "${_file_name}" "${_openssl_cert}" 2> "${_tmp_file_encr}";
-					printf "%s\n%s\n" \
-						"2:$?:$(head -n1 "${_tmp_file_encr}")" \
-						"5:${_err_tmp_file_encr}" >&3;
-				)
-
-			) 3>&1 >&4)"
-			exec 4>&-
-
-			# Output the error statuses
-			echo "${_error_statuses}"
-		)
+		) 3>&1 >&4)"
+		exec 4>&-
 
 		# Delete tmp file
 		if [ "${_ern_tmp_file_dump}" = "0" ]; then
-			rm "${_tmp_file_dump}" 2>/dev/null;
+			if ! rm "${_tmp_file_dump}" 2>/dev/null; then
+				_error_statuses="$( printf "${_error_statuses}\n%s" "6:1:Could not delete tmp file in: ${_tmp_file_dump}" )"
+			fi
 		fi
 		# Delete tmp file
 		if [ "${_ern_tmp_file_encr}" = "0" ]; then
-			rm "${_tmp_file_encr}" 2>/dev/null;
+			if ! rm "${_tmp_file_encr}" 2>/dev/null; then
+				_error_statuses="$( printf "${_error_statuses}\n%s" "8:1:Could not delete tmp file in: ${_tmp_file_encr}" )"
+			fi
 		fi
-
 
 
 	#
@@ -2344,79 +2341,78 @@ run_mysqldump() {
 		# Temp file 'mysqldump'
 		_err_tmp_file_dump="0:"
 		_ern_tmp_file_dump="0"
-		umask "$(chmod_2_umask "0600")";
-		if ! _tmp_file_dump="$( $(which mktemp) "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" 2>/dev/null)"; then
+		if ! _tmp_file_dump="$( create_tmp_file "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" "0600" 2>/dev/null)"; then
 			_err_tmp_file_dump="1:Could not create tmp file in: ${_tmp_dir}"
 			_ern_tmp_file_dump="1"
 		fi
 		# Temp file 'compress'
 		_err_tmp_file_comp="0:"
 		_ern_tmp_file_comp="0"
-		umask "$(chmod_2_umask "0600")";
-		if ! _tmp_file_comp="$( $(which mktemp) "${_tmp_dir}/.comp_XXXXXXXXXXXXXXX" 2>/dev/null)"; then
+		if ! _tmp_file_comp="$( create_tmp_file "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" "0600" 2>/dev/null)"; then
 			_err_tmp_file_comp="1:Could not create tmp file in: ${_tmp_dir}"
 			_ern_tmp_file_comp="1"
 		fi
 		# Temp file 'encrypt'
 		_err_tmp_file_encr="0:"
 		_ern_tmp_file_encr="0"
-		umask "$(chmod_2_umask "0600")";
-		if ! _tmp_file_encr="$( $(which mktemp) "${_tmp_dir}/.encr_XXXXXXXXXXXXXXX" 2>/dev/null)"; then
+		if ! _tmp_file_encr="$( create_tmp_file "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" "0600" 2>/dev/null)"; then
 			_err_tmp_file_encr="1:Could not create tmp file in: ${_tmp_dir}"
 			_ern_tmp_file_encr="1"
 		fi
 
-		# Creating a subshell, so umask does not affect the whole script
-		(
-			# Set umask prior writing, so we get the correct chmod just at the time of writing to disk
-			umask "$(chmod_2_umask "${_file_chmod}")";
+		# Set umask prior writing, so we get the correct chmod just at the time of writing to disk
+		umask "$(chmod_2_umask "${_file_chmod}")";
 
-			# POSIX pipefail emulation
-			exec 4>&1
+		# POSIX pipefail emulation
+		exec 4>&1
+		# Ignore ${_mysql_arg} to be quoted
+		# shellcheck disable=SC2086
+		_error_statuses="$( (
+			(
+				$(which mysqldump) ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}";
+				printf "%s\n%s\n" \
+					"0:$?:$(head -n1 "${_tmp_file_dump}")" \
+					"3:${_err_tmp_file_dump}" >&3;
+			) |
+			(
+				${_compress_bin} ${_compress_arg} 2> "${_tmp_file_comp}";
+				printf "%s\n%s\n" \
+					"1:$?:$(head -n1 "${_tmp_file_comp}")" \
+					"4:${_err_tmp_file_comp}" >&3;
+			) |
+			(
+				$(which openssl) smime -encrypt -binary -text -outform DER ${_openssl_algo} -out "${_file_name}" "${_openssl_cert}" 2> "${_tmp_file_encr}";
+				printf "%s\n%s\n" \
+					"2:$?:$(head -n1 "${_tmp_file_encr}")" \
+					"5:${_err_tmp_file_encr}" >&3;
+			)
 
-			# Ignore ${_mysql_arg} to be quoted
-			# shellcheck disable=SC2086
-			_error_statuses="$( (
-				(
-					$(which mysqldump) ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}";
-					printf "%s\n%s\n" \
-						"0:$?:$(head -n1 "${_tmp_file_dump}")" \
-						"3:${_err_tmp_file_dump}" >&3;
-				) |
-				(
-					${_compress_bin} ${_compress_arg} 2> "${_tmp_file_comp}";
-					printf "%s\n%s\n" \
-						"1:$?:$(head -n1 "${_tmp_file_comp}")" \
-						"4:${_err_tmp_file_comp}" >&3;
-				) |
-				(
-					$(which openssl) smime -encrypt -binary -text -outform DER ${_openssl_algo} -out "${_file_name}" "${_openssl_cert}" 2> "${_tmp_file_encr}";
-					printf "%s\n%s\n" \
-						"2:$?:$(head -n1 "${_tmp_file_encr}")" \
-						"5:${_err_tmp_file_encr}" >&3;
-				)
-
-			) 3>&1 >&4)"
-			exec 4>&-
-
-			# Output the error statuses
-			echo "${_error_statuses}"
-		)
+		) 3>&1 >&4)"
+		exec 4>&-
 
 		# Delete tmp file
 		if [ "${_ern_tmp_file_dump}" = "0" ]; then
-			rm "${_tmp_file_dump}" 2>/dev/null;
+			if ! rm "${_tmp_file_dump}" 2>/dev/null; then
+				_error_statuses="$( printf "${_error_statuses}\n%s" "6:1:Could not delete tmp file in: ${_tmp_file_dump}" )"
+			fi
 		fi
 		# Delete tmp file
 		if [ "${_ern_tmp_file_comp}" = "0" ]; then
-			rm "${_tmp_file_comp}" 2>/dev/null;
+			if ! rm "${_tmp_file_comp}" 2>/dev/null; then
+				_error_statuses="$( printf "${_error_statuses}\n%s" "7:1:Could not delete tmp file in: ${_tmp_file_comp}" )"
+			fi
 		fi
 		# Delete tmp file
 		if [ "${_ern_tmp_file_encr}" = "0" ]; then
-			rm "${_tmp_file_encr}" 2>/dev/null;
+			if ! rm "${_tmp_file_encr}" 2>/dev/null; then
+				_error_statuses="$( printf "${_error_statuses}\n%s" "8:1:Could not delete tmp file in: ${_tmp_file_encr}" )"
+			fi
 		fi
-
 	fi
+
+	# Output the error statuses
+	echo "${_error_statuses}"
+	return 0
 }
 
 
@@ -2965,7 +2961,7 @@ fi
 
 
 ############################################################
-# Config File
+# 2.) Validate config file location/rights
 ############################################################
 
 if [ ! -f "${CONFIG_FILE}" ]; then
@@ -3574,7 +3570,7 @@ debug "trace"  "(CFG): mysqldump '--skip-quick': Applied to DB's  < ${MYSQL_OPTS
 # Bad MySQL Opts
 ############################################################
 for opt in ${MYSQL_OPTS}; do
-	for evil in ${MYSQL_EVIL_OPTS}; do
+	for evil in ${MDS_MYSQL_EVIL_OPTS}; do
 		if echo "${opt}" | grep -e "^${evil}" > /dev/null 2>&1; then
 			debug "fatal" "(CFG): Insecure mysqldump option found in MYSQL_OPTS: '${opt}'" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 			debug "fatal" "(RUN): Blacklist pattern: '^${evil}'" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
@@ -3583,7 +3579,7 @@ for opt in ${MYSQL_OPTS}; do
 			exit $EXIT_ABORT
 		fi
 	done
-	for bad in ${MYSQL_BAD_OPTS}; do
+	for bad in ${MDS_MYSQL_BAD_OPTS}; do
 		if echo "${opt}" | grep -e "^${bad}" > /dev/null 2>&1; then
 			debug "fatal" "(CFG): Disallowed mysqldump option found in MYSQL_OPTS: '${opt}'" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 			debug "fatal" "(RUN): Blacklist pattern: '^${bad}'" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
@@ -4258,8 +4254,11 @@ fi
 # All variables here
 #
 #
+# Binaries
+BIN_TMPWATCH="$(which "${DELETE_METHOD}" 2>/dev/null)"	# This can be tmpwatch or tmpreaper
 
-
+# Error code for nagios
+NAGIOS_EXIT_CODE=0
 
 
 
@@ -4270,15 +4269,7 @@ fi
 #
 ################################################################################
 
-# Binaries
-#MYSQL="$(which mysql 2>/dev/null)"
-#MYSQLDUMP="$(which mysqldump 2>/dev/null)"
-#OPENSSL="$(which openssl 2>/dev/null)"
-TMPWATCH="$(which "${DELETE_METHOD}" 2>/dev/null)"	# This can be tmpwatch or tmpreaper
-MKTEMP="$(which mktemp 2>/dev/null)"
 
-# Error code for nagios
-ERROR=0
 
 
 
@@ -4287,16 +4278,7 @@ ERROR=0
 ############################################################
 
 # New temporary directory
-#
-#
-#
-#
-#
-# TODO: umask prior creation 0700
-# 
-# 
-# 
-if MY_TMP_DIR="$( ${MKTEMP} -d ${TMP_DIR}/mysqldump-secure.XXXXXXXXXX 2>/dev/null)"; then
+if MY_TMP_DIR="$(create_tmp_dir "${TMP_DIR}/${INFO_NAME}.XXXXXXXXXX" "0700")"; then
 	debug "trace"  "(RUN): Creating tmp dir:  ${MY_TMP_DIR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 else
 	debug "fatal" "(RUN): Cannot create tmp dir:  ${MY_TMP_DIR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
@@ -4304,42 +4286,9 @@ else
 	exit $EXIT_ABORT
 fi
 
-# Temp file 'mysqldump'
-#if MY_TMP_FILE_DUMP="$( ${MKTEMP} "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
-#	debug "trace"  "(RUN): Creating tmp file: ${MY_TMP_FILE_DUMP}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-#else
-#	debug "fatal" "(RUN): Cannot create tmp file: ${MY_TMP_FILE_DUMP}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-#	debug "fatal" "Aborting" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-#	exit $EXIT_ABORT
-#fi
-#
-## Temp file 'compression'
-#if MY_TMP_FILE_COMP="$( ${MKTEMP} "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
-#	debug "trace"  "(RUN): Creating tmp file: ${MY_TMP_FILE_COMP}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-#else
-#	debug "fatal" "(RUN): Cannot create tmp file: ${MY_TMP_FILE_COMP}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-#	debug "fatal" "Aborting" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-#	exit $EXIT_ABORT
-#fi
-#
-## Temp file 'encryption'
-#if MY_TMP_FILE_ENCR="$( ${MKTEMP} "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
-#	debug "trace"  "(RUN): Creating tmp file: ${MY_TMP_FILE_ENCR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-#else
-#	debug "fatal" "(RUN): Cannot create tmp file: ${MY_TMP_FILE_ENCR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-#	debug "fatal" "Aborting" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-#	exit $EXIT_ABORT
-#fi
-#
-#
-#
-#
-# TODO: UMASK!!!!!!!!!!!!!!!!!!!!!!!!!
-#
-#
+# Temp file 'tmpwatch/tmpreaper'
 if [ "${DELETE}" = "1" ]; then
-	# Temp file 'tmpwatch/tmpreaper'
-	if MY_TMP_FILE_DEL="$( ${MKTEMP} "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" 2>/dev/null)"; then
+	if MY_TMP_FILE_DEL="$(create_tmp_file "${MY_TMP_DIR}/.XXXXXXXXXXXXXXX" "0600")"; then
 		debug "trace"  "(RUN): Creating tmp file: ${MY_TMP_FILE_DEL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 	else
 		debug "fatal" "(RUN): Cannot create tmp file: ${MY_TMP_FILE_DEL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
@@ -4460,7 +4409,7 @@ for db in ${DATABASES}; do
 		[ "${NAGIOS_DB_ERROR}" = "" ] && NAGIOS_DB_ERROR="${db}" || NAGIOS_DB_ERROR="${NAGIOS_DB_ERROR},${db}"
 
 		debug "err" "(RUN): ${_cnt} Failed:   ${db} cannot be written to disk (file exists: ${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext})" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-		ERROR="$(merge_exit_codes "${ERROR}" 2)"
+		NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 2)"
 		MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
 
 	#
@@ -4481,14 +4430,14 @@ for db in ${DATABASES}; do
 		TOTAL_SIZE=$( sum "${TOTAL_SIZE}" "${DB_SIZE_MB}" )
 
 		# Number of tables
-		_TBL_CNT_TOTAL="$(  count_total_tables      "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
-		_TBL_CNT_INNODB="$( count_innodb_tables     "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
-		_TBL_CNT_OTHERS="$( count_non_innodb_tables "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
+		TBL_CNT_TOTAL="$(  count_total_tables      "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
+		TBL_CNT_INNODB="$( count_innodb_tables     "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
+		TBL_CNT_OTHERS="$( count_non_innodb_tables "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
 
 
-		debug "trace" "(RUN): ${_cnt} Number of total tables:       ${_TBL_CNT_TOTAL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-		debug "trace" "(RUN): ${_cnt} Number of InnoDB tables:      ${_TBL_CNT_INNODB}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-		debug "trace" "(RUN): ${_cnt} Number of non-InnoDB tables:  ${_TBL_CNT_OTHERS}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+		debug "trace" "(RUN): ${_cnt} Number of total tables:       ${TBL_CNT_TOTAL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+		debug "trace" "(RUN): ${_cnt} Number of InnoDB tables:      ${TBL_CNT_INNODB}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+		debug "trace" "(RUN): ${_cnt} Number of non-InnoDB tables:  ${TBL_CNT_OTHERS}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
 
 		##########################################################
@@ -4499,7 +4448,7 @@ for db in ${DATABASES}; do
 		#
 		# information_schema and performance schema are special tables, which do not allow locking
 		if [ "${db}" != "information_schema" ] && [ "${db}" != "performance_schema" ]; then
-			MYSQL_LOCK_OPTS="$( get_consistency_opts "${CONSISTENT_DUMP_ONLY_INNODB}" "${CONSISTENT_DUMP_MIXED_INNODB}" "${CONSISTENT_DUMP_NO_INNODB}" "${_TBL_CNT_INNODB}" "${_TBL_CNT_OTHERS}" )"
+			MYSQL_LOCK_OPTS="$( get_consistency_opts "${CONSISTENT_DUMP_ONLY_INNODB}" "${CONSISTENT_DUMP_MIXED_INNODB}" "${CONSISTENT_DUMP_NO_INNODB}" "${TBL_CNT_INNODB}" "${TBL_CNT_OTHERS}" )"
 			debug "trace" "(RUN): ${_cnt} Applying consistency setting: ${MYSQL_LOCK_OPTS}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		else
 			MYSQL_LOCK_OPTS="--skip-lock-tables"
@@ -4639,7 +4588,7 @@ for db in ${DATABASES}; do
 
 			TOTAL_ERR=$((TOTAL_ERR + 1))
 			MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
-			ERROR="$(merge_exit_codes "${ERROR}" 2)"
+			NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 2)"
 			[ "${NAGIOS_DB_ERROR}" = "" ] && NAGIOS_DB_ERROR="${db}" || NAGIOS_DB_ERROR="${NAGIOS_DB_ERROR},${db}"
 		else
 			TOTAL_DBS=$((TOTAL_DBS + 1))
@@ -4674,7 +4623,7 @@ for db in ${DATABASES}; do
 			if [ "${DUMP_FILE_INFO}" = "1" ]; then
 
 				write_info_file "${DUMP_DIR}" "${DUMP_FILE_PRE}${db}${ext}" "${DUMP_FILE_CHMOD}" \
-					"${db}" "${DB_SIZE_B}" "${_TBL_CNT_TOTAL}" "${MYSQLDUMP_ARGUMENTS}" "$((endtime - starttime))" \
+					"${db}" "${DB_SIZE_B}" "${TBL_CNT_TOTAL}" "${MYSQLDUMP_ARGUMENTS}" "$((endtime - starttime))" \
 					"${COMPRESS}" "${COMPRESS_BIN}" "${COMPRESS_ARG}" \
 					"${ENCRYPT}" "${OPENSSL_ALGO_ARG}" "${OPENSSL_PUBKEY_PEM}" \
 					"${MYSQL_ARGUMENTS}" "${MYSQL_SSL_ENABLE}" "${MYSQL_SSL_STATUS}" \
@@ -4697,7 +4646,7 @@ TOTAL_ENDTIME=$(date +%s)
 for req in ${REQUIRE}; do
 	debug "err" "(RUN): Required database: \"${req}\" has not been dumped." "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 	MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
-	ERROR="$(merge_exit_codes "${ERROR}" 2)"
+	NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 2)"
 done
 
 
@@ -4731,7 +4680,7 @@ if [ "${DELETE}" = "1" ]; then
 	if [ "${DELETE_METHOD}" = "tmpwatch" ]; then TMPWATCH_OPTS="-vv"; else TMPWATCH_OPTS="--verbose=3 --showdeleted"; fi
 
 
-	TMPWATCH_RUN="$(${TMPWATCH} ${FORCE_ARG} -m "${DELETE_IF_OLDER}" "${TMPWATCH_OPTS}" "${DUMP_DIR}/" 2> "${MY_TMP_FILE_DEL}")"
+	TMPWATCH_RUN="$(${BIN_TMPWATCH} ${FORCE_ARG} -m "${DELETE_IF_OLDER}" "${TMPWATCH_OPTS}" "${DUMP_DIR}/" 2> "${MY_TMP_FILE_DEL}")"
 	TMPWATCH_ERRNO="$?"
 	TMPWATCH_ERROR="$( cat "${MY_TMP_FILE_DEL}" )"
 
@@ -4739,12 +4688,12 @@ if [ "${DELETE}" = "1" ]; then
 		debug "err"  "(RUN): ${DELETE_METHOD} exit code: ${TMPWATCH_ERRNO}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		debug "err"  "(RUN): ${DELETE_METHOD} error: ${TMPWATCH_ERROR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
-		ERROR="$(merge_exit_codes "${ERROR}" 1)"
+		NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 1)"
 	elif [ "${TMPWATCH_ERROR}" != "" ]; then
 		debug "warn" "(RUN): ${DELETE_METHOD} exit code: ${TMPWATCH_ERRNO}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		debug "warn" "(RUN): ${DELETE_METHOD} error: ${TMPWATCH_ERROR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
-		ERROR="$(merge_exit_codes "${ERROR}" 1)"
+		NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 1)"
 	fi
 
 
@@ -4759,7 +4708,7 @@ if [ "${DELETE}" = "1" ]; then
 
 	# Number of deleted files and the command itself
 	debug  "info"  "(RUN): Deleting files older than $(get_tmpwatch_value "${DELETE_IF_OLDER}") $(get_tmpwatch_unit_name "${DELETE_IF_OLDER}") ... ${TMPWATCH_NUM_DEL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-	debug  "trace" "${TMPWATCH} ${FORCE_ARG} -m ${DELETE_IF_OLDER} ${TMPWATCH_OPTS} ${DUMP_DIR}/" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+	debug  "trace" "${BIN_TMPWATCH} ${FORCE_ARG} -m ${DELETE_IF_OLDER} ${TMPWATCH_OPTS} ${DUMP_DIR}/" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
 
 	# Some files have been skipped!
@@ -4767,7 +4716,7 @@ if [ "${DELETE}" = "1" ]; then
 		debug "warn" "(RUN): ${DELETE_METHOD}: ${TMPWATCH_NUM_IGN} files could not be deleted:" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		debug "warn" "${TMPWATCH_TXT_IGN}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
-		ERROR="$(merge_exit_codes "${ERROR}" 1)"
+		NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 1)"
 	fi
 
 	# Show deleted files
@@ -4795,7 +4744,7 @@ if [ "${NAGIOS_LOG}" = "1" ]; then
 
 	{
 		echo "[state]";
-		echo "success = ${ERROR}";
+		echo "success = ${NAGIOS_EXIT_CODE}";
 		echo "lastbak = ${TOTAL_STARTTIME}";
 		echo "message = ";
 		echo "missing = ${REQUIRE}";
@@ -4864,27 +4813,7 @@ if [ "${DELETE}" = "1" ]; then
 	fi
 fi
 
-#if rm "${MY_TMP_FILE_DUMP}" 2>/dev/null; then
-#	debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_DUMP}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-#else
-#	debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_DUMP}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-#	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
-#fi
-#
-#if rm "${MY_TMP_FILE_COMP}" 2>/dev/null; then
-#	debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_COMP}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-#else
-#	debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_COMP}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-#	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
-#fi
-#
-#if rm "${MY_TMP_FILE_ENCR}" 2>/dev/null; then
-#	debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_ENCR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-#else
-#	debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_ENCR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-#	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
-#fi
-#
+
 if rm -rf "${MY_TMP_DIR}" 2>/dev/null; then
 	debug "trace" "(RUN): Deleting tmp dir:  ${MY_TMP_DIR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 else
