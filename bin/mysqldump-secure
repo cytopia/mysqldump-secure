@@ -1809,7 +1809,7 @@ count_innodb_tables() {
 	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
 	_result="$( echo "${_result}" | tail -n1 )"
 
-	return "${_result}"
+	echo "${_result}"
 }
 
 # Count all InnoDB tables
@@ -1831,7 +1831,7 @@ count_non_innodb_tables() {
 	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
 	_result="$( echo "${_result}" | tail -n1 )"
 
-	return "${_result}"
+	echo "${_result}"
 }
 
 # Count all tables
@@ -1852,7 +1852,7 @@ count_total_tables() {
 	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
 	_result="$( echo "${_result}" | tail -n1 )"
 
-	return "${_result}"
+	echo "${_result}"
 }
 
 
@@ -2860,7 +2860,7 @@ while [ $# -gt 0  ]; do
 
 
 		--cron)
-			if [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ] || [ "${_ARG_VERB}" = "1" ]; then
+			if [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERS}" = "1" ] || [ "${_ARG_VERB}" != "1" ]; then
 				echo "Invalid. Arguments cannot be mixed." 1>&2
 				echo "Type '${INFO_NAME} --help' for available options." 1>&2
 				exit $EXIT_ABORT
@@ -2894,7 +2894,7 @@ while [ $# -gt 0  ]; do
 
 
 		--help)
-			if [ "${_ARG_CONF}" = "1" ] || [ "${_ARG_CRON}" = "1" ] || [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_VERS}" = "1" ] || [ "${_ARG_VERB}" = "1" ]; then
+			if [ "${_ARG_CONF}" = "1" ] || [ "${_ARG_CRON}" = "1" ] || [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_VERS}" = "1" ] || [ "${_ARG_VERB}" != "1" ]; then
 				echo "Invalid. Arguments cannot be mixed." 1>&2
 				echo "Type '${INFO_NAME} --help' for available options." 1>&2
 				exit $EXIT_ABORT
@@ -2911,7 +2911,7 @@ while [ $# -gt 0  ]; do
 
 
 		--version)
-			if [ "${_ARG_CONF}" = "1" ] || [ "${_ARG_CRON}" = "1" ] || [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERB}" = "1" ]; then
+			if [ "${_ARG_CONF}" = "1" ] || [ "${_ARG_CRON}" = "1" ] || [ "${_ARG_TEST}" = "1" ] || [ "${_ARG_HELP}" = "1" ] || [ "${_ARG_VERB}" != "1" ]; then
 				echo "Invalid. Arguments cannot be mixed." 1>&2
 				echo "Type '${INFO_NAME} --help' for available options." 1>&2
 				exit $EXIT_ABORT
