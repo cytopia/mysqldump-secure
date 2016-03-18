@@ -4341,7 +4341,8 @@ DB_CNT_FAILED=0
 #
 # Total size of all dumped databases
 #
-TOTAL_SIZE=0
+TOTAL_SIZE_B=0
+TOTAL_SIZE_MB=0
 
 #
 # Overall Timing
@@ -4362,6 +4363,13 @@ NAGIOS_DB_ERROR=""
 # Nagios Log: Aggregated exit code (0:OK, 1:Warn, 2:ERR, 3:UNKNOWN)
 #
 NAGIOS_EXIT_CODE=0
+
+
+
+#
+# TODO: Make all vars within 'if' local and small _tmp_bla
+#
+#
 
 
 ################################################################################
@@ -4511,18 +4519,16 @@ for db in ${DATABASES}; do
 
 		# Database size
 		DB_SIZE_B="$( get_mysql_database_size "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
-		DB_SIZE_KB="$( div "${DB_SIZE_B}" "1024" )"
-		DB_SIZE_MB="$( div "${DB_SIZE_KB}" "1024" )"
+		DB_SIZE_MB="$( div "${DB_SIZE_B}" "1048576" )"
 		DB_SIZE_MB="$( round "${DB_SIZE_MB}" "2" )"
 
 		# Total Database size (aggregated db size)
-		TOTAL_SIZE=$( sum "${TOTAL_SIZE}" "${DB_SIZE_MB}" )
+		TOTAL_SIZE_B=$( sum "${TOTAL_SIZE_B}" "${DB_SIZE_B}" )
 
 		# Number of tables
 		TBL_CNT_TOTAL="$(  count_total_tables      "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
 		TBL_CNT_INNODB="$( count_innodb_tables     "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
 		TBL_CNT_OTHERS="$( count_non_innodb_tables "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" "${db}" )"
-
 
 		debug "trace" "(RUN): ${_cnt} Number of total tables:       ${TBL_CNT_TOTAL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		debug "trace" "(RUN): ${_cnt} Number of InnoDB tables:      ${TBL_CNT_INNODB}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
@@ -4552,8 +4558,8 @@ for db in ${DATABASES}; do
 		# Performance schema does not allow to dump events
 		# mysqldump: mysqldump  Couldn't execute 'show events'  Access denied for user 'root'@'localhost' to database 'performance_schema' (1044)
 		if [ "${db}" = "performance_schema" ]; then
-			debug "trace" "(RUN): ${_cnt} \"${db}\" cannot be dumped with --events. Adding --skip-events" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 			MYSQL_SPECIAL_OPTS="--skip-events"
+			debug "trace" "(RUN): ${_cnt} \"${db}\" cannot be dumped with --events. Adding --skip-events" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		fi
 
 		#
@@ -4653,24 +4659,11 @@ for db in ${DATABASES}; do
 
 
 		#
-		# Error Checking
+		# Pipefail Error Checking
 		#
-		# Inside $error_statuses we have the following information.
-		# Note: Not all lines must be there (depends on enabled options)
-		#
-		# "0:<exit code>:<stderr msg>"   <--mysqldump
-		# "1:<exit code>:<stderr msg>"   <--compression
-		# "2:<exit code>:<stderr msg>"   <--openssl
-		#
-		# Cases:
-		#  1. Error code == 0 and <stderr msg> empty      => OK
-		#  2. Error code == 0 and <stderr msg> not empty  => Warning
-		#  3. Error code != 0                             => Error
-
-		#
-		# Error Evaluation
-		#
+		_dump_failed=0
 		if ! MY_ERRORS="$(mysqldump_pipefail_errors "${error_statuses}")"; then
+			_dump_failed=1
 
 			debug_i "fatal" "Failed\n" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 			debug   "fatal" "(RUN): ${_cnt} Error dumping ${db}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
@@ -4688,6 +4681,7 @@ for db in ${DATABASES}; do
 			NAGIOS_DB_ERROR="$( str_join "${NAGIOS_DB_ERROR}" "${db}" ","  )"
 
 		else
+			_dump_failed=0
 
 			debug_i "ok"    "${duration} sec ($(get_file_size "${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}" "m") MB)\n" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 			debug   "trace" "(RUN): ${_cnt} Dump File: ${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext}"  "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
@@ -4700,12 +4694,20 @@ for db in ${DATABASES}; do
 
 			DB_CNT_DUMPED=$((DB_CNT_DUMPED + 1))
 			NAGIOS_DB_DUMPED="$( str_join "${NAGIOS_DB_DUMPED}" "${db}" ","  )"
+		fi
 
+
+
+		#
+		# Success Handler
+		#
+		if [ "${_dump_failed}" = "0" ]; then
 
 			#
 			# If all was good, remove required db from list
 			#
 			REQUIRE="$( str_remove_word "${REQUIRE}" "${db}" )"
+
 
 			#
 			# Write file info?
@@ -4727,7 +4729,6 @@ for db in ${DATABASES}; do
 				fi
 
 			fi
-
 		fi
 	fi
 done
@@ -4747,9 +4748,13 @@ for req in ${REQUIRE}; do
 done
 
 
+# Human readable output of TOTAL_SIZE (MegaBytes)
+TOTAL_SIZE_MB="$( div "${TOTAL_SIZE_B}" "1048576" )"
+TOTAL_SIZE_MB="$( round "${TOTAL_SIZE_MB}" "2" )"
+
 debug "debug" "(RUN): Dumping finished (OK: ${DB_CNT_DUMPED} dbs, IGN: ${DB_CNT_IGNORED} dbs, ERR: ${DB_CNT_FAILED}, TOTAL: ${DB_CNT_TOTAL})" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 debug "debug" "(RUN): Took ${TIME_TOTAL_DURATION} seconds" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-debug "debug" "(RUN): Total size dumped: ${TOTAL_SIZE} MB" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+debug "debug" "(RUN): Total size dumped: ${TOTAL_SIZE_MB} MB" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
 
 
@@ -4784,7 +4789,6 @@ if [ "${DELETE}" = "1" ]; then
 		NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 1)"
 	fi
 
-
 	# Number removed/skipped files
 	TMPWATCH_NUM_DEL="$( echo "${TMPWATCH_RUN}" | grep -ci 'Removing file' )"
 	TMPWATCH_NUM_IGN="$( echo "${TMPWATCH_RUN}" | grep -ci 'skipped:' )"
@@ -4792,7 +4796,6 @@ if [ "${DELETE}" = "1" ]; then
 	# Output of removed/skipped files
 	TMPWATCH_TXT_DEL="$( echo "${TMPWATCH_RUN}" | grep -i 'Removing file' )"
 	TMPWATCH_TXT_IGN="$( echo "${TMPWATCH_RUN}" | grep -i 'skipped:' )"
-
 
 	# Number of deleted files and the command itself
 	debug  "info"  "(RUN): Deleting files older than $(get_tmpwatch_value "${DELETE_IF_OLDER}") $(get_tmpwatch_unit_name "${DELETE_IF_OLDER}") ... ${TMPWATCH_NUM_DEL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
@@ -4813,6 +4816,7 @@ if [ "${DELETE}" = "1" ]; then
 	# Show full trace output
 	debug "trace" "${TMPWATCH_RUN}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 fi
+
 
 
 
@@ -4842,7 +4846,7 @@ if [ "${NAGIOS_LOG}" = "1" ]; then
 		echo "msg_dbs = ${DB_CNT_DUMPED}";
 		echo "msg_ign = ${DB_CNT_IGNORED}";
 		echo "msg_err = ${DB_CNT_FAILED}";
-		echo "msg_meg = ${TOTAL_SIZE}";
+		echo "msg_meg = ${TOTAL_SIZE_MB}";
 		echo "msg_sec = ${TIME_TOTAL_DURATION}";
 		echo "msg_del = ${TMPWATCH_NUM_DEL}";
 		echo;
