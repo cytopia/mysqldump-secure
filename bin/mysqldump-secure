@@ -2718,12 +2718,15 @@ write_info_file() {
 		echo;
 		echo "[system]";
 		echo "uname      = $( uname -sr )";
-		echo "host       = $( hostname )";
+		echo "hostname   = $( hostname )";
 		echo "user       = $( whoami )";
+		echo "group      = $( id -g -n )";
 		echo;
 		echo "[tools]";
-		echo "mysqldump  = $( which mysqldump ) ($( $(which mysqldump) --version  | sed 's/.*mysqldump[[:space:]]*Ver[[:space:]]*//' | awk -F ',' '{print $1}' )) [$( $(which mysqldump) --version  | sed 's/.*mysqldump[[:space:]]*Ver[[:space:]]*//' | awk -F ',' '{print $2}' | sed 's/^[[:space:]]*//g' )]";
-		echo "mysql      = $( which mysql ) ($( $(which mysql) --version 2>/dev/null | sed 's/.*mysql[[:space:]]*Ver[[:space:]]*//' | awk -F ',' '{print $1}' )) [$( $(which mysql) --version 2>/dev/null | sed 's/.*mysql[[:space:]]*Ver[[:space:]]*//' | awk -F ',' '{print $2}' | sed 's/^[[:space:]]*//g' )]";
+		echo "mysqldump  = $( which mysqldump ) $( _get_version "mysqldump" )";
+		echo "mysql      = $( which mysql     ) $( _get_version "mysql" )";
+		echo "compressor = $(if [ "${_compress_opt}" = "1" ]; then echo "$( which ${_compress_bin} ) $( _get_version "${_compress_bin}" )"; else echo "Not used"; fi)";
+		echo "encryptor  = $(if [ "${_encrypt_opt}"  = "1" ]; then echo "$( which openssl ) $( _get_version "openssl" )"; else echo "Not used"; fi)";
 		echo;
 		echo "; ============================================================";
 		echo "; = Database / File information";
@@ -2754,10 +2757,11 @@ write_info_file() {
 		echo "duration   = ${_db_dump_time} sec"
 		echo;
 		echo "[compression]";
-		echo "binary     = $(if [ "${_compress_opt}" = "1" ]; then echo "${_compress_bin}"; fi)";
+		echo "compressor = $(if [ "${_compress_opt}" = "1" ]; then echo "${_compress_bin}"; fi)";
 		echo "arguments  = $(if [ "${_compress_opt}" = "1" ]; then echo "${_compress_arg}"; fi)";
 		echo;
 		echo "[encryption]";
+		echo "encryptor  = $(if [ "${_encrypt_opt}" = "1" ]; then echo "openssl"; fi)";
 		echo "algorithm  = $(if [ "${_encrypt_opt}" = "1" ]; then echo "${_encrypt_alg}"; fi)";
 		echo "pubkey     = $(if [ "${_encrypt_opt}" = "1" ]; then echo "${_encrypt_pem}"; fi)";
 		echo;
@@ -2780,6 +2784,54 @@ write_info_file() {
 	_exit="$?"
 
 	return ${_exit}
+}
+
+
+
+################################################################################
+#
+#  M I S C   F U N CT I O N S
+#
+################################################################################
+
+_get_version() {
+	_tool="${1}"
+
+	_version=""
+	_extra=""
+
+	if [ "${_tool}" = "mysqldump" ]; then
+		_version="$( $(which mysqldump)  --version  | sed 's/.*mysqldump[[:space:]]*Ver[[:space:]]*//' | awk -F ',' '{print $1}' )"
+		_extra="$( $(which mysqldump) --version  | sed 's/.*mysqldump[[:space:]]*Ver[[:space:]]*//' | awk -F ',' '{print $2}' | sed 's/^[[:space:]]*//g' )"
+	elif [ "${_tool}" = "mysql" ]; then
+		_version="$( $(which mysql)  --version  | sed 's/.*mysql[[:space:]]*Ver[[:space:]]*//' | awk -F ',' '{print $1}' )"
+		_extra="$( $(which mysql) --version  | sed 's/.*mysql[[:space:]]*Ver[[:space:]]*//' | awk -F ',' '{print $2}' | sed 's/^[[:space:]]*//g' )"
+	elif [ "${_tool}" = "openssl" ]; then
+		_version="$( $(which openssl)  version  | sed 's/^OpenSSL[[:space:]]*//' )"
+		_extra=""
+	elif [ "${_tool}" = "tmpwatch" ]; then
+		_version="$( $(which tmpwatch) --version 2>&1 | grep -oE 'tmpwatch[[:space:]]+[0-9.]+' | sed 's/tmpwatch[[:space:]]//' )"
+		_extra=""
+	elif [ "${_tool}" = "tmpreaper" ]; then
+		_version="$( $(which tmpreaper) --version 2>&1 | grep -oiE 'tmpreaper.*version.*[0-9.]+' | sed 's/.*Version:[[:space:]]//' )"
+		_extra=""
+	elif [ "${_tool}" = "gzip" ]; then
+		_version="$( $(which gzip) --version 2>&1 | head -n1 )"
+		_extra=""
+	elif [ "${_tool}" = "bzip2" ]; then
+		_version="$( $(which bzip2) --help 2>&1 | head -n1 | sed 's/.*Version[[:space:]]*//' )"
+		_extra=""
+	else
+		_version="Unable to obtain version"
+	fi
+
+
+	if [ "${_extra}" != "" ]; then
+		echo "(${_version}) [${_extra}]"
+	else
+		echo "(${_version})"
+	fi
+	return 0
 }
 
 
