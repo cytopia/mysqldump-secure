@@ -241,57 +241,57 @@ echo
 echo
 echo "--------------------------------------------------------------------------------"
 echo "-"
-echo "-  6.3 \$LOGFILE"
+echo "-  6.3 \$LOG_FILE"
 echo "-"
 echo "--------------------------------------------------------------------------------"
 
 echo
 echo "----------------------------------------"
-echo " 6.3.1 #LOGFILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.log\""
+echo " 6.3.1 #LOG_FILE=\"${_INSTALL_PREFIX}/var/log/mysqldump-secure.log\""
 echo "----------------------------------------"
 echo
-sed_change_config_file "^LOGFILE="  "#LOGFILE="
+sed_change_config_file "^LOG_FILE="  "#LOG_FILE="
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "WARN" "1" "\$LOGFILE" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$LOG_FILE" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
 	if [ "${RUN_CHECK_NORM}" = "1" ]; then
 		echo "---------- NORMAL MODE ----------"
 		CMD="${CMD_NORM}"
-		if ! check "1" "1" "WARN" "1" "\$LOGFILE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+		if ! check "1" "1" "WARN" "1" "\$LOG_FILE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "WARN" "1" "\$LOGFILE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "\$LOG_FILE" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 
-sed_change_config_file "^#LOGFILE="  "LOGFILE="
+sed_change_config_file "^#LOG_FILE="  "LOG_FILE="
 
 
 
 echo
 echo "----------------------------------------"
-echo " 6.3.2 LOGFILE=\"/var/log/mysqldump-secure.log.wrong\""
+echo " 6.3.2 LOG_FILE=\"/var/log/mysqldump-secure.log.wrong\""
 echo "----------------------------------------"
 echo
 sed_change_config_file "/var/log/mysqldump-secure.log"  "/var/log/mysqldump-secure.log.wrong"
 
 	echo "---------- CRON MODE ----------"
 	CMD="${CMD_CRON}"
-	if ! check "1" "1" "WARN" "1" "Logfile does not exist" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "Log file does not exist" "1" "1" "0" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 	sudo rm ${_INSTALL_PREFIX}/var/log/mysqldump-secure.log.wrong
 
 	if [ "${RUN_CHECK_NORM}" = "1" ]; then
 		echo "---------- NORMAL MODE ----------"
 		CMD="${CMD_NORM}"
-		if ! check "1" "1" "WARN" "1" "Logfile does not exist" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+		if ! check "1" "1" "WARN" "1" "Log file does not exist" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 		sudo rm ${_INSTALL_PREFIX}/var/log/mysqldump-secure.log.wrong
 	fi
 
 	echo "---------- NORMAL MODE VERBOSE ----------"
 	CMD="${CMD_VERB}"
-	if ! check "1" "1" "WARN" "1" "Logfile does not exist" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
+	if ! check "1" "1" "WARN" "1" "Log file does not exist" "1" "1" "1" "0" "${CMD}"; then ERROR=$((ERROR+1)); fi
 	sudo rm ${_INSTALL_PREFIX}/var/log/mysqldump-secure.log.wrong
 
 sed_change_config_file "/var/log/mysqldump-secure.log.wrong"  "/var/log/mysqldump-secure.log"
@@ -300,7 +300,7 @@ sed_change_config_file "/var/log/mysqldump-secure.log.wrong"  "/var/log/mysqldum
 
 echo
 echo "----------------------------------------"
-echo " 6.3.3 LOGFILE=\"/var/log/dir1/dir2/mysqldump-secure.log\""
+echo " 6.3.3 LOG_FILE=\"/var/log/dir1/dir2/mysqldump-secure.log\""
 echo "----------------------------------------"
 echo
 sed_change_config_file "/var/log/mysqldump-secure.log"  "/var/log/dir1/dir2/mysqldump-secure.log"
