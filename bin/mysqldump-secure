@@ -429,7 +429,7 @@ _coutr() {
 		IFS='
 		'
 		for _line in ${_string}; do
-			printf "%s%s${_suffix}\n" "${_prefix}" "${_line}"  1>&2	# stdout -> stderr
+			printf "${_prefix}%s${_suffix}\n" "${_line}"  1>&2	# stdout -> stderr
 		done
 		unset IFS
 		return 0
@@ -437,7 +437,7 @@ _coutr() {
 		IFS='
 		'
 		for _line in ${_string}; do
-			printf "%s%s${_suffix}\n" "${_prefix}" "${_line}" # stdout
+			printf "${_prefix}%s${_suffix}\n" "${_line}" # stdout
 		done
 		unset IFS
 		return 0
@@ -445,7 +445,7 @@ _coutr() {
 		IFS='
 		'
 		for _line in ${_string}; do
-			printf "%s%s${_suffix}\n" "${_prefix}" "${_line}" >> "${_target}" # file
+			printf "${_prefix}%s${_suffix}\n" "${_line}" >> "${_target}" # file
 		done
 		unset IFS
 		return 0
@@ -492,12 +492,19 @@ _couti() {
 # Public Logger functions
 ############################################################
 
+
+#
+# TODO: Allow prefix with "err|tmpreaper" in case of multilines
+#
+
 #
 # Single- multi-line output to stdout/stderr and/or logfile.
 #
 # @public
 #
 # @param  string  _lvl	  Assigned log level: "trace", "debug", "info", "warn" or "err" "fatal"
+#                         Can also be a combination separated with '|' for an extra prefix.
+#                         E.g.: "err|(RUN)"
 # @param  string  _msg	  Message (single-line or multiline)
 # @param  integer _ver	  (0|1|2|3) Current set verbosity level (0:fat,err,warn, 1:normal, 2:debug, 3:trace)
 # @param  string  _log	  (0|1|2|3) Current set file logging level (0:off, 1:normal, 2:debug, 3:trace)
@@ -510,8 +517,15 @@ debug() {
 	_log="${4}"		# (0|1|2|3) Current set file logging level (0:off, 1:normal, 2:debug, 3:trace)
 	_file="${5}"	# Full path to logfile
 
+	_tmp="${_lvl}"
+	_lvl="$( echo "${_tmp}" | sed 's/|.*//' )" # Everything before '|' or if no '|' is present, the whole string
+	_pre="$( if echo "${_tmp}" | grep -c '\|' >/dev/null 2>&1; then echo "${_tmp}" | sed 's/.*|//'; else echo ""; fi )" # Everything after '|' or nothing
+
 
 	# Make sure this function is used correctly
+	if [ "${#}" != "5" ]; then
+		_abort_on_internal_error "debug()" "\$#" "${#}"
+	fi
 	if [ "${_lvl}" != "trace" ] && [ "${_lvl}" != "debug" ] && [ "${_lvl}" != "info" ] && [ "${_lvl}" != "ok" ] && [ "${_lvl}" != "err" ] && [ "${_lvl}" != "warn" ] && [ "${_lvl}" != "fatal" ]; then
 		_abort_on_internal_error "debug()" "\$_lvl" "${_lvl}"
 	fi
@@ -526,7 +540,7 @@ debug() {
 	# Prefixes for severity level and date
 	_pre_level="$( _get_severity_level_prefix "${_lvl}" )"	# e.g.: "[DEBUG]" or [ERR], etc
 	_pre_color="$( _get_severity_color_prefix "${_lvl}" )"	# e.g.: Red color code for error
-	_pre_date="$( date '+%Y-%m-%d  %H:%M:%S' )"
+	_pre_date="$( date '+%Y-%m-%d %H:%M:%S' )"
 
 
 	# Remove empty lines and lines which only contain spaces from $_msg
@@ -542,7 +556,7 @@ debug() {
 	# 1.) [OUT] Always output '[fatal], [error] and [warning] to stderr
 	#
 	if [ "${_lvl}" = "fatal" ] || [ "${_lvl}" = "err" ] || [ "${_lvl}" = "warn" ]; then
-		_coutr "stderr" "${_pre_color}${_pre_level} " "${_msg}" "${CLR_RESET}"
+		_coutr "stderr" "${_pre_color}${_pre_level} ${_pre}" "${_msg}" "${CLR_RESET}"
 	fi
 
 	#
@@ -550,7 +564,7 @@ debug() {
 	#
 	if [ "${_ver}" = "3" ]; then
 		if [ "${_lvl}" = "trace" ] || [ "${_lvl}" = "debug" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "ok" ]; then
-			_coutr "stdout" "${_pre_color}${_pre_level} " "${_msg}" "${CLR_RESET}"
+			_coutr "stdout" "${_pre_color}${_pre_level} ${_pre}" "${_msg}" "${CLR_RESET}"
 		fi
 	fi
 
@@ -559,7 +573,7 @@ debug() {
 	#
 	if [ "${_ver}" = "2" ]; then
 		if [ "${_lvl}" = "debug" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "ok" ]; then
-			_coutr "stdout" "${_pre_color}${_pre_level} " "${_msg}" "${CLR_RESET}"
+			_coutr "stdout" "${_pre_color}${_pre_level} ${_pre}" "${_msg}" "${CLR_RESET}"
 		fi
 	fi
 
@@ -568,7 +582,7 @@ debug() {
 	#
 	if [ "${_ver}" = "1" ]; then
 		if [ "${_lvl}" = "info" ] || [ "${_lvl}" = "ok" ]; then
-			_coutr "stdout" "${_pre_color}${_pre_level} " "${_msg}" "${CLR_RESET}"
+			_coutr "stdout" "${_pre_color}${_pre_level} ${_pre}" "${_msg}" "${CLR_RESET}"
 		fi
 	fi
 
@@ -581,7 +595,7 @@ debug() {
 	# 5.) [FILE] Highest log level (LOG=3)
 	#
 	if [ "${_log}" = "3" ]; then
-		_coutr "${_file}" "${_pre_date}${_pre_level} " "${_msg}" ""
+		_coutr "${_file}" "${_pre_date} ${_pre_level} ${_pre}" "${_msg}" ""
 	fi
 
 	#
@@ -589,7 +603,7 @@ debug() {
 	#
 	if [ "${_log}" = "2" ]; then
 		if [ "${_lvl}" = "debug" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "err" ] || [ "${_lvl}" = "fatal" ]; then
-			_coutr "${_file}" "${_pre_date}${_pre_level} " "${_msg}" ""
+			_coutr "${_file}" "${_pre_date} ${_pre_level} ${_pre}" "${_msg}" ""
 		fi
 	fi
 
@@ -598,7 +612,7 @@ debug() {
 	#
 	if [ "${_log}" = "1" ]; then
 		if [ "${_lvl}" = "info" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "err" ] || [ "${_lvl}" = "fatal" ]; then
-			_coutr "${_file}" "${_pre_date}${_pre_level} " "${_msg}" ""
+			_coutr "${_file}" "${_pre_date} ${_pre_level} ${_pre}" "${_msg}" ""
 		fi
 	fi
 
@@ -624,6 +638,9 @@ debug_i() {
 	_file="${5}"	# Full path to logfile
 
 	# Make sure this function is used correctly
+	if [ "${#}" != "5" ]; then
+		_abort_on_internal_error "debug_i()" "\$#" "${#}"
+	fi
 	if [ "${_lvl}" != "trace" ] && [ "${_lvl}" != "debug" ] && [ "${_lvl}" != "info" ] && [ "${_lvl}" != "ok" ] && [ "${_lvl}" != "err" ] && [ "${_lvl}" != "warn" ] && [ "${_lvl}" != "fatal" ]; then
 		_abort_on_internal_error "debug_i()" "\$_lvl" "${_lvl}"
 	fi
@@ -696,7 +713,7 @@ debug_i() {
 	# 5.) [FILE] Highest log level (LOG=3)
 	#
 	if [ "${_log}" = "3" ]; then
-		_couti "${_file}" "${_pre_date}${_pre_level} " "${_msg}" ""
+		_couti "${_file}" "${_pre_date} ${_pre_level} " "${_msg}" ""
 	fi
 
 	#
@@ -704,7 +721,7 @@ debug_i() {
 	#
 	if [ "${_log}" = "2" ]; then
 		if [ "${_lvl}" = "debug" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "err" ] || [ "${_lvl}" = "fatal" ]; then
-			_couti "${_file}" "${_pre_date}${_pre_level} " "${_msg}" ""
+			_couti "${_file}" "${_pre_date} ${_pre_level} " "${_msg}" ""
 		fi
 	fi
 
@@ -713,7 +730,7 @@ debug_i() {
 	#
 	if [ "${_log}" = "1" ]; then
 		if [ "${_lvl}" = "info" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "err" ] || [ "${_lvl}" = "fatal" ]; then
-			_couti "${_file}" "${_pre_date}${_pre_level} " "${_msg}" ""
+			_couti "${_file}" "${_pre_date} ${_pre_level} " "${_msg}" ""
 		fi
 	fi
 
@@ -740,6 +757,9 @@ debug_pi() {
 	_file="${5}"	# Full path to logfile
 
 	# Make sure this function is used correctly
+	if [ "${#}" != "5" ]; then
+		_abort_on_internal_error "debug_pi()" "\$#" "${#}"
+	fi
 	if [ "${_lvl}" != "trace" ] && [ "${_lvl}" != "debug" ] && [ "${_lvl}" != "info" ] && [ "${_lvl}" != "ok" ] && [ "${_lvl}" != "err" ] && [ "${_lvl}" != "warn" ] && [ "${_lvl}" != "fatal" ]; then
 		_abort_on_internal_error "debug_pi()" "\$_lvl" "${_lvl}"
 	fi
@@ -754,7 +774,7 @@ debug_pi() {
 	# Prefixes for severity level and date
 	_pre_color="$( _get_severity_color_prefix "${_lvl}" )"	# e.g.: Red color code for error
 
-	_pre_date="$( date '+%Y-%m-%d  %H:%M:%S' )"
+	_pre_date="$( date '+%Y-%m-%d %H:%M:%S' )"
 	_pre_level="$( _get_severity_level_prefix "${_lvl}" )"	# e.g.: "[DEBUG]" or [ERR], etc
 
 
@@ -810,7 +830,7 @@ debug_pi() {
 	# 5.) [FILE] Highest log level (LOG=3)
 	#
 	if [ "${_log}" = "3" ]; then
-		_couti "${_file}" "${_pre_date}${_pre_level} " "${_msg}" ""
+		_couti "${_file}" "${_pre_date} ${_pre_level} " "${_msg}" ""
 	fi
 
 	#
@@ -818,7 +838,7 @@ debug_pi() {
 	#
 	if [ "${_log}" = "2" ]; then
 		if [ "${_lvl}" = "debug" ] || [ "${_lvl}" = "info" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "err" ] || [ "${_lvl}" = "fatal" ]; then
-			_couti "${_file}" "${_pre_date}${_pre_level} " "${_msg}" ""
+			_couti "${_file}" "${_pre_date} ${_pre_level} " "${_msg}" ""
 		fi
 	fi
 
@@ -827,7 +847,7 @@ debug_pi() {
 	#
 	if [ "${_log}" = "1" ]; then
 		if [ "${_lvl}" = "info" ] || [ "${_lvl}" = "ok" ] || [ "${_lvl}" = "warn" ] || [ "${_lvl}" = "err" ] || [ "${_lvl}" = "fatal" ]; then
-			_couti "${_file}" "${_pre_date}${_pre_level} " "${_msg}" ""
+			_couti "${_file}" "${_pre_date} ${_pre_level} " "${_msg}" ""
 		fi
 	fi
 
@@ -4803,7 +4823,7 @@ if [ "${DELETE}" = "1" ]; then
 
 	# Number of deleted files and the command itself
 	debug  "info"  "(RUN): Deleting files older than $(get_tmpwatch_value "${DELETE_IF_OLDER}") $(get_tmpwatch_unit_name "${DELETE_IF_OLDER}") ... ${TMPWATCH_NUM_DEL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-	debug  "trace" "${BIN_TMPWATCH} ${FORCE_ARG} -m ${DELETE_IF_OLDER} ${TMPWATCH_OPTS} ${DUMP_DIR}/" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+	debug  "trace" "(CFG): ${BIN_TMPWATCH} ${FORCE_ARG} -m ${DELETE_IF_OLDER} ${TMPWATCH_OPTS} ${DUMP_DIR}/" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
 
 	# Some files have been skipped!
@@ -4815,10 +4835,10 @@ if [ "${DELETE}" = "1" ]; then
 	fi
 
 	# Show deleted files
-	debug "info" "${TMPWATCH_TXT_DEL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+	debug "info|(RUN): ${DELETE_METHOD}: " "${TMPWATCH_TXT_DEL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
 	# Show full trace output
-	debug "trace" "${TMPWATCH_RUN}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+	debug "trace|(RUN): ${DELETE_METHOD}: " "${TMPWATCH_RUN}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 fi
 
 
