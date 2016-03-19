@@ -28,20 +28,23 @@
 #
 # 4. Global program variables
 # -------------------------------------------
+# TODO: Also think about other schema, so I don't mix
+#       them up with vars from the config.
 # * Uppercase
-# * Prefixed with MDS_[SECTION]_
-# Example: MDS_INFO_NAME, MDS_MYSQL_xxx, MDS_COUNT_WARNINGS
+# * Prefixed with identifier, such as: MDS_[SECTION]_, DB_[SECTION]_
+# Example: MDS_INFO_NAME, DB_CNT_FAILED
 #
-# 5. Temporary variables
+# 5. Variables within loops / Temporary variables
 # -------------------------------------------
 # * Uppercase
 # * Prefixed with _TMP
-# Example: _TMP_RESULT
+# Example: _TMP_RESULT <-- TODO: Fix this
 
 
 #
 # Normalize
 # Don't screw with numbers, sorting, date etc
+#
 LANG=C
 LC_ALL=C
 
@@ -66,6 +69,7 @@ LC_ALL=C
 # Some of this data is also written to the nagios logfile
 # in order to be able to check against latest/desired mysqldump-secure version.
 #
+# TODO: Prefix with MDS_
 INFO_NAME="mysqldump-secure"
 INFO_AUTHOR="Patrick Plocke <patrick@plocke.de>"
 INFO_GPGKEY="0x28BF179F"
@@ -2510,49 +2514,49 @@ mysqldump_pipefail_errors() {
 		if [ "${_type}" = "0" ]; then
 			if [ "${_exit}" != "0" ]; then
 				[ -z "${_errors}" ] && _errors="mysqldump: ${_msg}" || _errors="$( printf "%s\nmysqldump: %s" "${_errors}" "${_msg}")"
-				_errno=$((errno + 1))
+				_errno=$((_errno + 1))
 			fi
 		elif [ "${_type}" = "1" ]; then
 			if [ "${_exit}" != "0" ]; then
 				[ -z "${_errors}" ] && _errors="compression: ${_msg}" || _errors="$( printf "%s\ncompression: %s" "${_errors}" "${_msg}")"
-				_errno=$((errno + 1))
+				_errno=$((_errno + 1))
 			fi
 		elif [ "${_type}" = "2" ]; then
 			if [ "${_exit}" != "0" ]; then
 				[ -z "${_errors}" ] && _errors="encryption: ${_msg}" || _errors="$( printf "%s\nencryption: %s" "${_errors}" "${_msg}")"
-				_errno=$((errno + 1))
+				_errno=$((_errno + 1))
 			fi
 		# ---- file creation
 		elif [ "${_type}" = "3" ]; then
 			if [ "${_exit}" != "0" ]; then
 				[ -z "${_errors}" ] && _errors="tmpfile creation: ${_msg}" || _errors="$( printf "%s\ntmpfile creation: %s" "${_errors}" "${_msg}")"
-				_errno=$((errno + 1))
+				_errno=$((_errno + 1))
 			fi
 		elif [ "${_type}" = "4" ]; then
 			if [ "${_exit}" != "0" ]; then
 				[ -z "${_errors}" ] && _errors="tmpfile creation: ${_msg}" || _errors="$( printf "%s\ntmpfile creation: %s" "${_errors}" "${_msg}")"
-				_errno=$((errno + 1))
+				_errno=$((_errno + 1))
 			fi
 		elif [ "${_type}" = "5" ]; then
 			if [ "${_exit}" != "0" ]; then
 				[ -z "${_errors}" ] && _errors="tmpfile creation: ${_msg}" || _errors="$( printf "%s\ntmpfile creation: %s" "${_errors}" "${_msg}")"
-				_errno=$((errno + 1))
+				_errno=$((_errno + 1))
 			fi
 		# ---- file deletion
 		elif [ "${_type}" = "6" ]; then
 			if [ "${_exit}" != "0" ]; then
 				[ -z "${_errors}" ] && _errors="tmpfile deletion: ${_msg}" || _errors="$( printf "%s\ntmpfile deletion: %s" "${_errors}" "${_msg}")"
-				_errno=$((errno + 1))
+				_errno=$((_errno + 1))
 			fi
 		elif [ "${_type}" = "7" ]; then
 			if [ "${_exit}" != "0" ]; then
 				[ -z "${_errors}" ] && _errors="tmpfile deletion: ${_msg}" || _errors="$( printf "%s\ntmpfile deletion: %s" "${_errors}" "${_msg}")"
-				_errno=$((errno + 1))
+				_errno=$((_errno + 1))
 			fi
 		elif [ "${_type}" = "8" ]; then
 			if [ "${_exit}" != "0" ]; then
 				[ -z "${_errors}" ] && _errors="tmpfile deletion: ${_msg}" || _errors="$( printf "%s\ntmpfile deletion: %s" "${_errors}" "${_msg}")"
-				_errno=$((errno + 1))
+				_errno=$((_errno + 1))
 			fi
 		fi
 	done
@@ -2578,51 +2582,51 @@ mysqldump_pipefail_warnings() {
 
 		# ---- dumping
 		if [ "${_type}" = "0" ]; then
-			if [ "${_msg}" != "" ]; then
+			if [ "${_exit}" = "0" ] && [ "${_msg}" != "" ]; then
 				[ -z "${_warnings}" ] && _warnings="mysqldump: ${_msg}" || _warnings="$( printf "%s\nmysqldump: %s" "${_warnings}" "${_msg}")"
-				_errno=$((errno + 1))
+				_errno=$((_errno + 1))
 			fi
 		elif [ "${_type}" = "1" ]; then
-			if [ "${_msg}" != "" ]; then
+			if [ "${_exit}" = "0" ] && [ "${_msg}" != "" ]; then
 				[ -z "${_warnings}" ] && _warnings="compression: ${_msg}" || _warnings="$( printf "%s\ncompression: %s" "${_warnings}" "${_msg}")"
-				_errno=$((errno + 1))
+				_errno=$((_errno + 1))
 			fi
 		elif [ "${_type}" = "2" ]; then
-			if [ "${_msg}" != "" ]; then
+			if [ "${_exit}" = "0" ] && [ "${_msg}" != "" ]; then
 				[ -z "${_warnings}" ] && _warnings="encryption: ${_msg}" || _warnings="$( printf "%s\nencryption: %s" "${_warnings}" "${_msg}")"
-				_errno=$((errno + 1))
+				_errno=$((_errno + 1))
 			fi
 		# ---- file creation
 		elif [ "${_type}" = "3" ]; then
-			if [ "${_msg}" != "" ]; then
+			if [ "${_exit}" = "0" ] && [ "${_msg}" != "" ]; then
 				[ -z "${_warnings}" ] && _warnings="tmpfile creation: ${_msg}" || _warnings="$( printf "%s\ntmpfile creation: %s" "${_warnings}" "${_msg}")"
-				_errno=$((errno + 1))
+				_errno=$((_errno + 1))
 			fi
 		elif [ "${_type}" = "4" ]; then
-			if [ "${_msg}" != "" ]; then
+			if [ "${_exit}" = "0" ] && [ "${_msg}" != "" ]; then
 				[ -z "${_warnings}" ] && _warnings="tmpfile creation: ${_msg}" || _warnings="$( printf "%s\ntmpfile creation: %s" "${_warnings}" "${_msg}")"
-				_errno=$((errno + 1))
+				_errno=$((_errno + 1))
 			fi
 		elif [ "${_type}" = "5" ]; then
-			if [ "${_msg}" != "" ]; then
+			if [ "${_exit}" = "0" ] && [ "${_msg}" != "" ]; then
 				[ -z "${_warnings}" ] && _warnings="tmpfile creation: ${_msg}" || _warnings="$( printf "%s\ntmpfile creation: %s" "${_warnings}" "${_msg}")"
-				_errno=$((errno + 1))
+				_errno=$((_errno + 1))
 			fi
 		# ---- file deletion
 		elif [ "${_type}" = "6" ]; then
-			if [ "${_msg}" != "" ]; then
+			if [ "${_exit}" = "0" ] && [ "${_msg}" != "" ]; then
 				[ -z "${_warnings}" ] && _warnings="tmpfile deletion: ${_msg}" || _warnings="$( printf "%s\ntmpfile deletion: %s" "${_warnings}" "${_msg}")"
-				_errno=$((errno + 1))
+				_errno=$((_errno + 1))
 			fi
 		elif [ "${_type}" = "7" ]; then
-			if [ "${_msg}" != "" ]; then
+			if [ "${_exit}" = "0" ] && [ "${_msg}" != "" ]; then
 				[ -z "${_warnings}" ] && _warnings="tmpfile deletion: ${_msg}" || _warnings="$( printf "%s\ntmpfile deletion: %s" "${_warnings}" "${_msg}")"
-				_errno=$((errno + 1))
+				_errno=$((_errno + 1))
 			fi
 		elif [ "${_type}" = "8" ]; then
-			if [ "${_msg}" != "" ]; then
+			if [ "${_exit}" = "0" ] && [ "${_msg}" != "" ]; then
 				[ -z "${_warnings}" ] && _warnings="tmpfile deletion: ${_msg}" || _warnings="$( printf "%s\ntmpfile deletion: %s" "${_warnings}" "${_msg}")"
-				_errno=$((errno + 1))
+				_errno=$((_errno + 1))
 			fi
 		fi
 	done
