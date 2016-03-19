@@ -517,9 +517,12 @@ debug() {
 	_log="${4}"		# (0|1|2|3) Current set file logging level (0:off, 1:normal, 2:debug, 3:trace)
 	_file="${5}"	# Full path to logfile
 
-	_tmp="${_lvl}"
-	_lvl="$( echo "${_tmp}" | sed 's/|.*//' )" # Everything before '|' or if no '|' is present, the whole string
-	_pre="$( if echo "${_tmp}" | grep -c '\|' >/dev/null 2>&1; then echo "${_tmp}" | sed 's/.*|//'; else echo ""; fi )" # Everything after '|' or nothing
+	#_tmp="${_lvl}"
+	#_lvl="$( echo "${_tmp}" | sed 's/|.*//' )" # Everything before '|' or if no '|' is present, the whole string
+	#_pre="$( if echo "${_tmp}" | grep -c '\|' >/dev/null 2>&1; then echo "${_tmp}" | sed 's/.*|//'; else echo ""; fi )" # Everything after '|' or nothing
+
+	_pre="$( echo "${_lvl}" | awk -F '|' '{print $2}' )" # Get prefix if it exists behind a '|' separator
+	_lvl="$( echo "${_lvl}" | awk -F '|' '{print $1}' )" # Extract _lvl
 
 
 	# Make sure this function is used correctly
