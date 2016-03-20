@@ -5,6 +5,7 @@ Version 0.17 (unreleased)
 Version 0.16.1
 --------------
 
+- [Enh]     Improving Option: Allowing wildcards for required databases (e.g: REQUIRE="*")
 - [Enh]     Code refactoring
 - [Enh]     Removed tput coloring (making it work under FreeBSD)
 - [Enh]     Removed table list, as it was to slow with db: >1000 tables
