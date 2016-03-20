@@ -2725,7 +2725,7 @@ write_info_file() {
 		echo "[tools]";
 		echo "mysqldump  = $( which mysqldump ) $( _get_version "mysqldump" )";
 		echo "mysql      = $( which mysql     ) $( _get_version "mysql" )";
-		echo "compressor = $(if [ "${_compress_opt}" = "1" ]; then echo "$( which ${_compress_bin} ) $( _get_version "${_compress_bin}" )"; else echo "Not used"; fi)";
+		echo "compressor = $(if [ "${_compress_opt}" = "1" ]; then echo "$( which "${_compress_bin}" ) $( _get_version "${_compress_bin}" )"; else echo "Not used"; fi)";
 		echo "encryptor  = $(if [ "${_encrypt_opt}"  = "1" ]; then echo "$( which openssl ) $( _get_version "openssl" )"; else echo "Not used"; fi)";
 		echo;
 		echo "; ============================================================";
