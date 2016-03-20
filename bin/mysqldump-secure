@@ -1003,7 +1003,7 @@ str_count_lines() {
 # @param  string  Pattern list
 # @output string  Pattern (if string was matched)
 # @return integer 0: Found, 1: not found
-str_match_pattern_list() {
+str_name_match_pattern_list() {
 	_string="${1}"
 	_pattern_list="${2}"
 
@@ -1048,6 +1048,43 @@ str_match_pattern_list() {
 	return ${_exit}
 }
 
+# Check if a pattern can be matched by a list.
+
+str_pattern_match_name_list() {
+	_pattern="${1}"
+	_name_list="${2}"
+
+	# Replace '*' with '.*' to create a regex pattern
+	_regex="$(echo "${_pattern}" | sed 's/\*/\.\*/')"
+
+	# Default exit with 1,
+	# which means it was not found.
+	_exit=1
+
+	# The pattern the string was found in
+	_found=""
+
+	# We need to disable "variable globbing" (set -f) here,
+	# because if there is only a '*' inside '$_pattern_list'
+	# then
+	#       'for _pattern in $_pattern_list; do'
+	# would list all files in the current directory.
+	set -f
+	for _name in ${_name_list}; do
+
+		# Check if the pattern matches the complete db name
+		_found="$(echo "${_name}" | grep -oe "${_regex}")"
+
+		if [ "${_name}" = "${_found}" ]; then
+
+			# We have found it, change exit to success
+			_exit=0
+		fi
+	done
+	set +f
+
+	return ${_exit}
+}
 
 ################################################################################
 #
@@ -4464,6 +4501,7 @@ DB_CNT_REQ_FAILED=0		# Number of required databases not dumped
 #
 # Database lists
 #
+DB_LIST_ALL=""			# Space separated list of all databases
 DB_LIST_DUMPED=""		# Space separated list of all dumped databases
 DB_LIST_IGNORED=""		# Space separated list of all ignored databases
 DB_LIST_FAILED=""		# Space separated list of all failed databases
@@ -4536,8 +4574,8 @@ fi
 debug_pi "debug" "(SQL): Retrieving list of databases... " "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
 # Get all databases
-DATABASES="$( get_mysql_databases "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" )"
-DB_CNT_TOTAL="$( str_count_lines "${DATABASES}" )"
+DB_LIST_ALL="$( get_mysql_databases "${MYSQL_CNF_FILE}" "${MYSQL_SSL_ARGS}" )"
+DB_CNT_TOTAL="$( str_count_lines "${DB_LIST_ALL}" )"
 
 debug_i "debug" "${DB_CNT_TOTAL}\n" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
@@ -4554,7 +4592,7 @@ debug_i "debug" "${DB_CNT_TOTAL}\n" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG
 
 i=0 # Lopp counter
 TIME_TOTAL_START="$( get_time )"
-for db in ${DATABASES}; do
+for db in ${DB_LIST_ALL}; do
 
 
 	##########################################################
@@ -4587,12 +4625,12 @@ for db in ${DATABASES}; do
 	fi
 
 	# Ignored database
-	if _ignore_pattern="$( str_match_pattern_list "${db}" "${IGNORE}" )"; then
+	if _ignore_pattern="$( str_name_match_pattern_list "${db}" "${IGNORE}" )"; then
 		skip_ignored=1
 		debug "trace" "(CFG): ${_cnt} Ignoring DB: \"${db}\" by \$IGNORE pattern: \"${_ignore_pattern}\""  "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
 		# Only if ignored database is not required, we can ignore it.
-		if _required_pattern="$( str_match_pattern_list "${db}" "${REQUIRE}" )"; then
+		if _required_pattern="$( str_name_match_pattern_list "${db}" "${REQUIRE}" )"; then
 			skip_ignored=0
 			debug "trace" "(CFG): ${_cnt} Required DB: \"${db}\" un-ignored by \$REQUIRE pattern: \"${_required_pattern}\""  "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		fi
@@ -4869,11 +4907,11 @@ TIME_TOTAL_DURATION="$( get_duration "${TIME_TOTAL_START}" )"
 
 
 #
-# Check if any ignored database was supposed to be dumped.
+# Check if any ignored databases were required.
 #
 for _name in ${DB_LIST_IGNORED}; do
-	if _pattern="$( str_match_pattern_list "${_name}" "${REQUIRE}" )"; then
-		debug "err" "(RUN): Required database: \"${_name}\" has not been dumped." "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+	if _pattern="$( str_name_match_pattern_list "${_name}" "${REQUIRE}" )"; then
+		debug "err" "(RUN): Required (but ignored) database not dumped: \"${_name}\"" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
 		MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
 		DB_CNT_REQ_FAILED=$((DB_CNT_REQ_FAILED + 1))
@@ -4883,11 +4921,11 @@ for _name in ${DB_LIST_IGNORED}; do
 done
 
 #
-# Check if any failed database was supposed to be dumped.
+# Check if any failed databases were required.
 #
 for _name in ${DB_LIST_FAILED}; do
-	if _pattern="$( str_match_pattern_list "${_name}" "${REQUIRE}" )"; then
-		debug "err" "(RUN): Required database: \"${_name}\" has not been dumped." "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+	if _pattern="$( str_name_match_pattern_list "${_name}" "${REQUIRE}" )"; then
+		debug "err" "(RUN): Required (but failed) database not dumped: \"${_name}\"" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
 		MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
 		DB_CNT_REQ_FAILED=$((DB_CNT_REQ_FAILED + 1))
@@ -4895,6 +4933,23 @@ for _name in ${DB_LIST_FAILED}; do
 		NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 2)"
 	fi
 done
+
+#
+# Check require list for not existing databases
+#
+#
+for _pattern in ${REQUIRE}; do
+	if ! str_pattern_match_name_list "${_pattern}" "${DB_LIST_ALL}" ; then
+		debug "err" "(RUN): Required (but not found) database not dumped: \"${_pattern}\"" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+
+		MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
+		DB_CNT_REQ_FAILED=$((DB_CNT_REQ_FAILED + 1))
+		DB_LIST_REQ_FAILED="$( str_join "${DB_LIST_REQ_FAILED}" " " "${_name}" )"
+		NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 2)"
+	fi
+done
+
+
 
 
 
