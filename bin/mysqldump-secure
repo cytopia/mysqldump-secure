@@ -2205,7 +2205,15 @@ validate_cnf_file() {
 #
 ################################################################################
 
-
+# Get mysqldump consistency options based on database and settings.
+#
+# @param  integer  Settings for InnoDB only Database
+# @param  integer  Settings for mixed InnoDB and others Database
+# @param  integer  Settings for non-InnoDB Database
+# @param  integer  How many InnoDB tables
+# @param  integer  How many non-InnoDB tables
+# @output string   Mysqldump consistency options
+# @return integer  0
 get_consistency_opts() {
 	_consistent_dump_only_innodb="${1}"
 	_consistent_dump_mixed_innodb="${2}"
@@ -2213,6 +2221,8 @@ get_consistency_opts() {
 	_tbl_cnt_innodb="${4}"
 	_tbl_cnt_others="${5}"
 
+
+	# Default is to ignore locks completely
 	_lock_opts="--skip-lock-tables"
 
 	#
@@ -2258,7 +2268,20 @@ get_consistency_opts() {
 	return 0
 }
 
-
+# Run the actualy mysqldump here
+#
+# @param  integer  Dump mode (0: plain, 1: compressed, 2: encrypted, 3: compressed & encrypted)
+# @param  string   MySQL connection args (cnf file and SSL arguments)
+# @param  string   Database name
+# @param  string   Destination file full path
+# @param  integer  Destination file chmod
+# @param  string   Name of compression binary (e.g.: gzip)
+# @param  string   Compression arguments (e.g.: -9)
+# @param  string   OpenSSL asymmetric encryption algorithm (e.g.: -aes256)
+# @param  string   OpenSSL full path to public key file
+# @param  string   Full path to temporary directory
+# @output string   Multiline string of pipefail errors/warnings/success
+# @return integer  0
 run_mysqldump() {
 	_dump_mode="${1}"			# 0: plain, 1: compressed, 2: encrypted, 3: compressed & encrypted
 	_mysql_arg="${2}"			# mysql connection args, ssl and mysqldump arguments
@@ -2280,10 +2303,10 @@ run_mysqldump() {
 	if [ "${_dump_mode}" = "0" ]; then
 
 		# Temp file 'mysqldump'
-		_err_tmp_file_dump="0:"
+		_err_tmp_file_dump=""
 		_ern_tmp_file_dump="0"
 		if ! _tmp_file_dump="$( create_tmp_file "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" "0600" 2>/dev/null)"; then
-			_err_tmp_file_dump="1:Could not create tmp file in: ${_tmp_dir}"
+			_err_tmp_file_dump="Could not create tmp file in ${_tmp_dir}"
 			_ern_tmp_file_dump="1"
 		fi
 
@@ -2299,15 +2322,17 @@ run_mysqldump() {
 				$(which mysqldump) ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}" > "${_file_name}";
 				printf "%s\n%s\n" \
 					"0:$?:$(head -n1 "${_tmp_file_dump}")" \
-					"3:${_err_tmp_file_dump}" >&3;
+					"3:${_ern_tmp_file_dump}:${_err_tmp_file_dump}" >&3;
 			)
 		) 3>&1 >&4)"
 		exec 4>&-
 
 		# Delete tmp file
 		if [ "${_ern_tmp_file_dump}" = "0" ]; then
-			if ! rm "${_tmp_file_dump}" 2>/dev/null; then
-				_error_statuses="$( printf "${_error_statuses}\n%s" "6:1:Could not delete tmp file in: ${_tmp_file_dump}" )"
+			if [ ! -f "${_tmp_file_dump}" ]; then
+				_error_statuses="$( printf "${_error_statuses}\n%s\n" "6:1:tmp file does not exist ${_tmp_file_dump}" )"
+			elif ! rm "${_tmp_file_dump}" 2>/dev/null; then
+				_error_statuses="$( printf "${_error_statuses}\n%s\n" "6:1:Could not delete tmp file ${_tmp_file_dump}" )"
 			fi
 		fi
 
@@ -2318,17 +2343,17 @@ run_mysqldump() {
 	elif [ "${_dump_mode}" = "1" ]; then
 
 		# Temp file 'mysqldump'
-		_err_tmp_file_dump="0:"
+		_err_tmp_file_dump=""
 		_ern_tmp_file_dump="0"
 		if ! _tmp_file_dump="$( create_tmp_file "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" "0600" 2>/dev/null)"; then
-			_err_tmp_file_dump="1:Could not create tmp file in: ${_tmp_dir}"
+			_err_tmp_file_dump="Could not create tmp file ${_tmp_dir}"
 			_ern_tmp_file_dump="1"
 		fi
 		# Temp file 'compress'
-		_err_tmp_file_comp="0:"
+		_err_tmp_file_comp=""
 		_ern_tmp_file_comp="0"
 		if ! _tmp_file_comp="$( create_tmp_file "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" "0600" 2>/dev/null)"; then
-			_err_tmp_file_comp="1:Could not create tmp file in: ${_tmp_dir}"
+			_err_tmp_file_comp="Could not create tmp file ${_tmp_dir}"
 			_ern_tmp_file_comp="1"
 		fi
 
@@ -2344,27 +2369,31 @@ run_mysqldump() {
 				$(which mysqldump) ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}";
 				printf "%s\n%s\n" \
 					"0:$?:$(head -n1 "${_tmp_file_dump}")" \
-					"3:${_err_tmp_file_dump}" >&3;
+					"3:${_ern_tmp_file_dump}:${_err_tmp_file_dump}" >&3;
 			) |
 			(
 				${_compress_bin} ${_compress_arg} 2> "${_tmp_file_comp}" > "${_file_name}";
 				printf "%s\n%s\n" \
 					"1:$?:$(head -n1 "${_tmp_file_comp}")" \
-					"4:${_err_tmp_file_comp}" >&3;
+					"4:${_ern_tmp_file_comp}:${_err_tmp_file_comp}" >&3;
 			)
 		) 3>&1 >&4)"
 		exec 4>&-
 
 		# Delete tmp file
 		if [ "${_ern_tmp_file_dump}" = "0" ]; then
-			if ! rm "${_tmp_file_dump}" 2>/dev/null; then
-				_error_statuses="$( printf "${_error_statuses}\n%s" "6:1:Could not delete tmp file in: ${_tmp_file_dump}" )"
+			if [ ! -f "${_tmp_file_dump}" ]; then
+				_error_statuses="$( printf "${_error_statuses}\n%s\n" "6:1:tmp file does not exist ${_tmp_file_dump}" )"
+			elif ! rm "${_tmp_file_dump}" 2>/dev/null; then
+				_error_statuses="$( printf "${_error_statuses}\n%s\n" "6:1:Could not delete tmp file ${_tmp_file_dump}" )"
 			fi
 		fi
 		# Delete tmp file
 		if [ "${_ern_tmp_file_comp}" = "0" ]; then
-			if ! rm "${_tmp_file_comp}" 2>/dev/null; then
-				_error_statuses="$( printf "${_error_statuses}\n%s" "7:1:Could not delete tmp file in: ${_tmp_file_comp}" )"
+			if [ ! -f "${_tmp_file_comp}" ]; then
+				_error_statuses="$( printf "${_error_statuses}\n%s\n" "7:1:tmp file does not exist ${_tmp_file_comp}" )"
+			elif ! rm "${_tmp_file_comp}" 2>/dev/null; then
+				_error_statuses="$( printf "${_error_statuses}\n%s\n" "7:1:Could not delete tmp file ${_tmp_file_comp}" )"
 			fi
 		fi
 
@@ -2375,17 +2404,17 @@ run_mysqldump() {
 	elif [ "${_dump_mode}" = "2" ]; then
 
 		# Temp file 'mysqldump'
-		_err_tmp_file_dump="0:"
+		_err_tmp_file_dump=""
 		_ern_tmp_file_dump="0"
 		if ! _tmp_file_dump="$( create_tmp_file "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" "0600" 2>/dev/null)"; then
-			_err_tmp_file_dump="1:Could not create tmp file in: ${_tmp_dir}"
+			_err_tmp_file_dump="Could not create tmp file ${_tmp_dir}"
 			_ern_tmp_file_dump="1"
 		fi
 		# Temp file 'encrypt'
-		_err_tmp_file_encr="0:"
+		_err_tmp_file_encr=""
 		_ern_tmp_file_encr="0"
 		if ! _tmp_file_encr="$( create_tmp_file "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" "0600" 2>/dev/null)"; then
-			_err_tmp_file_encr="1:Could not create tmp file in: ${_tmp_dir}"
+			_err_tmp_file_encr="Could not create tmp file ${_tmp_dir}"
 			_ern_tmp_file_encr="1"
 		fi
 
@@ -2402,14 +2431,14 @@ run_mysqldump() {
 				$(which mysqldump) ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}";
 				printf "%s\n%s\n" \
 					"0:$?:$(head -n1 "${_tmp_file_dump}")" \
-					"3:${_err_tmp_file_dump}" >&3;
+					"3:${_ern_tmp_file_dump}:${_err_tmp_file_dump}" >&3;
 
 			) |
 			(
 				$(which openssl) smime -encrypt -binary -text -outform DER ${_openssl_algo} -out "${_file_name}" "${_openssl_cert}" 2> "${_tmp_file_encr}";
 				printf "%s\n%s\n" \
 					"2:$?:$(head -n1 "${_tmp_file_encr}")" \
-					"5:${_err_tmp_file_encr}" >&3;
+					"5:${_ern_tmp_file_encr}:${_err_tmp_file_encr}" >&3;
 			)
 
 		) 3>&1 >&4)"
@@ -2417,14 +2446,18 @@ run_mysqldump() {
 
 		# Delete tmp file
 		if [ "${_ern_tmp_file_dump}" = "0" ]; then
-			if ! rm "${_tmp_file_dump}" 2>/dev/null; then
-				_error_statuses="$( printf "${_error_statuses}\n%s" "6:1:Could not delete tmp file in: ${_tmp_file_dump}" )"
+			if [ ! -f "${_tmp_file_dump}" ]; then
+				_error_statuses="$( printf "${_error_statuses}\n%s\n" "6:1:tmp file does not exist ${_tmp_file_dump}" )"
+			elif ! rm "${_tmp_file_dump}" 2>/dev/null; then
+				_error_statuses="$( printf "${_error_statuses}\n%s\n" "6:1:Could not delete tmp file ${_tmp_file_dump}" )"
 			fi
 		fi
 		# Delete tmp file
 		if [ "${_ern_tmp_file_encr}" = "0" ]; then
-			if ! rm "${_tmp_file_encr}" 2>/dev/null; then
-				_error_statuses="$( printf "${_error_statuses}\n%s" "8:1:Could not delete tmp file in: ${_tmp_file_encr}" )"
+			if [ ! -f "${_tmp_file_encr}" ]; then
+				_error_statuses="$( printf "${_error_statuses}\n%s\n" "8:1:tmp file does not exist ${_tmp_file_encr}" )"
+			elif ! rm "${_tmp_file_encr}" 2>/dev/null; then
+				_error_statuses="$( printf "${_error_statuses}\n%s\n" "8:1:Could not delete tmp file ${_tmp_file_encr}" )"
 			fi
 		fi
 
@@ -2435,24 +2468,24 @@ run_mysqldump() {
 	elif [ "${_dump_mode}" = "3" ]; then
 
 		# Temp file 'mysqldump'
-		_err_tmp_file_dump="0:"
+		_err_tmp_file_dump=""
 		_ern_tmp_file_dump="0"
 		if ! _tmp_file_dump="$( create_tmp_file "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" "0600" 2>/dev/null)"; then
-			_err_tmp_file_dump="1:Could not create tmp file in: ${_tmp_dir}"
+			_err_tmp_file_dump="Could not create tmp file ${_tmp_dir}"
 			_ern_tmp_file_dump="1"
 		fi
 		# Temp file 'compress'
-		_err_tmp_file_comp="0:"
+		_err_tmp_file_comp=""
 		_ern_tmp_file_comp="0"
 		if ! _tmp_file_comp="$( create_tmp_file "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" "0600" 2>/dev/null)"; then
-			_err_tmp_file_comp="1:Could not create tmp file in: ${_tmp_dir}"
+			_err_tmp_file_comp="Could not create tmp file ${_tmp_dir}"
 			_ern_tmp_file_comp="1"
 		fi
 		# Temp file 'encrypt'
-		_err_tmp_file_encr="0:"
+		_err_tmp_file_encr=""
 		_ern_tmp_file_encr="0"
 		if ! _tmp_file_encr="$( create_tmp_file "${_tmp_dir}/.dump_XXXXXXXXXXXXXXX" "0600" 2>/dev/null)"; then
-			_err_tmp_file_encr="1:Could not create tmp file in: ${_tmp_dir}"
+			_err_tmp_file_encr="Could not create tmp file ${_tmp_dir}"
 			_ern_tmp_file_encr="1"
 		fi
 
@@ -2468,19 +2501,19 @@ run_mysqldump() {
 				$(which mysqldump) ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}";
 				printf "%s\n%s\n" \
 					"0:$?:$(head -n1 "${_tmp_file_dump}")" \
-					"3:${_err_tmp_file_dump}" >&3;
+					"3:${_ern_tmp_file_dump}:${_err_tmp_file_dump}" >&3;
 			) |
 			(
 				${_compress_bin} ${_compress_arg} 2> "${_tmp_file_comp}";
 				printf "%s\n%s\n" \
 					"1:$?:$(head -n1 "${_tmp_file_comp}")" \
-					"4:${_err_tmp_file_comp}" >&3;
+					"4:${_ern_tmp_file_comp}:${_err_tmp_file_comp}" >&3;
 			) |
 			(
 				$(which openssl) smime -encrypt -binary -text -outform DER ${_openssl_algo} -out "${_file_name}" "${_openssl_cert}" 2> "${_tmp_file_encr}";
 				printf "%s\n%s\n" \
 					"2:$?:$(head -n1 "${_tmp_file_encr}")" \
-					"5:${_err_tmp_file_encr}" >&3;
+					"5:${_ern_tmp_file_encr}:${_err_tmp_file_encr}" >&3;
 			)
 
 		) 3>&1 >&4)"
@@ -2488,20 +2521,26 @@ run_mysqldump() {
 
 		# Delete tmp file
 		if [ "${_ern_tmp_file_dump}" = "0" ]; then
-			if ! rm "${_tmp_file_dump}" 2>/dev/null; then
-				_error_statuses="$( printf "${_error_statuses}\n%s" "6:1:Could not delete tmp file in: ${_tmp_file_dump}" )"
+			if [ ! -f "${_tmp_file_dump}" ]; then
+				_error_statuses="$( printf "${_error_statuses}\n%s\n" "6:1:tmp file does not exist ${_tmp_file_dump}" )"
+			elif ! rm "${_tmp_file_dump}" 2>/dev/null; then
+				_error_statuses="$( printf "${_error_statuses}\n%s\n" "6:1:Could not delete tmp file ${_tmp_file_dump}" )"
 			fi
 		fi
 		# Delete tmp file
 		if [ "${_ern_tmp_file_comp}" = "0" ]; then
-			if ! rm "${_tmp_file_comp}" 2>/dev/null; then
-				_error_statuses="$( printf "${_error_statuses}\n%s" "7:1:Could not delete tmp file in: ${_tmp_file_comp}" )"
+			if [ ! -f "${_tmp_file_comp}" ]; then
+				_error_statuses="$( printf "${_error_statuses}\n%s\n" "7:1:tmp file does not exist ${_tmp_file_comp}" )"
+			elif ! rm "${_tmp_file_comp}" 2>/dev/null; then
+				_error_statuses="$( printf "${_error_statuses}\n%s\n" "7:1:Could not delete tmp file ${_tmp_file_comp}" )"
 			fi
 		fi
 		# Delete tmp file
 		if [ "${_ern_tmp_file_encr}" = "0" ]; then
-			if ! rm "${_tmp_file_encr}" 2>/dev/null; then
-				_error_statuses="$( printf "${_error_statuses}\n%s" "8:1:Could not delete tmp file in: ${_tmp_file_encr}" )"
+			if [ ! -f "${_tmp_file_encr}" ]; then
+				_error_statuses="$( printf "${_error_statuses}\n%s\n" "8:1:tmp file does not exist ${_tmp_file_encr}" )"
+			elif ! rm "${_tmp_file_encr}" 2>/dev/null; then
+				_error_statuses="$( printf "${_error_statuses}\n%s\n" "8:1:Could not delete tmp file ${_tmp_file_encr}" )"
 			fi
 		fi
 	fi
@@ -2512,8 +2551,11 @@ run_mysqldump() {
 }
 
 
-
-
+# Evaluate pipefail errors
+#
+# @param  string  Multiline pipefail string
+# @output string  Multiline error messages
+# @return integer Success
 mysqldump_pipefail_errors() {
 	_error_statuses="${1}"
 
@@ -2583,7 +2625,11 @@ mysqldump_pipefail_errors() {
 	return ${_errno}
 }
 
-
+# Evaluate pipefail warnings
+#
+# @param  string  Multiline pipefail string
+# @output string  Multiline warning messages
+# @return integer Success
 mysqldump_pipefail_warnings() {
 	_error_statuses="${1}"
 
@@ -2655,7 +2701,10 @@ mysqldump_pipefail_warnings() {
 
 
 
-
+#
+# Write the database dump info file with lot's of
+# useful information.
+#
 write_info_file() {
 	# File arguments
 	_file_path="${1}"
@@ -2686,7 +2735,6 @@ write_info_file() {
 	_mysql_repl_type="${21}"
 	_mysql_server="${22}"
 	_mysql_version="${23}"
-
 
 
 	_mtime="$( get_file_mtime "${_file_path}/${_file_name}" )"
@@ -2794,11 +2842,18 @@ write_info_file() {
 #
 ################################################################################
 
+#
+# Get version information of certain binaries
+#
+# @param  string  binary
+# @output string  Detailed version information
+# @return integer Success
 _get_version() {
 	_tool="${1}"
 
 	_version=""
 	_extra=""
+	_exit=0
 
 	if [ "${_tool}" = "mysqldump" ]; then
 		_version="$( $(which mysqldump)  --version  | sed 's/.*mysqldump[[:space:]]*Ver[[:space:]]*//' | awk -F ',' '{print $1}' )"
@@ -2823,15 +2878,16 @@ _get_version() {
 		_extra=""
 	else
 		_version="Unable to obtain version"
+		_exit=1
 	fi
-
 
 	if [ "${_extra}" != "" ]; then
 		echo "(${_version}) [${_extra}]"
 	else
 		echo "(${_version})"
 	fi
-	return 0
+
+	return ${_exit}
 }
 
 
@@ -4422,10 +4478,11 @@ BIN_TMPWATCH="$(which "${DELETE_METHOD}" 2>/dev/null)"	# This can be tmpwatch or
 #
 # Database counters
 #
-DB_CNT_TOTAL=0
-DB_CNT_IGNORED=0
-DB_CNT_DUMPED=0
-DB_CNT_FAILED=0
+DB_CNT_TOTAL=0		# Total numbers of databases
+DB_CNT_IGNORED=0	# Number of ignored databases (empty or via ignore list)
+DB_CNT_DUMPED=0		# Number of successfully dumped databases
+DB_CNT_FAILED=0		# Number of unseccessfull dumped fatabases (failed)
+DB_CNT_REQ_FAILED=0	# Number of required databases not dumped
 
 
 #
@@ -4464,11 +4521,9 @@ NAGIOS_EXIT_CODE=0
 
 ################################################################################
 #
-# ENTRY POINT: MAIN
+# PRE-PROCESSING
 #
 ################################################################################
-
-
 
 
 
@@ -4511,9 +4566,13 @@ debug_i "debug" "${DB_CNT_TOTAL}\n" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG
 
 
 
-############################################################
-# Dump databases
-############################################################
+
+
+################################################################################
+#
+# DUMP DATABASES
+#
+################################################################################
 
 
 i=0 # Lopp counter
@@ -4596,7 +4655,7 @@ for db in ${DATABASES}; do
 		# Add failed db to nagios log
 		NAGIOS_DB_ERROR="$( str_join "${NAGIOS_DB_ERROR}" "${db}" ","  )"
 
-		debug "err" "(RUN): ${_cnt} Failed:   ${db} cannot be written to disk (file exists: ${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext})" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+		debug "fatal" "(RUN): ${_cnt} Failed:   ${db} cannot be written to disk (file exists: ${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext})" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 2)"
 
 	#
@@ -4749,7 +4808,7 @@ for db in ${DATABASES}; do
 
 
 		#
-		# Pipefail Error Checking
+		# Pipefail Errors
 		#
 		_dump_failed=0
 		if ! MY_ERRORS="$(mysqldump_pipefail_errors "${error_statuses}")"; then
@@ -4769,7 +4828,9 @@ for db in ${DATABASES}; do
 			MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
 			NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 2)"
 			NAGIOS_DB_ERROR="$( str_join "${NAGIOS_DB_ERROR}" "${db}" ","  )"
-
+		#
+		# Pipefail OK
+		#
 		else
 			_dump_failed=0
 
@@ -4826,6 +4887,14 @@ TIME_TOTAL_DURATION="$( get_duration "${TIME_TOTAL_START}" )"
 
 
 
+
+################################################################################
+#
+# POST PROCESSING
+#
+################################################################################
+
+
 ############################################################
 # (CFG) Check required databases
 ############################################################
@@ -4833,18 +4902,9 @@ TIME_TOTAL_DURATION="$( get_duration "${TIME_TOTAL_START}" )"
 for req in ${REQUIRE}; do
 	debug "err" "(RUN): Required database: \"${req}\" has not been dumped." "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 	MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
-	DB_CNT_FAILED=$((DB_CNT_FAILED + 1))
+	DB_CNT_REQ_FAILED=$((DB_CNT_REQ_FAILED + 1))
 	NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 2)"
 done
-
-
-# Human readable output of TOTAL_SIZE (MegaBytes)
-TOTAL_SIZE_MB="$( div "${TOTAL_SIZE_B}" "1048576" )"
-TOTAL_SIZE_MB="$( round "${TOTAL_SIZE_MB}" "2" )"
-
-debug "debug" "(RUN): Dumping finished (OK: ${DB_CNT_DUMPED} dbs, IGN: ${DB_CNT_IGNORED} dbs, ERR: ${DB_CNT_FAILED}, TOTAL: ${DB_CNT_TOTAL})" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-debug "debug" "(RUN): Took ${TIME_TOTAL_DURATION} seconds" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-debug "debug" "(RUN): Total size dumped: ${TOTAL_SIZE_MB} MB" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
 
 
@@ -4909,13 +4969,11 @@ fi
 
 
 
-
 ############################################################
 # (OPT) Nagios Plugin Log
 ############################################################
 
 if [ "${NAGIOS_LOG}" = "1" ]; then
-
 
 	debug "debug" "(RUN): Writing nagios log file" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
@@ -4972,7 +5030,6 @@ fi
 
 
 
-
 ############################################################
 # Delete temporary files
 ############################################################
@@ -5002,11 +5059,22 @@ fi
 # Exit
 ############################################################
 
+
+# Human readable output of TOTAL_SIZE (MegaBytes)
+TOTAL_SIZE_MB="$( div "${TOTAL_SIZE_B}" "1048576" )"
+TOTAL_SIZE_MB="$( round "${TOTAL_SIZE_MB}" "2" )"
+
+debug "debug" "(RUN): Dumping finished (OK: ${DB_CNT_DUMPED} dbs, IGN: ${DB_CNT_IGNORED} dbs, ERR: ${DB_CNT_FAILED}, TOTAL: ${DB_CNT_TOTAL})" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+debug "debug" "(RUN): Took ${TIME_TOTAL_DURATION} seconds" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+debug "debug" "(RUN): Total size dumped: ${TOTAL_SIZE_MB} MB" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+
+
+
 if [ "${MDS_FAIL_COUNT}" != "0" ]; then
 	if [ "${MDS_FAIL_COUNT}" = "1" ]; then
-		debug "fatal" "Finished with ${MDS_FAIL_COUNT} failed backup" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+		debug "fatal" "Finished with ${MDS_FAIL_COUNT} Failures. ${DB_CNT_FAILED} failed backups (${DB_CNT_REQ_FAILED} required dbs missing)" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 	else
-		debug "fatal" "Finished with ${MDS_FAIL_COUNT} failed backups" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+		debug "fatal" "Finished with ${MDS_FAIL_COUNT} Failures. ${DB_CNT_FAILED} failed backups (${DB_CNT_REQ_FAILED} required dbs missing)" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 	fi
 	exit $EXIT_FAIL
 elif [ "${MDS_ERROR_COUNT}" != "0" ]; then
