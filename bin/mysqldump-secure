@@ -992,99 +992,6 @@ str_count_lines() {
 
 
 
-# Check if a string can be matched by a pattern list.
-#
-# The pattern list is a list of strings with optional '*'
-# for wildcards.
-# So string 'my_database' can be found in
-# pattern list: 'my_* oterh'.
-#
-# @param  string  String to match against pattern list
-# @param  string  Pattern list
-# @output string  Pattern (if string was matched)
-# @return integer 0: Found, 1: not found
-str_name_match_pattern_list() {
-	_string="${1}"
-	_pattern_list="${2}"
-
-	# Default exit with 1,
-	# which means it was not found.
-	_exit=1
-
-	# The pattern the string was found in
-	_found_pattern=""
-
-	# We need to disable "variable globbing" (set -f) here,
-	# because if there is only a '*' inside '$_pattern_list'
-	# then
-	#       'for _pattern in $_pattern_list; do'
-	# would list all files in the current directory.
-	set -f
-	for _pattern in ${_pattern_list}; do
-
-		# Replace '*' with '.*' to create a regex pattern
-		_regex="$(echo "${_pattern}" | sed 's/\*/\.\*/')"
-
-		# Check if the pattern matches the complete db name
-		_found="$(echo "${_string}" | grep -oe "${_regex}")"
-
-		if [ "${_string}" = "${_found}" ]; then
-
-			# Assign pattern for output
-			_found_pattern="${_pattern}"
-
-			# Return with 0 to indicate it was found
-			_exit=0
-
-			# Stop the loop
-			# We cannot simply return here, as we still have to
-			# set 'set +f', so break out of loop instead.
-			break
-		fi
-	done
-	set +f
-
-	echo "${_found_pattern}"
-	return ${_exit}
-}
-
-# Check if a pattern can be matched by a list.
-
-str_pattern_match_name_list() {
-	_pattern="${1}"
-	_name_list="${2}"
-
-	# Replace '*' with '.*' to create a regex pattern
-	_regex="$(echo "${_pattern}" | sed 's/\*/\.\*/')"
-
-	# Default exit with 1,
-	# which means it was not found.
-	_exit=1
-
-	# The pattern the string was found in
-	_found=""
-
-	# We need to disable "variable globbing" (set -f) here,
-	# because if there is only a '*' inside '$_pattern_list'
-	# then
-	#       'for _pattern in $_pattern_list; do'
-	# would list all files in the current directory.
-	set -f
-	for _name in ${_name_list}; do
-
-		# Check if the pattern matches the complete db name
-		_found="$(echo "${_name}" | grep -oe "${_regex}")"
-
-		if [ "${_name}" = "${_found}" ]; then
-
-			# We have found it, change exit to success
-			_exit=0
-		fi
-	done
-	set +f
-
-	return ${_exit}
-}
 
 ################################################################################
 #
@@ -2100,6 +2007,85 @@ count_total_tables() {
 }
 
 
+
+################################################################################
+#
+#  D A T A B A S E   I G N O R E / R E Q U I R E   H E L P E R
+#
+################################################################################
+
+# Check if the specified database should be ignored
+# This can either be by the full name or a wildcard with '*'
+#
+# @param  string  Ignore list
+# @param  string  Database name
+# @output string  Ignore pattern
+# @return integer 0: ignored, 1: not ignored
+database_is_ignored() {
+	_ignore_list="${1}"
+	_database="${2}"
+
+	# Default exit with 1, which means
+	# it was not found.
+	_exit=1
+
+	# The ignore pattern if it was ignored
+	_pattern=""
+
+	# We need to disable "variable globbing" (set -f) here,
+	# because if there is only a '*' inside '$IGNORE'
+	# then
+	#       'for ign_db in ${IGNORE}; do'
+	# would list all files in the current directory.
+	set -f
+	for _ignore_pattern in ${_ignore_list}; do
+
+		# Replace '*' with '.*' to create a regex pattern
+		_regex="$(echo "${_ignore_pattern}" | sed 's/\*/\.\*/')"
+
+		# Check if the pattern matches the complete db name
+		_found="$(echo "${_database}" | grep -oe "${_regex}")"
+
+		if [ "${_found}" = "${_database}" ]; then
+
+			# Assign new ignore pattern
+			_pattern="${_ignore_pattern}"
+
+			# Return with 0 to indicate it was found
+			_exit=0
+
+			# Stop the loop
+			break
+		fi
+	done
+	set +f
+
+	echo "${_pattern}"
+	return ${_exit}
+}
+
+# Check if the specified database is required.
+#
+# @param  string  Require list
+# @param  string  Database name
+# @return integer 0: required, 1: not required
+database_is_required() {
+	_require_list="${1}"
+	_database="${2}"
+
+	# Now check if the ignored db is actually a required db inside $REQUIRE
+	for _db_required in ${_require_list}; do
+		# Required database found?
+		if [ "${_database}" = "${_db_required}" ]; then
+			# Returning 0 indicates it is required
+			return 0
+		fi
+	done
+
+	# Returning invalid return code indicates it is not required
+	return 1
+
+}
 
 
 ################################################################################
@@ -4498,6 +4484,7 @@ DB_CNT_DUMPED=0			# Number of successfully dumped databases
 DB_CNT_FAILED=0			# Number of unseccessfull dumped fatabases (failed)
 DB_CNT_REQ_FAILED=0		# Number of required databases not dumped
 
+
 #
 # Database lists
 #
@@ -4505,7 +4492,8 @@ DB_LIST_ALL=""			# Space separated list of all databases
 DB_LIST_DUMPED=""		# Space separated list of all dumped databases
 DB_LIST_IGNORED=""		# Space separated list of all ignored databases
 DB_LIST_FAILED=""		# Space separated list of all failed databases
-DB_LIST_REQ_FAILED=""	# Space separated list of required databases not dumped
+#DB_LIST_REQ_FAILED=""	# Space separated list of required databases not dumped
+
 
 #
 # Total size of all dumped databases
@@ -4615,6 +4603,8 @@ for db in ${DB_LIST_ALL}; do
 
 
 
+
+
 	##########################################################
 	# IGNORE CHECKS
 
@@ -4625,14 +4615,14 @@ for db in ${DB_LIST_ALL}; do
 	fi
 
 	# Ignored database
-	if _ignore_pattern="$( str_name_match_pattern_list "${db}" "${IGNORE}" )"; then
+	if _ignore_pattern="$( database_is_ignored "${IGNORE}" "${db}" )"; then
 		skip_ignored=1
 		debug "trace" "(CFG): ${_cnt} Ignoring DB: \"${db}\" by \$IGNORE pattern: \"${_ignore_pattern}\""  "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 
 		# Only if ignored database is not required, we can ignore it.
-		if _required_pattern="$( str_name_match_pattern_list "${db}" "${REQUIRE}" )"; then
+		if database_is_required "${REQUIRE}" "${db}"; then
 			skip_ignored=0
-			debug "trace" "(CFG): ${_cnt} Required DB: \"${db}\" un-ignored by \$REQUIRE pattern: \"${_required_pattern}\""  "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+			debug "trace" "(CFG): ${_cnt} Required DB: \"${db}\" un-ignored by \$REQUIRE settings"  "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		fi
 	fi
 
@@ -4654,7 +4644,7 @@ for db in ${DB_LIST_ALL}; do
 		fi
 
 		DB_CNT_IGNORED=$((DB_CNT_IGNORED + 1))
-		DB_LIST_IGNORED="$( str_join "${DB_LIST_IGNORED}" " " "${db}" )"
+		DB_LIST_IGNORED="$( str_join "${DB_LIST_IGNORED}" "," "${db}" )"
 
 	#
 	# Main case 2 (file exists on disk)
@@ -4665,7 +4655,8 @@ for db in ${DB_LIST_ALL}; do
 		DB_CNT_FAILED=$((DB_CNT_FAILED + 1))
 		MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
 
-		DB_LIST_FAILED="$( str_join "${DB_LIST_FAILED}" " " "${db}" )"
+		# Add failed db to nagios log
+		DB_LIST_FAILED="$( str_join "${DB_LIST_FAILED}" "," "${db}" )"
 
 		debug "fatal" "(RUN): ${_cnt} Failed:   ${db} cannot be written to disk (file exists: ${DUMP_DIR}/${DUMP_FILE_PRE}${db}${ext})" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 2)"
@@ -4838,8 +4829,8 @@ for db in ${DB_LIST_ALL}; do
 
 			DB_CNT_FAILED=$((DB_CNT_FAILED + 1))
 			MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
-			DB_LIST_FAILED="$( str_join "${DB_LIST_FAILED}" " " "${db}" )"
 			NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 2)"
+			DB_LIST_FAILED="$( str_join "${DB_LIST_FAILED}" "," "${db}" )"
 		#
 		# Pipefail OK
 		#
@@ -4856,7 +4847,7 @@ for db in ${DB_LIST_ALL}; do
 			fi
 
 			DB_CNT_DUMPED=$((DB_CNT_DUMPED + 1))
-			DB_LIST_DUMPED="$( str_join "${DB_LIST_DUMPED}" " " "${db}" )"
+			DB_LIST_DUMPED="$( str_join "${DB_LIST_DUMPED}" "," "${db}" )"
 		fi
 
 
@@ -4865,6 +4856,12 @@ for db in ${DB_LIST_ALL}; do
 		# Success Handler
 		#
 		if [ "${_dump_failed}" = "0" ]; then
+
+			#
+			# If all was good, remove required db from list
+			#
+			REQUIRE="$( str_remove_word "${REQUIRE}" "${db}" )"
+
 
 			#
 			# Write file info?
@@ -4905,50 +4902,12 @@ TIME_TOTAL_DURATION="$( get_duration "${TIME_TOTAL_START}" )"
 # (CFG) Check required databases
 ############################################################
 
-
-#
-# Check if any ignored databases were required.
-#
-for _name in ${DB_LIST_IGNORED}; do
-	if _pattern="$( str_name_match_pattern_list "${_name}" "${REQUIRE}" )"; then
-		debug "err" "(RUN): Required (but ignored) database not dumped: \"${_name}\"" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-
-		MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
-		DB_CNT_REQ_FAILED=$((DB_CNT_REQ_FAILED + 1))
-		DB_LIST_REQ_FAILED="$( str_join "${DB_LIST_REQ_FAILED}" " " "${_name}" )"
-		NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 2)"
-	fi
+for req in ${REQUIRE}; do
+	debug "err" "(RUN): Required database: \"${req}\" has not been dumped." "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+	MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
+	DB_CNT_REQ_FAILED=$((DB_CNT_REQ_FAILED + 1))
+	NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 2)"
 done
-
-#
-# Check if any failed databases were required.
-#
-for _name in ${DB_LIST_FAILED}; do
-	if _pattern="$( str_name_match_pattern_list "${_name}" "${REQUIRE}" )"; then
-		debug "err" "(RUN): Required (but failed) database not dumped: \"${_name}\"" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-
-		MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
-		DB_CNT_REQ_FAILED=$((DB_CNT_REQ_FAILED + 1))
-		DB_LIST_REQ_FAILED="$( str_join "${DB_LIST_REQ_FAILED}" " " "${_name}" )"
-		NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 2)"
-	fi
-done
-
-#
-# Check require list for not existing databases
-#
-#
-for _pattern in ${REQUIRE}; do
-	if ! str_pattern_match_name_list "${_pattern}" "${DB_LIST_ALL}" ; then
-		debug "err" "(RUN): Required (but not found) database not dumped: \"${_pattern}\"" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-
-		MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
-		DB_CNT_REQ_FAILED=$((DB_CNT_REQ_FAILED + 1))
-		DB_LIST_REQ_FAILED="$( str_join "${DB_LIST_REQ_FAILED}" " " "${_name}" )"
-		NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 2)"
-	fi
-done
-
 
 
 
@@ -5026,7 +4985,7 @@ if [ "${NAGIOS_LOG}" = "1" ]; then
 		echo "success = ${NAGIOS_EXIT_CODE}";
 		echo "lastbak = ${TIME_TOTAL_START}";
 		echo "message = ";
-		echo "missing = ${DB_LIST_REQ_FAILED}";
+		echo "missing = ${REQUIRE}";
 		echo;
 		echo "[options]";
 		echo "opt_log = ${LOG}";
@@ -5069,7 +5028,6 @@ if [ "${NAGIOS_LOG}" = "1" ]; then
 		echo "[misc]";
 		echo "version = ${INFO_VERSION}";	# mysqldump-secure version (for checking against latest)
 	} >> "${NAGIOS_LOG_FILE}"
-
 fi
 
 
@@ -5082,28 +5040,19 @@ fi
 # Delete tmp files/folders in reverse order
 #
 if [ "${DELETE}" = "1" ]; then
-	if [ ! -f "${MY_TMP_FILE_DEL}" ]; then
-		debug "err"  "(RUN): Tmp file did not exist: ${MY_TMP_FILE_DEL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-		MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
+	if rm "${MY_TMP_FILE_DEL}" 2>/dev/null; then
+		debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_DEL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 	else
-		if rm "${MY_TMP_FILE_DEL}" 2>/dev/null; then
-			debug "trace" "(RUN): Deleting tmp file: ${MY_TMP_FILE_DEL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-		else
-			debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_DEL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-			MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
-		fi
-	fi
-fi
-if [ ! -d "${MY_TMP_DIR}" ]; then
-	debug "err"  "(RUN): Tmp dir did not exist: ${MY_TMP_DIR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-	MDS_ERROR_COUNT=$((MDS_ERROR_COUNT + 1))
-else
-	if rm -rf "${MY_TMP_DIR}" 2>/dev/null; then
-		debug "trace" "(RUN): Deleting tmp dir:  ${MY_TMP_DIR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
-	else
-		debug "warn"  "(RUN): Cannot delete tmp dir:  ${MY_TMP_DIR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+		debug "warn"  "(RUN): Cannot delete tmp file: ${MY_TMP_FILE_DEL}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 		MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 	fi
+fi
+
+if rm -rf "${MY_TMP_DIR}" 2>/dev/null; then
+	debug "trace" "(RUN): Deleting tmp dir:  ${MY_TMP_DIR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+else
+	debug "warn"  "(RUN): Cannot delete tmp dir:  ${MY_TMP_DIR}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+	MDS_WARNING_COUNT=$((MDS_WARNING_COUNT + 1))
 fi
 
 
