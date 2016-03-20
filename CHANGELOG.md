@@ -2,7 +2,7 @@ Version 0.17 (unreleased)
 ------------
 
 
-Version 0.16.1 (unreleased)
+Version 0.16.1
 --------------
 
 - [Enh]     Code refactoring
