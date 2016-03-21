@@ -4484,16 +4484,14 @@ DB_CNT_DUMPED=0			# Number of successfully dumped databases
 DB_CNT_FAILED=0			# Number of unseccessfull dumped fatabases (failed)
 DB_CNT_REQ_FAILED=0		# Number of required databases not dumped
 
-
 #
 # Database lists
 #
-DB_LIST_ALL=""			# Space separated list of all databases
-DB_LIST_DUMPED=""		# Space separated list of all dumped databases
-DB_LIST_IGNORED=""		# Space separated list of all ignored databases
-DB_LIST_FAILED=""		# Space separated list of all failed databases
-#DB_LIST_REQ_FAILED=""	# Space separated list of required databases not dumped
-
+DB_LIST_ALL=""			# Newline separated list of all databases
+DB_LIST_DUMPED=""		# Comma separated list of all dumped databases
+DB_LIST_IGNORED=""		# Comma separated list of all ignored databases
+DB_LIST_FAILED=""		# Comma separated list of all failed databases
+DB_LIST_REQ_FAILED=""	# Comma separated list of required databases not dumped
 
 #
 # Total size of all dumped databases
@@ -4906,6 +4904,7 @@ for req in ${REQUIRE}; do
 	debug "err" "(RUN): Required database: \"${req}\" has not been dumped." "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 	MDS_FAIL_COUNT=$((MDS_FAIL_COUNT + 1))
 	DB_CNT_REQ_FAILED=$((DB_CNT_REQ_FAILED + 1))
+	DB_LIST_REQ_FAILED="$( str_join "${DB_LIST_REQ_FAILED}" "," "${req}" )"
 	NAGIOS_EXIT_CODE="$(merge_exit_codes "${NAGIOS_EXIT_CODE}" 2)"
 done
 
@@ -4985,7 +4984,7 @@ if [ "${NAGIOS_LOG}" = "1" ]; then
 		echo "success = ${NAGIOS_EXIT_CODE}";
 		echo "lastbak = ${TIME_TOTAL_START}";
 		echo "message = ";
-		echo "missing = ${REQUIRE}";
+		echo "missing = ${DB_LIST_REQ_FAILED}";
 		echo;
 		echo "[options]";
 		echo "opt_log = ${LOG}";
