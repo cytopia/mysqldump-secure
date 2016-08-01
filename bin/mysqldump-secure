@@ -4578,7 +4578,15 @@ debug_i "debug" "${DB_CNT_TOTAL}\n" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG
 
 i=0 # Lopp counter
 TIME_TOTAL_START="$( get_time )"
+
+IFS='
+'
+set -f
 for db in ${DB_LIST_ALL}; do
+
+	# return IFS back if you need to split new line by spaces:
+	unset IFS
+	set +f
 
 
 	##########################################################
@@ -4883,9 +4891,18 @@ for db in ${DB_LIST_ALL}; do
 			fi
 		fi
 	fi
-done
-TIME_TOTAL_DURATION="$( get_duration "${TIME_TOTAL_START}" )"
 
+	# return IFS back to newline for "for" loop
+	IFS='
+'
+	set -f
+done
+
+# return delimiter to previous value
+set +f
+unset IFS
+
+TIME_TOTAL_DURATION="$( get_duration "${TIME_TOTAL_START}" )"
 
 
 

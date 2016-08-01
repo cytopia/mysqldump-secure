@@ -1,6 +1,14 @@
 Version 0.17 (unreleased)
 ------------
 
+-
+
+
+Version 0.16.2
+--------------
+
+- [Fix]     Handle databases that contain a space in its name
+
 
 Version 0.16.1
 --------------
