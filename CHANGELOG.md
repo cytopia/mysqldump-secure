@@ -2,6 +2,12 @@ Version 0.17 (unreleased)
 ------------
 
 
+Version 0.16.3
+--------------
+
+- [Fix]     Changed SMIME size threshold from 12MB to 1200MB
+
+
 Version 0.16.2
 --------------
 

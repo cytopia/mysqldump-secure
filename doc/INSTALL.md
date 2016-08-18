@@ -42,7 +42,7 @@ brew install --HEAD cytopia/tap/mysqldump-secure
 
 **Tarball (stable)**
 ```shell
-wget https://github.com/cytopia/mysqldump-secure/archive/0.16.2.tar.gz -O - | tar -xz
+wget https://github.com/cytopia/mysqldump-secure/archive/0.16.3.tar.gz -O - | tar -xz
 cd mysqldump-secure
 ```
 **Tarball (devel)**
@@ -55,7 +55,7 @@ cd mysqldump-secure
 ```shell
 git clone https://github.com/cytopia/mysqldump-secure.git
 cd mysqldump-secure
-git checkout 0.16.2
+git checkout 0.16.3
 ```
 **Git (devel)**
 ```shell

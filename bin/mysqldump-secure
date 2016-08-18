@@ -77,7 +77,7 @@ INFO_LICENSE="MIT"
 INFO_URL="http://mysqldump-secure.org"
 INFO_REPO="https://github.com/cytopia/mysqldump-secure"
 INFO_DATE="2016-08-18"
-INFO_VERSION="0.16.2"
+INFO_VERSION="0.16.3"
 
 
 
@@ -4745,7 +4745,7 @@ for db in ${DB_LIST_ALL}; do
 		# https://github.com/cytopia/mysqldump-secure/issues/21
 
 		# Warn about SMIME bug for files > 1200MB
-		SMIME_CRITICAL_SIZE_MB="12"
+		SMIME_CRITICAL_SIZE_MB="1200"
 		if [ "${ENCRYPT}" = "1" ] && [ "${ENABLE_SMIME_BUG_WARNING}" = "1" ] && [ "$( printf "%.0f\n" "${DB_SIZE_MB}" )" -gt "${SMIME_CRITICAL_SIZE_MB}" ]; then
 			debug "warn" "(SQL): ${_cnt} Warning:  Encryption is enabled and database size is > ${SMIME_CRITICAL_SIZE_MB} MB" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 			debug "warn" "(SQL): ${_cnt} Warning:  Verify that your backup can be decrypted." "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
