@@ -1,6 +1,18 @@
 # [![MySQLDumpSecure](https://raw.githubusercontent.com/cytopia/icons/master/64x64/mds.png)](http://mysqldump-secure.org) mysqldump-secure
 
 ----
+**ATTENTION**
+
+`WHEN USING ENCRYPTION WITH DATABASES LARGER THEN A FEW GIGABYTES, BACKUPS SEEM TO BE BROKEN.`
+
+https://github.com/cytopia/mysqldump-secure/issues/21
+
+PLEASE TURN OFF ENCRYPTION FOR LARGE DATABASES.
+
+----
+
+
+----
 **GIT NOTE:** 
 
 WHEN CLONING VIA GIT, MAKE SURE TO ALWAYS CHECK OUT THE LATEST TAG. 
