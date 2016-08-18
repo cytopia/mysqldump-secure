@@ -2,6 +2,12 @@ Version 0.17 (unreleased)
 ------------
 
 
+Version 0.16.2
+--------------
+
+- [Fix]     Warn about SMIME bug if db size > 1200MB (https://github.com/cytopia/mysqldump-secure/issues/21)
+
+
 Version 0.16.1
 --------------
 

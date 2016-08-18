@@ -76,8 +76,8 @@ INFO_GPGKEY="0x28BF179F"
 INFO_LICENSE="MIT"
 INFO_URL="http://mysqldump-secure.org"
 INFO_REPO="https://github.com/cytopia/mysqldump-secure"
-INFO_DATE="2016-03-21"
-INFO_VERSION="0.16.1"
+INFO_DATE="2016-08-18"
+INFO_VERSION="0.16.2"
 
 
 
@@ -4078,6 +4078,21 @@ elif [ "${ENCRYPT}" = "1" ]; then
 		exit $EXIT_ABORT
 	fi
 
+	# ENABLE_SMIME_BUG_WARNING
+	if ! set | grep '^ENABLE_SMIME_BUG_WARNING=' >/dev/null; then
+		debug "warn" "(CFG): \$ENABLE_SMIME_BUG_WARNING variable is not defined" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+		debug "warn" "(CFG): Setting \$ENABLE_SMIME_BUG_WARNING=1" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+		ENABLE_SMIME_BUG_WARNING=1
+	elif [ -z "${ENABLE_SMIME_BUG_WARNING}" ]; then
+		debug "warn" "(CFG): \$ENABLE_SMIME_BUG_WARNING variable should not be empty" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+		debug "warn" "(CFG): Setting \$ENABLE_SMIME_BUG_WARNING=1" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+		ENABLE_SMIME_BUG_WARNING=1
+	elif [ "${ENABLE_SMIME_BUG_WARNING}" != "0" ] && [ "${ENABLE_SMIME_BUG_WARNING}" != "1" ]; then
+		debug "warn" "(CFG): \$ENABLE_SMIME_BUG_WARNING variable has a wrong value: '${ENABLE_SMIME_BUG_WARNING}'" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+		debug "warn" "(CFG): Setting \$ENABLE_SMIME_BUG_WARNING=1" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+		ENABLE_SMIME_BUG_WARNING=1
+	fi
+
 	debug "info"  "(OPT): Encryption enabled" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 	debug "debug" "(OPT): Encryption algorithm: ${OPENSSL_ALGO_ARG}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 	debug "debug" "(OPT): Encryption pub key: ${OPENSSL_PUBKEY_PEM}" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
@@ -4724,6 +4739,19 @@ for db in ${DB_LIST_ALL}; do
 		MYSQLDUMP_ARGUMENTS="${MYSQL_OPTS} ${MYSQL_LOCK_OPTS} ${MYSQL_SPECIAL_OPTS} ${MYSQL_QUICK_OPT}"
 
 
+
+		##########################################################
+		# SMIME WARNING
+		# https://github.com/cytopia/mysqldump-secure/issues/21
+
+		# Warn about SMIME bug for files > 1200MB
+		SMIME_CRITICAL_SIZE_MB="12"
+		if [ "${ENCRYPT}" = "1" ] && [ "${ENABLE_SMIME_BUG_WARNING}" = "1" ] && [ "$( printf "%.0f\n" "${DB_SIZE_MB}" )" -gt "${SMIME_CRITICAL_SIZE_MB}" ]; then
+			debug "warn" "(SQL): ${_cnt} Warning:  Encryption is enabled and database size is > ${SMIME_CRITICAL_SIZE_MB} MB" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+			debug "warn" "(SQL): ${_cnt} Warning:  Verify that your backup can be decrypted." "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+			debug "warn" "(SQL): ${_cnt} Warning:  This warning can be disabled via 'ENABLE_SMIME_BUG_WARNING=0'" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+			debug "warn" "(SQL): ${_cnt} Warning:  Read here: https://github.com/cytopia/mysqldump-secure/issues/21" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
+		fi
 
 
 		##########################################################

@@ -3,13 +3,7 @@
 ----
 **ATTENTION**
 
-`WHEN USING ENCRYPTION WITH DATABASES LARGER THEN A FEW GIGABYTES, BACKUPS SEEM TO BE BROKEN.`
-
-https://github.com/cytopia/mysqldump-secure/issues/21
-
-PLEASE TURN OFF ENCRYPTION FOR LARGE DATABASES.
-
-----
+Please upgrade to the latest version in order to be notified about the [OpenSSL SMIME Bug](https://github.com/cytopia/mysqldump-secure/issues/21) in case you are affected.
 
 
 ----
@@ -90,7 +84,7 @@ See [https://travis-ci.org/cytopia/mysqldump-secure](https://travis-ci.org/cytop
 ### 2.1 Linux, BSD and OSX
 
 ```shell
-wget https://github.com/cytopia/mysqldump-secure/archive/0.16.1.tar.gz -O - | tar -xz
+wget https://github.com/cytopia/mysqldump-secure/archive/0.16.2.tar.gz -O - | tar -xz
 cd mysqldump-secure
 ./configure
 make
