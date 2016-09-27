@@ -5003,6 +5003,11 @@ fi
 # (OPT) Nagios Plugin Log
 ############################################################
 
+
+# Human readable output of TOTAL_SIZE (MegaBytes)
+TOTAL_SIZE_MB="$( div "${TOTAL_SIZE_B}" "1048576" )"
+TOTAL_SIZE_MB="$( round "${TOTAL_SIZE_MB}" "2" )"
+
 if [ "${NAGIOS_LOG}" = "1" ]; then
 
 	debug "debug" "(RUN): Writing nagios log file" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
@@ -5088,10 +5093,6 @@ fi
 # Exit
 ############################################################
 
-
-# Human readable output of TOTAL_SIZE (MegaBytes)
-TOTAL_SIZE_MB="$( div "${TOTAL_SIZE_B}" "1048576" )"
-TOTAL_SIZE_MB="$( round "${TOTAL_SIZE_MB}" "2" )"
 
 debug "debug" "(RUN): Dumping finished (OK: ${DB_CNT_DUMPED} dbs, IGN: ${DB_CNT_IGNORED} dbs, ERR: ${DB_CNT_FAILED}, TOTAL: ${DB_CNT_TOTAL})" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
 debug "debug" "(RUN): Took ${TIME_TOTAL_DURATION} seconds" "${OUT_VERBOSITY}" "${LOG_VERBOSITY}" "${LOG_FILE}"
