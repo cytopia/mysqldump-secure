@@ -28,7 +28,7 @@ esac
 
 openssl smime -decrypt \
 	-in "${2}" \
-	-binary -inform DEM \
+	-stream -binary -inform DEM \
 	-inkey "${1}" \
 	-out "${OUT_FILENAME}"
 

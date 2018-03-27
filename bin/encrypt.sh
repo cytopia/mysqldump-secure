@@ -22,7 +22,7 @@ if [ ! -f "${2}" ]; then
 fi
 
 
-openssl smime -encrypt -binary -text -aes256 \
+openssl smime -encrypt -stream -binary -text -aes256 \
 	-in "${2}" \
 	-out "${2}.enc" \
 	-outform DER "${1}"
