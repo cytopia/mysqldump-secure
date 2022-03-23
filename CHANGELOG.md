@@ -2,6 +2,12 @@ Version 0.17 (unreleased)
 ------------
 
 
+Version 0.16.4
+--------------
+
+- [Fix]     `empty` keyword is reserved in MySQL 8+
+
+
 Version 0.16.3
 --------------
 
