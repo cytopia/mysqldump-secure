@@ -2,6 +2,12 @@ Version 0.17 (unreleased)
 ------------
 
 
+Version 0.16.5
+--------------
+
+- [Fix]     Ensure `PATH` variable is set to survive cron runs
+
+
 Version 0.16.4
 --------------
 

@@ -47,7 +47,7 @@
 #
 LANG=C
 LC_ALL=C
-
+PATH="/usr/local/bin:/usr/local/sbin:/bin:/sbin:/usr/bin:/usr/sbin:${PATH}"
 
 
 ####################################################################################################
@@ -77,7 +77,7 @@ INFO_LICENSE="MIT"
 INFO_URL="http://mysqldump-secure.org"
 INFO_REPO="https://github.com/cytopia/mysqldump-secure"
 INFO_DATE="2022-03-23"
-INFO_VERSION="0.16.4"
+INFO_VERSION="0.16.5"
 
 
 
