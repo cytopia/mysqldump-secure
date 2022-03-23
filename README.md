@@ -7,9 +7,9 @@ Please upgrade to the latest version in order to be notified about the [OpenSSL 
 
 
 ----
-**GIT NOTE:** 
+**GIT NOTE:**
 
-WHEN CLONING VIA GIT, MAKE SURE TO ALWAYS CHECK OUT THE LATEST TAG. 
+WHEN CLONING VIA GIT, MAKE SURE TO ALWAYS CHECK OUT THE LATEST TAG.
 THE `MASTER` BRANCH IS ALWAYS UNDER DEVELOPMENT AND THEREFORE UNSTABLE.
 
 ----
@@ -32,7 +32,7 @@ THE `MASTER` BRANCH IS ALWAYS UNDER DEVELOPMENT AND THEREFORE UNSTABLE.
 It will backup every available database (which is readable by the specified user) as a separate file with the possibility to opt out via blacklisting. Dumped databases can optionally be piped directly to gzip or openssl in order to compress and/or encrypt the backup. Encryption is done before the file is written to disk to avoid possible race conditions (See documentation for more info about security measurements).
 
 
-Find the project website at [https://mysqldump-secure.org](https://mysqldump-secure.org)  
+Find the project website at [https://mysqldump-secure.org](https://mysqldump-secure.org)
 Find the whole post at [https://www.everythingcli.org](https://www.everythingcli.org/index.php/2015/06/13/secure-mysqldump-script-with-encryption-and-compression/)
 
 ##### Runs on
@@ -84,7 +84,7 @@ See [https://travis-ci.org/cytopia/mysqldump-secure](https://travis-ci.org/cytop
 ### 2.1 Linux, BSD and OSX
 
 ```shell
-wget https://github.com/cytopia/mysqldump-secure/archive/0.16.3.tar.gz -O - | tar -xz
+wget https://github.com/cytopia/mysqldump-secure/archive/0.16.4.tar.gz -O - | tar -xz
 cd mysqldump-secure
 ./configure
 make
