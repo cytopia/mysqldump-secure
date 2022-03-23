@@ -1927,7 +1927,7 @@ mysql_database_is_empty() {
 	# If a database does not show up in information_schema.tables, it means it
 	# has no tables yet and is therefore empty.
 	# If count == 0, return '0', else '1'
-	_query="SELECT IF(COUNT(*) = 0, '0', '1') AS empty
+	_query="SELECT IF(COUNT(*) = 0, '0', '1') AS is_empty
 				FROM INFORMATION_SCHEMA.TABLES
 				WHERE TABLE_SCHEMA = '${_database}';"
 
