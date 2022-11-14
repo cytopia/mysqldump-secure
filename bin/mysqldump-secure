@@ -1678,7 +1678,7 @@ mysql_test_connection() {
 	_errno=0
 
 	# Redirect stderr into stdout and both into variable
-	_error="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" -e exit 2>&1 )"
+	_error="$( "$(which mysql)" --defaults-file="${_cnf_file}" "${_ssl_opts}" -e exit 2>&1 )"
 	_errno=$?
 
 	if [ "${_errno}" != "0" ] || [ "${_error}" != "" ]; then
@@ -1706,7 +1706,7 @@ get_mysql_server_status() {
 	_exit=1
 
 	_query="status;"
-	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_result="$( "$(which mysql)" --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
 	_exit=$?
 
 	echo "${_result}"
@@ -1727,7 +1727,7 @@ get_mysql_server_hostname() {
 	_query="SHOW GLOBAL VARIABLES LIKE 'HOSTNAME';"
 
 	# Redirect stderr into stdout and both into variable
-	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_result="$( "$(which mysql)" --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
 	_exit=$?
 
 	_result="$( echo "${_result}" | tail -n1 | sed 's/hostname[[:space:]]*//g' )"
@@ -1750,7 +1750,7 @@ get_mysql_server_port() {
 	_query="SHOW GLOBAL VARIABLES LIKE 'PORT';"
 
 	# Redirect stderr into stdout and both into variable
-	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_result="$( "$(which mysql)" --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
 	_exit=$?
 
 	_result="$( echo "${_result}" | tail -n1 | sed 's/port[[:space:]]*//g' )"
@@ -1776,7 +1776,7 @@ get_mysql_server_replication_type() {
 	_exit=1
 
 	_query="select COUNT(1) SlaveThreads from information_schema.processlist where user = 'system user';"
-	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_result="$( "$(which mysql)" --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
 	_exit=$?
 
 	_result="$( echo "${_result}" | tail -n1 )"
@@ -1870,7 +1870,7 @@ get_mysql_databases() {
 	_exit=1
 
 	_query="show databases;"
-	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_result="$( "$(which mysql)" --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
 	_exit=$?
 
 	# Only gets databases which have content (tables)
@@ -1904,7 +1904,7 @@ get_mysql_database_size() {
 				WHERE TABLE_SCHEMA = '${_database}';"
 
 
-	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_result="$( "$(which mysql)" --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
 	_exit=$?
 
 	_result="$( echo "${_result}" | tail -n1 )"
@@ -1931,7 +1931,7 @@ mysql_database_is_empty() {
 				FROM INFORMATION_SCHEMA.TABLES
 				WHERE TABLE_SCHEMA = '${_database}';"
 
-	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_result="$( "$(which mysql)" --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
 	_result="$( echo "${_result}" | tail -n1 )"
 
 	return "${_result}"
@@ -1957,7 +1957,7 @@ count_innodb_tables() {
 				WHERE ENGINE = 'InnoDB'
 				AND TABLE_SCHEMA = '${_database}';"
 
-	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_result="$( "$(which mysql)" --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
 	_result="$( echo "${_result}" | tail -n1 )"
 
 	echo "${_result}"
@@ -1979,7 +1979,7 @@ count_non_innodb_tables() {
 				WHERE ENGINE <> 'InnoDB'
 				AND TABLE_SCHEMA = '${_database}';"
 
-	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_result="$( "$(which mysql)" --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
 	_result="$( echo "${_result}" | tail -n1 )"
 
 	echo "${_result}"
@@ -2000,7 +2000,7 @@ count_total_tables() {
 				FROM information_schema.TABLES
 				WHERE TABLE_SCHEMA = '${_database}';"
 
-	_result="$( $(which mysql) --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
+	_result="$( "$(which mysql)" --defaults-file="${_cnf_file}" "${_ssl_opts}" --batch -e "${_query}" 2>/dev/null)"
 	_result="$( echo "${_result}" | tail -n1 )"
 
 	echo "${_result}"
@@ -2319,7 +2319,7 @@ run_mysqldump() {
 		# shellcheck disable=SC2086
 		_error_statuses="$( (
 			(
-				$(which mysqldump) ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}" > "${_file_name}";
+				"$(which mysqldump)" ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}" > "${_file_name}";
 				printf "%s\n%s\n" \
 					"0:$?:$(head -n1 "${_tmp_file_dump}")" \
 					"3:${_ern_tmp_file_dump}:${_err_tmp_file_dump}" >&3;
@@ -2366,7 +2366,7 @@ run_mysqldump() {
 		# shellcheck disable=SC2086
 		_error_statuses="$( (
 			(
-				$(which mysqldump) ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}";
+				"$(which mysqldump)" ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}";
 				printf "%s\n%s\n" \
 					"0:$?:$(head -n1 "${_tmp_file_dump}")" \
 					"3:${_ern_tmp_file_dump}:${_err_tmp_file_dump}" >&3;
@@ -2428,7 +2428,7 @@ run_mysqldump() {
 		# shellcheck disable=SC2086
 		_error_statuses="$( (
 			(
-				$(which mysqldump) ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}";
+				"$(which mysqldump)" ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}";
 				printf "%s\n%s\n" \
 					"0:$?:$(head -n1 "${_tmp_file_dump}")" \
 					"3:${_ern_tmp_file_dump}:${_err_tmp_file_dump}" >&3;
@@ -2498,7 +2498,7 @@ run_mysqldump() {
 		# shellcheck disable=SC2086
 		_error_statuses="$( (
 			(
-				$(which mysqldump) ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}";
+				"$(which mysqldump)" ${_mysql_arg} "${_database}" 2> "${_tmp_file_dump}";
 				printf "%s\n%s\n" \
 					"0:$?:$(head -n1 "${_tmp_file_dump}")" \
 					"3:${_ern_tmp_file_dump}:${_err_tmp_file_dump}" >&3;
@@ -2856,11 +2856,11 @@ _get_version() {
 	_exit=0
 
 	if [ "${_tool}" = "mysqldump" ]; then
-		_version="$( $(which mysqldump)  --version  | sed 's/.*mysqldump[[:space:]]*Ver[[:space:]]*//' | awk -F ',' '{print $1}' )"
-		_extra="$( $(which mysqldump) --version  | sed 's/.*mysqldump[[:space:]]*Ver[[:space:]]*//' | awk -F ',' '{print $2}' | sed 's/^[[:space:]]*//g' )"
+		_version="$( "$(which mysqldump)"  --version  | sed 's/.*mysqldump[[:space:]]*Ver[[:space:]]*//' | awk -F ',' '{print $1}' )"
+		_extra="$( "$(which mysqldump)" --version  | sed 's/.*mysqldump[[:space:]]*Ver[[:space:]]*//' | awk -F ',' '{print $2}' | sed 's/^[[:space:]]*//g' )"
 	elif [ "${_tool}" = "mysql" ]; then
-		_version="$( $(which mysql)  --version  | sed 's/.*mysql[[:space:]]*Ver[[:space:]]*//' | awk -F ',' '{print $1}' )"
-		_extra="$( $(which mysql) --version  | sed 's/.*mysql[[:space:]]*Ver[[:space:]]*//' | awk -F ',' '{print $2}' | sed 's/^[[:space:]]*//g' )"
+		_version="$( "$(which mysql)"  --version  | sed 's/.*mysql[[:space:]]*Ver[[:space:]]*//' | awk -F ',' '{print $1}' )"
+		_extra="$( "$(which mysql)" --version  | sed 's/.*mysql[[:space:]]*Ver[[:space:]]*//' | awk -F ',' '{print $2}' | sed 's/^[[:space:]]*//g' )"
 	elif [ "${_tool}" = "openssl" ]; then
 		_version="$( $(which openssl)  version  | sed 's/^OpenSSL[[:space:]]*//' )"
 		_extra=""
