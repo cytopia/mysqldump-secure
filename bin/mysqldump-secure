@@ -1190,7 +1190,7 @@ get_file_chmod() {
 	_exit=1
 
 	# e.g. 640
-	if [ "$(uname)" = "Linux" ]; then
+	if [ "$(uname)" = "Linux" -o "$(uname -o)" = "Cygwin" ]; then
 		# If no special permissions are set (no sticky bit...), linux will
 		# only output the 3 digit number
 		_perm="$(stat --format '%a' "${_file}" 2>/dev/null)"
